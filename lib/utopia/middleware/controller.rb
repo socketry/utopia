@@ -2,12 +2,28 @@
 require 'utopia/middleware'
 require 'utopia/path'
 
+class Rack::Request
+	def controller(&block)
+		if block_given?
+			env["utopia.controller"].instance_eval(&block)
+		else
+			env["utopia.controller"]
+		end
+	end
+end
+
 module Utopia
 	module Middleware
 
 		class Controller
 			CONTROLLER_RB = "controller.rb"
-			
+
+			class Variables
+				def [](key)
+					instance_variable_get("@#{key}")
+				end
+			end
+
 			class Base
 				def initialize(controller)
 					@controller = controller
@@ -81,6 +97,8 @@ module Utopia
 			end
 
 			def call(env)
+				env["utopia.controller"] ||= Variables.new
+				
 				request = Rack::Request.new(env)
 
 				path = Path.create(request.path_info)

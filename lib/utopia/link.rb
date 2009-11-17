@@ -171,19 +171,16 @@ module Utopia
 			end
 
 			if options[:locale]
-				LOG.debug("Filtering based on locale #{options[:locale]}")
 				reduced = []
-				
+
 				links.group_by(&:name).each do |name, links|
 					default = nil
-					LOG.debug("Links for name #{name}: #{links.inspect}")
-					
+
 					link = links.reject{|link|
 						!(link.locale == options[:locale] || link.locale == "")
 					}.sort_by{|link| link.locale.size}.last
-					
+
 					if link
-						LOG.debug("Adding link #{link.inspect}")
 						reduced << link
 					end
 				end
