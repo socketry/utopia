@@ -2,7 +2,8 @@
 require 'utopia/middleware'
 require 'utopia/path'
 
-gem 'mime-types'
+require 'time'
+
 require 'mime/types'
 
 module Utopia

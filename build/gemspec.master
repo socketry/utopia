@@ -13,6 +13,11 @@ Dir.chdir("../") do
     s.files = FileList["{ext,lib}/**/*"].to_a
     s.require_path = "lib"
 
+	s.add_dependency("mime-types")
+	s.add_dependency("rack")
+	# s.add_dependency("rack-cache")
+	# s.add_dependency("rack-contrib")
+	
 	# s.extensions << "ext/xnode/extconf.rb"
   end
 end
