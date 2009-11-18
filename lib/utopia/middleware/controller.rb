@@ -76,14 +76,16 @@ module Utopia
 					base_path = File.join(@root, path.dirname.components)
 				end
 
-				Dir.chdir(base_path) do
-					if File.exist?(CONTROLLER_RB)
+				controller_path = File.join(base_path, CONTROLLER_RB)
+
+				if File.exist?(controller_path)
+					Dir.chdir(base_path) do
 						klass = Class.new(Base)
 						klass.class_eval(File.read(CONTROLLER_RB), CONTROLLER_RB)
 						return klass.new(self)
-					else
-						return nil
 					end
+				else
+					return nil
 				end
 			end
 
