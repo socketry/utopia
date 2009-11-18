@@ -109,7 +109,6 @@ module Utopia
 		}
 		
 		def self.index(root, top, options = {})
-			$stderr.puts "Links.index root: #{root} top: #{top} options: #{options.inspect}"
 			options = DEFAULT_OPTIONS.merge(options)
 			path = File.join(root, top.components)
 			metadata = Links.metadata(path)
