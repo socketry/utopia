@@ -62,9 +62,13 @@ module Utopia
 						attributes[key.to_s]
 					end
 
+					def content
+						parent.template.inner
+					end
+
 					def render_tag(tag)
 						if tag.name == "content"
-							return parent.template.inner.to_html
+							return content.to_html
 						end
 
 						node = lookup(tag.name)
