@@ -2,8 +2,6 @@
 module Utopia
 	
 	class Tag
-		NON_EMTPY_TAGS = Set.new(["textarea", "a"])
-		
 		def initialize(name, attributes = {}, content = nil)
 			@name = name
 			@attributes = attributes
@@ -34,16 +32,10 @@ module Utopia
 			@attributes.each do |key, value|
 				buf.write " #{key}=\"#{value}\""
 			end
-
-			if @content && @content.size > 0
-				buf.write ">"
-				buf.write @content.string
-				buf.write "</#{name}>"
-			elsif NON_EMTPY_TAGS.include?(name)
-				buf.write "></#{name}>"
-			else
-				buf.write " />"
-			end
+			
+			buf.write ">"
+			buf.write(@content.string) if @content && @content.size > 0
+			buf.write "</#{name}>"
 
 			return buf.string
 		end
