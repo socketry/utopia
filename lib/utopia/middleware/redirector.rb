@@ -4,6 +4,22 @@ require 'utopia/middleware'
 module Utopia
 	module Middleware
 
+		class ExceptionRedirector
+			def initialize(app, location)
+				@app = app
+				
+				@location = location
+			end
+			
+			def call(env)
+				begin
+					return @app.call(env)
+				rescue
+					return [301, {"Location" => @location}, []]
+				end
+			end
+		end
+
 		class Redirector
 			private
 			def normalize_keys(redirects)
@@ -66,7 +82,7 @@ module Utopia
 				end
 
 				response = @app.call(env)
-				
+
 				if response[0] >= 400 && uri = @errors[response[0]]
 					return redirect(uri, base_path)
 				else
