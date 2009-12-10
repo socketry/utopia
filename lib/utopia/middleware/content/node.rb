@@ -24,169 +24,236 @@ module Utopia
 			# You can get a list of Links from a current directory. This comprises of all
 			# files ending in ".xnode".
 
-			class Node
-				class Transaction
-					State = Struct.new(:node, :template, :attributes)
+			class Transaction
+				class State
+					def initialize(tag, node)
+						@node = node
 
-					def initialize(request, response)
-						@stack = []
-						@request = request
-						@response = response
+						@buffer = StringIO.new
+						@overrides = nil
+
+						@tags = []
+						@attributes = tag.to_hash
+
+						@content = nil
 					end
 
-					attr :request
-					attr :response
-					attr :stack
-
-					def current
-						@stack[-1]
-					end
-
-					def parent
-						@stack[-2]
-					end
-
-					def first
-						@stack[0]
-					end
-
-					def binding
-						super
-					end
-
-					def attributes
-						current.attributes
-					end
+					attr :attributes
+					attr :overrides
+					attr :content
+					attr :node
+					attr :tags
 
 					def [](key)
-						attributes[key.to_s]
+						@attributes[key.to_s]
 					end
 
-					def content
-						parent.template.inner
-					end
+					def call(transaction)
+						if node.respond_to? :call
+							@content = @buffer.string
+							@buffer = StringIO.new
 
-					def render_tag(tag)
-						if tag.name == "content"
-							return content.to_html
-						end
+							node.call(transaction, self)
 
-						node = lookup(tag.name)
-
-						if node == nil
-							tag.to_html
-						else
-							render_node(node, tag.attributes)
+							return @buffer.string
 						end
 					end
 
-					def render_node(node, attributes = {})
-						append(node) do
-							current.attributes = attributes
+					def lookup(tag)
+						if overrides
+							override = @overrides[tag.name]
 
-							if node.respond_to? :call
-								node.call(self)
+							if override.respond_to? :call
+								return override.call(tag)
+							elsif String === override
+								return Tag.new(override, tag.attributes)
 							else
-								node.process(self).content
+								return override
 							end
+						else
+							return tag
 						end
 					end
 
-					def append(node, &block)
-						begin
-							@stack << Transaction::State.new(node, nil, nil)
-							
-							yield
-						ensure
-							@stack.pop
-						end
+					def cdata(text)
+						@buffer.write(text)
 					end
 
-					def links(path, options = {}, &block)
-						options = options.dup
-
-						options[:locale] = request.current_locale if request.respond_to?(:current_locale)
-
-						current.node.links(path, options, &block)
+					def markup(text)
+						cdata(text)
 					end
 
-					def method_missing(name, *args)
-						@stack.reverse_each do |state|
-							if state.node.respond_to? name
-								return state.node.send(name, *args)
-							end
+					def tag_complete(tag)
+						tag.write_open_html(@buffer)
+						tag.write_close_html(@buffer)
+					end
+
+					def tag_begin(tag)
+						@tags << tag
+						tag.write_open_html(@buffer)
+					end
+
+					def tag_end(tag)
+						raise UnbalancedTagError(tag) unless @tags.pop.name == tag.name
+
+						tag.write_close_html(@buffer)
+					end
+				end
+
+				def initialize(request, response)
+					@begin_tags = []
+					@end_tags = []
+
+					@request = request
+					@response = response
+				end
+
+				def binding
+					super
+				end
+
+				def parse_xml(xml_data)
+					XNode::Processor.new(xml_data, self).parse
+				end
+
+				attr :request
+				attr :response
+				attr :begin_tags
+				attr :end_tags
+
+				def attributes
+					return current.attributes
+				end
+
+				def current
+					@begin_tags.last
+				end
+
+				def content
+					@end_tags.last.content
+				end
+
+				def parent
+					@begin_tags[-2]
+				end
+
+				def first
+					@begin_tags[0]
+				end
+
+				def tag(name, attributes, &block)
+					tag = Tag.new(name, attributes)
+					
+					node = tag_begin(tag)
+					
+					yield node if block_given?
+					
+					tag_end(tag)
+				end
+
+				def tag_complete(tag, node = nil)
+					if tag.name == "content"
+						current.markup(content)
+					else
+						tag_begin(tag, node)
+						tag_end(tag)
+					end
+				end
+
+				def tag_begin(tag, node = nil)
+					# LOG.debug("tag_begin: #{tag}")
+					node ||= lookup(tag)
+
+					if node
+						state = State.new(tag, node)
+						@begin_tags << state
+
+						if node.respond_to? :tag_begin
+							node.tag_begin(self, state)
 						end
+
+						return node
+					end
+
+					current.tag_begin(tag)
+
+					return nil
+				end
+
+				def cdata(text)
+					# LOG.debug("cdata: #{text}")
+					current.cdata(text)
+				end
+
+				def tag_end(tag = nil)
+					top = current
+
+					if top.tags.empty?
+						# LOG.debug("tag_end: #{top.inspect}")
+
+						if top.node.respond_to? :tag_end
+							top.node.tag_end(self, top)
+						end
+
+						@end_tags << top
+						buffer = top.call(self)
+
+						@begin_tags.pop
+						@end_tags.pop
+
+						# LOG.debug("buffer = #{buffer}")
+
+						if current
+							current.markup(buffer)
+						end
+
+						return buffer
+					else
+						# LOG.debug("tag_end: #{tag}")
+						current.tag_end(tag)
+					end
+					
+					return nil
+				end
+
+				def render_node(node, attributes = {})
+					state = State.new(attributes, node)
+					@begin_tags << state
+					
+					return tag_end
+				end
+
+				def lookup(tag)
+					result = tag
+					node = nil
+					
+					@begin_tags.reverse_each do |state|
+						result = state.lookup(result)
 						
-						super
+						node ||= state.node if state.node.respond_to? :lookup
+
+						return result if Node === result
 					end
+					
+					@end_tags.reverse_each do |state|
+						return state.node.lookup(result) if state.node.respond_to? :lookup
+					end
+					
+					return nil
 				end
 
-				class Template
-					def self.parse(transaction, xml_data, file_path, &block)
-						template = Template.new(&block)
-						transaction.current.template = template
-
-						XNode::Processor.new(xml_data, template).parse
-
-						if template.stack.size > 1
-							LOG.error("While processing #{file_path}:")
-							LOG.error("\tStack is not empty: \n#{YAML::dump(template.stack)}")
+				def method_missing(name, *args)
+					@begin_tags.reverse_each do |state|
+						if state.node.respond_to? name
+							return state.node.send(name, *args)
 						end
-
-						return template
 					end
 
-					def initialize(&block)
-						@callback = Proc.new(&block)
-						@stack = [Tag.new("root")]
-					end
-
-					attr :stack
-					attr :inner
-
-					def content
-						@stack.last.to_s
-					end
-
-					def tag(name, value_attrs)
-						@inner = Tag.new(name, value_attrs)
-						text = @callback.call(self, @inner)
-
-						append(text)
-					end
-
-					def tag_start(name, value_attrs)
-						@stack << Tag.new(name, value_attrs)
-					end
-
-					def tag_end(name)
-						@inner = @stack.pop
-
-						if @inner.name != name
-							raise UnbalancedTagError.new(@inner)
-						end
-
-						text = @callback.call(self, @inner)
-						append(text)
-					end
-
-					def text(string)
-						append(string)
-					end
-
-					def append(string)
-						@stack.last.append(string)
-					end
-
-					def instruction(name, text)
-					end
-
-					def doctype(string)
-						string.strip!
-						append "<!DOCTYPE #{string}>"
-					end
+					super
 				end
+			end
 
+			class Node
 				def initialize(controller, uri_path, request_path, file_path)
 					@controller = controller
 
@@ -200,9 +267,6 @@ module Utopia
 				attr :file_path
 
 				def link
-					# metadata = Links.metadata(file_path.dirname)
-					# info = metadata ? metadata[uri_path.basename] : {}
-
 					return Link.new(:file, uri_path)
 				end
 
@@ -217,8 +281,8 @@ module Utopia
 					end
 				end
 
-				def lookup(name)
-					return @controller.lookup_tag(name, parent_path)
+				def lookup(tag)
+					return @controller.lookup_tag(tag.name, parent_path)
 				end
 
 				def parent_path
@@ -241,23 +305,14 @@ module Utopia
 					links = Links.index(@controller.root, uri_path.dirname, :name => name, :indices => true)
 				end
 
-				public
-				def process(transaction)
+				def call(transaction, state)
 					xml_data = @controller.fetch_xml(@file_path).result(transaction.binding, @file_path)
-
-					template = Template.parse(transaction, xml_data, @file_path) do |template, tag|
-						transaction.render_tag(tag)
-					end
-
-					return template
+					
+					transaction.parse_xml(xml_data)
 				end
 
 				def process!(request, response)
-					# info = Links.metadata(File.dirname(file_path))
-					
 					transaction = Transaction.new(request, response)
-					
-					# Render body
 					response.body = [transaction.render_node(self)]
 				end
 			end

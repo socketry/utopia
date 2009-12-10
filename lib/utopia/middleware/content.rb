@@ -46,19 +46,31 @@ module Utopia
 					return Utopia::Tags.all[name]
 				end
 				
-				name_xnode = name + ".xnode"
+				if String === name && name.index("/")
+					name = Path.create(name)
+				end
+				
+				if Path === name
+					name = parent_path + name
+					name_path = name.components.dup
+					name_path[-1] += ".xnode"
+				else
+					name_path = name + ".xnode"
+				end
 
 				parent_path.ascend do |dir|
-					tag_path = File.join(root, dir.components, name_xnode)
+					tag_path = File.join(root, dir.components, name_path)
 
 					if File.exist? tag_path
 						return Node.new(self, dir + name, parent_path + name, tag_path)
 					end
 
-					tag_path = File.join(root, dir.components, "_" + name_xnode)
+					if String === name_path
+						tag_path = File.join(root, dir.components, "_" + name_path)
 
-					if File.exist? tag_path
-						return Node.new(self, dir + name, parent_path + name, tag_path)
+						if File.exist? tag_path
+							return Node.new(self, dir + name, parent_path + name, tag_path)
+						end
 					end
 				end
 			end

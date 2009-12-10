@@ -1,12 +1,12 @@
 
+require 'utopia/tag'
+
 module Utopia
 	module XNode
 		OPENED_TAG = 0
 		CLOSED_TAG = 1
 
 		class Processor
-			Tag = Struct.new(:name, :attributes)
-
 	    def initialize(content, delegate, options = {})
 	      @delegate = delegate
 				@stack = []
@@ -20,7 +20,7 @@ module Utopia
 		
 			def cdata(text)
 				# $stderr.puts "\tcdata: #{text}"
-				@delegate.text(text)
+				@delegate.cdata(text)
 			end
 		
 			def comment(text)
@@ -38,7 +38,7 @@ module Utopia
 						raise XNode::ScanError.new("Unbalanced tag #{tag_name}")
 					end
 				
-					@delegate.tag_end(cur.name)
+					@delegate.tag_end(cur)
 				end
 			end
 
@@ -48,11 +48,11 @@ module Utopia
 					if end_tag_type == CLOSED_TAG # <.../>
 						cur = @stack.pop
 				
-						@delegate.tag(cur.name, cur.attributes)
+						@delegate.tag_complete(cur)
 					elsif end_tag_type == OPENED_TAG # <...>
 						cur = @stack.last
 
-						@delegate.tag_start(cur.name, cur.attributes)
+						@delegate.tag_begin(cur)
 					end
 				end
 			end

@@ -2,19 +2,13 @@
 module Utopia
 	
 	class Tag
-		def initialize(name, attributes = {}, content = nil)
+		def initialize(name, attributes = {})
 			@name = name
 			@attributes = attributes
-			@content = nil
-
-			if content
-				append(content)
-			end
 		end
 
 		attr :name
 		attr :attributes
-		attr :content
 
 		def [](key)
 			@attributes[key]
@@ -25,8 +19,26 @@ module Utopia
 			@content.write text
 		end
 
-		def to_html
-			buf = StringIO.new 
+		def to_html(content = nil, buf = StringIO.new)
+			to_open_html(buf)
+			buf.write(content)
+			to_close_html(buf)
+			
+			return buf.string
+		end
+		
+		def to_hash
+			@attributes
+		end
+		
+		def to_s
+			buf = StringIO.new
+			write_open_html(buf)
+			return buf.string
+		end
+		
+		def write_open_html(buf)
+			buf ||= StringIO.new 
 			buf.write "<#{name}"
 
 			@attributes.each do |key, value|
@@ -34,18 +46,10 @@ module Utopia
 			end
 			
 			buf.write ">"
-			buf.write(@content.string) if @content && @content.size > 0
-			buf.write "</#{name}>"
-
-			return buf.string
 		end
-
-		def to_s
-			if @content
-				return @content.string
-			else
-				""
-			end
+		
+		def write_close_html(buf)
+			buf.write "</#{name}>"
 		end
 	end
 	

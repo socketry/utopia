@@ -67,7 +67,7 @@ class Utopia::Tags::Gallery
 		@node = node
 		@path = path
 		
-		Utopia::LOG.debug("node: #{node} path: #{path}")
+		Utopia::LOG.debug("node: #{node.inspect} path: #{path}")
 	end
 	
 	def images(options = {})
@@ -124,27 +124,18 @@ class Utopia::Tags::Gallery
 		end
 	end
 	
-	def self.call(t)
-		node = t.parent.node
-
-		gallery = new(node, Utopia::Path.create(t.attributes["path"] || "./"))
-		tag_name = t.attributes["tag"] || "img"
+	def self.call(transaction, state)
+		gallery = new(transaction.end_tags[-2].node, Utopia::Path.create(state["path"] || "./"))
+		tag_name = state["tag"] || "img"
 
 		options = {}
-		options[:process] = t.attributes["process"]
+		options[:process] = state["process"]
 
-		buf = StringIO.new
-		buf.puts "<div class=\"gallery\">"
-
-		gallery.images(options).each do |path|
-			tag = Utopia::Tag.new(tag_name, {"src" => path})
-			text = t.render_tag(tag)
-
-			buf.write(text)
+		transaction.tag("div", "class" => "gallery") do |node|
+			gallery.images(options).each do |path|
+				transaction.tag(tag_name, "src" => path)
+			end
 		end
-
-		buf.puts "</div>"
-		buf.string
 	end
 end
 
