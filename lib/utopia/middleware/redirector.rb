@@ -83,8 +83,13 @@ module Utopia
 
 				response = @app.call(env)
 
-				if response[0] >= 400 && uri = @errors[response[0]]
-					return redirect(uri, base_path)
+				if @errors && response[0] >= 400 && uri = @errors[response[0]]
+					# Detect if we are going around in a loop:
+					if base_path.index(uri)
+						return response
+					else
+						return redirect(uri, base_path)
+					end
 				else
 					return response
 				end
