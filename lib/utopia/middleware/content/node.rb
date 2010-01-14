@@ -270,6 +270,10 @@ module Utopia
 					return Link.new(:file, uri_path)
 				end
 
+				def lookup_node(path)
+					@controller.lookup_node(path)
+				end
+
 				def local_path(path, base = nil)
 					path = Path.create(path)
 					

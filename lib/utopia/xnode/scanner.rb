@@ -89,13 +89,13 @@ module Utopia
 		
 			def scan_tag_comment
 				if scan(/--/)
-					if scan_until(/(.*)-->/)
-						@callback.comment(self[1])
+					if scan_until(/(.*?)-->/m)
+						@callback.comment("--" + self[1] + "--")
 					else
 						raise ScanError.new("Comment is not closed!", self)
 					end
 				else
-					if scan_until(/(.*)>/)
+					if scan_until(/(.*?)>/)
 						@callback.comment(self[1])
 					else
 						raise ScanError.new("Comment is not closed!", self)
