@@ -2,7 +2,7 @@
 require 'utopia/tags'
 
 Utopia::Tags.create("google_analytics") do |transaction, state|
-result = <<EOF
+	html = <<EOF
 <!-- Google Analytics -->
 
 <script type="text/javascript">
@@ -17,4 +17,6 @@ pageTracker._trackPageview();
 
 <!-- Google Analytics -->
 EOF
+
+	transaction.cdata(html)
 end
