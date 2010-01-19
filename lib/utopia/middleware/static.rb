@@ -55,24 +55,32 @@ module Utopia
 				end
 
 				types.each do |type|
+					current_count = result.size
+					
 					begin
 						case type
+						when :defaults
+							result = load_mime_types(DEFAULT_TYPES).merge(result)
 						when Array
 							result["." + type[0]] = type[1]
 						when String
-							result["." + type] = MIME::Types.of(type).find{|mt| !mt.obsolete?}.content_type
+							mt = MIME::Types.of(type).select{|mt| !mt.obsolete?}.each do |mt|
+								extract_extensions.call(mt)
+							end
 						when Regexp
 							MIME::Types[type].select{|mt| !mt.obsolete?}.each do |mt|
 								extract_extensions.call(mt)
 							end
-						when Mime::Type
+						when MIME::Type
 							extract_extensions.call(type)
-						else
-							$stderr.puts "Unable to load mime type #{type.inspect}!"
 						end
 					rescue
-						$stderr.puts "Error while processing #{type.inspect}!"
+						LOG.error "#{self.class.name}: Error while processing #{type.inspect}!"
 						raise $!
+					end
+					
+					if result.size == current_count
+						LOG.warn "#{self.class.name}: Could not find any mime type for file extension #{type.inspect}"
 					end
 				end
 
