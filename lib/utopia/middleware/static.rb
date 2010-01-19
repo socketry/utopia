@@ -11,7 +11,7 @@ module Utopia
 
 		class Static
 			DEFAULT_TYPES = [
-				"html", "css", "js", "txt", "rtf",
+				"html", "css", "js", "txt", "rtf", "xml",
 				"pdf", "zip", "tar", "tgz", "tar.gz", "tar.bz2", "dmg",
 				"mp3", "mp4", "wav", "aiff", ["aac", "audio/x-aac"], "mov", "avi", "wmv",
 				/^image/
