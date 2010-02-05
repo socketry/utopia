@@ -8,8 +8,6 @@ module Utopia
 
 	module Middleware
 		class Content
-			HTML_TAGS = Set.new(%w{html head body link a p h1 h2 h3 h4 h5 h6 div span ul li ol dl})
-
 			class UnbalancedTagError < StandardError
 				def initialize(tag)
 					@tag = tag
@@ -30,7 +28,7 @@ module Utopia
 						@node = node
 
 						@buffer = StringIO.new
-						@overrides = nil
+						@overrides = {}
 
 						@tags = []
 						@attributes = tag.to_hash
@@ -49,20 +47,20 @@ module Utopia
 					end
 
 					def call(transaction)
+						@content = @buffer.string
+						@buffer = StringIO.new
+						
 						if node.respond_to? :call
-							@content = @buffer.string
-							@buffer = StringIO.new
-
 							node.call(transaction, self)
-
-							return @buffer.string
+						else
+							transaction.parse_xml(@content)
 						end
+
+						return @buffer.string
 					end
 
 					def lookup(tag)
-						if overrides
-							override = @overrides[tag.name]
-
+						if override = @overrides[tag.name]
 							if override.respond_to? :call
 								return override.call(tag)
 							elsif String === override
@@ -84,8 +82,7 @@ module Utopia
 					end
 
 					def tag_complete(tag)
-						tag.write_open_html(@buffer)
-						tag.write_close_html(@buffer)
+						tag.write_full_html(@buffer)
 					end
 
 					def tag_begin(tag)
@@ -118,7 +115,14 @@ module Utopia
 
 				attr :request
 				attr :response
+				
+				# Begin tags represents a list from outer to inner most tag.
+				# At any point in parsing xml, begin_tags is a list of the inner most tag,
+				# then the next outer tag, etc. This list is used for doing dependent lookups.
 				attr :begin_tags
+				
+				# End tags represents a list of execution order. This is the order that end tags
+				# have appeared when evaluating nodes.
 				attr :end_tags
 
 				def attributes
@@ -126,15 +130,16 @@ module Utopia
 				end
 
 				def current
-					@begin_tags.last
+					@begin_tags[-1]
 				end
 
 				def content
-					@end_tags.last.content
+					@end_tags[-1].content
 				end
 
 				def parent
-					@begin_tags[-2]
+					# @begin_tags[-2]
+					end_tags[-2]
 				end
 
 				def first
@@ -155,8 +160,14 @@ module Utopia
 					if tag.name == "content"
 						current.markup(content)
 					else
-						tag_begin(tag, node)
-						tag_end(tag)
+						node ||= lookup(tag)
+
+						if node
+							tag_begin(tag, node)
+							tag_end(tag)
+						else
+							current.tag_complete(tag)
+						end
 					end
 				end
 
@@ -200,8 +211,6 @@ module Utopia
 
 						@begin_tags.pop
 						@end_tags.pop
-
-						# LOG.debug("buffer = #{buffer}")
 
 						if current
 							current.markup(buffer)
@@ -305,12 +314,26 @@ module Utopia
 				end
 
 				def related_links
-					name = uri_path.basename.split(".").first
+					name = @uri_path.basename.split(".").first
 					links = Links.index(@controller.root, uri_path.dirname, :name => name, :indices => true)
 				end
 
+				def siblings_path
+					name = @uri_path.basename.split(".").first
+					
+					if name == "index"
+						@uri_path.dirname(2)
+					else
+						@uri_path.dirname
+					end
+				end
+
+				def sibling_links(options = {})
+					return Links.index(@controller.root, siblings_path, options)
+				end
+
 				def call(transaction, state)
-					xml_data = @controller.fetch_xml(@file_path).result(transaction.binding, @file_path)
+					xml_data = @controller.fetch_xml(@file_path).result(transaction.binding)
 					
 					transaction.parse_xml(xml_data)
 				end
