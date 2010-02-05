@@ -47,6 +47,7 @@ module Utopia
 				if begin_tag_type == OPENED_TAG # <...
 					if end_tag_type == CLOSED_TAG # <.../>
 						cur = @stack.pop
+						cur.closed = true
 				
 						@delegate.tag_complete(cur)
 					elsif end_tag_type == OPENED_TAG # <...>
