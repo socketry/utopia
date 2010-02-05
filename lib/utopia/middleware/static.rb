@@ -102,13 +102,40 @@ module Utopia
 			end
 
 			def fetch_file(path)
+				file_path = File.join(@root, path.components)
+				if File.exist?(file_path)
+					return FileReader.new(file_path)
+				else
+					return nil
+				end
+			end
+
+			def lookup_relative_file(path)
 				file = nil
 				name = path.basename
 
-				path.dirname.ascend do |parent_path|
+				if split = path.split("@rel@")
+					path = split[0]
+					name = split[1].components
+					
+					# Fix a problem if the browser request has multiple @rel@
+					# This normally indicates a browser bug.. :(
+					name.delete("@rel@")
+				else
+					path = path.dirname
+					
+					# Relative lookups are not done unless explicitly required by @rel@
+					# ... but they do work. This is a performance optimization.
+					return nil
+				end
+
+				# LOG.debug("Searching for #{name.inspect} starting in #{path.components}")
+
+				path.ascend do |parent_path|
 					file_path = File.join(@root, parent_path.components, name)
+					# LOG.debug("File path: #{file_path}")
 					if File.exist?(file_path)
-						return FileReader.new(file_path)
+						return (parent_path + name).to_s
 					end
 				end
 
@@ -121,8 +148,9 @@ module Utopia
 				request = Rack::Request.new(env)
 				ext = File.extname(request.path_info)
 				if @extensions.key? ext
-					file = fetch_file(Path.create(request.path_info).simplify)
-					if file
+					path = Path.create(request.path_info).simplify
+					
+					if file = fetch_file(path)
 						response_headers = {
 							"Last-Modified" => file.mtime_date,
 							"Content-Type" => @extensions[ext],
@@ -130,6 +158,8 @@ module Utopia
 						}
 
 						return [200, response_headers, file]
+					elsif redirect = lookup_relative_file(path)
+						return [307, {"Location" => redirect}, []]
 					end
 				end
 
