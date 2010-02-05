@@ -5,10 +5,12 @@ module Utopia
 		def initialize(name, attributes = {})
 			@name = name
 			@attributes = attributes
+			@closed = false
 		end
 
 		attr :name
 		attr :attributes
+		attr :closed, true
 
 		def [](key)
 			@attributes[key]
@@ -37,7 +39,7 @@ module Utopia
 			return buf.string
 		end
 		
-		def write_open_html(buf)
+		def write_open_html(buf, terminate = false)
 			buf ||= StringIO.new 
 			buf.write "<#{name}"
 
@@ -45,11 +47,25 @@ module Utopia
 				buf.write " #{key}=\"#{value}\""
 			end
 			
-			buf.write ">"
+			if terminate
+				buf.write "/>"
+			else
+				buf.write ">"
+			end
 		end
 		
 		def write_close_html(buf)
 			buf.write "</#{name}>"
+		end
+		
+		def write_full_html(buf, content = nil)
+			if @closed && content == nil
+				write_open_html(buf, true)
+			else
+				write_open_html(buf)
+				buf.write(content)
+				write_close_html(buf)
+			end
 		end
 	end
 	
