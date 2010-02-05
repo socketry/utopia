@@ -15,8 +15,14 @@ Dir.chdir("../") do
 
 	s.add_dependency("mime-types")
 	s.add_dependency("rack")
-	# s.add_dependency("rack-cache")
-	# s.add_dependency("rack-contrib")
+	
+	# Dates and Times, etc
+	s.add_dependency("activesupport")
+	
+	s.add_dependency("rack-cache")
+	s.add_dependency("rack-contrib")
+	
+	s.add_dependency("rmagick")
 	
 	# s.extensions << "ext/xnode/extconf.rb"
   end
