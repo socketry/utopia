@@ -2,10 +2,10 @@
 require 'utopia/middleware'
 require 'utopia/link'
 require 'utopia/path'
-require 'utopia/etanni'
 require 'utopia/tags'
 
 require 'utopia/middleware/content/node'
+require 'utopia/etanni'
 
 module Utopia
 	module Middleware
@@ -29,12 +29,14 @@ module Utopia
 			attr :passthrough
 
 			def fetch_xml(path)
+				read_file = lambda { Etanni.new(File.read(path)) }
+				
 				if @files
 					@files.fetch(path) do
-						@files[path] = Etanni.new(File.read(path))
+						@files[path] = read_file.call
 					end
 				else
-					Etanni.new(File.read(path))
+					read_file.call
 				end
 			end
 
