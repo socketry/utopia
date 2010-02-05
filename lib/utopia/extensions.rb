@@ -25,6 +25,28 @@ class Hash
 	end
 end
 
+class Array
+	def find_index(&block)
+		each_with_index do |item, index|
+			if yield(item)
+				return index
+			end
+		end
+		
+		return nil
+	end
+	
+	def split_at(&block)
+		index = find_index(&block)
+		
+		if index
+			return [self[0...index], self[index], self[index+1..-1]]
+		end
+		
+		return [[], nil, []]
+	end
+end
+
 class Rack::Request
 	def self.new(*args)
 		super(*args)
