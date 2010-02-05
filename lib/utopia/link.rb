@@ -21,7 +21,7 @@ module Utopia
 				@path = nil
 			end
 
-			components = @name.split(".")
+			@components = @name.split(".")
 			@locale = components[1..-1].join(".")
 			@title = components[0]
 
@@ -37,8 +37,13 @@ module Utopia
 		attr :path
 		attr :locale
 		attr :info
+		attr :components
 
 		def [] (key)
+			if key == :title
+				return @title
+			end
+			
 			return @info[key]
 		end
 
@@ -83,7 +88,11 @@ module Utopia
 
 		def self.metadata(path)
 			links_path = File.join(path, LINKS_YAML)
-			return File.exist?(links_path) ? YAML::load(File.read(links_path)) : {}
+			if File.exist?(links_path)
+				return YAML::load(File.read(links_path))
+			else
+				return {}
+			end
 		end
 
 		def self.indices(path, &block)
@@ -95,8 +104,6 @@ module Utopia
 				return entries
 			end
 		end
-
-		public
 
 		DEFAULT_OPTIONS = {
 			:directories => true,
@@ -188,7 +195,14 @@ module Utopia
 			end
 			
 			if options[:sort]
-				links = links.sort_by{|link| link[options[:sort]] || 0}
+				links = links.sort do |a, b|
+					begin
+						a[options[:sort]] <=> b[options[:sort]]
+					rescue
+						LOG.warn("Invalid comparison between #{a.path} and #{b.path} using key #{options[:sort]}!")
+						0 # This item is not sorted correctly.
+					end
+				end
 			end
 			
 			return links
