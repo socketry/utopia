@@ -29,7 +29,7 @@ module Utopia
 			attr :passthrough
 
 			def fetch_xml(path)
-				read_file = lambda { Etanni.new(File.read(path)) }
+				read_file = lambda { TemplateCache.new(path, Etanni) }
 				
 				if @files
 					@files.fetch(path) do
