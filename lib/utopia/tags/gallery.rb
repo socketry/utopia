@@ -7,7 +7,7 @@ require 'fileutils'
 class Utopia::Tags::Gallery
 	PROCESSES = {
 		:photo_thumbnail => lambda do |img|
-			img = img.resize_to_fit(300, 300).border(2, 2, "gray50")
+			img = img.resize_to_fit(300, 300)
 
 			shadow = img.flop
 			shadow = shadow.colorize(1, 1, 1, "gray50")
@@ -20,7 +20,7 @@ class Utopia::Tags::Gallery
 		:thumbnail => lambda do |img| 
 			img = img.resize_to_fit(300, 300)
 		end,
-		:large => lambda{|img| img.resize(1024, 1024)}
+		:large => lambda{|img| img.resize_to_fit(768, 768)}
 	}
 	
 	CACHE_DIR = "_cache"
@@ -70,6 +70,16 @@ class Utopia::Tags::Gallery
 		Utopia::LOG.debug("node: #{node.inspect} path: #{path}")
 	end
 	
+	def metadata
+		metadata_path = @node.local_path(@path + "gallery.yaml")
+		
+		if File.exist? metadata_path
+			return YAML::load(File.read(metadata_path))
+		else
+			return {}
+		end
+	end
+	
 	def images(options = {})
 		options[:filter] ||= /(\.jpg|\.png)$/
 
@@ -108,32 +118,41 @@ class Utopia::Tags::Gallery
 		# Calculate the new name for the processed image
 		local_original_path = @node.local_path(image_path.original)
 		
-		unless processes.respond_to? :each
+		if processes.kind_of? String
 			processes = processes.split(",")
 		end
 		
 		processes.each do |process|
 			local_processed_path = @node.local_path(image_path.processed(process))
 		
-			#unless File.exists? local_processed_path
+			unless File.exists? local_processed_path
 				image = Magick::ImageList.new(local_original_path)
 
 				processed_image = PROCESSES[process.to_sym].call(image)
 				processed_image.write(local_processed_path)
-			#end
+			end
 		end
 	end
 	
 	def self.call(transaction, state)
 		gallery = new(transaction.end_tags[-2].node, Utopia::Path.create(state["path"] || "./"))
+		metadata = gallery.metadata
+		metadata.default = {}
+		
 		tag_name = state["tag"] || "img"
 
 		options = {}
 		options[:process] = state["process"]
 
 		transaction.tag("div", "class" => "gallery") do |node|
-			gallery.images(options).each do |path|
-				transaction.tag(tag_name, "src" => path)
+			images = gallery.images(options).sort_by do |path|
+				name = path.original.basename
+				metadata[name]["order"] || name
+			end
+			
+			images.each do |path|
+				alt_text = metadata[path.original.basename]["caption"]
+				transaction.tag(tag_name, "src" => path, "alt" => alt_text)
 			end
 		end
 	end
