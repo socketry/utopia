@@ -108,8 +108,8 @@ module Utopia
 			end
 		end
 
-		def dirname
-			path = Path.new(components[0...-1])
+		def dirname(count = 1)
+			path = Path.new(components[0...-count])
 
 			return absolute? ? path.to_absolute : path
 		end
@@ -128,6 +128,18 @@ module Utopia
 			end until next_parent.eql?(parent)
 		end
 
+		def split(at)
+			if at.kind_of? String
+				at = @components.index(at)
+			end
+			
+			if at
+				return [Path.new(@components[0...at]), Path.new(@components[at+1..-1])]
+			else
+				return nil
+			end
+		end
+
 		def dup
 			return Path.new(components.dup)
 		end
@@ -137,7 +149,19 @@ module Utopia
 		end
 
 		def eql? other
-			@components.eql?(other.components)
+			if self.class == other.class
+				return @components.eql?(other.components)
+			else
+				return false
+			end
+		end
+
+		def == other
+			other.components.each_with_index do |part, index|
+				return false if @components[index] != part
+			end
+			
+			return true
 		end
 
 		def hash
