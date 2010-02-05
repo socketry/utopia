@@ -200,7 +200,7 @@ module Utopia
 						a[options[:sort]] <=> b[options[:sort]]
 					rescue
 						LOG.warn("Invalid comparison between #{a.path} and #{b.path} using key #{options[:sort]}!")
-						0 # This item is not sorted correctly.
+						a.title <=> b.title
 					end
 				end
 			end
