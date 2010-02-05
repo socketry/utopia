@@ -16,7 +16,7 @@ module Utopia
 				finish = Time.now
 
 				time = "%0.4f" % (finish - start)
-				LOG.debug "benchmark: Request #{env["PATH_INFO"]} took #{time}s"
+				# LOG.debug "benchmark: Request #{env["PATH_INFO"]} took #{time}s"
 				buf = StringIO.new
 
 				response[2].each do |text|
