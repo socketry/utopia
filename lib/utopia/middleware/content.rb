@@ -75,6 +75,8 @@ module Utopia
 						end
 					end
 				end
+				
+				return nil
 			end
 
 			def lookup_node(request_path)

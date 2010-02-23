@@ -119,13 +119,20 @@ module Utopia
 		end
 
 		def ascend(&block)
+			paths = []
+			
 			next_parent = self
 
 			begin
 				parent = next_parent
-				yield parent
+				
+				yield parent if block_given?
+				paths << parent
+				
 				next_parent = parent.dirname
 			end until next_parent.eql?(parent)
+			
+			return paths
 		end
 
 		def split(at)

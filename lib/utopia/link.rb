@@ -79,6 +79,21 @@ module Utopia
 				"<a class=#{options[:class].dump} href=\"#{href.to_html}\">#{options[:content].to_html}</a>"
 			end
 		end
+		
+		def eql? other
+			if other && self.class == other.class
+				return kind.eql?(other.kind) && 
+				       name.eql?(other.name) && 
+				       path.eql?(other.path) && 
+				       info.eql?(other.info)
+			else
+				return false
+			end
+		end
+
+		def == other
+			return other && kind == other.kind && name == other.name && path == other.path
+		end
 	end
 	
 	module Links
@@ -196,12 +211,14 @@ module Utopia
 			
 			if options[:sort]
 				links = links.sort do |a, b|
+					result = nil
 					begin
-						a[options[:sort]] <=> b[options[:sort]]
+						result ||= (a[options[:sort]] <=> b[options[:sort]])
 					rescue
-						LOG.warn("Invalid comparison between #{a.path} and #{b.path} using key #{options[:sort]}!")
-						a.title <=> b.title
+						# LOG.debug("Invalid comparison between #{a.path} and #{b.path} using key #{options[:sort]}!")
 					end
+					
+					result ||= (a.title <=> b.title)
 				end
 			end
 			
