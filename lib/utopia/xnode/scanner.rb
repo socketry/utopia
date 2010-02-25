@@ -1,15 +1,23 @@
 
 require 'strscan'
+require 'tempfile'
 
 module Utopia
 	module XNode
 		class ScanError < StandardError
-			def initialize(message, scanner = nil)
-				if scanner
-					message = message + ": %p" % scanner
-				end
+			def initialize(message, scanner)
+				@message = message
+				
+				@pos = scanner.pos
+				@line = scanner.calculate_line_number
+			end
 			
-				super(message)
+			def to_s
+				if @line
+					"Scan Error: #{@message} @ [#{@line[0]}:#{@line[2]}]: #{@line[4]}"
+				else
+					"Scan Error [#{@pos}]: #{@message}"
+				end
 			end
 		end
 	
@@ -20,6 +28,24 @@ module Utopia
 			def initialize(callback, string)
 				@callback = callback
 				super(string)
+			end
+
+			def calculate_line_number(at = pos)
+				line_no = 1
+				line_offset = offset = 0
+				
+				string.lines.each do |line|
+					line_offset = offset
+					offset += line.size
+					
+					if offset >= at
+						return [line_no, line_offset, at - line_offset, offset, line]
+					end
+					
+					line_no += 1
+				end
+				
+				return nil
 			end
 
 			def parse

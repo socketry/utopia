@@ -22,11 +22,64 @@ module Utopia
 				def [](key)
 					instance_variable_get("@#{key}")
 				end
+				
+				def []=(key, value)
+					instance_variable_set("@#{key}", value)
+				end
 			end
 
 			class Base
 				def initialize(controller)
 					@controller = controller
+					@actions = {}
+
+					methods.each do |method_name|
+						next unless method_name.match(/on_(.*)$/)
+
+						action($1.split("_")) do |path, request|
+							# LOG.debug("Controller: #{method_name}")
+							self.send(method_name, path, request)
+						end
+					end
+				end
+
+				def action(path, options = {}, &block)
+					cur = @actions
+
+					path.reverse.each do |name|
+						cur = cur[name] ||= {}
+					end
+
+					cur[:action] = Proc.new(&block)
+				end
+
+				def lookup(path)
+					cur = @actions
+
+					path.components.reverse.each do |name|
+						cur = cur[name]
+
+						return nil if cur == nil
+
+						if action = cur[:action]
+							return action
+						end
+					end
+				end
+
+				# Given a request, call an associated action if one exists
+				def passthrough(path, request)
+					action = lookup(path)
+
+					if action
+						action.call(path, request)
+					else
+						return nil
+					end
+				end
+				
+				def permission_denied
+					[403, {}, ["Permission Denied!"]]
 				end
 
 				def call(env)
@@ -37,7 +90,15 @@ module Utopia
 					Rack::Response.new([], status, "Location" => target.to_s).finish
 				end
 
+				def permission_denied
+					[403, {}, ["Permission Denied!"]]
+				end
+
 				def process!(path, request)
+				end
+				
+				def self.require_local(path)
+					require(File.join(const_get('BASE_PATH'), path))
 				end
 			end
 
@@ -79,11 +140,16 @@ module Utopia
 				controller_path = File.join(base_path, CONTROLLER_RB)
 
 				if File.exist?(controller_path)
-					Dir.chdir(base_path) do
-						klass = Class.new(Base)
-						klass.class_eval(File.read(CONTROLLER_RB), CONTROLLER_RB)
-						return klass.new(self)
-					end
+					klass = Class.new(Base)
+					klass.const_set('BASE_PATH', base_path)
+					
+					$LOAD_PATH.unshift(base_path)
+					
+					klass.class_eval(File.read(controller_path), controller_path)
+					
+					$LOAD_PATH.delete(base_path)
+					
+					return klass.new(self)
 				else
 					return nil
 				end

@@ -22,9 +22,7 @@ module Utopia
 		end
 
 		def to_html(content = nil, buf = StringIO.new)
-			to_open_html(buf)
-			buf.write(content)
-			to_close_html(buf)
+			write_full_html(buf, content)
 			
 			return buf.string
 		end

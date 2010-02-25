@@ -74,7 +74,7 @@ module Utopia
 				@app.call(env)
 			end
 
-			class RecursiveRequestError < RuntimeError
+			class RecursiveRequestError < StandardError
 			end
 
 			def request(env)

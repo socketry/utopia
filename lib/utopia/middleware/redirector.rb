@@ -4,21 +4,74 @@ require 'utopia/middleware'
 module Utopia
 	module Middleware
 
-		class ExceptionRedirector
+		class FailedRequestError < StandardError
+			def initialize(resource_path, resource_status, error_path, error_status)
+				@resource_path = resource_path
+				@resource_status = resource_status
+
+				@error_path = error_path
+				@error_status = error_status
+			end
+
+			def to_s
+				"Requested resource #{@resource_path} resulted in a #{@resource_status} error. Requested error handler #{@error_path} resulted in a #{@error_status} error."
+			end
+		end
+		
+		class ExceptionHandler
 			def initialize(app, location)
 				@app = app
-				
+
 				@location = location
 			end
-			
+
+			def fatal_error(env, ex)
+				body = StringIO.new
+
+				body.puts "<!DOCTYPE html><html><head><title>Fatal Error</title></head><body>"
+
+				body.puts "<h1>Fatal Error</h1>"
+
+				body.puts "<p>While requesting resource #{env['PATH_INFO'].to_html}, a fatal error occurred.</p>"
+
+				body.puts "<blockquote><strong>#{ex.class.name.to_html}</strong>: #{ex.to_s.to_html}</blockquote>"
+
+				body.puts "<p>There is nothing more we can do to fix the problem at this point.</p>"
+
+				body.puts "<p>We apologize for the inconvenience.</p>"
+
+				body.puts "</body></html>"
+				body.rewind
+
+				return [400, {"Content-Type" => "text/html"}, body]
+			end
+
+			def redirect(env, ex)
+				return @app.call(env.merge('PATH_INFO' => @location, 'REQUEST_METHOD' => 'GET'))
+			end
+
 			def call(env)
 				begin
 					return @app.call(env)
-				rescue
-					return [301, {"Location" => @location}, []]
+				rescue Exception => ex
+					if env['PATH_INFO'] == @location
+						return fatal_error(env, ex)
+					else
+
+						# If redirection fails
+						begin
+							return redirect(env, ex)
+						rescue
+							return fatal_error(env, ex)
+						end
+
+					end
 				end
 			end
 		end
+
+		# Legacy Support
+		ExceptionRedirector = ExceptionHandler
 
 		class Redirector
 			private
@@ -84,11 +137,13 @@ module Utopia
 				response = @app.call(env)
 
 				if @errors && response[0] >= 400 && uri = @errors[response[0]]
-					# Detect if we are going around in a loop:
-					if base_path.index(uri)
-						return response
+					error_request = env.merge("PATH_INFO" => uri, "REQUEST_METHOD" => "GET")
+					error_response = @app.call(error_request)
+
+					if error_response[0] >= 400
+						raise FailedRequestError.new(env['PATH_INFO'], response[0], uri, error_response[0])
 					else
-						return redirect(uri, base_path)
+						return error_response
 					end
 				else
 					return response
