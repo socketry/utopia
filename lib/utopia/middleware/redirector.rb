@@ -143,6 +143,8 @@ module Utopia
 					if error_response[0] >= 400
 						raise FailedRequestError.new(env['PATH_INFO'], response[0], uri, error_response[0])
 					else
+						# Feed the error code back with the error document
+						error_response[0] = response[0]
 						return error_response
 					end
 				else
