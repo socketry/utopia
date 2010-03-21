@@ -18,6 +18,7 @@ require 'utopia/path'
 
 require 'time'
 
+require 'digest/sha1'
 require 'mime/types'
 
 module Utopia
@@ -36,9 +37,11 @@ module Utopia
 			class FileReader
 				def initialize(path)
 					@path = path
+					@etag = Digest::SHA1.hexdigest("#{File.size(@path)}#{mtime_date}")
 				end
 
 				attr :path
+				attr :etag
 
 				def to_path
 					@path
@@ -58,6 +61,19 @@ module Utopia
 							yield part
 						end
 					end
+				end
+
+				def modified?(env)
+					if modified_since = env['HTTP_IF_MODIFIED_SINCE']
+						return false if File.mtime(@path) <= Time.parse(modified_since)
+					end
+
+					if etags = env['HTTP_IF_NONE_MATCH']
+						etags = etags.split(/\s*,\s*/)
+						return false if etags.include?(etag) || etags.include?('*')
+					end
+
+					return true
 				end
 			end
 
@@ -111,6 +127,8 @@ module Utopia
 				else
 					@extensions = load_mime_types(DEFAULT_TYPES)
 				end
+				
+				@cache_control = options[:cache_control] || "public, max-age=3600"
 				
 				LOG.info "#{self.class.name}: Running in #{@root} with #{extensions.size} filetypes"
 			end
@@ -168,10 +186,16 @@ module Utopia
 						response_headers = {
 							"Last-Modified" => file.mtime_date,
 							"Content-Type" => @extensions[ext],
-							"Content-Length" => file.size.to_s
+							"Cache-Control" => @cache_control,
+							"ETag" => file.etag
 						}
 
-						return [200, response_headers, file]
+						if file.modified?(env)
+							response_headers["Content-Length"] = file.size.to_s
+							return [200, response_headers, file]
+						else
+							return [304, response_headers, []]
+						end
 					elsif redirect = lookup_relative_file(path)
 						return [307, {"Location" => redirect}, []]
 					end
