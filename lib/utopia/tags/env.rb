@@ -17,13 +17,8 @@ require 'utopia/tags'
 
 Utopia::Tags.create("env") do |transaction, state|
 	only = state[:only].split(",").collect(&:to_sym) rescue []
-	
-	$stderr.puts "env: #{only.inspect} -> #{UTOPIA_ENV}"
-	
+
 	if defined?(UTOPIA_ENV) && only.include?(UTOPIA_ENV)
-		$stderr.puts "env: okay"
 		transaction.parse_xml(state.content)
-	else
-		$stderr.puts "env: ignored"
 	end
 end
