@@ -23,9 +23,9 @@ module Utopia
 			def initialize(app, options = {})
 				@app = app
 				@root = options[:root] || Utopia::Middleware::default_root
-				
+
 				@files = ["index.html"]
-				
+
 				@default = "index"
 			end
 
@@ -36,14 +36,12 @@ module Utopia
 					# Check to see if one of the files exists in the requested directory
 					@files.each do |file|
 						if File.exist?(File.join(@root, path.components, file))
-							env["PATH_INFO"] = (path + file).to_s
-							return @app.call(env)
+							return [307, {"Location" => (path + file).to_s}, []]
 						end
 					end
 				
 					# Use the default path
-					env["PATH_INFO"] = (path + @default).to_s
-					return @app.call(env)
+					return [307, {"Location" => (path + @default).to_s}, []]
 				else
 					return @app.call(env)
 				end
