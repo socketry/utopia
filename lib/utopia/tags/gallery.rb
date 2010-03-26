@@ -152,19 +152,23 @@ class Utopia::Tags::Gallery
 		gallery = new(transaction.end_tags[-2].node, Utopia::Path.create(state["path"] || "./"))
 		metadata = gallery.metadata
 		metadata.default = {}
-		
+
 		tag_name = state["tag"] || "img"
 
 		options = {}
 		options[:process] = state["process"]
+
+		filter = Regexp.new(state["filter"]) if state["filter"]
 
 		transaction.tag("div", "class" => "gallery") do |node|
 			images = gallery.images(options).sort_by do |path|
 				name = path.original.basename
 				metadata[name]["order"] || name
 			end
-			
+
 			images.each do |path|
+				next if filter and !filter.match(path.original.basename)
+
 				alt_text = metadata[path.original.basename]["caption"]
 				transaction.tag(tag_name, "src" => path, "alt" => alt_text)
 			end

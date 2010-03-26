@@ -92,6 +92,10 @@ module Utopia
 				# $stderr.puts "\tattribute: #{name} = #{value}"
 				@stack.last[0].attributes[name] = value
 			end
+
+			def instruction(content)
+				cdata("<?#{content}?>")
+			end
 		end
 	end
 end
