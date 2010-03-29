@@ -49,7 +49,6 @@ module Utopia
 			end
 		
 			def cdata(text)
-				# $stderr.puts "\tcdata: #{text}"
 				@delegate.cdata(text)
 			end
 		
@@ -58,7 +57,6 @@ module Utopia
 			end
 
 			def begin_tag(tag_name, begin_tag_type)
-				# $stderr.puts "begin_tag: #{tag_name}, #{begin_tag_type}"
 				if begin_tag_type == OPENED_TAG
 					@stack << [Tag.new(tag_name, {}), @scanner.pos]
 				else
@@ -73,12 +71,11 @@ module Utopia
 			end
 
 			def finish_tag(begin_tag_type, end_tag_type)
-				# $stderr.puts "finish_tag: #{begin_tag_type} #{end_tag_type}"
 				if begin_tag_type == OPENED_TAG # <...
 					if end_tag_type == CLOSED_TAG # <.../>
 						cur, pos = @stack.pop
 						cur.closed = true
-				
+
 						@delegate.tag_complete(cur)
 					elsif end_tag_type == OPENED_TAG # <...>
 						cur, pos = @stack.last
@@ -89,7 +86,6 @@ module Utopia
 			end
 
 			def attribute(name, value)
-				# $stderr.puts "\tattribute: #{name} = #{value}"
 				@stack.last[0].attributes[name] = value
 			end
 

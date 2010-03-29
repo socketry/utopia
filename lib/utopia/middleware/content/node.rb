@@ -162,11 +162,11 @@ module Utopia
 
 				def tag(name, attributes, &block)
 					tag = Tag.new(name, attributes)
-					
+
 					node = tag_begin(tag)
-					
+
 					yield node if block_given?
-					
+
 					tag_end(tag)
 				end
 
@@ -186,7 +186,6 @@ module Utopia
 				end
 
 				def tag_begin(tag, node = nil)
-					# LOG.debug("tag_begin: #{tag}")
 					node ||= lookup(tag)
 
 					if node
@@ -206,7 +205,6 @@ module Utopia
 				end
 
 				def cdata(text)
-					# LOG.debug("cdata: #{text}")
 					current.cdata(text)
 				end
 
@@ -214,8 +212,6 @@ module Utopia
 					top = current
 
 					if top.tags.empty?
-						# LOG.debug("tag_end: #{top.inspect}")
-
 						if top.node.respond_to? :tag_end
 							top.node.tag_end(self, top)
 						end
@@ -232,7 +228,6 @@ module Utopia
 
 						return buffer
 					else
-						# LOG.debug("tag_end: #{tag}")
 						current.tag_end(tag)
 					end
 					
@@ -299,12 +294,13 @@ module Utopia
 
 				def local_path(path, base = nil)
 					path = Path.create(path)
+					root = Pathname.new(@controller.root)
 					
 					if path.absolute?
-						return File.join(@controller.root, path.components)
+						return root.join(*path.components)
 					else
 						base ||= uri_path.dirname
-						return File.join(@controller.root, (base + path).components)
+						return root.join(*(base + path).components)
 					end
 				end
 

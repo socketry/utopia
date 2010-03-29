@@ -51,6 +51,10 @@ class Utopia::Tags::Gallery
 			@original_path
 		end
 
+#		def basename
+#			@original_path.basename
+#		end
+
 		def self.append_suffix(name, suffix)
 			name.split(".").insert(-2, suffix).join(".")
 		end
@@ -161,9 +165,12 @@ class Utopia::Tags::Gallery
 		filter = Regexp.new(state["filter"]) if state["filter"]
 
 		transaction.tag("div", "class" => "gallery") do |node|
-			images = gallery.images(options).sort_by do |path|
-				name = path.original.basename
-				metadata[name]["order"] || name
+			images = gallery.images(options).sort do |a, b|
+				if (metadata[a.original.basename]["order"] && metadata[b.original.basename]["order"])
+					metadata[a.original.basename]["order"] <=> metadata[b.original.basename]["order"]
+				else
+					a.original.basename <=> b.original.basename
+				end
 			end
 
 			images.each do |path|
