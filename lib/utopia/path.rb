@@ -188,6 +188,28 @@ module Utopia
 		def hash
 			@components.hash
 		end
+
+		def last
+			if directory?
+				components[-2]
+			else
+				components[-1]
+			end
+		end
+
+		def self.locale(name, extension = false)
+			if String === extension
+				name = File.basename(name, extension)
+			elsif extension
+				name = name.split
+			end
+			
+			name.split(".")[1..-1].join(".")
+		end
+		
+		def locale (extension = false)
+			return Path.locale(last, extension)
+		end
 	end
 	
 end

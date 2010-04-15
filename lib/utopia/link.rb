@@ -21,6 +21,8 @@ module Utopia
 		XNODE_EXT = ".xnode"
 
 		def initialize(kind, path, info = nil)
+			path = Path.create(path)
+
 			@kind = kind
 
 			case @kind
@@ -36,7 +38,8 @@ module Utopia
 			end
 
 			@components = @name.split(".")
-			@locale = components[1..-1].join(".")
+			@locale = path.locale(XNODE_EXT)
+
 			@title = components[0]
 
 			if info
@@ -211,8 +214,8 @@ module Utopia
 				links.group_by(&:name).each do |name, links|
 					default = nil
 
-					link = links.reject{|link|
-						!(link.locale == options[:locale] || link.locale == "")
+					link = links.select{|link|
+						link.locale == options[:locale] || link.locale == ''
 					}.sort_by{|link| link.locale.size}.last
 
 					if link
