@@ -169,7 +169,19 @@ module Utopia
 						index_name = File.basename(index, ".xnode")
 						index_metadata = directory_metadata.merge(indices_metadata[index_name] || {})
 
-						links << Link.new(:directory, top + [filename, index_name], index_metadata)
+						directory_link = Link.new(:directory, top + [filename, index_name], index_metadata)
+
+						# Check for localized directory metadata and update the link
+						if directory_link.locale
+							localized_metadata = metadata.delete(name + "." + directory_link.locale)
+
+							if localized_metadata
+								directory_link.info.update(localized_metadata.symbolize_keys)
+							end
+						end
+
+						links << directory_link
+
 						indices += 1
 					end
 
