@@ -39,7 +39,7 @@ class String
 	end
 
 	def to_title
-		(" " + self).gsub(/[ \-_](.)/){" " + $1.upcase}
+		(" " + self).gsub(/[ \-_](.)/){" " + $1.upcase}.strip
 	end
 
 	def to_snake
