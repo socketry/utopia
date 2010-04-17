@@ -239,15 +239,26 @@ module Utopia
 			end
 			
 			if options[:sort]
+				sort_key = options[:sort]
+				sort_default = options[:sort_default] || 0
+				
 				links = links.sort do |a, b|
 					result = nil
+
+					lhs = a[sort_key] || sort_default
+					rhs = b[sort_key] || sort_default
+					
 					begin
-						result ||= (a[options[:sort]] <=> b[options[:sort]])
+						result ||= lhs <=> rhs
 					rescue
 						# LOG.debug("Invalid comparison between #{a.path} and #{b.path} using key #{options[:sort]}!")
 					end
 					
-					result ||= (a.title <=> b.title)
+					if result == 0 || result == nil
+						a.title <=> b.title
+					else
+						result
+					end
 				end
 			end
 			
