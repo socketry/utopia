@@ -115,7 +115,13 @@ module Utopia
 				directory_path = File.join(@root, path.dirname.components, name)
 
 				if File.directory? directory_path
-					return [307, {"Location" => path.dirname.join([name, "index.#{extensions}"]).to_s}, []]
+					if extensions
+						index_path = [name, "index.#{extensions}"]
+					else
+						index_path = [name, "index"]
+					end
+					
+					return [307, {"Location" => path.dirname.join(index_path).to_s}, []]
 				end
 
 				# Otherwise look up the node
