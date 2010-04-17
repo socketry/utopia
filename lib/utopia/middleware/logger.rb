@@ -21,7 +21,7 @@ module Utopia
 
 		class Logger
 			ACCESS_LOG = "access_log"
-			HEADER = [:ip, :agent, :method, :url, :status, :location, :length]
+			HEADER = [:ip, :agent, :method, :url, :status, :location, :referer, :length]
 
 			def write_log(env, response)
 				request = Rack::Request.new(env)
@@ -30,6 +30,7 @@ module Utopia
 					:ip => request.ip,
 					:host => request.host,
 					:url => request.url,
+					:referer => request.referer,
 					:agent => env['HTTP_USER_AGENT'],
 					:status => response[0],
 					:method => request.request_method,
