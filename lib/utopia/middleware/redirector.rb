@@ -32,17 +32,11 @@ module Utopia
 				body = StringIO.new
 
 				body.puts "<!DOCTYPE html><html><head><title>Fatal Error</title></head><body>"
-
 				body.puts "<h1>Fatal Error</h1>"
-
 				body.puts "<p>While requesting resource #{env['PATH_INFO'].to_html}, a fatal error occurred.</p>"
-
 				body.puts "<blockquote><strong>#{ex.class.name.to_html}</strong>: #{ex.to_s.to_html}</blockquote>"
-
 				body.puts "<p>There is nothing more we can do to fix the problem at this point.</p>"
-
 				body.puts "<p>We apologize for the inconvenience.</p>"
-
 				body.puts "</body></html>"
 				body.rewind
 
@@ -78,38 +72,43 @@ module Utopia
 
 		class Redirector
 			private
-			def normalize_keys(redirects)
-				redirects.each do |key, value|
-					result = nil
-
-					case value
-					when String
-						result = @strings
-					when Regexp
-						result = @patterns
+			def normalize_strings(strings)
+				normalized = {}
+				
+				strings.each_pair do |key, value|
+					if Array === key
+						key.each { |s| normalized[s] = value }
 					else
-						$stderr.puts "Warning, could not process redirect #{key.inspect} to #{value.inspect}!"
-						next
-					end
-
-					if key.kind_of? Array
-						key.each do |subkey|
-							result[subkey]  = value
-						end
-					else
-						result[key] = value
+						normalized[key] = value
 					end
 				end
+				
+				return normalized
+			end
+
+			def normalize_patterns(patterns)
+				normalized = []
+				
+				patterns.each do |pattern|
+					uri = pattern.pop
+					
+					pattern.each do |key|
+						normalized.push([key, uri])
+					end
+				end
+				
+				return normalized
 			end
 
 			public
 			def initialize(app, options = {})
 				@app = app
 
-				@strings = {}
-				@patterns = {}
+				@strings = options[:strings] || {}
+				@patterns = options[:patterns] || {}
 
-				normalize_keys(options[:redirects]) if options[:redirects]
+				@strings = normalize_strings(@strings)
+				@patterns = normalize_patterns(@patterns)
 
 				@errors = options[:errors]
 
@@ -132,8 +131,11 @@ module Utopia
 				end
 
 				@patterns.each do |pattern, uri|
-					if match_data = base_path.match(pattern)
-						return redirect(uri, match_data)
+					$stderr.puts "Trying #{pattern} for #{base_path}"
+					if match_data = pattern.match(base_path)
+						result = redirect(uri, match_data)
+						
+						return result if result != nil
 					end
 				end
 
