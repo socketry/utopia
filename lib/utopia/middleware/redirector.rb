@@ -131,10 +131,9 @@ module Utopia
 				end
 
 				@patterns.each do |pattern, uri|
-					$stderr.puts "Trying #{pattern} for #{base_path}"
 					if match_data = pattern.match(base_path)
 						result = redirect(uri, match_data)
-						
+
 						return result if result != nil
 					end
 				end
