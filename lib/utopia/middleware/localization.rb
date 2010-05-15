@@ -3,7 +3,6 @@
 #	See <utopia.rb> for licensing details.
 
 require 'utopia/middleware'
-require 'utopia/response_helper'
 require 'utopia/middleware/localization/name'
 
 module Rack
