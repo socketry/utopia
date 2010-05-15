@@ -141,7 +141,6 @@ module Utopia
 				end
 
 				def parent
-					# @begin_tags[-2]
 					end_tags[-2]
 				end
 
@@ -281,7 +280,7 @@ module Utopia
 					@controller.lookup_node(path)
 				end
 
-				def local_path(path, base = nil)
+				def local_path(path = ".", base = nil)
 					path = Path.create(path)
 					root = Pathname.new(@controller.root)
 					
@@ -301,7 +300,7 @@ module Utopia
 					uri_path.dirname
 				end
 
-				def links(path, options = {}, &block)
+				def links(path = ".", options = {}, &block)
 					path = uri_path.dirname + Path.create(path)
 					links = Links.index(@controller.root, path, options)
 					

@@ -4,6 +4,7 @@
 
 require 'utopia/middleware'
 require 'utopia/path'
+require 'utopia/http_status_codes'
 
 class Rack::Request
 	def controller(&block)
@@ -75,29 +76,61 @@ module Utopia
 					action = lookup(path)
 
 					if action
-						action.call(path, request)
-					else
-						return nil
+						return respond_with(action.call(path, request))
 					end
-				end
-				
-				def permission_denied
-					[403, {}, ["Permission Denied!"]]
+
+					return nil
 				end
 
 				def call(env)
 					@controller.app.call(env)
 				end
 
-				def redirect(target, status=302)
-					Rack::Response.new([], status, "Location" => target.to_s).finish
+				def redirect(target, status = 302)
+					{:redirect => target, :status => status}
 				end
 
-				def permission_denied
-					[403, {}, ["Permission Denied!"]]
+				def respond_with(*args)
+					return args[0] if args[0] == nil || Array === args[0]
+
+					status = 200
+					options = nil
+
+					if Numeric === args[0] || Symbol === args[0]
+						status = args[0]
+						options = args[1] || {}
+					else
+						options = args[0]
+						status = options[:status] || status
+					end
+
+					status = Utopia::HTTP_STATUS_CODES[status] || status
+					headers = options[:headers] || {}
+
+					if options[:type]
+						headers['Content-Type'] ||= options[:type]
+					end
+
+					body = []
+					if options[:body]
+						body = options[:body]
+					elsif options[:content]
+						body = [options[:content]]
+					elsif status >= 300
+						body = [Utopia::HTTP_STATUS_DESCRIPTIONS[status] || 'Status #{status}']
+					end
+
+					if options[:redirect]
+						headers["Location"] = options[:redirect]
+						status = 302 if status < 300 || status >= 400
+					end
+
+					# Utopia::LOG.debug([status, headers, body].inspect)
+					return [status, headers, body]
 				end
 
 				def process!(path, request)
+					passthrough(path, request)
 				end
 				
 				def self.require_local(path)
@@ -112,7 +145,7 @@ module Utopia
 				LOG.info "#{self.class.name}: Running in #{@root}"
 
 				@controllers = {}
-				@cache_controllers = true
+				@cache_controllers = (UTOPIA_ENV == :production)
 
 				if options[:controller_file]
 					@controller_file = options[:controller_file]

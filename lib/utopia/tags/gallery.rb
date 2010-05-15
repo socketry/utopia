@@ -73,8 +73,6 @@ class Utopia::Tags::Gallery
 	def initialize(node, path)
 		@node = node
 		@path = path
-		
-		Utopia::LOG.debug("node: #{node.inspect} path: #{path}")
 	end
 	
 	def metadata
@@ -93,12 +91,8 @@ class Utopia::Tags::Gallery
 		paths = []
 		local_path = @node.local_path(@path)
 
-		Utopia::LOG.debug("Scanning #{local_path}")
-
 		Dir.entries(local_path).each do |filename|
 			next unless filename.match(options[:filter])
-
-			Utopia::LOG.debug("Filename #{filename} matched filter...")
 
 			fullpath = File.join(local_path, filename)
 
