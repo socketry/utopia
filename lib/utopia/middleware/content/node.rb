@@ -338,7 +338,7 @@ module Utopia
 
 				def process!(request, response)
 					transaction = Transaction.new(request, response)
-					response.body = [transaction.render_node(self)]
+					response.write(transaction.render_node(self))
 				end
 			end
 			
