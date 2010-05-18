@@ -13,12 +13,34 @@ module Utopia
 	module Middleware
 
 		class Static
-			DEFAULT_TYPES = [
-				"html", "css", "js", "txt", "rtf", "xml",
-				"pdf", "zip", "tar", "tgz", "tar.gz", "tar.bz2", "dmg",
-				"mp3", "mp4", "wav", "aiff", ["aac", "audio/x-aac"], "mov", "avi", "wmv",
-				/^image/
-			]
+			MIME_TYPES = {
+				:xiph => {
+					"ogx" => "application/ogg",
+					"ogv" => "video/ogg",
+					"oga" => "audio/ogg",
+					"ogg" => "audio/ogg",
+					"spx" => "audio/ogg",
+					"flac" => "audio/flac",
+					"anx" => "application/annodex",
+					"axa" => "audio/annodex",
+					"xspf" => "application/xspf+xml",
+				},
+				:media => [
+					:xiph, "mp3", "mp4", "wav", "aiff", ["aac", "audio/x-aac"], "mov", "avi", "wmv", "mpg"
+				],
+				:text => [
+					"html", "css", "js", "txt", "rtf", "xml", "pdf"
+				],
+				:archive => [
+					"zip", "tar", "tgz", "tar.gz", "tar.bz2", ["dmg", "application/x-apple-diskimage"]
+				],
+				:images => [
+					"png", "gif", "jpeg", "tiff"
+				],
+				:default => [
+					:media, :text, :archive, :images
+				]
+			}
 
 			private
 
@@ -69,16 +91,18 @@ module Utopia
 				result = {}
 
 				extract_extensions = lambda do |mime_type|
+					# LOG.info "Extracting #{mime_type.inspect}"
 					mime_type.extensions.each{|ext| result["." + ext] = mime_type.content_type}
 				end
 
 				types.each do |type|
 					current_count = result.size
+					# LOG.info "Processing #{type.inspect}"
 					
 					begin
 						case type
-						when :defaults
-							result = load_mime_types(DEFAULT_TYPES).merge(result)
+						when Symbol
+							result = load_mime_types(MIME_TYPES[type]).merge(result)
 						when Array
 							result["." + type[0]] = type[1]
 						when String
@@ -98,7 +122,7 @@ module Utopia
 					end
 					
 					if result.size == current_count
-						LOG.warn "#{self.class.name}: Could not find any mime type for file extension #{type.inspect}"
+						LOG.warn "#{self.class.name}: Could not find any mime type for #{type.inspect}"
 					end
 				end
 
@@ -113,12 +137,13 @@ module Utopia
 				if options[:types]
 					@extensions = load_mime_types(options[:types])
 				else
-					@extensions = load_mime_types(DEFAULT_TYPES)
+					@extensions = load_mime_types(MIME_TYPES[:default])
 				end
 				
 				@cache_control = options[:cache_control] || "public, max-age=3600"
 				
 				LOG.info "#{self.class.name}: Running in #{@root} with #{extensions.size} filetypes"
+				# LOG.info @extensions.inspect
 			end
 
 			def fetch_file(path)
