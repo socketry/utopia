@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<?r response["Content-Type"] = "text/html; charset=utf-8" ?>
+		<?r response["Cache-Control"] = "max-age=3600" ?>
+		
+		<?r if title = (attributes["title"] || @title) ?>
+			<title>#{title.gsub(/<.*?>/, "")} - Utopia</title>
+		<?r else ?>
+			<title>Utopia</title>
+		<?r end ?>
+		
+		<meta http-equiv="X-UA-Compatible" content="IE=8" />
+		
+		<link rel="icon" type="image/png" href="/_static/icon.png" />
+		<link rel="stylesheet" href="/_static/site.css" type="text/css" media="screen" charset="utf-8" />
+	</head>
+
+	<body class="ledlighting">
+		<div id="header">
+		</div>
+
+		<div id="page">
+			<content />
+		</div>
+	</body>
+</html>

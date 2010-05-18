@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'utopia/setup'
+require 'rake'
+
+$app = Rake.application = Rake::Application.new
+$app.init('Utopia')
+
+task :setup do
+	Utopia::Setup.copy(Dir.getwd)
+	
+	if `which thin`.strip == ""
+		$stderr.puts "Next, please install thin: `sudo gem install thin'."
+		$stderr.puts "Once you've done that, type `thin start' to start the web server."
+	else
+		$stderr.puts "Type `thin start' to start the web server."
+	end
+	
+	if `which git`.strip == ""
+		$stderr.puts "Now is a good time to learn about git : http://git-scm.com/"
+	end
+	
+	unless File.exist? '.git'
+		$stderr.puts "I recommend using git for version control."
+	end
+	
+	$stderr.puts "*** Thanks for trying out Utopia! ***"
+end
+
+task :default => :setup
+
+$app.top_level

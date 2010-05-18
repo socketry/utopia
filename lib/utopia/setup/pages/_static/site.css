@@ -1,0 +1,50 @@
+/* Copyright (c) 2010 Orion Transfer Ltd. All Rights Reserved. */
+
+body, p, ol, ul, blockquote {
+	font-family: "Skia", verdana, arial, helvetica, sans-serif;
+	line-height: 18px;
+	
+	color: #339;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: menlo, monospace;
+	color: #303;
+	
+	margin-top: 2em;
+	margin-bottom: 1em;
+}
+
+body {
+	background: url(/_static/background.png) #fff center no-repeat fixed;
+}
+
+img {
+	border: none;
+}
+
+a {
+	color: #33a;
+}
+
+a:hover {
+	color: #55c;
+}
+
+p, dl, h3 {
+	line-height: 1.4em;
+	margin: 1em;
+}
+
+h3 {
+	border-bottom: 1px solid #ccf;
+}
+
+ul {
+	line-height: 1.4em;
+	margin-bottom: 1em;
+}
+
+h3, h4, h5, h6 {
+	font-weight: normal;
+}
