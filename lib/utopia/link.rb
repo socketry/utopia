@@ -132,7 +132,7 @@ module Utopia
 			:virtual => true,
 			:indices => false,
 			:sort => :order,
-			:hidden => :hidden,
+			:display => :display,
 			:locale => nil
 		}
 		
@@ -196,8 +196,8 @@ module Utopia
 				end
 			end
 
-			if options[:hidden]
-				links = links.delete_if{|link| link[options[:hidden]]}
+			if options[:display]
+				links = links.delete_if{|link| !link[options[:display]]}
 			end
 
 			if options[:name]
