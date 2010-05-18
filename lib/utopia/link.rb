@@ -2,7 +2,10 @@
 #	Copyright 2010 Samuel Williams. All rights reserved.
 #	See <utopia.rb> for licensing details.
 
-require 'utopia/extensions'
+require 'utopia/extensions/date'
+require 'utopia/extensions/string'
+require 'utopia/extensions/hash'
+require 'utopia/extensions/array'
 
 module Utopia
 

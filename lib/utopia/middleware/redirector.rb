@@ -3,6 +3,8 @@
 #	See <utopia.rb> for licensing details.
 
 require 'utopia/middleware'
+require 'utopia/extensions/regexp'
+require 'utopia/extensions/string'
 
 module Utopia
 	module Middleware

@@ -5,6 +5,8 @@
 require 'pathname'
 require 'logger'
 
+require 'utopia/extensions/rack'
+
 module Utopia
 	LOG = Logger.new($stderr)
 	LOG.level = Logger::DEBUG
@@ -16,7 +18,6 @@ module Utopia
 	end
 end
 
-require 'utopia/extensions'
 require 'utopia/path'
 require 'utopia/tag'
 
