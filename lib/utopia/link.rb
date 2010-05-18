@@ -200,7 +200,7 @@ module Utopia
 			end
 
 			if options[:display]
-				links = links.delete_if{|link| !link[options[:display]]}
+				links = links.delete_if{|link| link[options[:display]] == false}
 			end
 
 			if options[:name]
