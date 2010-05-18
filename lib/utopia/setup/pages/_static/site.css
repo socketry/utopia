@@ -17,6 +17,7 @@ h1, h2, h3, h4, h5, h6 {
 
 body {
 	background: url(/_static/background.png) #fff center no-repeat fixed;
+	padding: 50px;
 }
 
 img {
