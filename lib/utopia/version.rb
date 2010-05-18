@@ -3,10 +3,10 @@
 #	See <utopia.rb> for licensing details.
 
 module Utopia
-  module VERSION #:nodoc:
+  module VERSION
     MAJOR = 0
     MINOR = 9
-    TINY  = 31
+    TINY  = 32
 
     STRING = [MAJOR, MINOR, TINY].join('.')
   end
