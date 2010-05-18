@@ -142,7 +142,7 @@ module Utopia
 				@app = app
 				@root = options[:root] || Utopia::Middleware::default_root
 
-				LOG.info "#{self.class.name}: Running in #{@root}"
+				LOG.info "** #{self.class.name}: Running in #{@root}"
 
 				@controllers = {}
 				@cache_controllers = (UTOPIA_ENV == :production)

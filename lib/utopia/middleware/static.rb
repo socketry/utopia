@@ -142,7 +142,7 @@ module Utopia
 				
 				@cache_control = options[:cache_control] || "public, max-age=3600"
 				
-				LOG.info "#{self.class.name}: Running in #{@root} with #{extensions.size} filetypes"
+				LOG.info "** #{self.class.name}: Running in #{@root} with #{extensions.size} filetypes"
 				# LOG.info @extensions.inspect
 			end
 

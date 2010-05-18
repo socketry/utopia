@@ -36,6 +36,10 @@ module Utopia
 				end
 
 				@log << record
+				
+				if UTOPIA_ENV != :production
+					$stderr.puts ">> #{record[:method]} #{record[:url]} -> #{response[0]}"
+				end
 			end
 
 			def initialize(app, options = {})

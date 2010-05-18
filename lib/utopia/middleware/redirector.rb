@@ -114,7 +114,7 @@ module Utopia
 
 				@errors = options[:errors]
 
-				LOG.info "#{self.class.name}: Running with #{@strings.size + @patterns.size} rules"
+				LOG.info "** #{self.class.name}: Running with #{@strings.size + @patterns.size} rules"
 			end
 
 			def redirect(uri, match_data)
