@@ -111,6 +111,11 @@ module Utopia
 						headers['Content-Type'] ||= options[:type]
 					end
 
+					if options[:redirect]
+						headers["Location"] = options[:redirect]
+						status = 302 if status < 300 || status >= 400
+					end
+
 					body = []
 					if options[:body]
 						body = options[:body]
@@ -118,11 +123,6 @@ module Utopia
 						body = [options[:content]]
 					elsif status >= 300
 						body = [Utopia::HTTP_STATUS_DESCRIPTIONS[status] || 'Status #{status}']
-					end
-
-					if options[:redirect]
-						headers["Location"] = options[:redirect]
-						status = 302 if status < 300 || status >= 400
 					end
 
 					# Utopia::LOG.debug([status, headers, body].inspect)

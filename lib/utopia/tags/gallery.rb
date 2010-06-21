@@ -8,23 +8,43 @@ require 'RMagick'
 require 'fileutils'
 
 class Utopia::Tags::Gallery
-	PROCESSES = {
-		:photo_thumbnail => lambda do |img|
+	module Processes
+		def self.pdf_thumbnail(img)
 			img = img.resize_to_fit(300, 300)
 
-			shadow = img.flop
-			shadow = shadow.colorize(1, 1, 1, "gray50")
-			shadow.background_color = "white"
-			shadow.border!(10, 10, "white")
-			shadow = shadow.blur_image(0, 5)
+			shadow = img.dup
+			
+			shadow = shadow.colorize(1, 1, 1, 'gray50')
+			shadow.background_color = 'transparent'
+			shadow.border!(10, 10, 'transparent')
+			
+			shadow = shadow.gaussian_blur_channel(5, 5, Magick::AlphaChannel)
       
 			shadow.composite(img, 5, 5, Magick::OverCompositeOp)
-		end,
-		:thumbnail => lambda do |img| 
+		end
+
+		def self.photo_thumbnail(img)
 			img = img.resize_to_fit(300, 300)
-		end,
-		:large => lambda{|img| img.resize_to_fit(768, 768)}
-	}
+
+			shadow = img.dup
+			
+			shadow = shadow.colorize(1, 1, 1, '#999999ff')
+			shadow.background_color = 'transparent'
+			shadow.border!(10, 10, '#99999900')
+			
+			shadow = shadow.gaussian_blur_channel(5, 5, Magick::AlphaChannel)
+      
+			shadow.composite(img, 5, 5, Magick::OverCompositeOp)
+		end
+		
+		def self.thumbnail(img)
+			img = img.resize_to_fit(300, 300)
+		end
+		
+		def self.large(img)
+			img.resize_to_fit(768, 768)
+		end
+	end
 	
 	CACHE_DIR = "_cache"
 	
@@ -32,26 +52,33 @@ class Utopia::Tags::Gallery
 		def initialize(original_path)
 			@original_path = original_path
 			@cache_root = @original_path.dirname + CACHE_DIR
+			
+			@extensions = {}
 		end
 
 		attr :cache_root
+		attr :extensions
 
 		def original
 			@original_path
 		end
 
-#		def basename
-#			@original_path.basename
-#		end
-
-		def self.append_suffix(name, suffix)
-			name.split(".").insert(-2, suffix).join(".")
+		def self.append_suffix(name, suffix, extension = nil)
+			components = name.split(".")
+			
+			components.insert(-2, suffix)
+			
+			if (extension)
+				components[-1] = extension
+			end
+			
+			return components.join(".")
 		end
 
 		def processed(process = nil)
 			if process
 				name = @original_path.basename
-				return cache_root + ImagePath.append_suffix(name, process.to_s)
+				return cache_root + ImagePath.append_suffix(name, process.to_s, @extensions[process.to_sym])
 			else
 				return @original_path
 			end
@@ -86,7 +113,7 @@ class Utopia::Tags::Gallery
 	end
 	
 	def images(options = {})
-		options[:filter] ||= /(\.jpg|\.png)$/
+		options[:filter] ||= /(jpg|png)$/
 
 		paths = []
 		local_path = @node.local_path(@path)
@@ -120,16 +147,20 @@ class Utopia::Tags::Gallery
 		local_original_path = @node.local_path(image_path.original)
 		
 		if processes.kind_of? String
-			processes = processes.split(",")
+			processes = processes.split(",").collect{|p| p.split(":")}
 		end
 		
-		processes.each do |process|
+		processes.each do |process, extension|
+			process = process.to_sym
+			image_path.extensions[process] = extension if extension
+			
 			local_processed_path = @node.local_path(image_path.processed(process))
 		
 			unless File.exists? local_processed_path
 				image = Magick::ImageList.new(local_original_path)
-
-				processed_image = PROCESSES[process.to_sym].call(image)
+				image.scene = 0
+				
+				processed_image = Processes.send(process, image)
 				processed_image.write(local_processed_path)
 			end
 		end
@@ -144,7 +175,8 @@ class Utopia::Tags::Gallery
 
 		options = {}
 		options[:process] = state["process"]
-
+		options[:filter] = Regexp.new("(#{state["filetypes"]})$") if state["filetypes"]
+		
 		filter = Regexp.new(state["filter"]) if state["filter"]
 
 		transaction.tag("div", "class" => "gallery") do |node|

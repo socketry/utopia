@@ -7,7 +7,7 @@ require 'rake'
 module Utopia
 	module Setup
 		ROOT = File.join(File.dirname(__FILE__), "setup", "")
-		DIRECTORIES = ["access_log", "cache", "cache/meta", "cache/head", "lib", "pages", "public"]
+		DIRECTORIES = ["access_log", "cache", "cache/meta", "cache/body", "lib", "pages", "public"]
 		
 		def self.copy(to, config = {})
 			$stderr.puts "Copying files from #{ROOT} to #{to}..."
