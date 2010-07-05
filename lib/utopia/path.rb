@@ -104,10 +104,20 @@ module Utopia
 		end
 
 		def basename(ext = nil)
-			if ext
+			if ext == true
+				File.basename(components.last, extension)
+			elsif String === ext
 				File.basename(components.last, ext)
 			else
 				components.last
+			end
+		end
+
+		def extension
+			if components.last
+				components.last.split(".").last
+			else
+				nil
 			end
 		end
 

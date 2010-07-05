@@ -192,7 +192,7 @@ module Utopia
 			def call(env)
 				request = Rack::Request.new(env)
 				ext = File.extname(request.path_info)
-				if @extensions.key? ext
+				if @extensions.key? ext.downcase
 					path = Path.create(request.path_info).simplify
 					
 					if file = fetch_file(path)

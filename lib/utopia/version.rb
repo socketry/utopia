@@ -6,7 +6,7 @@ module Utopia
   module VERSION
     MAJOR = 0
     MINOR = 9
-    TINY  = 33
+    TINY  = 35
 
     STRING = [MAJOR, MINOR, TINY].join('.')
   end

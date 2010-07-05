@@ -16,8 +16,6 @@ module Utopia
 
 				@error_path = error_path
 				@error_status = error_status
-
-				@log = Logger.new($stderr)
 			end
 
 			def to_s
@@ -55,10 +53,12 @@ module Utopia
 				begin
 					return @app.call(env)
 				rescue Exception => ex
-					@log.error "Exception #{ex.to_s.dump}!"
+					log = Logger.new(env['rack.errors'])
+					
+					log.error "Exception #{ex.to_s.dump}!"
 					
 					ex.backtrace.each do |bt|
-						@log.error bt
+						log.error bt
 					end
 					
 					if env['PATH_INFO'] == @location

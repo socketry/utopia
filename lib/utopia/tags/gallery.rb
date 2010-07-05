@@ -9,44 +9,74 @@ require 'fileutils'
 
 class Utopia::Tags::Gallery
 	module Processes
-		def self.pdf_thumbnail(img)
-			img = img.resize_to_fit(300, 300)
-
-			shadow = img.dup
+		class Thumbnail
+			def initialize(size = [800, 800])
+				@size = size
+			end
 			
-			shadow = shadow.colorize(1, 1, 1, 'gray50')
-			shadow.background_color = 'transparent'
-			shadow.border!(10, 10, 'transparent')
+			def call(img)
+				img.resize_to_fit(*@size)
+			end
 			
-			shadow = shadow.gaussian_blur_channel(5, 5, Magick::AlphaChannel)
-      
-			shadow.composite(img, 5, 5, Magick::OverCompositeOp)
-		end
-
-		def self.photo_thumbnail(img)
-			img = img.resize_to_fit(300, 300)
-
-			shadow = img.dup
-			
-			shadow = shadow.colorize(1, 1, 1, '#999999ff')
-			shadow.background_color = 'transparent'
-			shadow.border!(10, 10, '#99999900')
-			
-			shadow = shadow.gaussian_blur_channel(5, 5, Magick::AlphaChannel)
-      
-			shadow.composite(img, 5, 5, Magick::OverCompositeOp)
+			def default_extension(path)
+				ext = path.original.extension
+				
+				case ext
+				when /pdf/i
+					return "png"
+				else
+					return ext.downcase
+				end
+			end
 		end
 		
-		def self.thumbnail(img)
-			img = img.resize_to_fit(300, 300)
+		class DocumentThumbnail < Thumbnail
+			def call(img)
+				img = super(img)
+
+				shadow = img.dup
+
+				shadow = shadow.colorize(1, 1, 1, 'gray50')
+				shadow.background_color = 'transparent'
+				shadow.border!(10, 10, 'transparent')
+
+				shadow = shadow.gaussian_blur_channel(5, 5, Magick::AlphaChannel)
+
+				shadow.composite(img, 5, 5, Magick::OverCompositeOp)
+			end
+			
+			def default_extension(path)
+				return "png"
+			end
 		end
-		
-		def self.large(img)
-			img.resize_to_fit(768, 768)
+
+		class PhotoThumbnail < Thumbnail
+			def call(img)
+				img = super(img)
+
+				shadow = img.dup
+
+				shadow = shadow.colorize(1, 1, 1, '#999999ff')
+				shadow.background_color = 'transparent'
+				shadow.border!(10, 10, '#99999900')
+
+				shadow = shadow.gaussian_blur_channel(5, 5, Magick::AlphaChannel)
+
+				shadow.composite(img, 5, 5, Magick::OverCompositeOp)
+			end
+			
+			def default_extension(path)
+				return "png"
+			end
 		end
 	end
 	
 	CACHE_DIR = "_cache"
+	PROCESSES = {
+		:pdf_thumbnail => Processes::DocumentThumbnail.new([300, 300]),
+		:photo_thumbnail => Processes::PhotoThumbnail.new([300, 300]),
+		:large => Processes::Thumbnail.new([800, 800])
+	}
 	
 	class ImagePath
 		def initialize(original_path)
@@ -113,7 +143,7 @@ class Utopia::Tags::Gallery
 	end
 	
 	def images(options = {})
-		options[:filter] ||= /(jpg|png)$/
+		options[:filter] ||= /(jpg|png)$/i
 
 		paths = []
 		local_path = @node.local_path(@path)
@@ -150,18 +180,26 @@ class Utopia::Tags::Gallery
 			processes = processes.split(",").collect{|p| p.split(":")}
 		end
 		
-		processes.each do |process, extension|
-			process = process.to_sym
-			image_path.extensions[process] = extension if extension
+		processes.each do |process_name, extension|
+			process_name = process_name.to_sym
 			
-			local_processed_path = @node.local_path(image_path.processed(process))
-		
+			process = PROCESSES[process_name]
+			extension ||= process.default_extension(image_path)
+			
+			image_path.extensions[process_name] = extension if extension
+			
+			local_processed_path = @node.local_path(image_path.processed(process_name))
+			
 			unless File.exists? local_processed_path
 				image = Magick::ImageList.new(local_original_path)
 				image.scene = 0
 				
-				processed_image = Processes.send(process, image)
+				processed_image = process.call(image)
 				processed_image.write(local_processed_path)
+				
+				# Run GC to free up any memory.
+				processed_image = nil
+				GC.start if defined? GC
 			end
 		end
 	end
@@ -175,9 +213,9 @@ class Utopia::Tags::Gallery
 
 		options = {}
 		options[:process] = state["process"]
-		options[:filter] = Regexp.new("(#{state["filetypes"]})$") if state["filetypes"]
+		options[:filter] = Regexp.new("(#{state["filetypes"]})$", "i") if state["filetypes"]
 		
-		filter = Regexp.new(state["filter"]) if state["filter"]
+		filter = Regexp.new(state["filter"], Regexp::IGNORECASE) if state["filter"]
 
 		transaction.tag("div", "class" => "gallery") do |node|
 			images = gallery.images(options).sort do |a, b|
