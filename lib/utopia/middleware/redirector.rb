@@ -53,7 +53,7 @@ module Utopia
 				begin
 					return @app.call(env)
 				rescue Exception => ex
-					log = Logger.new(env['rack.errors'])
+					log = ::Logger.new(env['rack.errors'])
 					
 					log.error "Exception #{ex.to_s.dump}!"
 					
