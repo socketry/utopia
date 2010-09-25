@@ -15,7 +15,12 @@ class Utopia::Tags::Gallery
 			end
 			
 			def call(img)
-				img.resize_to_fit(*@size)
+				# Only resize an image if it is bigger than the given size.
+				if (img.columns > @size[0] || img.rows > @size[1])
+					img.resize_to_fit(*@size)
+				else
+					img
+				end
 			end
 			
 			def default_extension(path)
@@ -27,6 +32,13 @@ class Utopia::Tags::Gallery
 				else
 					return ext.downcase
 				end
+			end
+		end
+		
+		# Resize the image to fit within the specified dimensions while retaining the aspect ratio of the original image. If necessary, crop the image in the larger dimension.
+		class CropThumbnail < Thumbnail
+			def call(img)
+				img.resize_to_fill(*@size)
 			end
 		end
 		
@@ -75,7 +87,9 @@ class Utopia::Tags::Gallery
 	PROCESSES = {
 		:pdf_thumbnail => Processes::DocumentThumbnail.new([300, 300]),
 		:photo_thumbnail => Processes::PhotoThumbnail.new([300, 300]),
-		:large => Processes::Thumbnail.new([800, 800])
+		:large => Processes::Thumbnail.new([800, 800]),
+		:square_thumbnail => Processes::CropThumbnail.new([300, 300]),
+		:thumbnail => Processes::Thumbnail.new([300, 300])
 	}
 	
 	class ImagePath
