@@ -9,7 +9,9 @@ class Rack::Response
 	end
 	
 	def cache!(duration = 3600)
-		self["Cache-Control"] = "public, max-age=#{duration}"
-		self["Expires"] = (Time.now + duration).httpdate
+		unless (self["Cache-Control"] || "").match(/no-cache/)
+			self["Cache-Control"] = "public, max-age=#{duration}"
+			self["Expires"] = (Time.now + duration).httpdate
+		end
 	end
 end
