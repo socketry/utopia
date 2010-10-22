@@ -32,7 +32,8 @@ module Utopia
 					"html", "css", "js", "txt", "rtf", "xml", "pdf"
 				],
 				:archive => [
-					"zip", "tar", "tgz", "tar.gz", "tar.bz2", ["dmg", "application/x-apple-diskimage"]
+					"zip", "tar", "tgz", "tar.gz", "tar.bz2", ["dmg", "application/x-apple-diskimage"],
+					["torrent", "application/x-bittorrent"]
 				],
 				:images => [
 					"png", "gif", "jpeg", "tiff"
