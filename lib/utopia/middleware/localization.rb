@@ -33,42 +33,68 @@ module Utopia
 			end
 
 			def named_locale(resource_name)
-				Name.extract_locale(resource_name, @all_locales)
-			end
-			
-			def current_locale(env, resource_name)
-				Rack::Request.new(env).GET["locale"] || named_locale(resource_name) || @default_locale
+				if resource_name
+					Name.extract_locale(resource_name, @all_locales)
+				else
+					nil
+				end
 			end
 
 			attr :all_locales
 			attr :default_locale
-
-			def call(env)
-				path = Path.create(env["PATH_INFO"])
-
-				request_locale = current_locale(env, path.basename)
-				resource_name = Name.nonlocalized(path.basename, @all_locales).join(".")
-
-				env["utopia.current_locale"] = request_locale
-				env["utopia.localization"] = self
-
-				localized_name = Name.localized(resource_name, request_locale, @all_locales).join(".")
+			
+			def check_resource(resource_name, resource_locale, env)
+				localized_name = Name.localized(resource_name, resource_locale, @all_locales).join(".")
+				localized_path = Path.create(env["PATH_INFO"]).dirname + localized_name
 
 				localization_probe = env.dup
 				localization_probe["REQUEST_METHOD"] = "HEAD"
-				localization_probe["PATH_INFO"] = (path.dirname + localized_name).to_s
+				localization_probe["PATH_INFO"] = localized_path.to_s
 
-				response = @app.call(localization_probe)
+				# Find out if a resource exists for the requested localization
+				return [localized_path, @app.call(localization_probe)]
+			end
 
+			def call(env)
+				path = Path.create(env["PATH_INFO"])
+				env["utopia.localization"] = self
+
+				referer_locale = named_locale(env['HTTP_REFERER'])
+				request_locale = named_locale(path.basename)
+				resource_name = Name.nonlocalized(path.basename, @all_locales).join(".")
+
+				response = nil
+				if request_locale
+					env["utopia.current_locale"] = request_locale
+					resource_path, response = check_resource(resource_name, request_locale, env)
+				elsif referer_locale
+					env["utopia.current_locale"] = referer_locale
+					resource_path, response = check_resource(resource_name, referer_locale, env)
+				end
+				
+				# If the previous checks failed, i.e. there was no request/referer locale 
+				# or the response was 404 (i.e. no localised resource), we check for the
+				# @default_locale
+				if response == nil || response[0] >= 400
+					env["utopia.current_locale"] = @default_locale
+					resource_path, response = check_resource(resource_name, @default_locale, env)
+				end
+
+				# If the response is 2xx, we have a localised resource
 				if response[0] < 300
-					if path.basename == localized_name
+					# If the original request was the same as the localized request,
+					if path.basename == resource_path.basename
+						# The resource URI is correct.
 						return @app.call(env)
 					else
-						return [307, {"Location" => localization_probe["PATH_INFO"]}, []]
+						# Redirect to the correct resource URI.
+						return [307, {"Location" => resource_path.to_s}, []]
 					end
 				elsif response[0] < 400
+					# We have encountered a redirect while accessing the localized resource
 					return response
 				else
+					# A localized resource was not found, return the unlocalised resource path,
 					if path.basename == resource_name
 						return @app.call(env)
 					else

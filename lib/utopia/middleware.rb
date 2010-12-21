@@ -13,7 +13,7 @@ module Utopia
 	
 	module Middleware
 		def self.default_root(subdir = "pages")
-			Pathname.new(Dir.pwd).join(subdir).realpath.to_s
+			Pathname.new(Dir.pwd).join(subdir).cleanpath.to_s
 		end
 	end
 end

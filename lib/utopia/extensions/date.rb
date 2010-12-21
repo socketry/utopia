@@ -2,8 +2,6 @@
 #	Copyright 2010 Samuel Williams. All rights reserved.
 #	See <utopia.rb> for licensing details.
 
-require 'active_support'
-
 class Date
 	alias_method :old_cmp, :<=>
 	

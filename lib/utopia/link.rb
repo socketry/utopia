@@ -15,6 +15,8 @@ module Utopia
 		def initialize(kind, path, info = nil)
 			path = Path.create(path)
 
+			@info = info ? info.symbolize_keys : {}
+			@locale = @info.delete(:locale) || path.locale(XNODE_EXT)
 			@kind = kind
 
 			case @kind
@@ -26,19 +28,11 @@ module Utopia
 				@path = path
 			when :virtual
 				@name = path.to_s
-				@path = nil
+				@path = @info[:path] ? Path.create(@info[:path]) : nil
 			end
 
 			@components = @name.split(".")
-			@locale = path.locale(XNODE_EXT)
-
 			@title = components[0]
-
-			if info
-				@info = info.symbolize_keys
-			else
-				@info = {}
-			end
 		end
 
 		attr :kind
@@ -103,6 +97,10 @@ module Utopia
 		def == other
 			return other && kind == other.kind && name == other.name && path == other.path
 		end
+		
+		def default_locale
+			@locale == ''
+		end
 	end
 	
 	module Links
@@ -143,6 +141,8 @@ module Utopia
 			options = DEFAULT_OPTIONS.merge(options)
 			path = File.join(root, top.components)
 			metadata = Links.metadata(path)
+			
+			virtual_metadata = metadata.dup
 
 			links = []
 
@@ -154,8 +154,8 @@ module Utopia
 				if File.directory?(fullpath) && options[:directories]
 					name = filename
 					indices_metadata = Links.metadata(fullpath)
-
 					directory_metadata = metadata.delete(name) || {}
+
 					indices = 0
 					Links.indices(fullpath) do |index|
 						index_name = File.basename(index, ".xnode")
@@ -195,6 +195,16 @@ module Utopia
 
 			if options[:virtual]
 				metadata.each do |name, details|
+					# Given a virtual named such as "welcome.cn", merge it with metadata 
+					# from "welcome" if it exists.
+					basename, locale = name.split(".", 2)
+
+					if virtual_metadata[basename]
+						details = virtual_metadata[basename].merge(details || {})
+						name = basename
+						details[:locale] = locale
+					end
+
 					links << Link.new(:virtual, name, details)
 				end
 			end
@@ -216,15 +226,18 @@ module Utopia
 				reduced = []
 
 				links.group_by(&:name).each do |name, links|
-					default = nil
+					specific = nil
 
-					link = links.select{|link|
-						link.locale == options[:locale] || link.locale == ''
-					}.sort_by{|link| link.locale.size}.last
-
-					if link
-						reduced << link
+					links.each do |link|
+						if link.locale == options[:locale]
+							specific = link
+							break
+						elsif link.default_locale
+							specific ||= link
+						end
 					end
+
+					reduced << specific if specific
 				end
 				
 				links = reduced
