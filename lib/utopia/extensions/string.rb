@@ -10,6 +10,10 @@ class String
 		gsub(HTML_ESCAPE_PATTERN){|c| HTML_ESCAPE[c]}
 	end
 
+	def to_quoted_string
+		'"' + self.gsub('"', '\\"').gsub(/\r/, "\\r").gsub(/\n/, "\\n") + '"'
+	end
+
 	def to_title
 		(" " + self).gsub(/[ \-_](.)/){" " + $1.upcase}.strip
 	end
