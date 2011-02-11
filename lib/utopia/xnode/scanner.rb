@@ -74,6 +74,8 @@ module Utopia
 				if scan(/</)
 					if scan(/\//)
 						scan_tag_normal(CLOSED_TAG)
+					elsif scan(/!\[CDATA\[/)
+						scan_tag_cdata
 					elsif scan(/!/)
 						scan_tag_comment
 					elsif scan(/\?/)
@@ -115,7 +117,15 @@ module Utopia
 					raise ScanError.new("Invalid tag!", self)
 				end
 			end
-		
+			
+			def scan_tag_cdata
+				if scan_until(/(.*?)\]\]>/m)
+					@callback.cdata(self[1].to_html)
+				else
+					raise ScanError.new("CDATA tag is not closed!", self)
+				end
+			end
+			
 			def scan_tag_comment
 				if scan(/--/)
 					if scan_until(/(.*?)-->/m)
