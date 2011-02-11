@@ -2,6 +2,8 @@
 #	Copyright 2010 Samuel Williams. All rights reserved.
 #	See <utopia.rb> for licensing details.
 
+require 'yaml'
+
 require 'utopia/extensions/date'
 require 'utopia/extensions/string'
 require 'utopia/extensions/hash'
