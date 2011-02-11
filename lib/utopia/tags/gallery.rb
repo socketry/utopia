@@ -141,6 +141,27 @@ class Utopia::Tags::Gallery
 		end
 	end
 	
+	class ImageMetadata
+		def initialize(metadata)
+			@metadata = metadata
+		end
+		
+		attr :metadata
+		
+		def [] (key)
+			@metadata[key.to_s]
+		end
+		
+		def to_s
+			@metadata['caption'] || ''
+		end
+		
+		# A bit of a hack to ease migration.
+		def to_html
+			to_s.to_html
+		end
+	end
+	
 	def initialize(node, path)
 		@node = node
 		@path = path
@@ -242,9 +263,9 @@ class Utopia::Tags::Gallery
 
 			images.each do |path|
 				next if filter and !filter.match(path.original.basename)
-
-				alt_text = metadata[path.original.basename]["caption"]
-				transaction.tag(tag_name, "src" => path, "alt" => alt_text)
+				
+				alt = ImageMetadata.new(metadata[path.original.basename])
+				transaction.tag(tag_name, "src" => path, "alt" => alt)
 			end
 		end
 	end
