@@ -8,7 +8,7 @@ require 'utopia/path'
 require 'utopia/tags'
 
 require 'utopia/middleware/content/node'
-require 'utopia/etanni'
+require 'utopia/trenni'
 
 module Utopia
 	module Middleware
@@ -32,7 +32,7 @@ module Utopia
 			attr :passthrough
 
 			def fetch_xml(path)
-				read_file = lambda { TemplateCache.new(path, Etanni) }
+				read_file = lambda { Trenni.new(File.read(path), path) }
 				
 				if @files
 					@files.fetch(path) do
