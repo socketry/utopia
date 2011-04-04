@@ -245,6 +245,7 @@ class Utopia::Tags::Gallery
 		metadata.default = {}
 
 		tag_name = state["tag"] || "img"
+		gallery_class = state["class"] || "gallery"
 
 		options = {}
 		options[:process] = state["process"]
@@ -252,7 +253,7 @@ class Utopia::Tags::Gallery
 		
 		filter = Regexp.new(state["filter"], Regexp::IGNORECASE) if state["filter"]
 
-		transaction.tag("div", "class" => "gallery") do |node|
+		transaction.tag("div", "class" => gallery_class) do |node|
 			images = gallery.images(options).sort do |a, b|
 				if (metadata[a.original.basename]["order"] && metadata[b.original.basename]["order"])
 					metadata[a.original.basename]["order"] <=> metadata[b.original.basename]["order"]
