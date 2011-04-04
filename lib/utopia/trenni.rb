@@ -24,7 +24,7 @@ module Utopia
 			end
 
 			def output(text)
-				@parts << "_out << #{text} ; "
+				@parts << "_out << (#{text}) ; "
 			end
 
 			def code
@@ -35,6 +35,8 @@ module Utopia
 		end
 
 		class Scanner < StringScanner
+			TEXT = /([^<#]|<(?!\?r)|#[^\{]){1,1024}/m
+			
 			def initialize(callback, string)
 				@callback = callback
 				super(string)
@@ -54,17 +56,17 @@ module Utopia
 			end
 
 			def scan_text
-				if scan_until(/(.*?)(?=\#\{|<\?r)/m) || scan(/(.*)\Z/m)
-					@callback.text(self[1]) if self[1].size > 0
+				if scan(TEXT)
+					@callback.text(matched)
 				end
 			end
 
 			def scan_expression
 				if scan(/\#\{/)
-					done = false
+					level = 1
 					code = ""
 
-					until eos? || done
+					until eos? || level == 0
 						if scan(/[^"'\{\}]+/m)
 							code << matched
 						end
@@ -77,16 +79,17 @@ module Utopia
 							code << matched
 						end
 
-						if scan(/\{[^\}]*\}/m)
+						if scan(/\{/)
 							code << matched
+							level += 1
 						end
 
 						if scan(/\}/)
-							done = true
+							level -= 1
 						end
 					end
 
-					if done
+					if level == 0
 						@callback.output(code)
 					else
 						raise StandardError.new "Could not find end of expression #{self}!"
@@ -114,7 +117,7 @@ module Utopia
 		def compile!(filename = @filename)
 			buffer = Buffer.new
 			scanner = Scanner.new(buffer, @template)
-
+			
 			scanner.parse
 			
 			@code = buffer.code
