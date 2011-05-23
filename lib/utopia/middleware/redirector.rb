@@ -81,6 +81,16 @@ module Utopia
 		ExceptionRedirector = ExceptionHandler
 
 		class Redirector
+			# Redirects a whole source tree to a destination tree, given by the roots.
+			def self.moved(source_root, destination_root)
+				return [
+					/^#{Regexp.escape(source_root)}(.*)$/,
+					lambda do |match|
+						[301, {"Location" => (destination_root + match[1]).to_s}, []]
+					end
+				]
+			end
+			
 			private
 			def normalize_strings(strings)
 				normalized = {}
@@ -116,6 +126,14 @@ module Utopia
 
 				@strings = options[:strings] || {}
 				@patterns = options[:patterns] || {}
+
+				@patterns.collect! do |rule|
+					if Symbol === rule[0]
+						self.class.send(*rule)
+					else
+						rule
+					end
+				end
 
 				@strings = normalize_strings(@strings)
 				@patterns = normalize_patterns(@patterns)
