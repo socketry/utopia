@@ -35,7 +35,7 @@ module Utopia
 		end
 
 		class Scanner < StringScanner
-			TEXT = /([^<#]|<(?!\?r)|#[^\{]){1,1024}/m
+			TEXT = /([^<#]|<(?!\?r)|#(?!\{)){1,1024}/m
 			
 			def initialize(callback, string)
 				@callback = callback
@@ -85,6 +85,7 @@ module Utopia
 						end
 
 						if scan(/\}/)
+							code << matched if level > 1
 							level -= 1
 						end
 					end
