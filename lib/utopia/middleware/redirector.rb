@@ -125,7 +125,7 @@ module Utopia
 				@app = app
 
 				@strings = options[:strings] || {}
-				@patterns = options[:patterns] || {}
+				@patterns = options[:patterns] || []
 
 				@patterns.collect! do |rule|
 					if Symbol === rule[0]
