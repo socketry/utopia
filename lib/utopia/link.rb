@@ -113,7 +113,7 @@ module Utopia
 		def self.metadata(path)
 			links_path = File.join(path, LINKS_YAML)
 			if File.exist?(links_path)
-				return YAML::load(File.read(links_path))
+				return YAML::load(File.read(links_path)) || {}
 			else
 				return {}
 			end
