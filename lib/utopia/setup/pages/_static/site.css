@@ -2,7 +2,6 @@
 
 body, p, ol, ul, blockquote {
 	font-family: "Skia", verdana, arial, helvetica, sans-serif;
-	line-height: 18px;
 	
 	color: #339;
 }
@@ -33,7 +32,6 @@ a:hover {
 }
 
 p, dl, h3 {
-	line-height: 1.4em;
 	margin: 1em;
 }
 
@@ -42,7 +40,6 @@ h3 {
 }
 
 ul {
-	line-height: 1.4em;
 	margin-bottom: 1em;
 }
 
