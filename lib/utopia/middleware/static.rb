@@ -45,29 +45,36 @@ module Utopia
 
 			private
 
-			class FileReader
-				def initialize(path)
+			class LocalFile
+				def initialize(root, path)
+					@root = root
 					@path = path
-					@etag = Digest::SHA1.hexdigest("#{File.size(@path)}#{mtime_date}")
+					@etag = Digest::SHA1.hexdigest("#{File.size(full_path)}#{mtime_date}")
 				end
 
+				attr :root
 				attr :path
 				attr :etag
 
+				# Fit in with Rack::Sendfile
 				def to_path
-					@path
+					full_path
+				end
+
+				def full_path
+					File.join(@root, @path.components)
 				end
 
 				def mtime_date
-					File.mtime(@path).httpdate
+					File.mtime(full_path).httpdate
 				end
 
 				def size
-					File.size(@path)
+					File.size(full_path)
 				end
 
 				def each
-					File.open(@path, "rb") do |fp|
+					File.open(full_path, "rb") do |fp|
 						while part = fp.read(8192)
 							yield part
 						end
@@ -76,7 +83,7 @@ module Utopia
 
 				def modified?(env)
 					if modified_since = env['HTTP_IF_MODIFIED_SINCE']
-						return false if File.mtime(@path) <= Time.parse(modified_since)
+						return false if File.mtime(full_path) <= Time.parse(modified_since)
 					end
 
 					if etags = env['HTTP_IF_NONE_MATCH']
@@ -134,7 +141,7 @@ module Utopia
 			def initialize(app, options = {})
 				@app = app
 				@root = options[:root] || Utopia::Middleware::default_root
-
+				
 				if options[:types]
 					@extensions = load_mime_types(options[:types])
 				else
@@ -148,9 +155,11 @@ module Utopia
 			end
 
 			def fetch_file(path)
+				# We need file_path to be an absolute path for X-Sendfile to work correctly.
 				file_path = File.join(@root, path.components)
+				
 				if File.exist?(file_path)
-					return FileReader.new(file_path)
+					return LocalFile.new(@root, path)
 				else
 					return nil
 				end
@@ -201,11 +210,12 @@ module Utopia
 							"Last-Modified" => file.mtime_date,
 							"Content-Type" => @extensions[ext],
 							"Cache-Control" => @cache_control,
-							"ETag" => file.etag
+							"ETag" => file.etag,
 						}
 
 						if file.modified?(env)
 							response_headers["Content-Length"] = file.size.to_s
+							
 							return [200, response_headers, file]
 						else
 							return [304, response_headers, []]
