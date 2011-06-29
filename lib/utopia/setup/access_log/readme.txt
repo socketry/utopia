@@ -1,0 +1,1 @@
+The access log keeps track of all requests and is rotated automatically on a weekly basis.
