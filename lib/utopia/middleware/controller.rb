@@ -168,9 +168,11 @@ module Utopia
 
 			def load_file(path)
 				if path.directory?
-					base_path = File.join(@root, path.components)
+					uri_path = path
+					base_path = File.join(@root, uri_path.components)
 				else
-					base_path = File.join(@root, path.dirname.components)
+					uri_path = path.dirname
+					base_path = File.join(@root, uri_path.components)
 				end
 
 				controller_path = File.join(base_path, CONTROLLER_RB)
@@ -178,6 +180,7 @@ module Utopia
 				if File.exist?(controller_path)
 					klass = Class.new(Base)
 					klass.const_set('BASE_PATH', base_path)
+					klass.const_set('URI_PATH', uri_path)
 					
 					$LOAD_PATH.unshift(base_path)
 					

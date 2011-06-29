@@ -88,6 +88,21 @@ module Utopia
 			end
 		end
 
+		# Computes the difference of the path.
+		# /a/b/c - /a/b -> c
+		# a/b/c - a/b -> c
+		def -(other)
+			i = 0
+			
+			while i < other.components.size
+				break if @components[i] != other.components[i]
+				
+				i += 1
+			end
+			
+			return Path.create(@components[i,@components.size])
+		end
+
 		def simplify
 			result = absolute? ? [""] : []
 
