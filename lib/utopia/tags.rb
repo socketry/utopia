@@ -11,7 +11,7 @@ module Utopia
 		end
 		
 		def self.create(name, &block)
-			@@all[name] = Proc.new(&block)
+			@@all[name] = block
 		end
 		
 		def self.all
