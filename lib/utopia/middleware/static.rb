@@ -175,6 +175,7 @@ module Utopia
 					
 					# Fix a problem if the browser request has multiple @rel@
 					# This normally indicates a browser bug.. :(
+					name = name.dup
 					name.delete("@rel@")
 				else
 					path = path.dirname
