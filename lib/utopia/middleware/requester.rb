@@ -98,6 +98,11 @@ module Utopia
 				}
 				request(env.merge(path_env))
 			end
+
+			# Avoid a huge amount of junk being printed when inspecting +env+.
+			def inspect
+				to_s
+			end
 		end
 
 	end
