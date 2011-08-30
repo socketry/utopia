@@ -4,7 +4,6 @@
 
 require 'yaml'
 
-require 'utopia/extensions/date'
 require 'utopia/extensions/string'
 require 'utopia/extensions/hash'
 require 'utopia/extensions/array'
