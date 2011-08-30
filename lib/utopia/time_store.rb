@@ -35,7 +35,7 @@ module Utopia
 				@header = []
 			end
 
-			diff = (Set.new(header) + "time") - @header
+			diff = (Set.new(header) + ["time"]) - @header
 
 			if diff.size
 				@header += diff.to_a.sort
