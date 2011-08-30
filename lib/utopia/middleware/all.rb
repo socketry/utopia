@@ -4,7 +4,9 @@
 
 require 'pathname'
 
-Pathname.new(__FILE__).dirname.entries.grep(/\.rb$/).each do |path|
+Pathname.new(__FILE__).dirname.entries.each do |path|
+	next unless /\.rb$/ === path.to_s
+
 	name = File.basename(path.to_s, ".rb")
 	
 	if name != "all"
