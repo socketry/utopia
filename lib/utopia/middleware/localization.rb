@@ -30,6 +30,8 @@ module Utopia
 
 				@default_locale = options[:default] || "en"
 				@all_locales = options[:all] || ["en"]
+				
+				@nonlocalized = options[:nonlocalized] || []
 			end
 
 			def named_locale(resource_name)
@@ -55,7 +57,28 @@ module Utopia
 				return [localized_path, @app.call(localization_probe)]
 			end
 
+			def nonlocalized?(env)
+				@nonlocalized.each do |pattern|
+					case pattern
+					when String
+						return true if pattern == env["PATH_INFO"]
+					when Regexp
+						return true if pattern.match(env["PATH_INFO"])
+					when pattern.respond_to?(:call)
+						return true if pattern.call(env)
+					end
+				end
+				
+				return false
+			end
+
 			def call(env)
+				# Check for a non-localized resource.
+				if nonlocalized?(env)
+					return @app.call(env)
+				end
+				
+				# Otherwise, we need to check if the resource has been localized based on the request and referer parameters.
 				path = Path.create(env["PATH_INFO"])
 				env["utopia.localization"] = self
 
