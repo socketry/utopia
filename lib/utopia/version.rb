@@ -3,11 +3,11 @@
 #	See <utopia.rb> for licensing details.
 
 module Utopia
-  module VERSION
-    MAJOR = 0
-    MINOR = 9
-    TINY  = 55
+	module VERSION
+		MAJOR = 0
+		MINOR = 9
+		TINY  = 57
 
-    STRING = [MAJOR, MINOR, TINY].join('.')
-  end
+		STRING = [MAJOR, MINOR, TINY].join('.')
+	end
 end
