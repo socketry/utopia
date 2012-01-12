@@ -1,6 +1,7 @@
 #	This file is part of the "Utopia Framework" project, and is licensed under the GNU AGPLv3.
 #	Copyright 2010 Samuel Williams. All rights reserved.
 #	See <utopia.rb> for licensing details.
+
 require 'utopia/middleware'
 require 'utopia/path'
 
@@ -50,11 +51,14 @@ module Utopia
 					@root = root
 					@path = path
 					@etag = Digest::SHA1.hexdigest("#{File.size(full_path)}#{mtime_date}")
+
+					@range = nil
 				end
 
 				attr :root
 				attr :path
 				attr :etag
+				attr :range
 
 				# Fit in with Rack::Sendfile
 				def to_path
@@ -74,8 +78,15 @@ module Utopia
 				end
 
 				def each
-					File.open(full_path, "rb") do |fp|
-						while part = fp.read(8192)
+					File.open(full_path, "rb") do |file|
+						file.seek(@range.begin)
+						remaining = @range.end - @range.begin+1
+
+						while remaining > 0
+							break unless part = file.read([8192, remaining].min)
+
+							remaining -= part.length
+
 							yield part
 						end
 					end
@@ -92,6 +103,38 @@ module Utopia
 					end
 
 					return true
+				end
+
+				def serve(env, response_headers)
+					ranges = Rack::Utils.byte_ranges(env, size)
+					response = [200, response_headers, self]
+
+					# LOG.info("Requesting ranges: #{ranges.inspect} (#{size})")
+
+					if ranges.nil? || ranges.length > 1
+						# No ranges, or multiple ranges (which we don't support):
+						# TODO: Support multiple byte-ranges
+						response[0] = 200
+						response[1]["Content-Length"] = size.to_s
+						@range = 0..size-1
+					elsif ranges.empty?
+						# Unsatisfiable. Return error, and file size:
+						response = Middleware::failure(416, "Invalid range specified.")
+						response[1]["Content-Range"] = "bytes */#{size}"
+						return response
+					else
+						# Partial content:
+						@range = ranges[0]
+						response[0] = 206
+						response[1]["Content-Range"] = "bytes #{@range.begin}-#{@range.end}/#{size}"
+						response[1]["Content-Length"] = (@range.end - @range.begin+1).to_s
+						size = @range.end - @range.begin + 1
+					end
+
+					# LOG.info("Response for #{self.full_path}: #{response.inspect}")
+					LOG.info "Serving file #{full_path.inspect}, range #{@range.inspect}"
+
+					return response
 				end
 			end
 
@@ -141,15 +184,15 @@ module Utopia
 			def initialize(app, options = {})
 				@app = app
 				@root = options[:root] || Utopia::Middleware::default_root
-				
+
 				if options[:types]
 					@extensions = load_mime_types(options[:types])
 				else
 					@extensions = load_mime_types(MIME_TYPES[:default])
 				end
-				
+
 				@cache_control = options[:cache_control] || "public, max-age=3600"
-				
+
 				LOG.info "** #{self.class.name}: Running in #{@root} with #{extensions.size} filetypes"
 				# LOG.info @extensions.inspect
 			end
@@ -203,21 +246,21 @@ module Utopia
 			def call(env)
 				request = Rack::Request.new(env)
 				ext = File.extname(request.path_info)
+
 				if @extensions.key? ext.downcase
 					path = Path.create(request.path_info).simplify
-					
+
 					if file = fetch_file(path)
 						response_headers = {
 							"Last-Modified" => file.mtime_date,
 							"Content-Type" => @extensions[ext],
 							"Cache-Control" => @cache_control,
 							"ETag" => file.etag,
+							"Accept-Ranges" => "bytes"
 						}
 
 						if file.modified?(env)
-							response_headers["Content-Length"] = file.size.to_s
-							
-							return [200, response_headers, file]
+							return file.serve(env, response_headers)
 						else
 							return [304, response_headers, []]
 						end

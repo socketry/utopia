@@ -31,6 +31,7 @@ module Utopia
 		403 => "Access Forbidden",
 		404 => "Resource Not Found",
 		405 => "Unsupported Method",
+		416 => "Byte range unsatisfiable",
 		500 => "Internal Server Error",
 		501 => "Not Implemented",
 		503 => "Service Unavailable"

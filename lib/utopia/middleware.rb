@@ -5,6 +5,7 @@
 require 'pathname'
 require 'logger'
 
+require 'utopia/http_status_codes'
 require 'utopia/extensions/rack'
 
 module Utopia
@@ -14,6 +15,16 @@ module Utopia
 	module Middleware
 		def self.default_root(subdir = "pages")
 			Pathname.new(Dir.pwd).join(subdir).cleanpath.to_s
+		end
+		
+		def self.failure(status = 500, message = "Non-specific error")
+			body = "#{HTTP_STATUS_DESCRIPTIONS[status] || status.to_s}: #{message}"
+			
+			return [status, {
+				"Content-Type" => "text/plain",
+				"Content-Length" => body.size.to_s,
+				"X-Cascade" => "pass"
+			}, [body]]
 		end
 	end
 end
