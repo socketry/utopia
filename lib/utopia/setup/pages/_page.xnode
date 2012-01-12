@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<?r response["Content-Type"] = "text/html; charset=utf-8" ?>
-		<?r response["Cache-Control"] = "max-age=3600" ?>
+		<?r response.content_type! "text/html; charset=utf-8" ?>
+		<?r response.cache! ?>
 		
 		<?r if title = (attributes["title"] || @title) ?>
 			<title>#{title.gsub(/<.*?>/, "")} - Utopia</title>
