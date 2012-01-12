@@ -2,6 +2,19 @@
 #	Copyright 2010 Samuel Williams. All rights reserved.
 #	See <utopia.rb> for licensing details.
 
+class Rack::Request
+	def url_with_path(path = "")
+		url = scheme + "://"
+		url << host
+
+		if scheme == "https" && port != 443 || scheme == "http" && port != 80
+			url << ":#{port}"
+		end
+
+		url << path
+	end
+end
+
 class Rack::Response
 	def do_not_cache!
 		self["Cache-Control"] = "no-cache, must-revalidate"
@@ -13,5 +26,9 @@ class Rack::Response
 			self["Cache-Control"] = "public, max-age=#{duration}"
 			self["Expires"] = (Time.now + duration).httpdate
 		end
+	end
+	
+	def content_type!(value)
+		self["Content-Type"] = value.to_s
 	end
 end
