@@ -160,6 +160,7 @@ module Utopia
 					indices = 0
 					Links.indices(fullpath) do |index|
 						index_name = File.basename(index, ".xnode")
+						# Values in indices_metadata will override values in directory_metadata:
 						index_metadata = directory_metadata.merge(indices_metadata[index_name] || {})
 
 						directory_link = Link.new(:directory, top + [filename, index_name], index_metadata)
@@ -179,7 +180,8 @@ module Utopia
 					end
 
 					if indices == 0
-						links << Link.new(:directory, top + [filename, ""], directory_metadata.merge(:uri => "\#"))
+						# We specify that no link was found, unless one was explicitly specified in directory_metadata:
+						links << Link.new(:directory, top + [filename, ""], {:uri => "\#"}.merge(directory_metadata))
 					end
 				elsif filename.match(INDEX_XNODE_FILTER) && options[:indices] == false
 					name = $1
