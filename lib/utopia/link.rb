@@ -77,10 +77,10 @@ module Utopia
 			options[:content] ||= title
 			options[:class] ||= "link"
 			
-			if href == "\#"
-				"<span class=#{options[:class].dump}>#{options[:content].to_html}</span>"
-			else
+			if href?
 				"<a class=#{options[:class].dump} href=\"#{href.to_html}\">#{options[:content].to_html}</a>"
+			else
+				"<span class=#{options[:class].dump}>#{options[:content].to_html}</span>"
 			end
 		end
 		
