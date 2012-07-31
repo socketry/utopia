@@ -52,25 +52,21 @@ module Utopia
 		end
 
 		def href
-			if @info[:uri]
-				return @info[:uri]
-			elsif @path
-				return @path.to_s
-			else
-				"\#"
+			@info.fetch(:uri) do
+				if @path
+					@path.to_s
+				else
+					nil
+				end
 			end
 		end
 
 		def href?
-			return href != "\#"
+			return href != nil
 		end
 
 		def title
 			@info[:title] || @title.to_title
-		end
-
-		def external?
-			@info.key? :uri
 		end
 
 		def to_href(options = {})
@@ -180,8 +176,8 @@ module Utopia
 					end
 
 					if indices == 0
-						# We specify that no link was found, unless one was explicitly specified in directory_metadata:
-						links << Link.new(:directory, top + [filename, ""], {:uri => "\#"}.merge(directory_metadata))
+						# Specify a nil uri if no index could be found for the directory:
+						links << Link.new(:directory, top + [filename, ""], {'uri' => nil}.merge(directory_metadata))
 					end
 				elsif filename.match(INDEX_XNODE_FILTER) && options[:indices] == false
 					name = $1
