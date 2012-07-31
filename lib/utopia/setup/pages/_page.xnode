@@ -11,7 +11,7 @@
 		<?r end ?>
 		
 		<link rel="icon" type="image/png" href="/_static/icon.png" />
-		<link rel="stylesheet" href="/_static/site.css" type="text/css" media="screen" charset="utf-8" />
+		<link rel="stylesheet" href="/_static/site.css" type="text/css" media="screen" />
 	</head>
 
 	<body>
