@@ -165,7 +165,7 @@ module Utopia
 
 						directory_link = Link.new(:directory, top + [filename, index_name], index_metadata)
 
-						# Check for localized directory metadata and update the link
+						# Check for localized directory metadata and update the link:
 						if directory_link.locale
 							localized_metadata = metadata.delete(name + "." + directory_link.locale)
 
@@ -198,8 +198,7 @@ module Utopia
 
 			if options[:virtual]
 				metadata.each do |name, details|
-					# Given a virtual named such as "welcome.cn", merge it with metadata 
-					# from "welcome" if it exists.
+					# Given a virtual named such as "welcome.cn", merge it with metadata from "welcome" if it exists:
 					basename, locale = name.split(".", 2)
 
 					if virtual_metadata[basename]

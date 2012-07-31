@@ -21,10 +21,6 @@ module Utopia
 				attr :tag
 			end
 
-			# Nodes typically represent XNODE files on the disk.
-			# You can get a list of Links from a current directory. This comprises of all
-			# files ending in ".xnode".
-
 			class Transaction
 				class State
 					def initialize(tag, node)
@@ -127,12 +123,12 @@ module Utopia
 
 				attr :request
 				attr :response
-				
+
 				# Begin tags represents a list from outer to inner most tag.
 				# At any point in parsing xml, begin_tags is a list of the inner most tag,
 				# then the next outer tag, etc. This list is used for doing dependent lookups.
 				attr :begin_tags
-				
+
 				# End tags represents a list of execution order. This is the order that end tags
 				# have appeared when evaluating nodes.
 				attr :end_tags
@@ -227,21 +223,22 @@ module Utopia
 					else
 						current.tag_end(tag)
 					end
-					
+
 					return nil
 				end
 
 				def render_node(node, attributes = {})
 					state = State.new(attributes, node)
 					@begin_tags << state
-					
+
 					return tag_end
 				end
 
+				# Takes an instance of Tag
 				def lookup(tag)
 					result = tag
 					node = nil
-					
+
 					@begin_tags.reverse_each do |state|
 						result = state.lookup(result)
 						
@@ -249,11 +246,11 @@ module Utopia
 
 						return result if Node === result
 					end
-					
+
 					@end_tags.reverse_each do |state|
 						return state.node.lookup(result) if state.node.respond_to? :lookup
 					end
-					
+
 					return nil
 				end
 
