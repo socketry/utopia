@@ -352,9 +352,9 @@ module Utopia
 					transaction.parse_xml(xml_data)
 				end
 
-				def process!(request, response)
+				def process!(request, response, attributes = {})
 					transaction = Transaction.new(request, response)
-					response.write(transaction.render_node(self))
+					response.write(transaction.render_node(self, attributes))
 				end
 			end
 			
