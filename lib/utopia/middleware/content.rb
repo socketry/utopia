@@ -35,8 +35,8 @@ module Utopia
 				read_file = lambda { Trenni.new(File.read(path), path) }
 				
 				if @files
-					@files.fetch(path) do
-						@files[path] = read_file.call
+					@files.fetch(path) do |key|
+						@files[key] = read_file.call
 					end
 				else
 					read_file.call
