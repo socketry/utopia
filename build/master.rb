@@ -1,6 +1,6 @@
 
 Dir.chdir("../") do
-	require 'lib/utopia/version'
+	require './lib/utopia/version'
 
 	Gem::Specification.new do |s|
 		s.name = "utopia"

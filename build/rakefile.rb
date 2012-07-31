@@ -1,10 +1,12 @@
 
-# Automatic Gem Build Script v2.0
+# Automatic Gem Build Script v3.0
 
 require 'fileutils'
 require 'rubygems'
 
-MasterGemspec = "gemspec.master"
+MasterGemspec = "master.rb"
+
+GEM = ENV['GEM'] || "gem"
 
 desc 'Build a gemspec file'
 task :build_gemspec do
@@ -26,12 +28,12 @@ end
 
 task :build_gem => [:build_gemspec] do
   Dir.chdir("../") do
-    system("gem build #{$base_gemspec}")
+    system("#{GEM} build #{$base_gemspec}")
   end
 end
 
 task :install_gem => [:build_gem] do
   Dir.chdir("../") do
-    system("gem install --local #{$versioned_gem}")
+    system("#{GEM} install --local #{$versioned_gem}")
   end
 end
