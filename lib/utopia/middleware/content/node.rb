@@ -37,6 +37,7 @@ module Utopia
 						@attributes = tag.to_hash
 
 						@content = nil
+						@deferred = []
 					end
 
 					attr :attributes
@@ -44,6 +45,14 @@ module Utopia
 					attr :content
 					attr :node
 					attr :tags
+
+					attr :deferred
+
+					def defer(&block)
+						@deferred << block
+						
+						Tag.closed("deferred", :id => @deferred.size - 1).to_html
+					end
 
 					def [](key)
 						@attributes[key.to_s]
