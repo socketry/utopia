@@ -32,15 +32,18 @@ module Utopia
 				:text => [
 					"html", "css", "js", "txt", "rtf", "xml", "pdf"
 				],
+				:fonts => [
+					"otf", ["eot", "application/vnd.ms-fontobject"], "ttf", "woff"
+				],
 				:archive => [
 					"zip", "tar", "tgz", "tar.gz", "tar.bz2", ["dmg", "application/x-apple-diskimage"],
 					["torrent", "application/x-bittorrent"]
 				],
 				:images => [
-					"png", "gif", "jpeg", "tiff"
+					"png", "gif", "jpeg", "tiff", "svg"
 				],
 				:default => [
-					:media, :text, :archive, :images
+					:media, :text, :archive, :images, :fonts
 				]
 			}
 
