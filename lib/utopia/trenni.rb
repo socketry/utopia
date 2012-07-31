@@ -6,6 +6,24 @@ require 'strscan'
 
 module Utopia
 	class Trenni
+		# The output variable that will be used in templates:
+		OUT = '_out'
+		
+		# Returns the output produced by calling the given block.
+		def self.capture(*args, &block)
+			out = eval(OUT, block.binding)
+			top = out.size
+			
+			block.call *args
+			
+			return out.pop(out.size - top).join
+		end
+		
+		# Returns the buffer used for capturing output.
+		def self.buffer(binding)
+			eval(OUT, binding)
+		end
+		
 		class Buffer
 			def initialize
 				@parts = []
@@ -16,7 +34,7 @@ module Utopia
 			def text(text)
 				text = text.gsub('\\', '\\\\\\').gsub('@', '\\@')
 
-				@parts << "_out << %q@#{text}@ ; "
+				@parts << "#{OUT} << %q@#{text}@ ; "
 			end
 
 			def expression(text)
@@ -24,11 +42,11 @@ module Utopia
 			end
 
 			def output(text)
-				@parts << "_out << (#{text}) ; "
+				@parts << "#{OUT} << (#{text}) ; "
 			end
 
 			def code
-				parts = ['_out = [] ; '] + @parts + ['_out.join']
+				parts = ["#{OUT} = [] ; "] + @parts + ["#{OUT}.join"]
 
 				code = parts.join
 			end
