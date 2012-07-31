@@ -20,22 +20,70 @@ module Utopia
 	module Middleware
 
 		class Controller
+			module Direct
+				def process!(path, request)
+					return nil unless path.dirname == self.class.uri_path
+
+					passthrough(path, request)
+				end
+			end
+			
 			CONTROLLER_RB = "controller.rb"
 
 			class Variables
-				def [](key)
-					instance_variable_get("@#{key}")
+				def initialize
+					@controllers = [Object.new]
+				end
+
+				def << controller
+					@controllers << controller
+				end
+
+				def fetch(key)
+					@controllers.reverse_each do |controller|
+						if controller.instance_variables.include?(key)
+							return controller.instance_variable_get(key)
+						end
+					end
+					
+					if block_given?
+						yield key
+					else
+						raise KeyError.new(key)
+					end
+				end
+
+				def to_hash
+					attributes = {}
+
+					@controllers.each do |controller|
+						controller.instance_variables.each do |name|
+							key = name[1..-1]
+							
+							# Instance variables that start with an underscore are considered private and not exposed:
+							next if key.start_with?('_')
+							
+							attributes[key] = controller.instance_variable_get(name)
+						end
+					end
+
+					return attributes
+				end
+
+				def [] key
+					fetch("@#{key}".to_sym) { nil }
 				end
 				
-				def []=(key, value)
-					instance_variable_set("@#{key}", value)
+				# Deprecated - to support old code:
+				def []= key, value
+					@controllers.first.instance_variable_set("@#{key}".to_sym, value)
 				end
 			end
 
 			class Base
 				def initialize(controller)
-					@controller = controller
-					@actions = {}
+					@_controller = controller
+					@_actions = {}
 
 					methods.each do |method_name|
 						next unless method_name.match(/on_(.*)$/)
@@ -43,12 +91,15 @@ module Utopia
 						action($1.split("_")) do |path, request|
 							# LOG.debug("Controller: #{method_name}")
 							self.send(method_name, path, request)
+							
+							# Don't pass the result back, instead use pass! or respond!
+							nil
 						end
 					end
 				end
 
 				def action(path, options = {}, &block)
-					cur = @actions
+					cur = @_actions
 
 					path.reverse.each do |name|
 						cur = cur[name] ||= {}
@@ -58,7 +109,7 @@ module Utopia
 				end
 
 				def lookup(path)
-					cur = @actions
+					cur = @_actions
 
 					path.components.reverse.each do |name|
 						cur = cur[name]
@@ -71,23 +122,49 @@ module Utopia
 					end
 				end
 
-				# Given a request, call an associated action if one exists
+				# Given a request, call an associated action if one exists.
 				def passthrough(path, request)
 					action = lookup(path)
 
 					if action
-						return respond_with(action.call(path, request))
+						variables = request.controller
+						clone = self.dup
+						
+						variables << clone
+						
+						response = catch(:response) do
+							clone.instance_exec(path, request, &action)
+							
+							# By default give nothing - i.e. keep on processing:
+							nil
+						end
+						
+						if response
+							return clone.respond_with(*response)
+						end
 					end
 
 					return nil
 				end
 
 				def call(env)
-					@controller.app.call(env)
+					@_controller.app.call(env)
 				end
 
-				def redirect(target, status = 302)
-					{:redirect => target, :status => status}
+				def respond! (*args)
+					throw :response, args
+				end
+
+				def ignore!
+					throw :response, nil
+				end
+
+				def redirect! (target, status = 302)
+					respond! :redirect => target, :status => status
+				end
+
+				def fail!(error = :bad_request)
+					respond! error
 				end
 
 				def respond_with(*args)
@@ -133,8 +210,16 @@ module Utopia
 					passthrough(path, request)
 				end
 				
+				def self.base_path
+					self.const_get(:BASE_PATH)
+				end
+				
+				def self.uri_path
+					self.const_get(:URI_PATH)
+				end
+				
 				def self.require_local(path)
-					require(File.join(const_get('BASE_PATH'), path))
+					require File.join(base_path, path)
 				end
 			end
 
@@ -179,8 +264,8 @@ module Utopia
 
 				if File.exist?(controller_path)
 					klass = Class.new(Base)
-					klass.const_set('BASE_PATH', base_path)
-					klass.const_set('URI_PATH', uri_path)
+					klass.const_set(:BASE_PATH, base_path)
+					klass.const_set(:URI_PATH, uri_path)
 					
 					$LOAD_PATH.unshift(base_path)
 					
@@ -196,6 +281,7 @@ module Utopia
 
 			def fetch_controllers(path)
 				controllers = []
+
 				path.ascend do |parent_path|
 					controllers << lookup(parent_path)
 				end
@@ -204,7 +290,7 @@ module Utopia
 			end
 
 			def call(env)
-				env["utopia.controller"] ||= Variables.new
+				variables = (env["utopia.controller"] ||= Variables.new)
 				
 				request = Rack::Request.new(env)
 

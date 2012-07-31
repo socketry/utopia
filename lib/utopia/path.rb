@@ -9,6 +9,8 @@ module Utopia
 	class Path
 		SEPARATOR = "/"
 
+		include Comparable
+
 		def initialize(components)
 			# To ensure we don't do anything stupid we freeze the components
 			@components = components.dup.freeze
@@ -191,7 +193,7 @@ module Utopia
 			end
 		end
 
-		def == other
+		def starts_with? other
 			other.components.each_with_index do |part, index|
 				return false if @components[index] != part
 			end
