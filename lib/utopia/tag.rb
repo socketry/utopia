@@ -5,6 +5,13 @@
 module Utopia
 	
 	class Tag
+		def self.closed(name, attributes = {})
+			tag = Tag.new(name, attributes)
+			tag.closed = true
+			
+			return tag
+		end
+		
 		def initialize(name, attributes = {})
 			@name = name
 			@attributes = attributes
@@ -45,7 +52,11 @@ module Utopia
 			buf.write "<#{name}"
 
 			@attributes.each do |key, value|
-				buf.write " #{key}=\"#{value}\""
+				if value
+					buf.write " #{key}=\"#{value}\""
+				else
+					buf.write " #{key}"
+				end
 			end
 			
 			if terminate

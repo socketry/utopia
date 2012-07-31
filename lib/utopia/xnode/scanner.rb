@@ -26,7 +26,9 @@ module Utopia
 	
 		class Scanner < StringScanner
 			CDATA = /[^<]+/m
-			TAG_PARAMETER = /\s*([^\s=\/>]*)=((['"])(.*?)\3)/um
+			# Parse an attribute in the form of key="value" or key.
+			ATTRIBUTE_NAME = /\s*([^\s=\/>]+)/um
+			ATTRIBUTE_VALUE = /=((['"])(.*?)\2)/um
 
 			def initialize(callback, string)
 				@callback = callback
@@ -87,8 +89,13 @@ module Utopia
 			end
 		
 			def scan_attributes
-				while scan(TAG_PARAMETER)
-					@callback.attribute(self[1], self[4])
+				while scan(ATTRIBUTE_NAME)
+					name = self[1]
+					if scan(ATTRIBUTE_VALUE)
+						@callback.attribute(name, self[3])
+					else
+						@callback.attribute(name, nil)
+					end
 				end
 			end
 		
