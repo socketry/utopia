@@ -121,7 +121,14 @@ module Utopia
 						return [200, {}, []]
 					else
 						response = Rack::Response.new
-						node.process!(request, response)
+						
+						attributes = {}
+						
+						if request.controller
+							attributes = request.controller.to_hash
+						end
+						
+						node.process!(request, response, attributes)
 						return response.finish
 					end
 				else
