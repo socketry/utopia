@@ -302,7 +302,14 @@ module Utopia
 				end
 
 				def lookup(tag)
-					return @controller.lookup_tag(tag.name, parent_path)
+					from_path = parent_path
+					
+					# If the current node is called 'foo', we can't lookup 'foo' in the current directory or we will likely have infinite recursion.
+					if tag.name == @uri_path.basename
+						from_path = from_path.dirname
+					end
+					
+					return @controller.lookup_tag(tag.name, from_path)
 				end
 
 				def parent_path
