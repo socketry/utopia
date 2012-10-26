@@ -5,6 +5,14 @@
 module Utopia
 	
 	class Tag
+		include Comparable
+		
+		def <=> other
+			if Tag === other
+				[@name, @attributes, @closed] <=> [other.name, other.attributes, other.closed]
+			end
+		end
+		
 		def self.closed(name, attributes = {})
 			tag = Tag.new(name, attributes)
 			tag.closed = true
@@ -31,10 +39,10 @@ module Utopia
 			@content.write text
 		end
 
-		def to_html(content = nil, buf = StringIO.new)
-			write_full_html(buf, content)
+		def to_html(content = nil, buffer = StringIO.new)
+			write_full_html(buffer, content)
 			
-			return buf.string
+			return buffer.string
 		end
 		
 		def to_hash
@@ -42,41 +50,41 @@ module Utopia
 		end
 		
 		def to_s
-			buf = StringIO.new
-			write_open_html(buf)
-			return buf.string
+			buffer = StringIO.new
+			write_full_html(buffer)
+			return buffer.string
 		end
 		
-		def write_open_html(buf, terminate = false)
-			buf ||= StringIO.new 
-			buf.write "<#{name}"
+		def write_open_html(buffer, terminate = false)
+			buffer ||= StringIO.new 
+			buffer.write "<#{name}"
 
 			@attributes.each do |key, value|
 				if value
-					buf.write " #{key}=\"#{value}\""
+					buffer.write " #{key}=\"#{value}\""
 				else
-					buf.write " #{key}"
+					buffer.write " #{key}"
 				end
 			end
 			
 			if terminate
-				buf.write "/>"
+				buffer.write "/>"
 			else
-				buf.write ">"
+				buffer.write ">"
 			end
 		end
 		
-		def write_close_html(buf)
-			buf.write "</#{name}>"
+		def write_close_html(buffer)
+			buffer.write "</#{name}>"
 		end
 		
-		def write_full_html(buf, content = nil)
+		def write_full_html(buffer, content = nil)
 			if @closed && content == nil
-				write_open_html(buf, true)
+				write_open_html(buffer, true)
 			else
-				write_open_html(buf)
-				buf.write(content)
-				write_close_html(buf)
+				write_open_html(buffer)
+				buffer.write(content)
+				write_close_html(buffer)
 			end
 		end
 	end
