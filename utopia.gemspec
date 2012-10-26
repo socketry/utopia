@@ -28,6 +28,4 @@ Gem::Specification.new do |gem|
   
   gem.add_dependency "rack-cache"
   gem.add_dependency "rack-contrib"
-  
-  gem.add_dependency "rmagick"
 end
