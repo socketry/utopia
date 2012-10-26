@@ -22,7 +22,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
   
-  gem.add_dependency "trenni", "~> 1.1.1"
+  gem.add_dependency "trenni", "~> 1.2.0"
   gem.add_dependency "mime-types"
   gem.add_dependency "rack", "~> 1.4.1"
   
