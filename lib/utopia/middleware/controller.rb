@@ -4,7 +4,6 @@
 
 require 'utopia/middleware'
 require 'utopia/path'
-require 'utopia/http_status_codes'
 
 class Rack::Request
 	def controller(&block)
@@ -18,7 +17,6 @@ end
 
 module Utopia
 	module Middleware
-
 		class Controller
 			module Direct
 				def process!(path, request)

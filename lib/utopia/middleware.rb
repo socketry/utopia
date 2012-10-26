@@ -5,7 +5,8 @@
 require 'pathname'
 require 'logger'
 
-require 'utopia/http_status_codes'
+require 'utopia/http'
+
 require 'utopia/extensions/rack'
 
 module Utopia
@@ -18,7 +19,7 @@ module Utopia
 		end
 		
 		def self.failure(status = 500, message = "Non-specific error")
-			body = "#{HTTP_STATUS_DESCRIPTIONS[status] || status.to_s}: #{message}"
+			body = "#{HTTP::STATUS_DESCRIPTIONS[status] || status.to_s}: #{message}"
 			
 			return [status, {
 				"Content-Type" => "text/plain",
