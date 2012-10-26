@@ -4,7 +4,7 @@
 
 require 'set'
 
-require 'utopia/xnode'
+require 'utopia/middleware/content/processor'
 require 'utopia/link'
 
 module Utopia
@@ -118,7 +118,7 @@ module Utopia
 				end
 
 				def parse_xml(xml_data)
-					XNode::Processor.new(xml_data, self).parse
+					Processor.parse_xml(xml_data, self)
 				end
 
 				attr :request
