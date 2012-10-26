@@ -19,8 +19,6 @@ module Utopia
 				@app = app
 
 				@root = File.expand_path(options[:root] || Utopia::Middleware::default_root)
-				
-				LOG.info "** #{self.class.name}: Running in #{@root}"
 
 				# Set to hash to enable caching
 				@nodes = {}

@@ -195,9 +195,6 @@ module Utopia
 				end
 
 				@cache_control = options[:cache_control] || "public, max-age=3600"
-
-				LOG.info "** #{self.class.name}: Running in #{@root} with #{extensions.size} filetypes"
-				# LOG.info @extensions.inspect
 			end
 
 			def fetch_file(path)
