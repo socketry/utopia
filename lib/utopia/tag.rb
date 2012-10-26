@@ -3,13 +3,10 @@
 #	See <utopia.rb> for licensing details.
 
 module Utopia
-	
 	class Tag
-		include Comparable
-		
-		def <=> other
+		def == other
 			if Tag === other
-				[@name, @attributes, @closed] <=> [other.name, other.attributes, other.closed]
+				[@name, @attributes, @closed] == [other.name, other.attributes, other.closed]
 			end
 		end
 		
