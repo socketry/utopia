@@ -8,26 +8,35 @@ $app = Rake.application = Rake::Application.new
 $app.init('Utopia')
 
 task :setup do
-	Utopia::Setup.copy(Dir.getwd)
+	path = File.expand_path(ARGV.last, Dir.getwd)
+	FileUtils.mkdir_p path
+
+	Dir.chdir(path) do
+		Utopia::Setup.copy(path)
 	
-	if `which thin`.strip == ""
-		$stderr.puts "Next, please install thin: `sudo gem install thin'."
-		$stderr.puts "Once you've done that, type `thin start' to start the web server."
-	else
-		$stderr.puts "Type `thin start' to start the web server."
-	end
+		if `which thin`.strip == ""
+			$stderr.puts "Next, please install thin: `sudo gem install thin'."
+		end
 	
-	if `which git`.strip == ""
-		$stderr.puts "Now is a good time to learn about git : http://git-scm.com/"
-	end
+		if `which git`.strip == ""
+			$stderr.puts "Now is a good time to learn about git : http://git-scm.com/"
+		end
 	
-	unless File.exist? '.git'
-		$stderr.puts "I recommend using git for version control."
+		unless File.exist? '.git'
+			sh("git", "init")
+			sh("git", "add", ".")
+			sh("git", "commit", "-m", "Initial utopia site.")
+		end
 	end
 	
 	$stderr.puts "*** Thanks for trying out Utopia! ***"
 end
 
-task :default => :setup
+task :help do
+	$stderr.puts "To create a new site, use the setup task:"
+	$stderr.puts "$ #{File.basename($0)} setup www.example.com"
+end
+
+task :default => :help
 
 $app.top_level

@@ -1,7 +1,7 @@
 
 source "http://rubygems.org"
 
-gem "utopia", "~> $UTOPIA_VERSION"
+gem "utopia", "= $UTOPIA_VERSION"
 
 group :development do
 	gem "thin"

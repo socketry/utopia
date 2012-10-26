@@ -33,7 +33,7 @@ module Utopia
 			['config.ru', 'Gemfile'].each do |configuration_file|
 				$stderr.puts "Updating #{configuration_file}..."
 				path = File.join(to, configuration_file)
-				buffer = File.read(path).gsub('$UTOPIA_VERSION', Utopia::VERSION.dump)
+				buffer = File.read(path).gsub('$UTOPIA_VERSION', Utopia::VERSION)
 				File.open(path, "w") { |file| file.write(buffer) }
 			end
 		end
