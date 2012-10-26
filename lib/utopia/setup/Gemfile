@@ -1,0 +1,8 @@
+
+source "http://rubygems.org"
+
+gem "utopia", "~> $UTOPIA_VERSION"
+
+group :development do
+	gem "thin"
+end

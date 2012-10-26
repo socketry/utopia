@@ -30,10 +30,12 @@ module Utopia
 				FileUtils.mkdir_p(File.join(to, path))
 			end
 			
-			$stderr.puts "Updating config.ru..."
-			config_ru = File.join(to, "config.ru")
-			buf = File.read(config_ru).gsub('$UTOPIA_VERSION', Utopia::VERSION::STRING.dump)
-			File.open(config_ru, "w") { |fp| fp.write(buf) }
+			['config.ru', 'Gemfile'].each do |configuration_file|
+				$stderr.puts "Updating #{configuration_file}..."
+				path = File.join(to, configuration_file)
+				buffer = File.read(path).gsub('$UTOPIA_VERSION', Utopia::VERSION.dump)
+				File.open(path, "w") { |file| file.write(buffer) }
+			end
 		end
 	end
 end
