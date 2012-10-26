@@ -2,8 +2,6 @@
 #	Copyright 2010 Samuel Williams. All rights reserved.
 #	See <utopia.rb> for licensing details.
 
-require 'rack/utils'
-
 module Utopia
 	
 	class Path
@@ -21,6 +19,12 @@ module Utopia
 			create(path)
 		end
 
+		def self.unescape(string)
+			string.tr('+', ' ').gsub(/((?:%[0-9a-fA-F]{2})+)/n) {
+				[$1.delete('%')].pack('H*')
+			}
+		end
+
 		def self.create(path)
 			case path
 			when Path
@@ -28,7 +32,7 @@ module Utopia
 			when Array
 				return Path.new(path)
 			when String
-				path = Rack::Utils.unescape(path)
+				path = unescape(path)
 				# Ends with SEPARATOR
 				if path[-1,1] == SEPARATOR
 					return Path.new(path.split(SEPARATOR) << "")
