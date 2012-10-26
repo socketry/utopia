@@ -184,6 +184,7 @@ module Utopia
 			end
 
 			public
+
 			def initialize(app, options = {})
 				@app = app
 				@root = options[:root] || Utopia::Middleware::default_root
