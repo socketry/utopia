@@ -2,6 +2,8 @@
 #	Copyright 2010 Samuel Williams. All rights reserved.
 #	See <utopia.rb> for licensing details.
 
+require 'rack'
+
 class Rack::Request
 	def url_with_path(path = "")
 		url = scheme + "://"
