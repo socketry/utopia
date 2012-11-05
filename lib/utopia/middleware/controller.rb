@@ -20,6 +20,7 @@
 
 require 'utopia/middleware'
 require 'utopia/path'
+require 'utopia/http'
 
 class Rack::Request
 	def controller(&block)
@@ -195,7 +196,7 @@ module Utopia
 						status = options[:status] || status
 					end
 
-					status = Utopia::HTTP_STATUS_CODES[status] || status
+					status = Utopia::HTTP::STATUS_CODES[status] || status
 					headers = options[:headers] || {}
 
 					if options[:type]
@@ -213,7 +214,7 @@ module Utopia
 					elsif options[:content]
 						body = [options[:content]]
 					elsif status >= 300
-						body = [Utopia::HTTP_STATUS_DESCRIPTIONS[status] || 'Status #{status}']
+						body = [Utopia::HTTP::STATUS_DESCRIPTIONS[status] || 'Status #{status}']
 					end
 
 					# Utopia::LOG.debug([status, headers, body].inspect)
