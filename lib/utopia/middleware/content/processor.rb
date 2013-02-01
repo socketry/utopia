@@ -38,14 +38,19 @@ module Utopia
 						@start_position = start_position
 						@current_tag = current_tag
 						@closing_tag = closing_tag
-				
-						@starting_line = @scanner.calculate_line_number(@start_pos)
-						@ending_line = @scanner.calculate_line_number
+						
+						@starting_line = Trenni::Parser.line_at_offset(@scanner.string, @start_position)
+						@ending_line = Trenni::Parser.line_at_offset(@scanner.string, @scanner.pos)
 					end
 
+					attr :scanner
+					attr :start_position
+					attr :current_tag
+					attr :closing_tag
+
 					def to_s
-						"Unbalanced Tag #{@current_tag}. " \
-						"Line #{@starting_line[0]}: #{@starting_line[4]} has been closed by #{@closing_tag} on line #{@ending_line[0]}: #{@ending_line[4]}"
+						"Unbalanced Tag Error. " \
+						"Line #{@starting_line[:line_number]}: #{@current_tag} has been closed by #{@closing_tag} on line #{@ending_line[:line_number]}!"
 					end
 				end
 
