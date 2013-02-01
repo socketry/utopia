@@ -25,7 +25,7 @@ module Utopia
 
 		include Comparable
 
-		def initialize(components)
+		def initialize(components = [])
 			# To ensure we don't do anything stupid we freeze the components
 			@components = components.dup.freeze
 		end

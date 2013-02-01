@@ -150,7 +150,7 @@ module Utopia
 			:locale => nil
 		}
 		
-		def self.index(root, top, options = {})
+		def self.index(root, top = Path.new, options = {})
 			options = DEFAULT_OPTIONS.merge(options)
 			path = File.join(root, top.components)
 			metadata = Links.metadata(path)
