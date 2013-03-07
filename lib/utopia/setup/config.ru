@@ -7,8 +7,7 @@ $LOAD_PATH << File.join(File.dirname(__FILE__), "lib")
 gem 'utopia', "= $UTOPIA_VERSION"
 require 'utopia/middleware/all'
 
-# Utopia relies on effectively caching resources:
-gem 'rack-cache'
+# Utopia relies heavily on a local cache:
 require 'rack/cache'
 
 if UTOPIA_ENV == :development
@@ -16,7 +15,7 @@ if UTOPIA_ENV == :development
 else
 	use Utopia::Middleware::ExceptionHandler, "/errors/exception"
 	
-	# You might want to use the Rack::MailExceptions middleware to get notifications about problems.
+	use Utopia::Middleware::MailExceptions
 end
 
 use Rack::ContentLength
