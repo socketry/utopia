@@ -39,6 +39,8 @@ module Utopia
 				@from = config.fetch(:from) {(ENV['USER'] || 'rack') + "@localhost"}
 				@subject = config[:subject] || '%{exception} [PID %{pid} : %{cwd}]'
 				@delivery_method = config.fetch(:delivery_method, LOCAL_SMTP)
+				
+				@dump_environment = config.fetch(:dump_environment, false)
 			end
 
 			def call(env)
@@ -76,6 +78,8 @@ module Utopia
 				
 				io.puts
 				
+				io.puts "#{exception.class.name}: #{exception.to_s}"
+				
 				if exception.respond_to?(:backtrace)
 					io.puts exception.backtrace
 				else
@@ -87,7 +91,7 @@ module Utopia
 			
 			def generate_mail(exception, env)
 				attributes = {
-					exception: exception.to_s,
+					exception: exception.class.name,
 					pid: $$,
 					cwd: Dir.getwd,
 				}
@@ -104,8 +108,10 @@ module Utopia
 				if body = extract_body(env) and body.size > 0
 					mail.attachments['body.bin'] = body
 				end
-					
-				mail.attachments['environment.yaml'] = YAML::dump(env)
+				
+				if @dump_environment
+					mail.attachments['environment.yaml'] = YAML::dump(env)
+				end
 
 				return mail
 			end
