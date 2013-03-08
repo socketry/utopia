@@ -166,7 +166,7 @@ module Utopia
 					@_controller.app.call(env)
 				end
 
-				def respond! (*args)
+				def respond!(*args)
 					throw :response, args
 				end
 
@@ -180,6 +180,10 @@ module Utopia
 
 				def fail!(error = :bad_request)
 					respond! error
+				end
+
+				def success!(*args)
+					respond! :success, *args
 				end
 
 				def respond_with(*args)
