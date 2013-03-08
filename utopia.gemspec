@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
 		structure representing the website.
 	EOF
 	gem.summary       = %q{Utopia is a framework for building dynamic content-driven websites.}
-	gem.homepage      = ""
+	gem.homepage      = "https://github.com/ioquatix/utopia"
 
 	gem.files         = `git ls-files`.split($/)
 	gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
