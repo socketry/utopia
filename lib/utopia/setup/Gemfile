@@ -1,7 +1,8 @@
 
 source "http://rubygems.org"
 
-gem "utopia", "= $UTOPIA_VERSION"
+gem "utopia", "~> $UTOPIA_VERSION"
+gem "utopia-tags-gallery"
 
 group :development do
 	gem "thin"
