@@ -2,7 +2,8 @@
 source "http://rubygems.org"
 
 gem "utopia", "~> $UTOPIA_VERSION"
-gem "utopia-tags-gallery"
+# gem "utopia-tags-gallery"
+# gem "utopia-tags-google-analytics"
 
 group :development do
 	gem "thin"

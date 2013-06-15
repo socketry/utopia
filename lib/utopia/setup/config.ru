@@ -3,8 +3,6 @@
 UTOPIA_ENV = (ENV['UTOPIA_ENV'] || ENV['RACK_ENV'] || :development).to_sym
 $LOAD_PATH << File.join(File.dirname(__FILE__), "lib")
 
-# It is recommended that you always explicity specify the version of the gem you are using.
-gem 'utopia', "= $UTOPIA_VERSION"
 require 'utopia/middleware/all'
 
 # Utopia relies heavily on a local cache:
@@ -14,7 +12,6 @@ if UTOPIA_ENV == :development
 	use Rack::ShowExceptions
 else
 	use Utopia::Middleware::ExceptionHandler, "/errors/exception"
-	
 	use Utopia::Middleware::MailExceptions
 end
 
@@ -40,7 +37,7 @@ use Utopia::Middleware::Static
 
 if UTOPIA_ENV == :production
 	use Rack::Cache, {
-		:metastore   => "file:#{Utopia::Middleware::default_root("cache/meta")}",
+		:metastore => "file:#{Utopia::Middleware::default_root("cache/meta")}",
 		:entitystore => "file:#{Utopia::Middleware::default_root("cache/body")}",
 		:verbose => false
 	}
