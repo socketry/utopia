@@ -218,7 +218,7 @@ module Utopia
 					elsif options[:content]
 						body = [options[:content]]
 					elsif status >= 300
-						body = [Utopia::HTTP::STATUS_DESCRIPTIONS[status] || 'Status #{status}']
+						body = [Utopia::HTTP::STATUS_DESCRIPTIONS[status] || "Status #{status}"]
 					end
 
 					# Utopia::LOG.debug([status, headers, body].inspect)
