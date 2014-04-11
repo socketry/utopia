@@ -18,10 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'test/unit'
+require 'minitest/autorun'
 require 'utopia/path'
 
-class TestPath < Test::Unit::TestCase
+class TestPath < MiniTest::Test
 	def test_absolute_path_concatenation
 		root = Utopia::Path["/"]
 		
@@ -29,4 +29,3 @@ class TestPath < Test::Unit::TestCase
 		assert_equal Utopia::Path["/foo/bar"], (root + Utopia::Path["foo/bar"])
 	end
 end
-

@@ -18,11 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'test/unit'
+require 'minitest/autorun'
+
 require 'rack/mock'
 require 'utopia/middleware/content'
 
-class TestContentMiddleware < Test::Unit::TestCase
+class TestContentMiddleware < MiniTest::Test
 	APP = lambda {|env| [404, [], []]}
 	
 	class TestDelegate
