@@ -60,9 +60,9 @@ module Utopia
 
 					attr :deferred
 
-					def defer(&block)
+					def defer(value = nil, &block)
 						@deferred << block
-						
+					
 						Tag.closed("deferred", :id => @deferred.size - 1).to_html
 					end
 
@@ -215,6 +215,16 @@ module Utopia
 
 				def cdata(text)
 					current.cdata(text)
+				end
+
+				def deferred(*args, &block)
+					if block_given?
+						current.defer(&block)
+					else
+						current.defer do
+							tag(*args)
+						end
+					end
 				end
 
 				def tag_end(tag = nil)
