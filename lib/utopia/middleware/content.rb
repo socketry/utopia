@@ -29,7 +29,7 @@ require 'trenni/template'
 
 module Utopia
 	module Middleware
-	
+
 		class Content
 			def initialize(app, options = {})
 				@app = app
@@ -144,6 +144,7 @@ module Utopia
 						end
 						
 						node.process!(request, response, attributes)
+						
 						return response.finish
 					end
 				else

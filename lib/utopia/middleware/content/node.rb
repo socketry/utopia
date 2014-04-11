@@ -217,7 +217,7 @@ module Utopia
 					current.cdata(text)
 				end
 
-				def deferred(*args, &block)
+				def deferred_tag(*args, &block)
 					if block_given?
 						current.defer(&block)
 					else
