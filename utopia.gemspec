@@ -21,12 +21,12 @@ Gem::Specification.new do |spec|
 	spec.executables   = spec.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
 	spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
 	spec.require_paths = ["lib"]
-
-	spec.add_dependency "trenni", "~> 1.2.0"
-	spec.add_dependency "mime-types"
 	
-	spec.add_dependency "rack", "~> 1.4"
-	spec.add_dependency "rack-cache"
+	spec.add_dependency "trenni", "~> 1.3.0"
+	spec.add_dependency "mime-types", "~> 1.16"
 	
-	spec.add_dependency "mail"
+	spec.add_dependency "rack", "~> 1.5"
+	spec.add_dependency "rack-cache", "~> 1.2.0"
+	
+	spec.add_dependency "mail", "~> 2.5.4"
 end
