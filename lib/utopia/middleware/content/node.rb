@@ -169,7 +169,7 @@ module Utopia
 					@begin_tags[0]
 				end
 
-				def tag(name, attributes, &block)
+				def tag(name, attributes = {}, &block)
 					tag = Tag.new(name, attributes)
 
 					node = tag_begin(tag)
