@@ -23,10 +23,15 @@ Gem::Specification.new do |spec|
 	spec.require_paths = ["lib"]
 	
 	spec.add_dependency "trenni", "~> 1.3.0"
-	spec.add_dependency "mime-types", "~> 1.16"
+	spec.add_dependency "mime-types", "~> 2.0"
 	
 	spec.add_dependency "rack", "~> 1.5"
 	spec.add_dependency "rack-cache", "~> 1.2.0"
 	
-	spec.add_dependency "mail", "~> 2.5.4"
+	spec.add_dependency "mail", "~> 2.6.1"
+	
+	spec.add_development_dependency "bundler", "~> 1.3"
+	spec.add_development_dependency "rspec", "~> 3.0.0"
+	spec.add_development_dependency "thin"
+	spec.add_development_dependency "rake"
 end
