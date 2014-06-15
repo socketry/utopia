@@ -18,14 +18,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'minitest/autorun'
 require 'utopia/path'
 
-class TestPath < MiniTest::Test
-	def test_absolute_path_concatenation
-		root = Utopia::Path["/"]
-		
-		assert root.absolute?
-		assert_equal Utopia::Path["/foo/bar"], (root + Utopia::Path["foo/bar"])
+module Utopia::PathSpec
+	describe Utopia::Path do
+		it "should concatenate absolute paths" do
+			root = Utopia::Path["/"]
+			
+			expect(root).to be_absolute
+			expect(root + Utopia::Path["foo/bar"]).to be == Utopia::Path["/foo/bar"]
+		end
 	end
 end

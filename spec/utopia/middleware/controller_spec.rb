@@ -18,15 +18,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'minitest/autorun'
-
 require 'rack/mock'
 require 'utopia/middleware/controller'
 
-class TestControllerMiddleware < MiniTest::Test
+module Utopia::Middleware::ControllerSpec
 	APP = lambda {|env| [404, [], []]}
 	
 	class TestController < Utopia::Middleware::Controller::Base
+		def direct?(path)
+			true
+		end
+		
 		def on_success(path, request)
 			success!
 		end
@@ -48,20 +50,21 @@ class TestControllerMiddleware < MiniTest::Test
 		end
 	end
 	
-	def test_controller_response
-		variables = Utopia::Middleware::Controller::Variables.new
-		request = Rack::Request.new("utopia.controller" => variables)
-		middleware = MockControllerMiddleware.new
-		controller = TestController.new(middleware)
+	describe Utopia::Middleware::Controller do
+		it "should call controller methods" do
+			variables = Utopia::Middleware::Controller::Variables.new
+			request = Rack::Request.new("utopia.controller" => variables)
+			middleware = MockControllerMiddleware.new
+			controller = TestController.new(middleware)
 		
-		result = controller.process!(Utopia::Path["/success"], request)
-		assert_equal [200, {}, []], result
+			result = controller.process!(Utopia::Path["/success"], request)
+			expect(result).to be == [200, {}, []]
 		
-		result = controller.process!(Utopia::Path["/failure"], request)
-		assert_equal [400, {}, ["Bad Request"]], result
+			result = controller.process!(Utopia::Path["/failure"], request)
+			expect(result).to be == [400, {}, ["Bad Request"]]
 		
-		result = controller.process!(Utopia::Path["/variable"], request)
-		assert_equal({"variable"=>:value}, variables.to_hash)
+			result = controller.process!(Utopia::Path["/variable"], request)
+			expect(variables.to_hash).to be == {"variable"=>:value}
+		end
 	end
 end
-
