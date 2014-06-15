@@ -35,14 +35,6 @@ end
 module Utopia
 	module Middleware
 		class Controller
-			module Direct
-				def process!(path, request)
-					return nil unless path.dirname == self.class.uri_path
-
-					passthrough(path, request)
-				end
-			end
-			
 			CONTROLLER_RB = "controller.rb"
 
 			class Variables
@@ -224,8 +216,14 @@ module Utopia
 					# Utopia::LOG.debug([status, headers, body].inspect)
 					return [status, headers, body]
 				end
-
+				
+				def direct?(path)
+					path.dirname == self.class.uri_path
+				end
+				
 				def process!(path, request)
+					return nil unless direct?(path)
+					
 					passthrough(path, request)
 				end
 				
@@ -321,6 +319,5 @@ module Utopia
 				return @app.call(env)
 			end
 		end
-
 	end
 end
