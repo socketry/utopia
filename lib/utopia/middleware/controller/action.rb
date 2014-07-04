@@ -54,15 +54,16 @@ module Utopia
 						if match_name = self[name]
 							# Match the exact name:
 							match_name.append(path, index+1, actions)
-						elsif match_one = self[:*]
+						end
+						
+						if match_one = self[:*]
 							# Match one input:
 							match_one.append(path, index+1, actions)
-						elsif match_all = self[:**]
+						end
+						
+						if match_all = self[:**]
 							# Match all remaining input:
 							actions << match_all if match_all.callback?
-						else
-							# No match:
-							return
 						end
 					else
 						# Got to end, matched completely:
@@ -78,6 +79,8 @@ module Utopia
 					actions = []
 					
 					append(relative_path.reverse, 0, actions)
+					
+					# puts "select(#{relative_path}, #{self.inspect}) => #{actions.inspect}"
 					
 					return actions
 				end

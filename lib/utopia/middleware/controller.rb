@@ -62,7 +62,7 @@ module Utopia
 				base_path = File.join(@root, uri_path.components)
 				
 				controller_path = File.join(base_path, CONTROLLER_RB)
-				puts "load_controller_file(#{path.inspect}) => #{controller_path}"
+				# puts "load_controller_file(#{path.inspect}) => #{controller_path}"
 				
 				if File.exist?(controller_path)
 					klass = Class.new(Base)
@@ -87,7 +87,7 @@ module Utopia
 				controller_path = Path.new
 				
 				path.descend do |controller_path|
-					puts "Invoke controller: #{controller_path}"
+					# puts "Invoke controller: #{controller_path}"
 					if controller = lookup_controller(controller_path)
 						# We only want to invoke controllers which have not already been invoked:
 						unless done.include? controller
