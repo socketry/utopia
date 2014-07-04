@@ -162,17 +162,9 @@ module Utopia
 					return [status, headers, body]
 				end
 				
-				def match?(request, path)
-					direct? path
-				end
-				
 				# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid rack response if the controller can do so.
 				def process!(request, path)
 					passthrough(request, path)
-				end
-				
-				def self.to_s
-					"Controller:#{self.uri_path.to_s}"
 				end
 			end
 		end
