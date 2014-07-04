@@ -22,23 +22,50 @@ require 'rack/mock'
 require 'utopia/middleware/controller'
 
 module Utopia::Middleware::ControllerSpec
+	describe Utopia::Middleware::Controller::Action do
+		it "should resolve callbacks" do
+			actions = Utopia::Middleware::Controller::Action.new
+			
+			specific_action = actions.define(['a', 'b', 'c']) {puts 'specific_action'}
+			indirect_action = actions.define(['**']) {puts 'indirect_action'}
+			indirect_named_action = actions.define(['**', 'r']) {puts 'indirect_named_action'}
+			
+			expect(specific_action).to_not be == indirect_action
+			expect(indirect_action).to_not be == indirect_named_action
+			
+			expect(actions.select(['a', 'b', 'c'])).to be_include(specific_action)
+			expect(actions.select(['q'])).to be_include(indirect_action)
+			
+			expect(actions.select(['q', 'r'])).to be_include(indirect_named_action)
+			expect(actions.select(['q', 'r', 's'])).to be == [indirect_action]
+		end
+	end
+	
 	APP = lambda {|env| [404, [], []]}
 	
 	class TestController < Utopia::Middleware::Controller::Base
-		def direct?(path)
-			true
-		end
-		
-		def on_success(path, request)
+		on 'success' do
 			success!
 		end
 		
-		def on_failure(path, request)
+		on :failure do
 			fail!
 		end
 		
-		def on_variable(path, request)
+		on :variable do |request, path|
 			@variable = :value
+		end
+		
+		def self.uri_path
+			Utopia::Path["/"]
+		end
+	end
+	
+	class TestIndirectController < Utopia::Middleware::Controller::Base
+		on('user/update') do
+		end
+		
+		on('**/comment/post') do
 		end
 	end
 	
@@ -55,15 +82,15 @@ module Utopia::Middleware::ControllerSpec
 			variables = Utopia::Middleware::Controller::Variables.new
 			request = Rack::Request.new("utopia.controller" => variables)
 			middleware = MockControllerMiddleware.new
-			controller = TestController.new(middleware)
+			controller = TestController.new
 		
-			result = controller.process!(Utopia::Path["/success"], request)
+			result = controller.process!(request, Utopia::Path["/success"])
 			expect(result).to be == [200, {}, []]
 		
-			result = controller.process!(Utopia::Path["/failure"], request)
+			result = controller.process!(request, Utopia::Path["/failure"])
 			expect(result).to be == [400, {}, ["Bad Request"]]
 		
-			result = controller.process!(Utopia::Path["/variable"], request)
+			result = controller.process!(request, Utopia::Path["/variable"])
 			expect(variables.to_hash).to be == {"variable"=>:value}
 		end
 	end

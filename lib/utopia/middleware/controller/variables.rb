@@ -1,4 +1,4 @@
-# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2014, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,29 +18,50 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'utopia/path'
+module Utopia
+	module Middleware
+		class Controller
+			class Variables
+				def initialize
+					@controllers = []
+				end
 
-module Utopia::PathSpec
-	describe Utopia::Path do
-		it "should concatenate absolute paths" do
-			root = Utopia::Path["/"]
-			
-			expect(root).to be_absolute
-			expect(root + Utopia::Path["foo/bar"]).to be == Utopia::Path["/foo/bar"]
-		end
-		
-		it "should compute all descendant paths" do
-			root = Utopia::Path["/foo/bar"]
-			
-			descendants = root.descend.to_a
-			
-			expect(descendants[0].components).to be == [""]
-			expect(descendants[1].components).to be == ["", "foo"]
-			expect(descendants[2].components).to be == ["", "foo", "bar"]
-			
-			ascendants = root.ascend.to_a
-			
-			expect(descendants.reverse).to be == ascendants
+				def << controller
+					@controllers << controller
+				end
+
+				def fetch(key)
+					@controllers.reverse_each do |controller|
+						if controller.instance_variables.include?(key)
+							return controller.instance_variable_get(key)
+						end
+					end
+					
+					if block_given?
+						yield key
+					else
+						raise KeyError.new(key)
+					end
+				end
+
+				def to_hash
+					attributes = {}
+
+					@controllers.each do |controller|
+						controller.instance_variables.each do |name|
+							key = name[1..-1]
+							
+							attributes[key] = controller.instance_variable_get(name)
+						end
+					end
+
+					return attributes
+				end
+
+				def [] key
+					fetch("@#{key}".to_sym) { nil }
+				end
+			end
 		end
 	end
 end

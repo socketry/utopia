@@ -55,6 +55,8 @@ module Utopia
 				else
 					return Path.new(path.split(SEPARATOR))
 				end
+			when Symbol
+				return Path.new([path])
 			end
 		end
 
@@ -84,12 +86,16 @@ module Utopia
 			end
 		end
 
-		def to_s
+		def to_str
 			if @components == [""]
 				SEPARATOR
 			else
 				@components.join(SEPARATOR)
 			end
+		end
+
+		def to_s
+			to_str
 		end
 
 		def join(other)
@@ -168,21 +174,30 @@ module Utopia
 			components.join(File::SEPARATOR)
 		end
 
+		def descend(&block)
+			return to_enum(:descend) unless block_given?
+			
+			parent_path = []
+			
+			components.each do |component|
+				parent_path << component
+				
+				yield self.class.new(parent_path)
+			end
+		end
+
 		def ascend(&block)
-			paths = []
+			return to_enum(:ascend) unless block_given?
 			
 			next_parent = self
-
+			
 			begin
 				parent = next_parent
 				
-				yield parent if block_given?
-				paths << parent
+				yield parent
 				
 				next_parent = parent.dirname
 			end until next_parent.eql?(parent)
-			
-			return paths
 		end
 
 		def split(at)
