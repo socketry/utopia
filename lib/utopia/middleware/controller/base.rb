@@ -51,6 +51,10 @@ module Utopia
 					end
 					
 					def on(path, options = {}, &block)
+						if Symbol === path
+							path = ['**', path]
+						end
+						
 						actions.define(Path[path].components, options, &block)
 					end
 					
@@ -66,11 +70,12 @@ module Utopia
 					end
 				end
 				
+				# Given a path, look up all matched actions.
 				def lookup(path)
 					self.class.lookup(path)
 				end
 				
-				# Given a request, call an associated action if one exists.
+				# Given a request, call associated actions if at least one exists.
 				def passthrough(request, path)
 					actions = lookup(path)
 					
@@ -93,6 +98,13 @@ module Utopia
 					end
 					
 					return nil
+				end
+
+				# Copy the instance variables from the previous controller to the next controller (usually only a few). This allows controllers to share effectively the same instance variables while still being separate classes/instances.
+				def copy_instance_variables(from)
+					from.instance_variables.each do |name|
+						instance_variable_set(name, from.instance_variable_get(name))
+					end
 				end
 
 				def call(env)

@@ -98,6 +98,10 @@ module Utopia
 			to_str
 		end
 
+		def [] index
+			@components[index]
+		end
+
 		def join(other)
 			Path.new(@components + other).simplify
 		end

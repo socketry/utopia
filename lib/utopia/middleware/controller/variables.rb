@@ -27,7 +27,12 @@ module Utopia
 				end
 
 				def << controller
+					top = @controllers.last
+					
 					@controllers << controller
+					
+					# This ensures that most variables will be at the top and controllers can naturally interactive with instance variables.
+					controller.copy_instance_variables(top) if top
 				end
 
 				def fetch(key)
