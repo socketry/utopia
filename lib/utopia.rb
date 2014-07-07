@@ -20,5 +20,12 @@
 
 require 'utopia/version'
 
-module Utopia
-end
+require 'utopia/middleware/content'
+require 'utopia/middleware/controller'
+require 'utopia/middleware/directory_index'
+require 'utopia/middleware/exception_handler'
+require 'utopia/middleware/localization'
+require 'utopia/middleware/mail_exceptions'
+require 'utopia/middleware/redirector'
+require 'utopia/middleware/requester'
+require 'utopia/middleware/static'

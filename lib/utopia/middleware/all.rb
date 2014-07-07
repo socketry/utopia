@@ -20,6 +20,8 @@
 
 require 'pathname'
 
+warn "require 'utopia/middleware/all' is deprecated. Require 'utopia' instead."
+
 Pathname.new(__FILE__).dirname.entries.each do |path|
 	next unless /\.rb$/ === path.to_s
 

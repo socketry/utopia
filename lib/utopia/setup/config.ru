@@ -3,7 +3,7 @@
 UTOPIA_ENV = (ENV['UTOPIA_ENV'] || ENV['RACK_ENV'] || :development).to_sym
 $LOAD_PATH << File.join(File.dirname(__FILE__), "lib")
 
-require 'utopia/middleware/all'
+require 'utopia'
 
 # Utopia relies heavily on a local cache:
 require 'rack/cache'
