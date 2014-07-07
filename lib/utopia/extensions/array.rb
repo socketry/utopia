@@ -19,23 +19,11 @@
 # THE SOFTWARE.
 
 class Array
-	def find_index(&block)
-		each_with_index do |item, index|
-			if yield(item)
-				return index
-			end
-		end
-		
-		return nil
-	end
-	
 	def split_at(&block)
-		index = find_index(&block)
-		
-		if index
-			return [self[0...index], self[index], self[index+1..-1]]
+		if middle = index(&block)
+			[self[0...middle], self[middle], self[middle+1..-1]]
+		else
+			[[], nil, []]
 		end
-		
-		return [[], nil, []]
 	end
 end

@@ -23,60 +23,25 @@
 
 require 'date'
 
-class Date
-	alias_method :old_compare, :<=>
-	
-	def <=>(other)
-		if other.class == Date
-			old_compare(other)
-		else
-			if Time === other
-				other = other.to_datetime
-			end
-			
-		 	if DateTime === other
-				result = old_compare(other.to_date)
-				if result == 0 && other.day_fraction > 0
-					-1
-				else
-					result
-				end
-			end
-		end
-	end
-end
-
 class Time
 	alias_method :old_compare, :<=>
 	
 	def <=>(other)
-		if other.class == Date
-			(other <=> self) * -1
-		elsif Time === other
-			old_compare(other)
+		if Date === other or DateTime === other
+			self.to_datetime <=> other
 		else
-			if DateTime === other
-				other = other.to_time
-			end
-			
 			old_compare(other)
 		end
 	end
 end
 
-class DateTime
+class Date
 	alias_method :old_compare, :<=>
 	
 	def <=>(other)
-		if other.class == Date
-			(other <=> self) * -1
-		elsif DateTime === other
-			old_compare(other)
+		if Time === other
+			self.to_datetime <=> other.to_datetime
 		else
-			if Time === other
-				other = other.to_datetime
-			end
-			
 			old_compare(other)
 		end
 	end

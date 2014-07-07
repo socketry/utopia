@@ -22,23 +22,18 @@ require 'rack'
 
 class Rack::Request
 	def url_with_path(path = "")
-		url = scheme + "://"
-		url << host
-
-		if scheme == "https" && port != 443 || scheme == "http" && port != 80
-			url << ":#{port}"
-		end
-
-		url << path
+		base_url << path
 	end
 end
 
 class Rack::Response
+	# Specifies that the content shouldn't be cached. Overrides `cache!` if already called.
 	def do_not_cache!
 		self["Cache-Control"] = "no-cache, must-revalidate"
 		self["Expires"] = Time.now.httpdate
 	end
 	
+	# Specify that the content should be cached.
 	def cache!(duration = 3600)
 		unless (self["Cache-Control"] || "").match(/no-cache/)
 			self["Cache-Control"] = "public, max-age=#{duration}"
@@ -46,6 +41,7 @@ class Rack::Response
 		end
 	end
 	
+	# Specify the content type of the response data.
 	def content_type!(value)
 		self["Content-Type"] = value.to_s
 	end

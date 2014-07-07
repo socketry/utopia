@@ -18,23 +18,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-class String
-	HTML_ESCAPE = {"&" => "&amp;", "<" => "&lt;", ">" => "&gt;", "\"" => "&quot;"}
-	HTML_ESCAPE_PATTERN = Regexp.new("[" + Regexp.quote(HTML_ESCAPE.keys.join) + "]")
+require 'trenni/strings'
 
+class String
 	def to_html
-		gsub(HTML_ESCAPE_PATTERN){|c| HTML_ESCAPE[c]}
+		Trenni::Strings::to_html(self)
 	end
 
 	def to_quoted_string
-		'"' + self.gsub('"', '\\"').gsub(/\r/, "\\r").gsub(/\n/, "\\n") + '"'
+		Trenni::Strings::to_quoted_string(self)
 	end
 
 	def to_title
-		self.gsub(/(^|[ \-_])(.)/){" " + $2.upcase}.strip
+		Trenni::Strings::to_title(self)
 	end
 
 	def to_snake
-		self.gsub("::", "").gsub(/([A-Z]+)/){"_" + $1.downcase}.sub(/^_+/, "")
+		Trenni::Strings::to_snake(self)
 	end
 end
