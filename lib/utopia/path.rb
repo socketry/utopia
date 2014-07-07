@@ -19,7 +19,6 @@
 # THE SOFTWARE.
 
 module Utopia
-	
 	class Path
 		SEPARATOR = "/"
 
@@ -266,5 +265,4 @@ module Utopia
 			return Path.locale(last, extension)
 		end
 	end
-	
 end

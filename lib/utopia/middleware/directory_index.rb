@@ -23,7 +23,6 @@ require 'utopia/path'
 
 module Utopia
 	module Middleware
-
 		class DirectoryIndex
 			def initialize(app, options = {})
 				@app = app
@@ -52,6 +51,5 @@ module Utopia
 				end
 			end
 		end
-
 	end
 end
