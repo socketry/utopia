@@ -16,7 +16,6 @@ else
 end
 
 use Rack::ContentLength
-use Utopia::Middleware::Logger
 
 use Utopia::Middleware::Redirector, {
 	:strings => {
