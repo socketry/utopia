@@ -48,6 +48,12 @@ module Utopia
 				protected
 				
 				def append(path, index, actions = [])
+					# ** is greedy, it always matches if possible:
+					if match_all = self[:**]
+						# Match all remaining input:
+						actions << match_all if match_all.callback?
+					end
+					
 					if index < path.size
 						name = path[index].to_sym
 					
@@ -59,11 +65,6 @@ module Utopia
 						if match_one = self[:*]
 							# Match one input:
 							match_one.append(path, index+1, actions)
-						end
-						
-						if match_all = self[:**]
-							# Match all remaining input:
-							actions << match_all if match_all.callback?
 						end
 					else
 						# Got to end, matched completely:

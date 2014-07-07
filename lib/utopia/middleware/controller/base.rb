@@ -170,12 +170,12 @@ module Utopia
 						body = [Utopia::HTTP::STATUS_DESCRIPTIONS[status] || "Status #{status}"]
 					end
 
-					# Utopia::LOG.debug([status, headers, body].inspect)
 					return [status, headers, body]
 				end
 				
 				# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid rack response if the controller can do so.
 				def process!(request, path)
+					# puts "process! #{request} #{path}"
 					passthrough(request, path)
 				end
 			end
