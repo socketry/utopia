@@ -372,7 +372,7 @@ module Utopia
 				end
 
 				def call(transaction, state)
-					xml_data = @controller.fetch_xml(@file_path).result(transaction.binding)
+					xml_data = @controller.fetch_xml(@file_path).evaluate(transaction)
 					
 					transaction.parse_xml(xml_data)
 				end
@@ -382,7 +382,6 @@ module Utopia
 					response.write(transaction.render_node(self, attributes))
 				end
 			end
-			
 		end
 	end
 end
