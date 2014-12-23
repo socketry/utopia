@@ -20,11 +20,10 @@
 
 require 'set'
 
-require 'utopia/middleware/content/processor'
-require 'utopia/link'
+require_relative 'processor'
+require_relative 'link'
 
 module Utopia
-
 	module Middleware
 		class Content
 			class UnbalancedTagError < StandardError
@@ -36,8 +35,25 @@ module Utopia
 				
 				attr :tag
 			end
-
+			
+			# A single request through content middleware.
 			class Transaction
+				# Provides a well defined interface for the evaluation of view code.
+				class View
+					def initialize(transaction)
+						@view_transaction = transaction
+					end
+					
+					def request
+						@view_transaction.request
+					end
+					
+					def response
+						@view_transaction.response
+					end
+				end
+				
+				# The state of a single tag being rendered.
 				class State
 					def initialize(tag, node)
 						@node = node
@@ -130,15 +146,14 @@ module Utopia
 				end
 
 				def binding
-					super
+					@view ||= View.new(self)
+					
+					@view.binding
 				end
 
 				def parse_xml(xml_data)
 					Processor.parse_xml(xml_data, self)
 				end
-
-				attr :request
-				attr :response
 
 				# Begin tags represents a list from outer to inner most tag.
 				# At any point in parsing xml, begin_tags is a list of the inner most tag,

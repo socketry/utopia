@@ -18,22 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'trenni/strings'
+require_relative "../tags"
 
-class String
-	def to_html
-		Trenni::Strings::to_html(self)
-	end
+Utopia::Middleware::Content::Tags.create("env") do |transaction, state|
+	only = state[:only].split(",").collect(&:to_sym) rescue []
 
-	def to_quoted_string
-		Trenni::Strings::to_quoted_string(self)
-	end
-
-	def to_title
-		Trenni::Strings::to_title(self)
-	end
-
-	def to_snake
-		Trenni::Strings::to_snake(self)
+	if defined?(UTOPIA_ENV) and only.include?(UTOPIA_ENV)
+		transaction.parse_xml(state.content)
 	end
 end

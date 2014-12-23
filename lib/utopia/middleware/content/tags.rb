@@ -18,12 +18,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'utopia/tags'
-
-Utopia::Tags.create("env") do |transaction, state|
-	only = state[:only].split(",").collect(&:to_sym) rescue []
-
-	if defined?(UTOPIA_ENV) && only.include?(UTOPIA_ENV)
-		transaction.parse_xml(state.content)
+module Utopia
+	module Middleware
+		class Content
+			module Tags
+				@@all = {}
+				
+				def self.register(name, tag)
+					@@all[name] = tag
+				end
+				
+				def self.create(name, &block)
+					@@all[name] = block
+				end
+				
+				def self.all
+					@@all
+				end
+			end
+		end
 	end
 end

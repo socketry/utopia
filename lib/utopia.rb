@@ -18,14 +18,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'utopia/version'
+require_relative 'utopia/version'
 
-require 'utopia/middleware/content'
-require 'utopia/middleware/controller'
-require 'utopia/middleware/directory_index'
-require 'utopia/middleware/exception_handler'
-require 'utopia/middleware/localization'
-require 'utopia/middleware/mail_exceptions'
-require 'utopia/middleware/redirector'
-require 'utopia/middleware/requester'
-require 'utopia/middleware/static'
+require_relative 'utopia/middleware/content'
+require_relative 'utopia/middleware/controller'
+require_relative 'utopia/middleware/directory_index'
+require_relative 'utopia/middleware/exception_handler'
+require_relative 'utopia/middleware/localization'
+require_relative 'utopia/middleware/mail_exceptions'
+require_relative 'utopia/middleware/redirector'
+require_relative 'utopia/middleware/requester'
+require_relative 'utopia/middleware/static'

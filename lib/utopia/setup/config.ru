@@ -5,6 +5,8 @@ $LOAD_PATH << File.join(File.dirname(__FILE__), "lib")
 
 require 'utopia'
 
+require 'utopia/tags'
+
 # Utopia relies heavily on a local cache:
 require 'rack/cache'
 

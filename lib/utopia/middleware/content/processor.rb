@@ -18,9 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'utopia/tag'
 require 'trenni/parser'
 require 'trenni/strings'
+
+require_relative 'tag'
 
 module Utopia
 	module Middleware
@@ -87,7 +88,7 @@ module Utopia
 					else
 						current_tag, current_position = @stack.pop
 				
-						if (tag_name != current_tag.name)
+						if tag_name != current_tag.name
 							raise UnbalancedTagError.new(@scanner, current_position, current_tag.name, tag_name)
 						end
 				

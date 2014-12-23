@@ -18,18 +18,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'utopia/middleware'
-require 'utopia/link'
-require 'utopia/path'
-require 'utopia/tags'
+require_relative '../middleware'
+require_relative '../path'
 
-require 'utopia/middleware/content/node'
-require 'utopia/middleware/content/processor'
+require_relative 'content/tags'
+require_relative 'content/node'
+require_relative 'content/processor'
+
 require 'trenni/template'
 
 module Utopia
 	module Middleware
-
 		class Content
 			def initialize(app, options = {})
 				@app = app
@@ -40,7 +39,7 @@ module Utopia
 				@nodes = {}
 				@files = nil
 
-				@tags = options[:tags] || {}
+				@tags = options[:tags] || Tags::all
 			end
 
 			attr :root
@@ -62,8 +61,6 @@ module Utopia
 			def lookup_tag(name, parent_path)
 				if @tags.key? name
 					return @tags[name]
-				elsif Utopia::Tags.all.key? name
-					return Utopia::Tags.all[name]
 				end
 				
 				if String === name && name.index("/")

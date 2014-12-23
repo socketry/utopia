@@ -18,20 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-module Utopia
-	module Tags
-		@@all = {}
-		
-		def self.register(name, tag)
-			@@all[name] = tag
-		end
-		
-		def self.create(name, &block)
-			@@all[name] = block
-		end
-		
-		def self.all
-			@@all
-		end
-	end
+require_relative "../tags"
+
+Utopia::Middleware::Content::Tags.create("deferred") do |transaction, state|
+	id = state[:id].to_i
+	
+	procedure = transaction.parent.deferred[id]
+	
+	procedure.call(transaction, state)
 end

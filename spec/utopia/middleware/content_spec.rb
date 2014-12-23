@@ -43,7 +43,7 @@ module Utopia::Middleware::ContentSpec
 			
 			processor.parse %Q{<foo></foo>}
 			
-			foo_tag = Utopia::Tag.new("foo")
+			foo_tag = Utopia::Middleware::Content::Tag.new("foo")
 			expected_events = [
 				[:tag_begin, foo_tag],
 				[:tag_end, foo_tag],
@@ -58,7 +58,7 @@ module Utopia::Middleware::ContentSpec
 			
 			processor.parse %Q{<foo>Bob &amp; Barley<!-- Comment --><![CDATA[Hello & World]]></foo>}
 			
-			foo_tag = Utopia::Tag.new("foo")
+			foo_tag = Utopia::Middleware::Content::Tag.new("foo")
 			expected_events = [
 				[:tag_begin, foo_tag],
 				[:cdata, "Bob &amp; Barley"],

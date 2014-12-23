@@ -18,9 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'utopia/tags'
+require_relative "../tags"
 
-Utopia::Tags.create("node") do |transaction, state|
+Utopia::Middleware::Content::Tags.create("node") do |transaction, state|
 	path = Utopia::Path.create(state[:path])
 	
 	node = transaction.lookup_node(path)

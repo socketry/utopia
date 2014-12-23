@@ -18,12 +18,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'utopia/tags'
+require_relative "../tags"
 
-Utopia::Tags.create("deferred") do |transaction, state|
-	id = state[:id].to_i
+class Utopia::Middleware::Content::Tags::Override
+	def self.tag_begin(transaction, state)
+		state.overrides[state[:name]] = state[:with]
+	end
 	
-	procedure = transaction.parent.deferred[id]
-	
-	procedure.call(transaction, state)
+	def self.call(transaction, state)
+		transaction.parse_xml(state.content)
+	end
 end
+
+Utopia::Middleware::Content::Tags.register("override", Utopia::Middleware::Content::Tags::Override)

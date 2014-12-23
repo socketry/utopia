@@ -19,7 +19,8 @@
 # THE SOFTWARE.
 
 require 'utopia/middleware'
-require 'utopia/extensions/string'
+
+require 'trenni/strings'
 
 module Utopia
 	module Middleware
@@ -30,13 +31,13 @@ module Utopia
 				@location = location
 			end
 
-			def fatal_error(env, ex)
+			def fatal_error(env, exception)
 				body = StringIO.new
 
 				body.puts "<!DOCTYPE html><html><head><title>Fatal Error</title></head><body>"
 				body.puts "<h1>Fatal Error</h1>"
-				body.puts "<p>While requesting resource #{env['PATH_INFO'].to_html}, a fatal error occurred.</p>"
-				body.puts "<blockquote><strong>#{ex.class.name.to_html}</strong>: #{ex.to_s.to_html}</blockquote>"
+				body.puts "<p>While requesting resource #{Trenni::Strings::to_html env['PATH_INFO']}, a fatal error occurred.</p>"
+				body.puts "<blockquote><strong>#{Trenni::Strings::to_html exception.class.name}</strong>: #{Trenni::Strings::to_html exception.to_s}</blockquote>"
 				body.puts "<p>There is nothing more we can do to fix the problem at this point.</p>"
 				body.puts "<p>We apologize for the inconvenience.</p>"
 				body.puts "</body></html>"
@@ -52,26 +53,26 @@ module Utopia
 			def call(env)
 				begin
 					return @app.call(env)
-				rescue Exception => ex
-					log = ::Logger.new(env['rack.errors'])
+				rescue Exception => exception
+					# An error has occurred, log it:
+					log = ::Logger.new(env['rack.errors'] || $stderr)
 					
-					log.error "Exception #{ex.to_s.dump}!"
+					log.error "Exception #{exception.to_s.dump}!"
 					
 					ex.backtrace.each do |bt|
 						log.error bt
 					end
 					
+					# If the error occurred while accessing the error handler, we finish with a fatal error:
 					if env['PATH_INFO'] == @location
 						return fatal_error(env, ex)
 					else
-
-						# If redirection fails
+						# If redirection fails, we also finish with a fatal error:
 						begin
 							return redirect(env, ex)
 						rescue
 							return fatal_error(env, ex)
 						end
-
 					end
 				end
 			end

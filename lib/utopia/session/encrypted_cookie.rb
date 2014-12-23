@@ -23,7 +23,6 @@ require 'digest/sha2'
 
 module Utopia
 	module Session
-
 		class EncryptedCookie
 			RACK_SESSION = "rack.session"
 			RACK_SESSION_OPTIONS = "rack.session.options"

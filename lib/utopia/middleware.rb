@@ -21,9 +21,8 @@
 require 'pathname'
 require 'logger'
 
-require 'utopia/http'
-
-require 'utopia/extensions/rack'
+require_relative 'http'
+require_relative 'extensions/rack'
 
 module Utopia
 	LOG = Logger.new($stderr)
@@ -44,7 +43,3 @@ module Utopia
 		end
 	end
 end
-
-require 'utopia/path'
-require 'utopia/tag'
-
