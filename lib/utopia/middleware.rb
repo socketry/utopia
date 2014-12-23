@@ -27,7 +27,6 @@ require 'utopia/extensions/rack'
 
 module Utopia
 	LOG = Logger.new($stderr)
-	LOG.level = Logger::DEBUG
 	
 	module Middleware
 		def self.default_root(subdir = "pages")
