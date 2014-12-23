@@ -150,8 +150,7 @@ module Utopia
 						size = @range.end - @range.begin + 1
 					end
 
-					# LOG.info("Response for #{self.full_path}: #{response.inspect}")
-					LOG.info "Serving file #{full_path.inspect}, range #{@range.inspect}"
+					# LOG.debug {"Serving file #{full_path.inspect}, range #{@range.inspect}"}
 
 					return response
 				end
