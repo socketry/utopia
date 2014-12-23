@@ -217,7 +217,7 @@ module Utopia
 					current.cdata(text)
 				end
 
-				def deferred_tag(*args, &block)
+				def partial(*args, &block)
 					if block_given?
 						current.defer(&block)
 					else
@@ -226,6 +226,8 @@ module Utopia
 						end
 					end
 				end
+
+				alias deferred_tag partial
 
 				def tag_end(tag = nil)
 					top = current
