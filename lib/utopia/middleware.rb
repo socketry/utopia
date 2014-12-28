@@ -28,8 +28,8 @@ module Utopia
 	LOG = Logger.new($stderr)
 	
 	module Middleware
-		def self.default_root(subdir = "pages")
-			Pathname.new(Dir.pwd).join(subdir).cleanpath.to_s
+		def self.default_root(subdirectory = "pages")
+			File.cleanpath(File.join(Dir.pwd, subdirectory))
 		end
 		
 		def self.failure(status = 500, message = "Non-specific error")
