@@ -29,7 +29,7 @@ module Utopia::SessionSpec
 	describe Utopia::Session do
 		include Rack::Test::Methods
 		
-		let(:app) {Rack::Builder.parse_file('session_spec.ru').first}
+		let(:app) {Rack::Builder.parse_file(File.join(__dir__, 'session_spec.ru')).first}
 		
 		it "shouldn't commit session values unless required" do
 			# This URL doesn't update the session:
