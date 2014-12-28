@@ -49,9 +49,7 @@ module Utopia::Middleware::ControllerSpec
 			expect(actions.select(['r'])).to be_include greedy_action
 		end
 	end
-	
-	APP = lambda {|env| [404, [], []]}
-	
+		
 	class TestController < Utopia::Middleware::Controller::Base
 		on 'success' do
 			success!
