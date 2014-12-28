@@ -21,18 +21,19 @@
 require 'openssl'
 require 'digest/sha2'
 
+require_relative 'lazy_hash'
+require_relative '../session'
+
 module Utopia
 	module Session
 		class EncryptedCookie
-			RACK_SESSION = "rack.session"
-			RACK_SESSION_OPTIONS = "rack.session.options"
-
-			def initialize(app, options={})
+			def initialize(app, options = {})
 				@app = app
-				@cookie = options[:cookie] || (RACK_SESSION + ".encrypted")
-				@secret = Digest::SHA256.digest(options[:secret])
+				@cookie_name = options.delete(:cookie_name) || (RACK_SESSION + ".encrypted")
 
-				@default_options = {
+				@secret = options.delete(:secret)
+
+				@options = {
 					:domain => nil,
 					:path => "/",
 					:expires_after => nil
@@ -40,80 +41,77 @@ module Utopia
 			end
 
 			def call(env)
-				original_session = load_session(env).dup
+				session_hash = prepare_session(env)
 
 				status, headers, body = @app.call(env)
 
-				if original_session != env[RACK_SESSION]
-					commit_session(env, status, headers, body)
+				if session_hash.changed?
+					commit(session_hash.values, headers)
 				end
 
 				return [status, headers, body]
 			end
-
-			private
-
-			def load_session(env)
-				session = {}
-
-				request = Rack::Request.new(env)
-				data = request.cookies[@cookie]
-
-				if data
-					session = decrypt(data) rescue session
+			
+			protected
+			
+			def prepare_session(env)
+				env[RACK_SESSION] = LazyHash.new do
+					self.load_session_values(env)
 				end
-
-				env[RACK_SESSION] = session
-				env[RACK_SESSION_OPTIONS] = @default_options.dup
-
-				return session
 			end
 			
-			def commit_session(env, status, headers, body)
-				session = env[RACK_SESSION]
-
-				data = encrypt(session)
-
-				if data.size > (1024 * 4)
-					env["rack.errors"].puts "Error: #{self.class.name} data exceeds 4K. Content Dropped!"
-				else
-					options = env[RACK_SESSION_OPTIONS]
-					cookie = {:value => data}
-					cookie[:expires] = Time.now + options[:expires_after] unless options[:expires_after].nil?
-
-					Rack::Utils.set_cookie_header!(headers, @cookie, cookie.merge(options))
+			# Load session
+			def load_session_values(env)
+				values = {}
+				
+				request = Rack::Request.new(env)
+				data = request.cookies[@cookie_name]
+				
+				if data
+					values = decrypt(data) rescue values
 				end
+				
+				return values
+			end
+			
+			def commit(values, headers)
+				data = encrypt(values)
+				
+				cookie = {:value => data}
+				
+				cookie[:expires] = Time.now + @options[:expires_after] unless @options[:expires_after].nil?
+				
+				Rack::Utils.set_cookie_header!(headers, @cookie_name, cookie.merge(@options))
 			end
 			
 			def encrypt(hash)
 				c = OpenSSL::Cipher::Cipher.new("aes-256-cbc")
 				c.encrypt
-
+				
 				# your pass is what is used to encrypt/decrypt
 				c.key = @secret
 				c.iv = iv = c.random_iv
-
+				
 				e = c.update(Marshal.dump(hash))
 				e << c.final
-
+				
 				return [iv, e].pack("m16m*")
 			end
-
+			
 			def decrypt(data)
 				iv, e = data.unpack("m16m*")
-
+				
 				c = OpenSSL::Cipher::Cipher.new("aes-256-cbc")
 				c.decrypt
-
+				
 				c.key = @secret
 				c.iv = iv
-
+				
 				d = c.update(e)
 				d << c.final
-
+				
 				return Marshal.load(d)
 			end
 		end
-		
 	end
 end
