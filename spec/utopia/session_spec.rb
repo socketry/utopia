@@ -41,5 +41,13 @@ module Utopia::SessionSpec
 			expect(last_response.header).to_not be == {}
 			expect(last_response.header).to be_include 'Set-Cookie'
 		end
+		
+		it "should set and get values correctly" do
+			get "/session-set?key=foo&value=bar"
+			expect(last_response.header).to be_include 'Set-Cookie'
+			
+			get "/session-get?key=foo"
+			expect(last_response.body).to be == "bar"
+		end
 	end
 end
