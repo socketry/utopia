@@ -1,5 +1,5 @@
 #!/usr/bin/env rspec
-# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2014, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,32 +22,22 @@
 require 'rack'
 require 'rack/test'
 
-require 'utopia/session'
-require 'utopia/session/encrypted_cookie'
+require 'utopia/middleware/static'
 
-module Utopia::SessionSpec
-	describe Utopia::Session do
+module Utopia::Middleware::StaticSpec
+	describe Utopia::Middleware::Static do
 		include Rack::Test::Methods
 		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('../session_spec.ru', __FILE__)).first}
+		let(:app) {Rack::Builder.parse_file(File.expand_path('../static_spec.ru', __FILE__)).first}
 		
-		it "shouldn't commit session values unless required" do
-			# This URL doesn't update the session:
-			get "/"
-			expect(last_response.header).to be == {}
-			
-			# This URL updates the session:
-			get "/login"
-			expect(last_response.header).to_not be == {}
-			expect(last_response.header).to be_include 'Set-Cookie'
+		it "should give the correct mime type" do
+			get "/test.txt"
+			expect(last_response.header['Content-Type']).to be == 'text/plain'
 		end
 		
-		it "should set and get values correctly" do
-			get "/session-set?key=foo&value=bar"
-			expect(last_response.header).to be_include 'Set-Cookie'
-			
-			get "/session-get?key=foo"
-			expect(last_response.body).to be == "bar"
+		it "should redirect when requesting relative resources" do
+			get "/@rel@/test.txt"
+			expect(last_response.header['Location']).to be == '/test.txt'
 		end
 	end
 end

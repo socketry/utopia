@@ -73,7 +73,7 @@ module Utopia::Middleware::ContentSpec
 	
 	describe Utopia::Middleware::Content do
 		it "Should parse file and expand variables" do
-			root = File.expand_path("../content_root", __FILE__)
+			root = File.expand_path("../pages", __FILE__)
 			content = Utopia::Middleware::Content.new(APP, :root => root)
 		
 			path = Utopia::Path.create('/index')

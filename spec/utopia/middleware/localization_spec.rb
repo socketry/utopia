@@ -1,5 +1,5 @@
 #!/usr/bin/env rspec
-# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2014, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,32 +22,26 @@
 require 'rack'
 require 'rack/test'
 
-require 'utopia/session'
-require 'utopia/session/encrypted_cookie'
+require 'utopia/middleware/static'
+require 'utopia/middleware/content'
+require 'utopia/middleware/localization'
 
-module Utopia::SessionSpec
-	describe Utopia::Session do
+module Utopia::Middleware::StaticSpec
+	describe Utopia::Middleware::Static do
 		include Rack::Test::Methods
 		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('../session_spec.ru', __FILE__)).first}
+		let(:app) {Rack::Builder.parse_file(File.expand_path('../localization_spec.ru', __FILE__)).first}
 		
-		it "shouldn't commit session values unless required" do
-			# This URL doesn't update the session:
-			get "/"
-			expect(last_response.header).to be == {}
+		it "should redirect to default localization" do
+			get '/localized.txt'
 			
-			# This URL updates the session:
-			get "/login"
-			expect(last_response.header).to_not be == {}
-			expect(last_response.header).to be_include 'Set-Cookie'
+			expect(last_response.header['Location']).to be == '/localized.en.txt'
 		end
 		
-		it "should set and get values correctly" do
-			get "/session-set?key=foo&value=bar"
-			expect(last_response.header).to be_include 'Set-Cookie'
+		it "should redirect to referrer localization" do
+			get '/localized.txt', {}, 'HTTP_REFERER' => 'index.jp'
 			
-			get "/session-get?key=foo"
-			expect(last_response.body).to be == "bar"
+			expect(last_response.header['Location']).to be == '/localized.jp.txt'
 		end
 	end
 end
