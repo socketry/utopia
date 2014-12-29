@@ -28,7 +28,6 @@ use Utopia::Middleware::Redirector, {
 	}
 }
 
-use Utopia::Middleware::Requester
 use Utopia::Middleware::DirectoryIndex
 use Utopia::Middleware::Controller
 

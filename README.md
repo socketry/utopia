@@ -8,9 +8,7 @@ structure representing the website.
 Utopia builds on top of Rack with the following middleware:
 
 * `Utopia::Middleware::Static`: Serve static files with recursive lookup
-* `Utopia::Middleware::Requester`: Allow nesting of virtual requests
 * `Utopia::Middleware::Redirector`: Redirect URL patterns and status codes
-* `Utopia::Middleware::Logger`: Advanced rotating access log
 * `Utopia::Middleware::Localization`: Non-intrusive localization of resources
 * `Utopia::Middleware::DirectoryIndex`: Redirect directory requests to specific files
 * `Utopia::Middleware::Controller`: Dynamic behaviour with recursive execution
