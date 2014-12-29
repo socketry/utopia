@@ -24,7 +24,7 @@ require 'utopia/middleware/localization/name'
 module Rack
 	class Request
 		def current_locale
-			env["utopia.current_locale"]
+			env[Utopia::Middleware::Localization::CURRENT_LOCALE_KEY]
 		end
 		
 		def all_locales
@@ -32,20 +32,22 @@ module Rack
 		end
 		
 		def localization
-			env["utopia.localization"]
+			env[Utopia::Middleware::Localization::LOCALIZATION_KEY]
 		end
 	end
 end
 
 module Utopia
 	module Middleware
-
 		class Localization
+			LOCALIZATION_KEY = 'utopia.localization'.freeze
+			CURRENT_LOCALE_KEY = 'utopia.current_locale'.freeze
+			
 			def initialize(app, options = {})
 				@app = app
 
 				@default_locale = options[:default] || "en"
-				@all_locales = options[:all] || ["en"]
+				@all_locales = options[:locales] || ["en"]
 				
 				@nonlocalized = options[:nonlocalized] || []
 			end
@@ -96,7 +98,7 @@ module Utopia
 				
 				# Otherwise, we need to check if the resource has been localized based on the request and referer parameters.
 				path = Path.create(env["PATH_INFO"])
-				env["utopia.localization"] = self
+				env[LOCALIZATION_KEY] = self
 
 				referer_locale = named_locale(env['HTTP_REFERER'])
 				request_locale = named_locale(path.basename)
@@ -104,10 +106,10 @@ module Utopia
 
 				response = nil
 				if request_locale
-					env["utopia.current_locale"] = request_locale
+					env[CURRENT_LOCALE_KEY] = request_locale
 					resource_path, response = check_resource(resource_name, request_locale, env)
 				elsif referer_locale
-					env["utopia.current_locale"] = referer_locale
+					env[CURRENT_LOCALE_KEY] = referer_locale
 					resource_path, response = check_resource(resource_name, referer_locale, env)
 				end
 				
@@ -115,7 +117,7 @@ module Utopia
 				# or the response was 404 (i.e. no localised resource), we check for the
 				# @default_locale
 				if response == nil || response[0] >= 400
-					env["utopia.current_locale"] = @default_locale
+					env[CURRENT_LOCALE_KEY] = @default_locale
 					resource_path, response = check_resource(resource_name, @default_locale, env)
 				end
 
