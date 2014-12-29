@@ -18,8 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'utopia/middleware'
-require 'utopia/path'
+require_relative '../middleware'
 
 module Utopia
 	module Middleware

@@ -18,17 +18,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'pathname'
 require 'logger'
 
 require_relative 'http'
+require_relative 'path'
+
 require_relative 'extensions/rack'
 
 module Utopia
 	LOG = Logger.new($stderr)
 	
 	module Middleware
-		def self.default_root(subdirectory = "pages")
+		PAGES_PATH = 'pages'.freeze
+		
+		def self.default_root(subdirectory = PAGES_PATH)
 			File.expand_path(subdirectory, Dir.pwd)
 		end
 		

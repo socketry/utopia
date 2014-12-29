@@ -21,7 +21,6 @@
 require 'utopia/extensions/array'
 require 'utopia/extensions/date'
 require 'utopia/extensions/hash'
-require 'utopia/extensions/regexp'
 
 module Utopia::ExtensionsSpec
 	describe Array do
@@ -72,13 +71,6 @@ module Utopia::ExtensionsSpec
 			hash = {'a' => 1, 'b' => 2}
 			
 			expect(hash.symbolize_keys).to be == {a: 1, b: 2}
-		end
-	end
-	
-	describe Regexp do
-		it "should start with" do
-			expect(Regexp.starts_with("foobar")).to be =~ "foobarbaz"
-			expect(Regexp.starts_with("bar")).to_not be =~ "blubarbaz"
 		end
 	end
 end

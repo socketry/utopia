@@ -18,9 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'utopia/middleware'
-require 'utopia/extensions/regexp'
-require 'utopia/extensions/string'
+require_relative '../middleware'
 
 module Utopia
 	module Middleware
@@ -50,7 +48,15 @@ module Utopia
 				]
 			end
 			
+			def self.starts_with(source_root, destination_uri)
+				return [
+					/^#{Regexp.escape(string)}/,
+					destination_uri
+				]
+			end
+			
 			private
+			
 			def normalize_strings(strings)
 				normalized = {}
 				
@@ -80,6 +86,7 @@ module Utopia
 			end
 
 			public
+			
 			def initialize(app, options = {})
 				@app = app
 

@@ -5,8 +5,6 @@ $LOAD_PATH << File.join(File.dirname(__FILE__), "lib")
 
 require 'utopia'
 
-require 'utopia/tags'
-
 # Utopia relies heavily on a local cache:
 require 'rack/cache'
 
@@ -45,6 +43,7 @@ if UTOPIA_ENV == :production
 	}
 end
 
-use Utopia::Middleware::Content
+use Utopia::Middleware::Content,
+	cache_templates: (UTOPIA_ENV == production)
 
 run lambda { |env| [404, {}, []] }

@@ -35,9 +35,7 @@ module Utopia
 
 				@root = File.expand_path(options[:root] || Utopia::Middleware::default_root)
 
-				# Set to hash to enable caching
-				@nodes = {}
-				@files = nil
+				@templates = options[:cache_templates] ? {} : nil
 
 				@tags = options[:tags] || Tags::all
 			end
@@ -46,14 +44,12 @@ module Utopia
 			attr :passthrough
 
 			def fetch_xml(path)
-				read_file = lambda { Trenni::Template.load(path) }
-				
-				if @files
-					@files.fetch(path) do |key|
-						@files[key] = read_file.call
+				if @templates
+					@templates.fetch(path) do |key|
+						@templates[key] = Trenni::Template.load(path)
 					end
 				else
-					read_file.call
+					Trenni::Template.load(path)
 				end
 			end
 

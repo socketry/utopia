@@ -18,8 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'utopia/middleware'
-require 'utopia/middleware/localization/name'
+require_relative '../middleware'
+require_relative 'localization/name'
 
 module Rack
 	class Request
