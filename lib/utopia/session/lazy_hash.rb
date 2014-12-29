@@ -48,6 +48,14 @@ module Utopia
 				return value
 			end
 			
+			def delete(key)
+				load!
+				
+				@changed = true if @values.include? key
+				
+				@values.delete(key)
+			end
+			
 			def changed?
 				@changed
 			end
