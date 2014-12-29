@@ -29,7 +29,9 @@ use Utopia::Middleware::Redirector, {
 }
 
 use Utopia::Middleware::DirectoryIndex
-use Utopia::Middleware::Controller
+
+use Utopia::Middleware::Controller,
+	cache_controllers: (UTOPIA_ENV == production)
 
 # To enable full Sendfile support, please refer to the Rack::Sendfile documentation for your webserver.
 use Rack::Sendfile

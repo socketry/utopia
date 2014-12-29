@@ -42,7 +42,8 @@ module Utopia
 				@root = options[:root] || Utopia::Middleware::default_root
 
 				@controllers = {}
-				@cache_controllers = (UTOPIA_ENV == :production)
+				
+				@cache_controllers = options[:cache_controllers] || false
 			end
 			
 			attr :app
