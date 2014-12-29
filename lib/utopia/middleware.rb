@@ -29,7 +29,7 @@ module Utopia
 	
 	module Middleware
 		def self.default_root(subdirectory = "pages")
-			File.cleanpath(File.join(Dir.pwd, subdirectory))
+			File.expand_path(subdirectory, Dir.pwd)
 		end
 		
 		def self.failure(status = 500, message = "Non-specific error")
