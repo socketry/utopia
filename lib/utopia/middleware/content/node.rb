@@ -38,21 +38,6 @@ module Utopia
 			
 			# A single request through content middleware.
 			class Transaction
-				# Provides a well defined interface for the evaluation of view code.
-				class View
-					def initialize(transaction)
-						@view_transaction = transaction
-					end
-					
-					def request
-						@view_transaction.request
-					end
-					
-					def response
-						@view_transaction.response
-					end
-				end
-				
 				# The state of a single tag being rendered.
 				class State
 					def initialize(tag, node)
@@ -144,6 +129,9 @@ module Utopia
 					@request = request
 					@response = response
 				end
+
+				attr :request
+				attr :response
 
 				def binding
 					@view ||= View.new(self)
