@@ -18,36 +18,34 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative '../middleware'
+require_relative 'middleware'
 
 module Utopia
-	module Middleware
-		class DirectoryIndex
-			def initialize(app, options = {})
-				@app = app
-				@root = options[:root] || Utopia::Middleware::default_root
+	class DirectoryIndex
+		def initialize(app, options = {})
+			@app = app
+			@root = options[:root] || Utopia::default_root
 
-				@files = ["index.html"]
+			@files = ["index.html"]
 
-				@default = "index"
-			end
+			@default = "index"
+		end
 
-			def call(env)
-				path = Path.create(env["PATH_INFO"])
-				
-				if path.directory?
-					# Check to see if one of the files exists in the requested directory
-					@files.each do |file|
-						if File.exist?(File.join(@root, path.components, file))
-							return [307, {"Location" => (path + file).to_s}, []]
-						end
+		def call(env)
+			path = Path.create(env["PATH_INFO"])
+			
+			if path.directory?
+				# Check to see if one of the files exists in the requested directory
+				@files.each do |file|
+					if File.exist?(File.join(@root, path.components, file))
+						return [307, {"Location" => (path + file).to_s}, []]
 					end
-				
-					# Use the default path
-					return [307, {"Location" => (path + @default).to_s}, []]
-				else
-					return @app.call(env)
 				end
+			
+				# Use the default path
+				return [307, {"Location" => (path + @default).to_s}, []]
+			else
+				return @app.call(env)
 			end
 		end
 	end

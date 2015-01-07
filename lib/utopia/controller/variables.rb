@@ -19,53 +19,51 @@
 # THE SOFTWARE.
 
 module Utopia
-	module Middleware
-		class Controller
-			class Variables
-				def initialize
-					@controllers = []
-				end
+	class Controller
+		class Variables
+			def initialize
+				@controllers = []
+			end
 
-				def << controller
-					top = @controllers.last
-					
-					@controllers << controller
-					
-					# This ensures that most variables will be at the top and controllers can naturally interactive with instance variables.
-					controller.copy_instance_variables(top) if top
-				end
+			def << controller
+				top = @controllers.last
+				
+				@controllers << controller
+				
+				# This ensures that most variables will be at the top and controllers can naturally interactive with instance variables.
+				controller.copy_instance_variables(top) if top
+			end
 
-				def fetch(key)
-					@controllers.reverse_each do |controller|
-						if controller.instance_variables.include?(key)
-							return controller.instance_variable_get(key)
-						end
-					end
-					
-					if block_given?
-						yield key
-					else
-						raise KeyError.new(key)
+			def fetch(key)
+				@controllers.reverse_each do |controller|
+					if controller.instance_variables.include?(key)
+						return controller.instance_variable_get(key)
 					end
 				end
+				
+				if block_given?
+					yield key
+				else
+					raise KeyError.new(key)
+				end
+			end
 
-				def to_hash
-					attributes = {}
+			def to_hash
+				attributes = {}
 
-					@controllers.each do |controller|
-						controller.instance_variables.each do |name|
-							key = name[1..-1]
-							
-							attributes[key] = controller.instance_variable_get(name)
-						end
+				@controllers.each do |controller|
+					controller.instance_variables.each do |name|
+						key = name[1..-1]
+						
+						attributes[key] = controller.instance_variable_get(name)
 					end
-
-					return attributes
 				end
 
-				def [] key
-					fetch("@#{key}".to_sym) { nil }
-				end
+				return attributes
+			end
+
+			def [] key
+				fetch("@#{key}".to_sym) { nil }
 			end
 		end
 	end

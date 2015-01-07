@@ -19,9 +19,9 @@
 # THE SOFTWARE.
 
 require 'rack/mock'
-require 'utopia/middleware/content'
+require 'utopia/content'
 
-module Utopia::Middleware::ContentSpec
+module Utopia::ContentSpec
 	APP = lambda {|env| [404, [], []]}
 	
 	class TestDelegate
@@ -36,14 +36,14 @@ module Utopia::Middleware::ContentSpec
 		end
 	end
 	
-	describe Utopia::Middleware::Content::Processor do
+	describe Utopia::Content::Processor do
 		it "should parse single tag" do
 			delegate = TestDelegate.new
-			processor = Utopia::Middleware::Content::Processor.new(delegate)
+			processor = Utopia::Content::Processor.new(delegate)
 			
 			processor.parse %Q{<foo></foo>}
 			
-			foo_tag = Utopia::Middleware::Content::Tag.new("foo")
+			foo_tag = Utopia::Content::Tag.new("foo")
 			expected_events = [
 				[:tag_begin, foo_tag],
 				[:tag_end, foo_tag],
@@ -54,11 +54,11 @@ module Utopia::Middleware::ContentSpec
 		
 		it "should parse and escape text" do
 			delegate = TestDelegate.new
-			processor = Utopia::Middleware::Content::Processor.new(delegate)
+			processor = Utopia::Content::Processor.new(delegate)
 			
 			processor.parse %Q{<foo>Bob &amp; Barley<!-- Comment --><![CDATA[Hello & World]]></foo>}
 			
-			foo_tag = Utopia::Middleware::Content::Tag.new("foo")
+			foo_tag = Utopia::Content::Tag.new("foo")
 			expected_events = [
 				[:tag_begin, foo_tag],
 				[:cdata, "Bob &amp; Barley"],
@@ -71,14 +71,14 @@ module Utopia::Middleware::ContentSpec
 		end
 	end
 	
-	describe Utopia::Middleware::Content do
+	describe Utopia::Content do
 		it "Should parse file and expand variables" do
 			root = File.expand_path("../pages", __FILE__)
-			content = Utopia::Middleware::Content.new(APP, :root => root)
+			content = Utopia::Content.new(APP, :root => root)
 		
 			path = Utopia::Path.create('/index')
 			node = content.lookup_node(path)
-			expect(node).to be_kind_of Utopia::Middleware::Content::Node
+			expect(node).to be_kind_of Utopia::Content::Node
 		
 			output = StringIO.new
 			node.process!({}, output, {})

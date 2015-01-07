@@ -1,5 +1,4 @@
-#!/usr/bin/env rspec
-# Copyright, 2014, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,29 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'rack'
-require 'rack/test'
-
-require 'utopia/middleware/static'
-require 'utopia/middleware/content'
-require 'utopia/middleware/localization'
-
-module Utopia::Middleware::StaticSpec
-	describe Utopia::Middleware::Static do
-		include Rack::Test::Methods
+class Utopia::Content::Tags::Node
+	def self.call(transaction, state)
+		path = Utopia::Path.create(state[:path])
 		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('../localization_spec.ru', __FILE__)).first}
+		node = transaction.lookup_node(path)
 		
-		it "should redirect to default localization" do
-			get '/localized.txt'
-			
-			expect(last_response.header['Location']).to be == '/localized.en.txt'
-		end
-		
-		it "should redirect to referrer localization" do
-			get '/localized.txt', {}, 'HTTP_REFERER' => 'index.jp'
-			
-			expect(last_response.header['Location']).to be == '/localized.jp.txt'
-		end
+		transaction.render_node(node)
 	end
 end

@@ -18,12 +18,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative "../tags"
+class Utopia::Content::Tags::Environment
+	def self.for(environment)
+		self.class.new(environment)
+	end
+	
+	def initialize(environment)
+		@environment = environment
+	end
+	
+	def call(transaction, state)
+		only = state[:only].split(",").collect(&:to_sym) rescue []
 
-Utopia::Middleware::Content::Tags.create("deferred") do |transaction, state|
-	id = state[:id].to_i
-	
-	procedure = transaction.parent.deferred[id]
-	
-	procedure.call(transaction, state)
+		if defined?(@environment) and only.include?(@environment)
+			transaction.parse_xml(state.content)
+		end
+	end
 end

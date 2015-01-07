@@ -18,9 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative "../tags"
-
-class Utopia::Middleware::Content::Tags::Override
+class Utopia::Content::Tags::Override
 	def self.tag_begin(transaction, state)
 		state.overrides[state[:name]] = state[:with]
 	end
@@ -29,5 +27,3 @@ class Utopia::Middleware::Content::Tags::Override
 		transaction.parse_xml(state.content)
 	end
 end
-
-Utopia::Middleware::Content::Tags.register("override", Utopia::Middleware::Content::Tags::Override)

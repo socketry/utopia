@@ -22,22 +22,26 @@
 require 'rack'
 require 'rack/test'
 
-require 'utopia/middleware/static'
+require 'utopia/static'
+require 'utopia/content'
+require 'utopia/localization'
 
-module Utopia::Middleware::StaticSpec
-	describe Utopia::Middleware::Static do
+module Utopia::StaticSpec
+	describe Utopia::Static do
 		include Rack::Test::Methods
 		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('../static_spec.ru', __FILE__)).first}
+		let(:app) {Rack::Builder.parse_file(File.expand_path('../localization_spec.ru', __FILE__)).first}
 		
-		it "should give the correct mime type" do
-			get "/test.txt"
-			expect(last_response.header['Content-Type']).to be == 'text/plain'
+		it "should redirect to default localization" do
+			get '/localized.txt'
+			
+			expect(last_response.header['Location']).to be == '/localized.en.txt'
 		end
 		
-		it "should redirect when requesting relative resources" do
-			get "/@rel@/test.txt"
-			expect(last_response.header['Location']).to be == '/test.txt'
+		it "should redirect to referrer localization" do
+			get '/localized.txt', {}, 'HTTP_REFERER' => 'index.jp'
+			
+			expect(last_response.header['Location']).to be == '/localized.jp.txt'
 		end
 	end
 end

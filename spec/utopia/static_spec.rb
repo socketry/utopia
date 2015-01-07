@@ -1,4 +1,5 @@
-# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
+#!/usr/bin/env rspec
+# Copyright, 2014, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,12 +19,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative "../tags"
+require 'rack'
+require 'rack/test'
 
-Utopia::Middleware::Content::Tags.create("node") do |transaction, state|
-	path = Utopia::Path.create(state[:path])
-	
-	node = transaction.lookup_node(path)
-	
-	transaction.render_node(node)
+require 'utopia/static'
+
+module Utopia::StaticSpec
+	describe Utopia::Static do
+		include Rack::Test::Methods
+		
+		let(:app) {Rack::Builder.parse_file(File.expand_path('../static_spec.ru', __FILE__)).first}
+		
+		it "should give the correct mime type" do
+			get "/test.txt"
+			expect(last_response.header['Content-Type']).to be == 'text/plain'
+		end
+		
+		it "should redirect when requesting relative resources" do
+			get "/@rel@/test.txt"
+			expect(last_response.header['Location']).to be == '/test.txt'
+		end
+	end
 end

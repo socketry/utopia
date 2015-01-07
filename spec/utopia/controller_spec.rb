@@ -19,12 +19,12 @@
 # THE SOFTWARE.
 
 require 'rack/mock'
-require 'utopia/middleware/controller'
+require 'utopia/controller'
 
-module Utopia::Middleware::ControllerSpec
-	describe Utopia::Middleware::Controller::Action do
+module Utopia::ControllerSpec
+	describe Utopia::Controller::Action do
 		it "should resolve callbacks" do
-			actions = Utopia::Middleware::Controller::Action.new
+			actions = Utopia::Controller::Action.new
 			
 			specific_action = actions.define(['a', 'b', 'c']) {puts 'specific_action'}
 			indirect_action = actions.define(['**']) {puts 'indirect_action'}
@@ -41,7 +41,7 @@ module Utopia::Middleware::ControllerSpec
 		end
 		
 		it "should be greedy matching" do
-			actions = Utopia::Middleware::Controller::Action.new
+			actions = Utopia::Controller::Action.new
 			
 			greedy_action = actions.define(['**', 'r']) {puts 'greedy_action'}
 			
@@ -50,7 +50,7 @@ module Utopia::Middleware::ControllerSpec
 		end
 	end
 		
-	class TestController < Utopia::Middleware::Controller::Base
+	class TestController < Utopia::Controller::Base
 		on 'success' do
 			success!
 		end
@@ -68,7 +68,7 @@ module Utopia::Middleware::ControllerSpec
 		end
 	end
 	
-	class TestIndirectController < Utopia::Middleware::Controller::Base
+	class TestIndirectController < Utopia::Controller::Base
 		def initialize
 			@sequence = ""
 		end
@@ -110,8 +110,8 @@ module Utopia::Middleware::ControllerSpec
 		end
 	end
 	
-	describe Utopia::Middleware::Controller do
-		let(:variables) {Utopia::Middleware::Controller::Variables.new}
+	describe Utopia::Controller do
+		let(:variables) {Utopia::Controller::Variables.new}
 		
 		it "should call controller methods" do
 			request = Rack::Request.new("utopia.controller" => variables)
