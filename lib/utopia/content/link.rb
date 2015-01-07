@@ -19,18 +19,19 @@
 # THE SOFTWARE.
 
 require 'yaml'
-
 require 'trenni/builder'
+
+require_relative '../path'
 
 module Utopia
 	class Content
 		class Link
 			XNODE_EXT = ".xnode"
 
-			def initialize(kind, path, info = nil)
+			def initialize(kind, path, info = {})
 				path = Path.create(path)
 
-				@info = info ? info : {}
+				@info = info
 				@locale = @info.delete(:locale) || path.locale(XNODE_EXT)
 				@kind = kind
 
