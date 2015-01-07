@@ -28,21 +28,19 @@ require_relative 'extensions/rack'
 module Utopia
 	LOG = Logger.new($stderr)
 	
-	module Middleware
-		PAGES_PATH = 'pages'.freeze
+	PAGES_PATH = 'pages'.freeze
+	
+	def self.default_root(subdirectory = PAGES_PATH)
+		File.expand_path(subdirectory, Dir.pwd)
+	end
+	
+	def self.failure(status = 500, message = "Non-specific error")
+		body = "#{HTTP::STATUS_DESCRIPTIONS[status] || status.to_s}: #{message}"
 		
-		def self.default_root(subdirectory = PAGES_PATH)
-			File.expand_path(subdirectory, Dir.pwd)
-		end
-		
-		def self.failure(status = 500, message = "Non-specific error")
-			body = "#{HTTP::STATUS_DESCRIPTIONS[status] || status.to_s}: #{message}"
-			
-			return [status, {
-				"Content-Type" => "text/plain",
-				"Content-Length" => body.size.to_s,
-				"X-Cascade" => "pass"
-			}, [body]]
-		end
+		return [status, {
+			"Content-Type" => "text/plain",
+			"Content-Length" => body.size.to_s,
+			"X-Cascade" => "pass"
+		}, [body]]
 	end
 end
