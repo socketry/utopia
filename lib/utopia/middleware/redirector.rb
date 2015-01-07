@@ -22,7 +22,6 @@ require_relative '../middleware'
 
 module Utopia
 	module Middleware
-
 		class FailedRequestError < StandardError
 			def initialize(resource_path, resource_status, error_path, error_status)
 				@resource_path = resource_path

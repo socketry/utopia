@@ -27,7 +27,7 @@ require 'mime/types'
 
 module Utopia
 	module Middleware
-
+		# Serve static files and include recursive name resolution using @rel@ directory entries.
 		class Static
 			MIME_TYPES = {
 				:xiph => {
