@@ -48,7 +48,7 @@ module Utopia
 		
 		def self.starts_with(source_root, destination_uri)
 			return [
-				/^#{Regexp.escape(string)}/,
+				/^#{Regexp.escape(source_root)}/,
 				destination_uri
 			]
 		end
