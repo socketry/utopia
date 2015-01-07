@@ -131,6 +131,11 @@ module Utopia
 
 			attr :request
 			attr :response
+			
+			# A helper method for accessing controller variables from view:
+			def controller
+				@request.controller
+			end
 
 			def parse_xml(xml_data)
 				Processor.parse_xml(xml_data, self)
