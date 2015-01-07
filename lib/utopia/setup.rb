@@ -26,33 +26,39 @@ require 'rake'
 
 module Utopia
 	module Setup
-		ROOT = File.join(File.dirname(__FILE__), "setup", "")
-		DIRECTORIES = ["access_log", "cache", "cache/meta", "cache/body", "lib", "pages", "public"]
+		ROOT = File.expand_path("../setup", __FILE__)
+		DIRECTORIES = ["cache", "cache/meta", "cache/body", "lib", "pages", "public"]
+		SYMLINKS = {"public/_static" => "../pages/_static"}
 		
-		def self.copy(to, config = {})
-			$stderr.puts "Copying files from #{ROOT} to #{to}..."
-			Find.find(ROOT) do |src|
-				dst = File.join(to, src[ROOT.size..-1])
+		def self.copy(destination, config = {})
+			$stderr.puts "Copying files from #{ROOT} to #{destination}..."
+			
+			DIRECTORIES.each do |directory|
+				FileUtils.mkdir_p(File.join(destination, directory))
+			end
+			
+			Find.find(ROOT) do |source_path|
+				destination_path = File.join(destination, source_path[ROOT.size..-1])
 				
-				if File.directory?(src)
-					FileUtils.mkdir_p(dst)
+				if File.directory?(source_path)
+					FileUtils.mkdir_p(destination_path)
 				else
-					if File.exist? dst
-						$stderr.puts "File already exists: #{dst}!"
+					if File.exist? destination_path
+						$stderr.puts "\tFile already exists: #{destination_path}!"
 					else
-						$stderr.puts "Copying #{src} to #{dst}..."
-						FileUtils.cp(src, dst)
+						$stderr.puts "\tCopying #{source_path} to #{destination_path}..."
+						FileUtils.copy_entry(source_path, destination_path)
 					end
 				end
 			end
 			
-			DIRECTORIES.each do |path|
-				FileUtils.mkdir_p(File.join(to, path))
+			SYMLINKS.each do |path, target|
+				FileUtils.ln_s(target, File.join(destination, path))
 			end
 			
 			['config.ru', 'Gemfile'].each do |configuration_file|
-				$stderr.puts "Updating #{configuration_file}..."
-				path = File.join(to, configuration_file)
+				path = File.join(destination, configuration_file)
+				$stderr.puts "Updating #{path}..."
 				buffer = File.read(path).gsub('$UTOPIA_VERSION', Utopia::VERSION)
 				File.open(path, "w") { |file| file.write(buffer) }
 			end
