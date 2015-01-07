@@ -37,9 +37,9 @@ use Utopia::Middleware::Static
 
 if RACK_ENV == :production
 	use Rack::Cache,
-		:metastore => "file:#{Utopia::Middleware::default_root("cache/meta")}",
-		:entitystore => "file:#{Utopia::Middleware::default_root("cache/body")}",
-		:verbose => false
+		metastore: "file:#{Utopia::Middleware::default_root("cache/meta")}",
+		entitystore: "file:#{Utopia::Middleware::default_root("cache/body")}",
+		verbose: false
 end
 
 use Utopia::Middleware::Content,
