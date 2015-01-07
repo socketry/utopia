@@ -1,0 +1,4 @@
+
+task :server do
+	sh('puma')
+end
