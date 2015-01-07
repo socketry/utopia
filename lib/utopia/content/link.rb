@@ -20,6 +20,8 @@
 
 require 'yaml'
 
+require 'trenni/builder'
+
 module Utopia
 	class Content
 		class Link
@@ -60,7 +62,7 @@ module Utopia
 					return @title
 				end
 				
-				return @info[key.to_s]
+				return @info[key]
 			end
 
 			def href
@@ -82,13 +84,16 @@ module Utopia
 			end
 
 			def to_href(options = {})
-				options[:content] ||= title
-				options[:class] ||= "link"
-				
-				if href?
-					"<a class=#{options[:class].dump} href=\"#{href.to_html}\">#{options[:content].to_html}</a>"
-				else
-					"<span class=#{options[:class].dump}>#{options[:content].to_html}</span>"
+				Trenni::Builder.fragment(options[:builder]) do |builder|
+					if href?
+						builder.tag('a', class: options.fetch(:class, 'link'), href: href) do
+							builder.text(options[:content] || title)
+						end
+					else
+						builder.tag('span', class: options.fetch(:class, 'link')) do
+							builder.text(options[:content] || title)
+						end
+					end
 				end
 			end
 			
@@ -117,13 +122,25 @@ module Utopia
 			INDEX_XNODE_FILTER = /^(index(\..+)*)\.xnode$/
 			LINKS_YAML = "links.yaml"
 
+			def self.symbolize_keys(hash)
+				# Second level attributes should be symbolic:
+				hash.each do |key, info|
+					hash[key] = info.each_with_object({}) { |(k,v),result| result[k.to_sym] = v }
+				end
+				
+				return hash
+			end
+
 			def self.metadata(path)
 				links_path = File.join(path, LINKS_YAML)
-				if File.exist?(links_path)
-					return YAML::load(File.read(links_path)) || {}
+				
+				hash = if File.exist?(links_path)
+					YAML::load(File.read(links_path)) || {}
 				else
-					return {}
+					{}
 				end
+				
+				return symbolize_keys(hash)
 			end
 
 			def self.indices(path, &block)
@@ -189,7 +206,7 @@ module Utopia
 
 						if indices == 0
 							# Specify a nil uri if no index could be found for the directory:
-							links << Link.new(:directory, top + [filename, ""], {'uri' => nil}.merge(directory_metadata))
+							links << Link.new(:directory, top + [filename, ""], {:uri => nil}.merge(directory_metadata))
 						end
 					elsif filename.match(INDEX_XNODE_FILTER) && options[:indices] == false
 						name = $1
