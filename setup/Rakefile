@@ -1,4 +1,4 @@
 
 task :server do
-	sh('puma')
+	system('puma')
 end
