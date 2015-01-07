@@ -34,7 +34,7 @@ module Utopia
 
 			@templates = options[:cache_templates] ? {} : nil
 
-			@tags = options[:tags] || {}
+			@tags = options.fetch(:tags, {})
 		end
 
 		attr :root

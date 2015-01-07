@@ -18,12 +18,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-class Utopia::Content::Tags::Override
-	def self.tag_begin(transaction, state)
-		state.overrides[state[:name]] = state[:with]
-	end
-	
-	def self.call(transaction, state)
-		transaction.parse_xml(state.content)
+module Utopia
+	module Tags
+		class Deferred
+			def self.call(transaction, state)
+				id = state[:id].to_i
+				
+				procedure = transaction.parent.deferred[id]
+				
+				procedure.call(transaction, state)
+			end
+		end
 	end
 end
