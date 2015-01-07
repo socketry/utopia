@@ -20,6 +20,7 @@
 
 module Utopia
 	class Content
+		# This represents an individual SGML tag, e.g. <a>, </a> or <a />, with attributes. Attribute values must be escaped.
 		class Tag
 			def == other
 				if Tag === other
