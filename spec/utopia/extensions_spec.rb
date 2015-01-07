@@ -20,7 +20,6 @@
 
 require 'utopia/extensions/array'
 require 'utopia/extensions/date'
-require 'utopia/extensions/hash'
 
 module Utopia::ExtensionsSpec
 	describe Array do
@@ -63,14 +62,6 @@ module Utopia::ExtensionsSpec
 			
 			expect(today.to_time <=> yesterday.to_datetime).to be == 1
 			expect(today.to_time <=> yesterday.to_time).to be == 1
-		end
-	end
-	
-	describe Hash do
-		it "should symbolize keys" do
-			hash = {'a' => 1, 'b' => 2}
-			
-			expect(hash.symbolize_keys).to be == {a: 1, b: 2}
 		end
 	end
 end
