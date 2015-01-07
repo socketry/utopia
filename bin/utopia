@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2014, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,34 +23,15 @@
 require 'rubygems'
 require 'rake'
 
-$app = Rake.application = Rake::Application.new
-$app.init('Utopia')
-
-# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
-# 
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-# 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-# 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
-
 require_relative '../lib/utopia/version'
 
 require 'fileutils'
 require 'find'
 require 'rake'
+
+
+$app = Rake.application = Rake::Application.new
+$app.init('Utopia')
 
 module Setup
 	DIRECTORIES = ["cache", "cache/meta", "cache/body", "lib", "pages", "public"]
@@ -62,7 +43,7 @@ module Setup
 	OLD_DIRECTORIES = ["access_log"]
 end
 
-task :setup do
+task :create do
 	destination_root = File.expand_path(ARGV.last, Dir.getwd)
 	setup_root = File.expand_path("../../setup", __FILE__)
 	
@@ -114,10 +95,11 @@ task :setup do
 	end
 	
 	$stderr.puts "*** Thanks for using Utopia! ***"
+	$stderr.puts "To start the server:\n\tcd #{ARGV.last}\n\trake server"
 end
 
 task :upgrade do
-	destination_root = Dir.getwd
+	destination_root = File.expand_path(ARGV.last, Dir.getwd)
 	setup_root = File.expand_path("../../setup", __FILE__)
 	directories = ["cache", "cache/meta", "cache/body", "lib", "pages", "public"]
 	symlinks = {"public/_static" => "../pages/_static"}
@@ -182,8 +164,11 @@ task :upgrade do
 end
 
 task :help do
-	$stderr.puts "To create a new site, use the setup task:"
-	$stderr.puts "$ #{File.basename($0)} setup www.example.com"
+	$stderr.puts "To create a new site, use the create task:"
+	$stderr.puts "\t#{File.basename($0)} create path/to/www.example.com"
+	
+	$stderr.puts "To upgrade an existing site, use the upgrade task:"
+	$stderr.puts "\t#{File.basename($0)} upgrade path/to/www.example.com"
 end
 
 task :default => :help
