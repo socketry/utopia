@@ -52,15 +52,23 @@ require 'fileutils'
 require 'find'
 require 'rake'
 
+module Setup
+	DIRECTORIES = ["cache", "cache/meta", "cache/body", "lib", "pages", "public"]
+	SYMLINKS = {"public/_static" => "../pages/_static"}
+	
+	CONFIGURATION_FILES = ['config.ru', 'Gemfile', 'Rakefile']
+	
+	# Removed during upgrade process
+	OLD_DIRECTORIES = ["access_log"]
+end
+
 task :setup do
 	destination_root = File.expand_path(ARGV.last, Dir.getwd)
 	setup_root = File.expand_path("../../setup", __FILE__)
-	directories = ["cache", "cache/meta", "cache/body", "lib", "pages", "public"]
-	symlinks = {"public/_static" => "../pages/_static"}
-
+	
 	$stderr.puts "Copying files from #{setup_root} to #{destination_root}..."
 	
-	directories.each do |directory|
+	Setup::DIRECTORIES.each do |directory|
 		FileUtils.mkdir_p(File.join(destination_root, directory))
 	end
 	
@@ -80,15 +88,17 @@ task :setup do
 		end
 	end
 	
-	symlinks.each do |path, target|
+	Setup::SYMLINKS.each do |path, target|
 		FileUtils.ln_s(target, File.join(destination_root, path))
 	end
 	
-	['config.ru', 'Gemfile'].each do |configuration_file|
-		path = File.join(destination_root, configuration_file)
-		$stderr.puts "Updating #{path}..."
-		buffer = File.read(path).gsub('$UTOPIA_VERSION', Utopia::VERSION)
-		File.open(path, "w") { |file| file.write(buffer) }
+	Setup::CONFIGURATION_FILES.each do |configuration_file|
+		destination_path = File.join(destination_root, configuration_file)
+		
+		$stderr.puts "Updating #{destination_path}..."
+		
+		buffer = File.read(destination_path).gsub('$UTOPIA_VERSION', Utopia::VERSION)
+		File.open(destination_path, "w") { |file| file.write(buffer) }
 	end
 
 	if `which git`.strip == ""
@@ -101,6 +111,71 @@ task :setup do
 			sh("git", "add", ".")
 			sh("git", "commit", "-m", "Initial utopia site.")
 		end
+	end
+	
+	$stderr.puts "*** Thanks for using Utopia! ***"
+end
+
+task :upgrade do
+	destination_root = Dir.getwd
+	setup_root = File.expand_path("../../setup", __FILE__)
+	directories = ["cache", "cache/meta", "cache/body", "lib", "pages", "public"]
+	symlinks = {"public/_static" => "../pages/_static"}
+	branch_name = "utopia-upgrade-#{Utopia::VERSION}"
+	
+	$stderr.puts "Upgrading #{destination_root}..."
+	
+	Dir.chdir(destination_root) do
+		sh('git', 'checkout', '-b', branch_name)
+	end
+	
+	Setup::DIRECTORIES.each do |directory|
+		FileUtils.mkdir_p(File.join(destination_root, directory))
+	end
+	
+	Setup::OLD_DIRECTORIES.each do |directory|
+		path = File.join(destination_root, directory)
+		$stderr.puts "\tRemoving #{path}..."
+		FileUtils.rm_rf(path)
+	end
+	
+	Setup::SYMLINKS.each do |path, target|
+		FileUtils.ln_s(target, File.join(destination_root, path), force: true)
+	end
+	
+	Setup::CONFIGURATION_FILES.each do |configuration_file|
+		source_path = File.join(setup_root, configuration_file)
+		destination_path = File.join(destination_root, configuration_file)
+		
+		$stderr.puts "Updating #{destination_path}..."
+		
+		FileUtils.copy_entry(source_path, destination_path)
+		buffer = File.read(destination_path).gsub('$UTOPIA_VERSION', Utopia::VERSION)
+		File.open(destination_path, "w") { |file| file.write(buffer) }
+	end
+	
+	begin
+		Dir.chdir(destination_root) do
+			# Stage any files that have been changed or removed:
+			sh("git", "add", "-u")
+			
+			# Stage any new files that we have explicitly added:
+			sh("git", "add", *Setup::CONFIGURATION_FILES, *Setup::SYMLINKS.keys)
+			
+			# Commit all changes:
+			sh("git", "commit", "-m", "Upgrade to utopia #{Utopia::VERSION}.")
+			
+			# Checkout master..
+			sh("git", "checkout", "master")
+			
+			# and merge:
+			sh("git", "merge", "--no-commit", "--no-ff", branch_name)
+		end
+	rescue RuntimeError
+		$stderr.puts "** Detected error with upgrade, reverting changes. Some new files may still exist in tree. **"
+		
+		sh("git", "checkout", "master")
+		sh("git", "branch", "-d", branch_name)
 	end
 	
 	$stderr.puts "*** Thanks for using Utopia! ***"
