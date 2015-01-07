@@ -133,12 +133,6 @@ module Utopia
 				attr :request
 				attr :response
 
-				def binding
-					@view ||= View.new(self)
-					
-					@view.binding
-				end
-
 				def parse_xml(xml_data)
 					Processor.parse_xml(xml_data, self)
 				end
