@@ -87,11 +87,11 @@ module Utopia
 			def to_href(options = {})
 				Trenni::Builder.fragment(options[:builder]) do |builder|
 					if href?
-						builder.tag('a', class: options.fetch(:class, 'link'), href: href) do
+						builder.inline('a', class: options.fetch(:class, 'link'), href: href) do
 							builder.text(options[:content] || title)
 						end
 					else
-						builder.tag('span', class: options.fetch(:class, 'link')) do
+						builder.inline('span', class: options.fetch(:class, 'link')) do
 							builder.text(options[:content] || title)
 						end
 					end
