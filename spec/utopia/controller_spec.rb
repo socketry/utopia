@@ -1,3 +1,5 @@
+#!/usr/bin/env rspec
+
 # Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,7 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require_relative 'spec_helper'
+
 require 'rack/mock'
+require 'rack/test'
 require 'utopia/controller'
 
 module Utopia::ControllerSpec
@@ -102,11 +107,36 @@ module Utopia::ControllerSpec
 		end
 	end
 	
-	class MockControllerMiddleware
-		attr :env
+	describe Utopia::Controller do
+		include Rack::Test::Methods
 		
-		def call(env)
-			@env = env
+		let(:app) {Rack::Builder.parse_file(File.expand_path('../controller_spec.ru', __FILE__)).first}
+		
+		it "should successfully call the controller method" do
+			get "/controller/hello-world"
+			
+			expect(last_response.status).to be == 200
+			expect(last_response.body).to be == 'Hello World'
+		end
+		
+		it "should successfully call the recursive controller method" do
+			get "/controller/recursive/hello-world"
+			
+			expect(last_response.status).to be == 200
+			expect(last_response.body).to be == 'Hello World'
+		end
+		
+		it "should successfully call the controller method" do
+			get "/controller/flat"
+			
+			expect(last_response.status).to be == 200
+			expect(last_response.body).to be == 'flat'
+		end
+		
+		it "should successfully call the recursive controller method" do
+			get "/controller/recursive/flat"
+			
+			expect(last_response.status).to be == 404
 		end
 	end
 	

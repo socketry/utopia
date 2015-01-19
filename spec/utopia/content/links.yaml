@@ -1,0 +1,6 @@
+welcome:
+  order: 1
+  title: "Welcome"
+  uri: "/welcome"
+index:
+  order: 0

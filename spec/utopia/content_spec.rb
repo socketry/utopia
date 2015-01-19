@@ -18,12 +18,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'rack/mock'
+require_relative 'spec_helper'
+
 require 'utopia/content'
 
 module Utopia::ContentSpec
-	APP = lambda {|env| [404, [], []]}
-	
 	class TestDelegate
 		def initialize
 			@events = []
@@ -72,9 +71,39 @@ module Utopia::ContentSpec
 	end
 	
 	describe Utopia::Content do
+		include Rack::Test::Methods
+		
+		let(:app) {Rack::Builder.parse_file(File.expand_path('../content_spec.ru', __FILE__)).first}
+		
+		it "should successfully redirect to the index page" do
+			get '/'
+			
+			expect(last_response.status).to be == 307
+			expect(last_response.headers['Location']).to be == '/index'
+			
+			get '/content'
+			
+			expect(last_response.status).to be == 307
+			expect(last_response.headers['Location']).to be == '/content/index'
+		end
+		
+		it "should successfully render the index page" do
+			get "/index"
+			
+			expect(last_response.body).to be == '<h1>Hello World</h1>'
+		end
+		
+		it "should render partials correctly" do
+			get "/content/test-partial"
+			
+			expect(last_response.body).to be == '10'
+		end
+	end
+	
+	describe Utopia::Content do
 		it "Should parse file and expand variables" do
 			root = File.expand_path("../pages", __FILE__)
-			content = Utopia::Content.new(APP, :root => root)
+			content = Utopia::Content.new(lambda{}, :root => root)
 		
 			path = Utopia::Path.create('/index')
 			node = content.lookup_node(path)
@@ -82,7 +111,7 @@ module Utopia::ContentSpec
 		
 			output = StringIO.new
 			node.process!({}, output, {})
-			expect(output.string).to be == %Q{<h1>Hello World</h1>}
+			expect(output.string).to be == '<h1>Hello World</h1>'
 		end
 	end
 end

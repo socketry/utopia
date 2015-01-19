@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require_relative '../spec_helper'
+
 require 'utopia/content/link'
 
 module Utopia::Content::LinkSpec
@@ -41,6 +43,20 @@ module Utopia::Content::LinkSpec
 		it "should link should have full path" do
 			expect(subject.name).to be == "bob"
 			expect(subject.path).to be == nil
+		end
+	end
+	
+	describe Utopia::Content::Links do
+		it "should give a list of links" do
+			links = Utopia::Content::Links.index(__dir__, Utopia::Path.create("/"))
+			
+			expect(links.size).to be == 2
+			
+			expect(links[1].title).to be == "Welcome"
+			expect(links[1].to_href).to be == '<a class="link" href="/welcome">Welcome</a>'
+			
+			expect(links[1]).to be_eql links[1]
+			expect(links[0]).to_not be_eql links[1]
 		end
 	end
 end
