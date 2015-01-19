@@ -57,13 +57,6 @@ module Utopia
 				def lookup(path)
 					possible_actions = actions.select((path - uri_path).components)
 				end
-				
-				def method_added(name)
-					if name.match(/^on_(.*)$/)
-						warn "Method #{name} using legacy definition mechanism."
-						on($1.split("_").join('/'), unbound: true, &name)
-					end
-				end
 			end
 			
 			# Given a path, look up all matched actions.
