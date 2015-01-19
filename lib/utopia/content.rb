@@ -104,16 +104,12 @@ module Utopia
 			request = Rack::Request.new(env)
 			path = Path.create(request.path_info).to_absolute
 
-			# Check if the request is to a non-specific index.
-			name, extensions = path.basename.split(".", 2)
+			# Check if the request is to a non-specific index. This only works for requests with a given name:
+			name, extensions = path.basename_parts
 			directory_path = File.join(@root, path.dirname.components, name)
 
 			if File.directory? directory_path
-				if extensions
-					index_path = [name, "index.#{extensions}"]
-				else
-					index_path = [name, "index"]
-				end
+				index_path = [name, Path.join_name("index", extensions)]
 				
 				return [307, {"Location" => path.dirname.join(index_path).to_s}, []]
 			end

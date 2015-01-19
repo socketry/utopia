@@ -40,6 +40,26 @@ module Utopia
 			}
 		end
 
+		def self.split_name(name, last_only = true, separator = '.')
+			offset = if last_only
+				name.rindex(separator)
+			else
+				name.index(separator)
+			end
+			
+			return name, nil unless offset
+			
+			return name[0..offset], name[(offset+1)..-1]
+		end
+
+		def self.join_name(name, extension, separator = '.')
+			if extension
+				return "#{name}#{separator}#{extension}"
+			else
+				return name
+			end
+		end
+
 		def self.create(path)
 			case path
 			when Path
@@ -149,19 +169,21 @@ module Utopia
 			return Path.new(result)
 		end
 
-		def basename(ext = nil)
-			if ext == true
-				File.basename(components.last, extension)
-			elsif String === ext
-				File.basename(components.last, ext)
+		def basename(remove_extension = nil)
+			if remove_extension and components.last.end_with?(remove_extension)
+				components.last[0..-(remove_extension.length+1)]
 			else
 				components.last
 			end
 		end
 
+		def basename_parts
+			@basename_split ||= self.class.split_name(components.last)
+		end
+
 		def extension
-			if components.last
-				components.last.split(".").last
+			if name = components.last
+				@extension ||= basename_split.last
 			else
 				nil
 			end
@@ -173,8 +195,8 @@ module Utopia
 			return absolute? ? path.to_absolute : path
 		end
 
-		def to_local_path
-			components.join(File::SEPARATOR)
+		def to_local_path(separator = File::SEPARATOR)
+			components.join(separator)
 		end
 
 		def descend(&block)
@@ -261,7 +283,7 @@ module Utopia
 			name.split(".")[1..-1].join(".")
 		end
 		
-		def locale (extension = false)
+		def locale(extension = false)
 			return Path.locale(last, extension)
 		end
 	end
