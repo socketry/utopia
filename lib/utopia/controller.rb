@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require_relative 'path'
+
 require_relative 'controller/variables'
 require_relative 'controller/action'
 require_relative 'controller/base'
