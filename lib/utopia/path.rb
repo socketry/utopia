@@ -19,19 +19,60 @@
 # THE SOFTWARE.
 
 module Utopia
+	class Basename
+		# A basename represents a file name with an optional extension. You can specify a specific extension to identify or specify '.' to select any extension after the last trailing dot.
+		def initialize(name, extension = false)
+			if extension and offset = name.rindex(extension)
+				@name = name[0..offset]
+				@extension = name[offset..-1]
+			else
+				@name = name
+				@extension = nil
+			end
+		end
+		
+		def rename(name)
+			copy = self.dup
+			
+			copy.send(:instance_variable_set, :@name, name)
+			
+			return copy
+		end
+		
+		attr :name
+		attr :extension
+		
+		# Used for identifying locale information if present:
+		def parts
+			@parts ||= @name.split('.')[1..-1]
+		end
+		
+		def locale
+			parts.last
+		end
+		
+		def to_str
+			"#{name}#{extension}"
+		end
+		
+		def to_s
+			to_str
+		end
+	end
+	
 	class Path
 		SEPARATOR = "/"
 
 		include Comparable
 
 		def initialize(components = [])
-			# To ensure we don't do anything stupid we freeze the components
-			@components = components.dup.freeze
+			@components = components
 		end
 
-		# Shorthand constructor
-		def self.[](path)
-			create(path)
+		def freeze
+			@components.freeze
+			
+			super
 		end
 
 		def self.unescape(string)
@@ -40,24 +81,8 @@ module Utopia
 			}
 		end
 
-		def self.split_name(name, last_only = true, separator = '.')
-			offset = if last_only
-				name.rindex(separator)
-			else
-				name.index(separator)
-			end
-			
-			return name, nil unless offset
-			
-			return name[0..offset], name[(offset+1)..-1]
-		end
-
-		def self.join_name(name, extension, separator = '.')
-			if extension
-				return "#{name}#{separator}#{extension}"
-			else
-				return name
-			end
+		def self.[] path
+			self.create(path)
 		end
 
 		def self.create(path)
@@ -65,17 +90,11 @@ module Utopia
 			when Path
 				return path
 			when Array
-				return Path.new(path)
+				return self.new(path)
 			when String
-				path = unescape(path)
-				# Ends with SEPARATOR
-				if path[-1,1] == SEPARATOR
-					return Path.new(path.split(SEPARATOR) << "")
-				else
-					return Path.new(path.split(SEPARATOR))
-				end
+				return self.new(unescape(path).split(SEPARATOR, -1))
 			when Symbol
-				return Path.new([path])
+				return self.new([path])
 			end
 		end
 
@@ -101,7 +120,7 @@ module Utopia
 			if absolute?
 				return self
 			else
-				return Path.new([""] + @components)
+				return self.class.new([""] + @components)
 			end
 		end
 
@@ -117,12 +136,8 @@ module Utopia
 			to_str
 		end
 
-		def [] index
-			@components[index]
-		end
-
 		def join(other)
-			Path.new(@components + other).simplify
+			self.class.new(@components + other).simplify
 		end
 
 		def +(other)
@@ -151,13 +166,13 @@ module Utopia
 				i += 1
 			end
 			
-			return Path.create(@components[i,@components.size])
+			return self.class.new(@components[i,@components.size])
 		end
 
 		def simplify
 			result = absolute? ? [""] : []
 
-			components.each do |bit|
+			@components.each do |bit|
 				if bit == ".."
 					result.pop
 				elsif bit != "." && bit != ""
@@ -166,37 +181,22 @@ module Utopia
 			end
 
 			result << "" if directory?
-			return Path.new(result)
+			
+			return self.class.new(result)
 		end
 
-		def basename(remove_extension = nil)
-			if remove_extension and components.last.end_with?(remove_extension)
-				components.last[0..-(remove_extension.length+1)]
-			else
-				components.last
-			end
+		def basename(*args)
+			Basename.new(@components.last, *args)
 		end
-
-		def basename_parts
-			@basename_split ||= self.class.split_name(components.last)
-		end
-
-		def extension
-			if name = components.last
-				@extension ||= basename_split.last
-			else
-				nil
-			end
-		end
-
+		
 		def dirname(count = 1)
-			path = Path.new(components[0...-count])
+			path = self.class.new(@components[0...-count])
 
 			return absolute? ? path.to_absolute : path
 		end
 
 		def to_local_path(separator = File::SEPARATOR)
-			components.join(separator)
+			@components.join(separator)
 		end
 
 		def descend(&block)
@@ -204,10 +204,10 @@ module Utopia
 			
 			parent_path = []
 			
-			components.each do |component|
+			@components.each do |component|
 				parent_path << component
 				
-				yield self.class.new(parent_path)
+				yield self.class.new(parent_path.dup)
 			end
 		end
 
@@ -231,7 +231,7 @@ module Utopia
 			end
 			
 			if at
-				return [Path.new(@components[0...at]), Path.new(@components[at+1..-1])]
+				return [self.class.new(@components[0...at]), self.class.new(@components[at+1..-1])]
 			else
 				return nil
 			end
@@ -260,31 +260,51 @@ module Utopia
 			
 			return true
 		end
-
+		
 		def hash
 			@components.hash
 		end
-
-		def last
-			if directory?
-				components[-2]
-			else
-				components[-1]
-			end
-		end
-
-		def self.locale(name, extension = false)
-			if String === extension
-				name = File.basename(name, extension)
-			elsif extension
-				name = name.split
-			end
-			
-			name.split(".")[1..-1].join(".")
+		
+		def [] index
+			return @components[component_offset(index)]
 		end
 		
-		def locale(extension = false)
-			return Path.locale(last, extension)
+		# Replaces a named component, indexing as per 
+		def []= index, value
+			return @components[component_offset(index)] = value
 		end
+		
+		def delete_at(index)
+			@components.delete_at(component_offset(index))
+		end
+		
+		def first
+			if absolute?
+				@components[1]
+			else
+				@components[0]
+			end
+		end
+		
+		def last
+			if directory?
+				@components[-2]
+			else
+				@components[-1]
+			end
+		end
+		
+		private
+		
+		def component_offset(index)
+			index -= 1 if index < 0 and directory?
+			index += 1 if index >= 0 and absolute?
+			
+			return index
+		end
+	end
+	
+	def Path(path)
+		Path.create(path)
 	end
 end
