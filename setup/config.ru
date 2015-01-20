@@ -49,10 +49,10 @@ use Utopia::Static
 use Utopia::Content,
 	cache_templates: (RACK_ENV == :production),
 	tags: {
-		'deferred': Utopia::Tags::Deferred,
-		'override': Utopia::Tags::Override,
-		'node': Utopia::Tags::Node,
-		'environment': Utopia::Tags::Environment.for(RACK_ENV)
+		'deferred' => Utopia::Tags::Deferred,
+		'override' => Utopia::Tags::Override,
+		'node' => Utopia::Tags::Node,
+		'environment' => Utopia::Tags::Environment.for(RACK_ENV)
 	}
 
 run lambda { |env| [404, {}, []] }
