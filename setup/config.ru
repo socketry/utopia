@@ -28,9 +28,9 @@ end
 use Rack::ContentLength
 
 use Utopia::Redirector,
-	patterns: {
+	patterns: [
 		Utopia::Redirector::DIRECTORY_INDEX
-	},
+	],
 	strings: {
 		'/' => '/welcome/index',
 	},
