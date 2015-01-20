@@ -36,6 +36,15 @@ module Utopia::ContentSpec
 	end
 	
 	describe Utopia::Content::Processor do
+		it "should format open tags correctly" do
+			foo_tag = Utopia::Content::Tag.new("foo", bar: nil, baz: 'bob')
+			
+			expect(foo_tag[:bar]).to be nil
+			expect(foo_tag[:baz]).to be == 'bob'
+			
+			expect(foo_tag.to_s('content')).to be == '<foo bar baz="bob">content</foo>'
+		end
+		
 		it "should parse single tag" do
 			delegate = TestDelegate.new
 			processor = Utopia::Content::Processor.new(delegate)
@@ -49,6 +58,8 @@ module Utopia::ContentSpec
 			]
 			
 			expect(delegate.events).to be == expected_events
+			
+			expect(foo_tag.to_s)
 		end
 		
 		it "should parse and escape text" do
