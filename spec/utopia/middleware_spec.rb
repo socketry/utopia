@@ -1,5 +1,4 @@
-#!/usr/bin/env rspec
-# Copyright, 2014, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,40 +20,12 @@
 
 require_relative 'spec_helper'
 
-require 'rack'
-require 'rack/test'
+require 'utopia/middleware'
 
-require 'utopia/static'
-require 'utopia/content'
-require 'utopia/localization'
-
-module Utopia::StaticSpec
-	describe Utopia::Static do
-		include Rack::Test::Methods
-		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('../localization_spec.ru', __FILE__)).first}
-		
-		it "should respond with default localization" do
-			get '/localized.txt'
-			
-			expect(last_response.body).to be == 'localized.en.txt'
-		end
-		
-		it "should respond with the requested localization" do
-			get '/en/localized.txt'
-			expect(last_response.body).to be == 'localized.en.txt'
-
-			get '/de/localized.txt'
-			expect(last_response.body).to be == 'localized.de.txt'
-
-			get '/jp/localized.txt'
-			expect(last_response.body).to be == 'localized.jp.txt'
-		end
-		
-		it "should respond with accepted language localization" do
-			get '/localized.txt', {}, 'HTTP_ACCEPT_LANGUAGE' => 'jp,en'
-			
-			expect(last_response.body).to be == 'localized.jp.txt'
+module Utopia::MiddlewareSpec
+	describe Utopia do
+		it "should give a default path relative to the cwd" do
+			expect(File).to exist(Utopia::default_root('pages', File.dirname(__FILE__)))
 		end
 	end
 end
