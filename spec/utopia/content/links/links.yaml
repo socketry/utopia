@@ -4,3 +4,6 @@ welcome:
   uri: "/welcome"
 index:
   order: 0
+# This metadata also gets merged with foo/links.yml#index
+foo:
+  order: 2

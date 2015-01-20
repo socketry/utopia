@@ -25,10 +25,10 @@ require_relative '../spec_helper'
 require 'utopia/content/link'
 
 module Utopia::Content::LinkSpec
-	describe Utopia::Content::Link.new(:file, "/foo/bar/baz.xnode") do
+	describe Utopia::Content::Link.new(:file, "/foo/bar/baz") do
 		it "should link should have full path" do
 			expect(subject.name).to be == "baz"
-			expect(subject.path).to be == Utopia::Path.create("/foo/bar/baz.xnode")
+			expect(subject.path).to be == Utopia::Path.create("/foo/bar/baz")
 		end
 	end
 	
@@ -48,15 +48,41 @@ module Utopia::Content::LinkSpec
 	
 	describe Utopia::Content::Links do
 		it "should give a list of links" do
-			links = Utopia::Content::Links.index(__dir__, Utopia::Path.create("/"))
+			links = Utopia::Content::Links.index(File.expand_path("../links", __FILE__), Utopia::Path.create("/"))
 			
-			expect(links.size).to be == 2
+			expect(links.size).to be == 3
+			
+			expect(links[0].kind).to be == :virtual
+			expect(links[0].href).to be == nil
 			
 			expect(links[1].title).to be == "Welcome"
 			expect(links[1].to_href).to be == '<a class="link" href="/welcome">Welcome</a>'
+			expect(links[1].kind).to be == :file
+			expect(links[1].href).to be == "/welcome"
+			
+			expect(links[2].title).to be == 'Foo Bar'
+			expect(links[2].kind).to be == :directory
+			expect(links[2].href).to be == "/foo/index"
 			
 			expect(links[1]).to be_eql links[1]
 			expect(links[0]).to_not be_eql links[1]
+		end
+		
+		it "should filter links by name" do
+			links = Utopia::Content::Links.index(File.expand_path("../links", __FILE__), Utopia::Path.create("/"), name: /foo/)
+			
+			expect(links.size).to be == 1
+		end
+		
+		it "should select localized links" do
+			root = File.expand_path("../links/foo", __FILE__)
+			
+			# Select both test links
+			links = Utopia::Content::Links.index(root, Utopia::Path.create("/"))
+			expect(links.size).to be == 2
+			
+			links = Utopia::Content::Links.index(root, Utopia::Path.create("/"), locale: 'en')
+			expect(links.size).to be == 1
 		end
 	end
 end
