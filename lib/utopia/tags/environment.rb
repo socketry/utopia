@@ -22,7 +22,7 @@ module Utopia
 	module Tags
 		class Environment
 			def self.for(environment)
-				self.class.new(environment)
+				self.new(environment)
 			end
 			
 			def initialize(environment)

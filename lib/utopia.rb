@@ -27,3 +27,8 @@ require_relative 'utopia/localization'
 require_relative 'utopia/mail_exceptions'
 require_relative 'utopia/redirector'
 require_relative 'utopia/static'
+
+require_relative 'utopia/tags/deferred'
+require_relative 'utopia/tags/environment'
+require_relative 'utopia/tags/node'
+require_relative 'utopia/tags/override'
