@@ -19,7 +19,6 @@
 # THE SOFTWARE.
 
 require_relative 'middleware'
-require_relative 'localization'
 
 require 'time'
 
@@ -129,12 +128,17 @@ module Utopia
 
 				# LOG.info("Requesting ranges: #{ranges.inspect} (#{size})")
 
-				if ranges == nil or ranges.size != 1
-					# No ranges, or multiple ranges (which we don't support).
-					# TODO: Support multiple byte-ranges, for now just send entire file:
+				if ranges.nil? || ranges.length > 1
+					# No ranges, or multiple ranges (which we don't support):
+					# TODO: Support multiple byte-ranges
 					response[0] = 200
 					response[1]["Content-Length"] = size.to_s
 					@range = 0..size-1
+				elsif ranges.empty?
+					# Unsatisfiable. Return error, and file size:
+					response = failure(416, "Invalid range specified.")
+					response[1]["Content-Range"] = "bytes */#{size}"
+					return response
 				else
 					# Partial content:
 					@range = ranges[0]

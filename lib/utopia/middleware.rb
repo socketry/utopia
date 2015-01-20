@@ -30,17 +30,7 @@ module Utopia
 	
 	PAGES_PATH = 'pages'.freeze
 	
-	def self.default_root(subdirectory = PAGES_PATH)
-		File.expand_path(subdirectory, Dir.pwd)
-	end
-	
-	def self.failure(status = 500, message = "Non-specific error")
-		body = "#{HTTP::STATUS_DESCRIPTIONS[status] || status.to_s}: #{message}"
-		
-		return [status, {
-			"Content-Type" => "text/plain",
-			"Content-Length" => body.size.to_s,
-			"X-Cascade" => "pass"
-		}, [body]]
+	def self.default_root(subdirectory = PAGES_PATH, pwd = Dir.pwd)
+		File.expand_path(subdirectory, pwd)
 	end
 end
