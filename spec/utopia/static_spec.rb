@@ -34,12 +34,21 @@ module Utopia::StaticSpec
 		
 		it "should give the correct mime type" do
 			get "/test.txt"
+			
 			expect(last_response.header['Content-Type']).to be == 'text/plain'
 		end
 		
 		it "should redirect when requesting relative resources" do
 			get "/@rel@/test.txt"
+			
 			expect(last_response.header['Location']).to be == '/test.txt'
+		end
+		
+		it "should return partial content" do
+			get "/test.txt", {}, 'HTTP_RANGE' => 'bytes=0-4'
+			
+			expect(last_response.status).to be == 206 
+			expect(last_response.body).to be == "Hello"
 		end
 	end
 end
