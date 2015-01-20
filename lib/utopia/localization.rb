@@ -19,7 +19,6 @@
 # THE SOFTWARE.
 
 require_relative 'middleware'
-require_relative 'localization/name'
 
 module Rack
 	class Request
@@ -39,108 +38,71 @@ end
 
 module Utopia
 	class Localization
+		RESOURCE_NOT_FOUND = [400, {}, []].freeze
+		
+		HTTP_ACCEPT_LANGUAGE = 'HTTP_ACCEPT_LANGUAGE'.freeze
 		LOCALIZATION_KEY = 'utopia.localization'.freeze
-		CURRENT_LOCALE_KEY = 'utopia.current_locale'.freeze
+		CURRENT_LOCALE_KEY = 'utopia.localization.current_locale'.freeze
 		
 		def initialize(app, options = {})
 			@app = app
 
-			@default_locale = options[:default] || "en"
+			@default_locale = options[:default_locale] || "en"
 			@all_locales = options[:locales] || ["en"]
-			
-			@nonlocalized = options[:nonlocalized] || []
-		end
-
-		def named_locale(resource_name)
-			if resource_name
-				Name.extract_locale(resource_name, @all_locales)
-			else
-				nil
-			end
 		end
 
 		attr :all_locales
 		attr :default_locale
-		
-		def check_resource(resource_name, resource_locale, env)
-			localized_name = Name.localized(resource_name, resource_locale, @all_locales).join(".")
-			localized_path = Path.create(env["PATH_INFO"]).dirname + localized_name
 
-			localization_probe = env.dup
-			localization_probe["REQUEST_METHOD"] = "HEAD"
-			localization_probe["PATH_INFO"] = localized_path.to_s
-
-			# Find out if a resource exists for the requested localization
-			return [localized_path, @app.call(localization_probe)]
-		end
-
-		def nonlocalized?(env)
-			@nonlocalized.each do |pattern|
-				case pattern
-				when String
-					return true if env["PATH_INFO"].start_with?(pattern)
-				when Regexp
-					return true if pattern.match(env["PATH_INFO"])
-				when pattern.respond_to?(:call)
-					return true if pattern.call(env)
-				end
-			end
+		def preferred_locales(env)
+			locales = browser_preferred_locales(env)
+			locales << @default_locale unless locales.include? @default_locale
 			
-			return false
+			return locales
+		end
+		
+		def browser_preferred_locales(env)
+			accept_languages = env[HTTP_ACCEPT_LANGUAGE]
+			
+			# No user prefered languages:
+			return [] unless accept_languages
+
+			languages = accept_languages.split(',').map { |language|
+				language.split(';q=').tap{|x| x[1] = (x[1] || 1.0).to_f}
+			}.sort{|a, b| b[1] <=> a[1]}.collect(&:first)
+			
+			# Returns languages based on the order of the first argument
+			return languages & @all_locales
 		end
 
 		def call(env)
-			# Check for a non-localized resource.
-			if nonlocalized?(env)
-				return @app.call(env)
-			end
-			
-			# Otherwise, we need to check if the resource has been localized based on the request and referer parameters.
-			path = Path.create(env["PATH_INFO"])
 			env[LOCALIZATION_KEY] = self
-
-			referer_locale = named_locale(env['HTTP_REFERER'])
-			request_locale = named_locale(path.basename)
-			resource_name = Name.nonlocalized(path.basename, @all_locales).join(".")
-
-			response = nil
-			if request_locale
-				env[CURRENT_LOCALE_KEY] = request_locale
-				resource_path, response = check_resource(resource_name, request_locale, env)
-			elsif referer_locale
-				env[CURRENT_LOCALE_KEY] = referer_locale
-				resource_path, response = check_resource(resource_name, referer_locale, env)
+			path = Path[env['PATH_INFO']]
+			
+			# Are we already within a localized hierarchy?
+			if all_locales.include? path.first
+				# This is a localized path with a specific localization, e.g. '/fr/test.txt' so we should rewrite the request to the non-localized path but specify the localized header:
+				env[CURRENT_LOCALE_KEY] = path.first
+				
+				# Remove the localization prefix.
+				path.delete_at(0)
+				env["PATH_INFO"] = path.to_s
+			else
+				# We have a non-localized request, but there might be a localized resource. We return the best localization possible:
+				preferred_locales(env).each do |locale|
+					env[CURRENT_LOCALE_KEY] = locale
+					
+					response = @app.call(env)
+					
+					# Response can be considered successful:
+					return response unless response[0] >= 400
+				end
+				
+				# No locale specific resource was found:
+				env.delete(CURRENT_LOCALE_KEY)
 			end
 			
-			# If the previous checks failed, i.e. there was no request/referer locale 
-			# or the response was 404 (i.e. no localised resource), we check for the
-			# @default_locale
-			if response == nil || response[0] >= 400
-				env[CURRENT_LOCALE_KEY] = @default_locale
-				resource_path, response = check_resource(resource_name, @default_locale, env)
-			end
-
-			# If the response is 2xx, we have a localised resource
-			if response[0] < 300
-				# If the original request was the same as the localized request,
-				if path.basename == resource_path.basename
-					# The resource URI is correct.
-					return @app.call(env)
-				else
-					# Redirect to the correct resource URI.
-					return [307, {"Location" => resource_path.to_s}, []]
-				end
-			elsif response[0] < 400
-				# We have encountered a redirect while accessing the localized resource
-				return response
-			else
-				# A localized resource was not found, return the unlocalised resource path,
-				if path.basename == resource_name
-					return @app.call(env)
-				else
-					return [307, {"Location" => (path.dirname + resource_name).to_s}, []]
-				end
-			end
+			return @app.call(env)
 		end
 	end
 end

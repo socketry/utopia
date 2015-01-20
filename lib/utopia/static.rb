@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 require_relative 'middleware'
+require_relative 'localization'
 
 require 'time'
 
@@ -253,16 +254,23 @@ module Utopia
 		attr :extensions
 
 		def call(env)
-			request = Rack::Request.new(env)
-			ext = File.extname(request.path_info)
+			path_info = env['PATH_INFO']
+			extension = File.extname(path_info)
 
-			if @extensions.key? ext.downcase
-				path = Path.create(request.path_info).simplify
-
+			if @extensions.key? extension.downcase
+				path = Path[path_info].simplify
+				
+				if locale = env[Localization::CURRENT_LOCALE_KEY]
+					filename = path.last
+					
+					# Modify in place:
+					filename.insert(filename.rindex('.') || -1, ".#{locale}")
+				end
+				
 				if file = fetch_file(path)
 					response_headers = {
 						"Last-Modified" => file.mtime_date,
-						"Content-Type" => @extensions[ext],
+						"Content-Type" => @extensions[extension],
 						"Cache-Control" => @cache_control,
 						"ETag" => file.etag,
 						"Accept-Ranges" => "bytes"
