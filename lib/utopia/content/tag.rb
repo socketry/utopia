@@ -49,11 +49,6 @@ module Utopia
 				@attributes[key]
 			end
 
-			def append(text)
-				@content ||= StringIO.new
-				@content.write text
-			end
-
 			def to_html(content = nil, buffer = StringIO.new)
 				write_full_html(buffer, content)
 				
@@ -64,9 +59,9 @@ module Utopia
 				@attributes
 			end
 			
-			def to_s
+			def to_s(content = nil)
 				buffer = StringIO.new
-				write_full_html(buffer)
+				write_full_html(buffer, content)
 				return buffer.string
 			end
 			
