@@ -22,7 +22,6 @@ require_relative 'utopia/version'
 
 require_relative 'utopia/content'
 require_relative 'utopia/controller'
-require_relative 'utopia/directory_index'
 require_relative 'utopia/exception_handler'
 require_relative 'utopia/localization'
 require_relative 'utopia/mail_exceptions'

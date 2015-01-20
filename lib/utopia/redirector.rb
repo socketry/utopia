@@ -36,6 +36,9 @@ module Utopia
 	end
 
 	class Redirector
+		# This redirects directories to the directory + 'index' 
+		DIRECTORY_INDEX = [/^(.*)\/$/, lambda{|prefix| [307, {"Location" => "#{prefix}/index"}, []]}]
+		
 		# Redirects a whole source tree to a destination tree, given by the roots.
 		def self.moved(source_root, destination_root)
 			return [

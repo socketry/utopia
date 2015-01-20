@@ -19,6 +19,9 @@ end
 use Rack::ContentLength
 
 use Utopia::Redirector,
+	patterns: {
+		Utopia::Redirector::DIRECTORY_INDEX
+	},
 	strings: {
 		'/' => '/welcome/index',
 	},
@@ -26,7 +29,6 @@ use Utopia::Redirector,
 		404 => "/errors/file-not-found"
 	}
 
-use Utopia::DirectoryIndex
 
 use Utopia::Controller,
 	cache_controllers: (RACK_ENV == :production)
