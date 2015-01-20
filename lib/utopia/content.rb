@@ -27,6 +27,8 @@ require 'trenni/template'
 
 module Utopia
 	class Content
+		XNODE_EXTENSION = '.xnode'.freeze
+		
 		def initialize(app, options = {})
 			@app = app
 
@@ -63,9 +65,9 @@ module Utopia
 			if Path === name
 				name = parent_path + name
 				name_path = name.components.dup
-				name_path[-1] += ".xnode"
+				name_path[-1] += XNODE_EXTENSION
 			else
-				name_path = name + ".xnode"
+				name_path = name + XNODE_EXTENSION
 			end
 
 			parent_path.ascend do |dir|
@@ -86,10 +88,11 @@ module Utopia
 			
 			return nil
 		end
-
+		
+		# The request_path is an absolute uri path, e.g. /foo/bar. If an xnode file exists on disk for this exact path, it is instantiated, otherwise nil.
 		def lookup_node(request_path)
 			name = request_path.basename
-			name_xnode = name + ".xnode"
+			name_xnode = name.to_s + XNODE_EXTENSION
 
 			node_path = File.join(@root, request_path.dirname.components, name_xnode)
 
@@ -105,11 +108,12 @@ module Utopia
 			path = Path.create(request.path_info).to_absolute
 
 			# Check if the request is to a non-specific index. This only works for requests with a given name:
-			name, extensions = path.basename_parts
-			directory_path = File.join(@root, path.dirname.components, name)
+			basename = path.basename
+			directory_path = File.join(@root, path.dirname.components, basename.name)
 
+			# If the request for /foo/bar{extensions} is actually a directory, rewrite it to /foo/bar/index{extensions}:
 			if File.directory? directory_path
-				index_path = [name, Path.join_name("index", extensions)]
+				index_path = [basename.name, basename.rename("index")]
 				
 				return [307, {"Location" => path.dirname.join(index_path).to_s}, []]
 			end

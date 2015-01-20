@@ -21,44 +21,43 @@
 require 'yaml'
 require 'trenni/builder'
 
+require_relative '../content'
 require_relative '../path'
 
 module Utopia
 	class Content
 		class Link
-			XNODE_EXT = ".xnode"
-
-			def initialize(kind, path, info = {})
+			def initialize(kind, path, info = nil)
 				path = Path.create(path)
 
-				@info = info
-				@locale = @info.delete(:locale) || path.locale(XNODE_EXT)
+				@info = info || {}
 				@kind = kind
 
 				case @kind
 				when :file
-					@name = path.basename(XNODE_EXT)
+					@name = path.last
 					@path = path
 				when :directory
-					@name = path.dirname.basename(XNODE_EXT)
+					@name = path.dirname.last
 					@path = path
 				when :virtual
 					@name = path.to_s
 					@path = @info[:path] ? Path.create(@info[:path]) : nil
 				end
-
-				@components = @name.split(".")
-				@title = components[0]
+				
+				basename = Basename.new(@name)
+				@title = basename.name
+				@locale = basename.locale
 			end
 
 			attr :kind
 			attr :name
 			attr :path
-			attr :locale
 			attr :info
-			attr :components
+			attr :locale
 
 			def [] (key)
+				# This allows order by title..
 				if key == :title
 					return @title
 				end
@@ -161,7 +160,7 @@ module Utopia
 				:indices => false,
 				:sort => :order,
 				:display => :display,
-				:locale => nil
+				:tags => nil
 			}
 			
 			def self.index(root, top = Path.new, options = {})
@@ -183,7 +182,7 @@ module Utopia
 						indices_metadata = Links.metadata(fullpath)
 						directory_metadata = metadata.delete(name) || {}
 
-						indices = 0
+						indices_count = 0
 						Links.indices(fullpath) do |index|
 							index_name = File.basename(index, ".xnode")
 							# Values in indices_metadata will override values in directory_metadata:
@@ -202,10 +201,10 @@ module Utopia
 
 							links << directory_link
 
-							indices += 1
+							indices_count += 1
 						end
 
-						if indices == 0
+						if indices_count == 0
 							# Specify a nil uri if no index could be found for the directory:
 							links << Link.new(:directory, top + [filename, ""], {:uri => nil}.merge(directory_metadata))
 						end
@@ -242,12 +241,7 @@ module Utopia
 				end
 
 				if options[:name]
-					case options[:name]
-					when Regexp
-						links.reject!{|link| !link.name.match(options[:name])}
-					when String
-						links.reject!{|link| link.name.index(options[:name]) != 0}
-					end
+					links.reject!{|link| link.name.index(options[:name]) != 0}
 				end
 
 				if options[:locale]

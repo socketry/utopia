@@ -53,7 +53,7 @@ module Utopia
 						path = ['**', path]
 					end
 					
-					actions.define(Path[path].components, options, &block)
+					actions.define(Path.create(path).components, options, &block)
 				end
 				
 				def lookup(path)
