@@ -138,6 +138,23 @@ module Utopia::ControllerSpec
 			
 			expect(last_response.status).to be == 404
 		end
+		
+		it "should perform ignore the request" do
+			get '/controller/ignore'
+			expect(last_response.status).to be == 404
+		end
+		
+		it "should redirect the request" do
+			get '/controller/redirect'
+			expect(last_response.status).to be == 302
+			expect(last_response.headers['Location']).to be == 'bar'
+		end
+		
+		it "should rewrite the request" do
+			get '/controller/rewrite'
+			expect(last_response.status).to be == 200
+			expect(last_response.body).to be == 'Hello World'
+		end
 	end
 	
 	describe Utopia::Controller do

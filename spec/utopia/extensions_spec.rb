@@ -34,6 +34,10 @@ module Utopia::ExtensionsSpec
 			expect(b).to be == 3
 			expect(c).to be == [4, 5]
 		end
+		
+		it "should not split empty array" do
+			expect([].split_at('a')).to be == [[], nil, []]
+		end
 	end
 	
 	describe Date do

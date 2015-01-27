@@ -23,68 +23,26 @@ require_relative 'spec_helper'
 require 'utopia/content'
 
 module Utopia::ContentSpec
-	class TestDelegate
-		def initialize
-			@events = []
-		end
+	describe Utopia::Content::Node do
+		include Rack::Test::Methods
 		
-		attr :events
-		
-		def method_missing(*args)
-			@events << args
-		end
-	end
+		let(:app) {Rack::Builder.parse_file(File.expand_path('../content_spec.ru', __FILE__)).first}
 	
-	describe Utopia::Content::Processor do
-		it "should format open tags correctly" do
-			foo_tag = Utopia::Content::Tag.new("foo", bar: nil, baz: 'bob')
-			
-			expect(foo_tag[:bar]).to be nil
-			expect(foo_tag[:baz]).to be == 'bob'
-			
-			expect(foo_tag.to_s('content')).to be == '<foo bar baz="bob">content</foo>'
-		end
+
 		
-		it "should parse single tag" do
-			delegate = TestDelegate.new
-			processor = Utopia::Content::Processor.new(delegate)
-			
-			processor.parse %Q{<foo></foo>}
-			
-			foo_tag = Utopia::Content::Tag.new("foo")
-			expected_events = [
-				[:tag_begin, foo_tag],
-				[:tag_end, foo_tag],
-			]
-			
-			expect(delegate.events).to be == expected_events
-			
-			expect(foo_tag.to_s)
-		end
-		
-		it "should parse and escape text" do
-			delegate = TestDelegate.new
-			processor = Utopia::Content::Processor.new(delegate)
-			
-			processor.parse %Q{<foo>Bob &amp; Barley<!-- Comment --><![CDATA[Hello & World]]></foo>}
-			
-			foo_tag = Utopia::Content::Tag.new("foo")
-			expected_events = [
-				[:tag_begin, foo_tag],
-				[:cdata, "Bob &amp; Barley"],
-				[:cdata, "<!-- Comment -->"],
-				[:cdata, "Hello &amp; World"],
-				[:tag_end, foo_tag],
-			]
-			
-			expect(delegate.events).to be == expected_events
-		end
+
 	end
 	
 	describe Utopia::Content do
 		include Rack::Test::Methods
 		
 		let(:app) {Rack::Builder.parse_file(File.expand_path('../content_spec.ru', __FILE__)).first}
+		
+		it "should get a local path" do
+			get '/node/index'
+			
+			expect(last_response.body).to be == File.expand_path('../pages/node', __FILE__)
+		end
 		
 		it "should successfully redirect to the index page" do
 			get '/'

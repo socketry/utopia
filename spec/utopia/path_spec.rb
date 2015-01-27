@@ -44,5 +44,38 @@ module Utopia::PathSpec
 			
 			expect(descendants.reverse).to be == ascendants
 		end
+		
+		it "should remove the extension from the basename" do
+			path = Utopia::Path["dir/foo.html"]
+			
+			basename = path.basename(".html")
+			
+			expect(basename.name).to be == 'foo'
+			expect(basename.extension).to be == '.html'
+		end
+		
+		it "shouldn't be able to modify frozen paths" do
+			path = Utopia::Path["dir/foo.html"]
+			
+			path.freeze
+			
+			expect(path.frozen?).to be true
+			
+			expect{path[0] = 'bob'}.to raise_exception(RuntimeError)
+		end
+		
+		it "should expand relative paths" do
+			root = Utopia::Path['/root']
+			path = Utopia::Path["dir/foo.html"]
+			
+			expect(path.expand(root)).to be == (root + path)
+		end
+		
+		it "shouldn't expand absolute paths" do
+			root = Utopia::Path['/root']
+			path = Utopia::Path["dir/foo.html"]
+			
+			expect(root.expand(root)).to be == root
+		end
 	end
 end
