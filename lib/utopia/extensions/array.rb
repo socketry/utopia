@@ -19,8 +19,8 @@
 # THE SOFTWARE.
 
 class Array
-	def split_at(&block)
-		if middle = index(&block)
+	def split_at(*args, &block)
+		if middle = index(*args, &block)
 			[self[0...middle], self[middle], self[middle+1..-1]]
 		else
 			[[], nil, []]
