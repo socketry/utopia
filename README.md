@@ -2,18 +2,17 @@
 
 Utopia is a website generation framework which provides a robust set of tools
 to build highly complex dynamic websites. It uses the filesystem heavily for
-content and provides frameworks for interacting with files and directories as
+content and provides functions for interacting with files and directories as
 structure representing the website.
 
 Utopia builds on top of Rack with the following middleware:
 
-- `Utopia::Static`: Serve static files with recursive lookup
-- `Utopia::Redirector`: Redirect URL patterns and status codes
-- `Utopia::Localization`: Non-intrusive localization of resources
-- `Utopia::DirectoryIndex`: Redirect directory requests to specific files
-- `Utopia::Controller`: Dynamic behaviour with recursive execution
-- `Utopia::Content`: XML-style template engine with powerful tag behaviours
-- `Utopia::Session::EncryptedCookie`: Session storage using an encrypted cookie
+- `Utopia::Static`: Serve static files with recursive lookup.
+- `Utopia::Redirector`: Redirect URL patterns and status codes.
+- `Utopia::Localization`: Non-intrusive localization of resources.
+- `Utopia::Controller`: Dynamic behaviour with recursive execution.
+- `Utopia::Content`: XML-style template engine with powerful tag behaviours.
+- `Utopia::Session::EncryptedCookie`: Session storage using an encrypted cookie.
 
 For more details please see the main [project page][1].
 
@@ -22,6 +21,31 @@ For more details please see the main [project page][1].
 [![Build Status](https://secure.travis-ci.org/ioquatix/utopia.png)](http://travis-ci.org/ioquatix/utopia)
 [![Coverage Status](https://coveralls.io/repos/ioquatix/utopia/badge.svg)](https://coveralls.io/r/ioquatix/utopia)
 
+## Middleware
+
+### Static
+
+This middleware serves static files using the `mime-types` library. By default, it works with `Rack::Sendfile` and `Rack::Cache` and supports `ETag` based caching.
+
+### Redirector
+
+A flexible high level URI rewriting system which includes support for string mappings, regular expressions and status codes (e.g. 404 errors).
+
+### Localization
+
+The localization middleware uses the `Accept-Language` header to guess the preferred locale out of the given options. If a request path maps to a resource, that resource is returned. Otherwise, a localized request is made.
+
+### Controller
+
+A simple recursive controller layer which works in isolation from the view rendering middleware. A controller consists of a set of actions which match against incoming paths and execute code accordingly.
+
+### Content
+
+A tag based content generation system which integrates nicely with HTML5. Supports structures which separate generic page templates from dynamically generated content in an easy and consistent way.
+
+### Session
+
+The encrypted cookie session management uses symmetric private key encryption to store data on the client and avoid tampering.
 
 ## Installation
 
@@ -31,9 +55,9 @@ Install utopia:
 
 Create a new site:
 
-	$ utopia setup www.example.com
+	$ utopia create www.example.com
 	$ cd www.example.com
-	$ thin start -p 9000
+	$ rake server
 
 ## Usage
 
@@ -51,7 +75,7 @@ The default site includes documentation and examples.
 
 Released under the MIT license.
 
-Copyright, 2012, by [Samuel G. D. Williams](http://www.codeotaku.com/samuel-williams).
+Copyright, 2015, by [Samuel G. D. Williams](http://www.codeotaku.com/samuel-williams).
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
