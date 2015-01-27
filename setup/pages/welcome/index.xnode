@@ -1,7 +1,20 @@
-<page>
+<page class="front">
 	<heading>Welcome to Utopia</heading>
 	
-	<p>Utopia is designed to simply your life. It is not an application development framework. It is not a content management system. It does not require a database. It isn't model view controller. It is simply a platform on which websites can be easily developed with a minimum of effort.</p>
+	<p>Utopia is designed to simplify web development.</p>
 	
-	<p><a href="http://www.oriontransfer.co.nz/software/utopia/setup">Utopia Project Page &amp; Documentation</a></p>
+	<h2>Server Side Tag Based Markup</h2>
+	
+	<p>Server side tags reduce the amount of duplicate view code especially for content-heavy sites.</p>
+	
+	<h2>Recursive Controller Layer</h2>
+	
+	<p>Nested controllers make access control a breeze.</p>
+	
+	<h2>Standards Based Localization</h2>
+	
+	<p>Automatically sniff the user's desired language and provide content in the correct language.</p>
+	
+	
+	
 </page>

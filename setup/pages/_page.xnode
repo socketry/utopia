@@ -14,7 +14,7 @@
 		<link rel="stylesheet" href="/_static/site.css" type="text/css" media="screen" />
 	</head>
 
-	<body>
+	<body class="#{attributes['class']}">
 		<div id="header">
 		</div>
 
