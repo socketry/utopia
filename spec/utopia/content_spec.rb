@@ -23,16 +23,6 @@ require_relative 'spec_helper'
 require 'utopia/content'
 
 module Utopia::ContentSpec
-	describe Utopia::Content::Node do
-		include Rack::Test::Methods
-		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('../content_spec.ru', __FILE__)).first}
-	
-
-		
-
-	end
-	
 	describe Utopia::Content do
 		include Rack::Test::Methods
 		
@@ -70,10 +60,10 @@ module Utopia::ContentSpec
 	end
 	
 	describe Utopia::Content do
-		it "Should parse file and expand variables" do
-			root = File.expand_path("../pages", __FILE__)
-			content = Utopia::Content.new(lambda{}, :root => root)
+		let(:root) {File.expand_path("../pages", __FILE__)}
+		let(:content) {Utopia::Content.new(lambda{}, root: root, cache_templates: true)}
 		
+		it "should parse file and expand variables" do
 			path = Utopia::Path.create('/index')
 			node = content.lookup_node(path)
 			expect(node).to be_kind_of Utopia::Content::Node
@@ -81,6 +71,17 @@ module Utopia::ContentSpec
 			output = StringIO.new
 			node.process!({}, output, {})
 			expect(output.string).to be == '<h1>Hello World</h1>'
+		end
+		
+		it "should fetch xml and use cache" do
+			node_path = File.expand_path('../pages/index.xnode', __FILE__)
+			
+			template = content.fetch_xml(node_path)
+			
+			expect(template).to be_kind_of Trenni::Template
+			
+			# Check that the same object is returned:
+			expect(template).to be content.fetch_xml(node_path)
 		end
 	end
 end

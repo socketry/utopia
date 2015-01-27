@@ -48,6 +48,10 @@ module Utopia
 				return value
 			end
 			
+			def include?(key)
+				load!.include?(key)
+			end
+			
 			def delete(key)
 				load!
 				

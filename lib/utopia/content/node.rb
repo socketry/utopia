@@ -330,7 +330,7 @@ module Utopia
 			def lookup(tag)
 				from_path = parent_path
 				
-				# If the current node is called 'foo', we can't lookup 'foo' in the current directory or we will likely have infinite recursion.
+				# If the current node is called 'foo', we can't lookup 'foo' in the current directory or we will have infinite recursion.
 				if tag.name == @uri_path.basename
 					from_path = from_path.dirname
 				end
@@ -354,12 +354,12 @@ module Utopia
 			end
 
 			def related_links
-				name = @uri_path.basename(XNODE_EXTENSION).name
+				name = @uri_path.last.split('.', 2).first
 				links = Links.index(@controller.root, uri_path.dirname, :name => name, :indices => true)
 			end
 
 			def siblings_path
-				name = @uri_path.basename(XNODE_EXTENSION).name
+				name = @uri_path.last.split('.', 2).first
 				
 				if name == "index"
 					@uri_path.dirname(2)

@@ -52,4 +52,31 @@ module Utopia::SessionSpec
 			expect(last_response.body).to be == "bar"
 		end
 	end
+	
+	describe Utopia::Session::LazyHash do
+		it "should load hash when required" do
+			loaded = false
+			
+			hash = Utopia::Session::LazyHash.new do
+				loaded = true
+				{a: 10, b: 20}
+			end
+			
+			expect(loaded).to be false
+			
+			expect(hash[:a]).to be 10
+			
+			expect(loaded).to be true
+		end
+		
+		it "should delete the specified item" do
+			hash = Utopia::Session::LazyHash.new do
+				{a: 10, b: 20}
+			end
+			
+			expect(hash.include?(:a)).to be true
+			expect(hash.delete(:a)).to be 10
+			expect(hash.include?(:a)).to be false
+		end
+	end
 end

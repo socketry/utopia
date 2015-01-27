@@ -90,7 +90,7 @@ module Utopia
 		
 		# The request_path is an absolute uri path, e.g. /foo/bar. If an xnode file exists on disk for this exact path, it is instantiated, otherwise nil.
 		def lookup_node(request_path)
-			name = request_path.basename
+			name = request_path.last
 			name_xnode = name.to_s + XNODE_EXTENSION
 
 			node_path = File.join(@root, request_path.dirname.components, name_xnode)

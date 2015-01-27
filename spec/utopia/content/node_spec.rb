@@ -25,16 +25,39 @@ require 'utopia/content'
 module Utopia::ContentSpec
 	describe Utopia::Content::Node do
 		let(:root) {File.expand_path("../node", __FILE__)}
-		let(:controller) {Utopia::Content.new(lambda{}, root: root)}
+		let(:content) {Utopia::Content.new(lambda{}, root: root)}
 		
 		it "should list siblings in correct order" do
-			node = controller.lookup_node(Utopia::Path['/first'])
+			node = content.lookup_node(Utopia::Path['/ordered/first'])
 			
-			sibling_links = node.sibling_links
+			links = node.sibling_links
 			
-			expect(sibling_links.size).to be == 2
-			expect(sibling_links[0].name).to be == 'first'
-			expect(sibling_links[1].name).to be == 'second'
+			expect(links.size).to be == 2
+			expect(links[0].name).to be == 'first'
+			expect(links[1].name).to be == 'second'
+		end
+		
+		it "should list all links in correct order" do
+			node = content.lookup_node(Utopia::Path['/ordered/index'])
+			
+			links = node.links
+			
+			expect(links.size).to be == 2
+			expect(links[0].name).to be == 'first'
+			expect(links[1].name).to be == 'second'
+		end
+		
+		it "shoud list related links" do
+			node = content.lookup_node(Utopia::Path['/related/foo.en'])
+			
+			links = node.related_links
+			
+			expect(links.size).to be == 2
+			expect(links[0].name).to be == 'foo.en'
+			expect(links[0].locale).to be == 'en'
+			
+			expect(links[1].name).to be == 'foo.jp'
+			expect(links[1].locale).to be == 'jp'
 		end
 	end
 end

@@ -257,7 +257,7 @@ module Utopia
 			end
 		end
 
-		def starts_with? other
+		def start_with? other
 			other.components.each_with_index do |part, index|
 				return false if @components[index] != part
 			end

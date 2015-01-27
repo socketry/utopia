@@ -24,6 +24,13 @@ require 'utopia/path'
 
 module Utopia::PathSpec
 	describe Utopia::Path do
+		it "should be root path" do
+			root = Utopia::Path["/"]
+			
+			expect(root.components).to be == ['', '']
+			expect(root.to_local_path).to be == '/'
+		end
+		
 		it "should concatenate absolute paths" do
 			root = Utopia::Path["/"]
 			
@@ -45,6 +52,14 @@ module Utopia::PathSpec
 			expect(descendants.reverse).to be == ascendants
 		end
 		
+		it "should be able to remove relative path entries" do
+			path = Utopia::Path["/foo/bar/../baz/."]
+			expect(path.simplify.components).to be == ['', 'foo', 'baz']
+			
+			path = Utopia::Path["/foo/bar/../baz/./"]
+			expect(path.simplify.components).to be == ['', 'foo', 'baz', '']
+		end
+		
 		it "should remove the extension from the basename" do
 			path = Utopia::Path["dir/foo.html"]
 			
@@ -52,6 +67,29 @@ module Utopia::PathSpec
 			
 			expect(basename.name).to be == 'foo'
 			expect(basename.extension).to be == '.html'
+		end
+		
+		it "should be able to convert into a directory" do
+			path = Utopia::Path["foo/bar"]
+			
+			expect(path).to_not be_directory
+			
+			expect(path.to_directory).to be_directory
+			
+			dir_path = path.to_directory
+			expect(dir_path.to_directory).to be == dir_path
+		end
+		
+		it "should start with the given path" do
+			path = Utopia::Path["/a/b/c/d/e"]
+			
+			expect(path.start_with?(path.dirname)).to be true
+		end
+		
+		it "should split at the specified point" do
+			path = Utopia::Path["/a/b/c/d/e"]
+			
+			expect(path.split('c')).to be == [Utopia::Path['/a/b'], Utopia::Path['d/e']]
 		end
 		
 		it "shouldn't be able to modify frozen paths" do

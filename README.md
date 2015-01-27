@@ -20,6 +20,8 @@ For more details please see the main [project page][1].
 [1]: http://www.oriontransfer.co.nz/gems/utopia
 
 [![Build Status](https://secure.travis-ci.org/ioquatix/utopia.png)](http://travis-ci.org/ioquatix/utopia)
+[![Coverage Status](https://coveralls.io/repos/ioquatix/utopia/badge.svg)](https://coveralls.io/r/ioquatix/utopia)
+
 
 ## Installation
 
