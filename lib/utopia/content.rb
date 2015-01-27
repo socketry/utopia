@@ -131,13 +131,13 @@ module Utopia
 				else
 					response = Rack::Response.new
 					
-					attributes = {}
+					attributes = nil
 					
-					if request.controller
-						attributes = request.controller.to_hash
+					if request.respond_to?(:controller)
+						attributes = request.controller
 					end
 					
-					node.process!(request, response, attributes)
+					node.process!(request, response, (attributes || {}).to_hash)
 					
 					return response.finish
 				end
