@@ -68,8 +68,13 @@ module Utopia
 			
 			if File.exist?(controller_path)
 				klass = Class.new(Base)
+				
+				# base_path is expected to be a string representing a filesystem path:
 				klass.const_set(:BASE_PATH, base_path)
+				
+				# uri_path is expected to be an instance of Path:
 				klass.const_set(:URI_PATH, uri_path)
+				
 				klass.const_set(:CONTROLLER, self)
 				
 				$LOAD_PATH.unshift(base_path)
@@ -102,7 +107,8 @@ module Utopia
 						end
 						
 						if location
-							request.env['PATH_INFO'] = location.to_s
+							# Rewrite relative paths based on the controller's URI:
+							request.env['PATH_INFO'] = Path[location].expand(controller.class.uri_path).to_s
 							
 							return invoke_controllers(variables, request, done)
 						end
