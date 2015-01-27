@@ -354,12 +354,12 @@ module Utopia
 			end
 
 			def related_links
-				name = @uri_path.basename.split(".").first
+				name = @uri_path.basename(XNODE_EXTENSION).name
 				links = Links.index(@controller.root, uri_path.dirname, :name => name, :indices => true)
 			end
 
 			def siblings_path
-				name = @uri_path.basename.split(".").first
+				name = @uri_path.basename(XNODE_EXTENSION).name
 				
 				if name == "index"
 					@uri_path.dirname(2)
