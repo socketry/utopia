@@ -300,9 +300,21 @@ module Utopia
 		
 		private
 		
+		# We adjust the index slightly so that indices reference path components rather than the directory markers at the start and end of the path components array.
 		def component_offset(index)
-			index -= 1 if index < 0 and directory?
-			index += 1 if index >= 0 and absolute?
+			if Range === index
+				Range.new(adjust_index(index.first), adjust_index(index.last), index.exclude_end?)
+			else
+				adjust_index(index)
+			end
+		end
+		
+		def adjust_index(index)
+			if index < 0
+				index -= 1 if directory?
+			else
+				index += 1 if absolute?
+			end
 			
 			return index
 		end
