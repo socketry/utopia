@@ -218,39 +218,6 @@ module Utopia
 			end
 		end
 
-		def lookup_relative_file(path)
-			file = nil
-			name = path.basename
-
-			if split = path.split("@rel@")
-				path = split[0]
-				name = split[1].components
-				
-				# Fix a problem if the browser request has multiple @rel@
-				# This normally indicates a browser bug.. :(
-				name = name.dup
-				name.delete("@rel@")
-			else
-				path = path.dirname
-				
-				# Relative lookups are not done unless explicitly required by @rel@
-				# ... but they do work. This is a performance optimization.
-				return nil
-			end
-
-			# LOG.debug("Searching for #{name.inspect} starting in #{path.components}")
-
-			path.ascend do |parent_path|
-				file_path = File.join(@root, parent_path.components, name)
-				# LOG.debug("File path: #{file_path}")
-				if File.exist?(file_path)
-					return (parent_path + name).to_s
-				end
-			end
-
-			return nil
-		end
-
 		attr :extensions
 
 		def call(env)
@@ -281,8 +248,6 @@ module Utopia
 					else
 						return [304, response_headers, []]
 					end
-				elsif redirect = lookup_relative_file(path)
-					return [307, {"Location" => redirect}, []]
 				end
 			end
 
