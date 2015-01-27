@@ -37,6 +37,7 @@ module Rack
 end
 
 module Utopia
+	# If you request a URL which has localized content, a localized redirect would be returned based on the content requested.
 	class Localization
 		RESOURCE_NOT_FOUND = [400, {}, []].freeze
 		
@@ -49,16 +50,15 @@ module Utopia
 
 			@default_locale = options[:default_locale] || "en"
 			@all_locales = options[:locales] || ["en"]
+			
+			@nonlocalized = options.fetch(:nonlocalized, [])
 		end
 
 		attr :all_locales
 		attr :default_locale
-
+		
 		def preferred_locales(env)
-			locales = browser_preferred_locales(env)
-			locales << @default_locale unless locales.include? @default_locale
-			
-			return locales
+			browser_preferred_locales(env) | [@default_locale, nil]
 		end
 		
 		def browser_preferred_locales(env)
@@ -74,8 +74,36 @@ module Utopia
 			# Returns languages based on the order of the first argument
 			return languages & @all_locales
 		end
-
+		
+		def nonlocalized?(env)
+			path_info = env['PATH_INFO']
+			
+			@nonlocalized.any? { |pattern| path_info[pattern] != nil }
+		end
+		
+		# Set the Vary: header on the response to indicate that this response should include the header in the cache key.
+		def vary(env, response)
+			headers = response[1]
+			
+			# This response was based on the Accept-Language header:
+			if headers['Vary']
+				headers['Vary'] += ',Accept-Language'
+			else
+				headers['Vary'] = 'Accept-Language'
+			end
+			
+			# Althought this header is generally not supported, we supply it anyway as it is useful for debugging:
+			if locale = env[CURRENT_LOCALE_KEY]
+				# Set the Content-Location to point to the localized URI as requested:
+				headers['Content-Location'] = "/#{locale}" + env['PATH_INFO']
+			end
+			
+			return response
+		end
+		
 		def call(env)
+			return @app.call(env) if nonlocalized?(env)
+			
 			env[LOCALIZATION_KEY] = self
 			path = Path[env['PATH_INFO']]
 			
@@ -86,23 +114,24 @@ module Utopia
 				
 				# Remove the localization prefix.
 				path.delete_at(0)
-				env["PATH_INFO"] = path.to_s
+				env['PATH_INFO'] = path.to_s
+				
+				# This is a direct request to a specific resource:
+				return @app.call(env)
 			else
+				response = nil
+				
 				# We have a non-localized request, but there might be a localized resource. We return the best localization possible:
 				preferred_locales(env).each do |locale|
 					env[CURRENT_LOCALE_KEY] = locale
 					
 					response = @app.call(env)
 					
-					# Response can be considered successful:
-					return response unless response[0] >= 400
+					break unless response[0] >= 400
 				end
 				
-				# No locale specific resource was found:
-				env.delete(CURRENT_LOCALE_KEY)
+				return vary(env, response)
 			end
-			
-			return @app.call(env)
 		end
 	end
 end

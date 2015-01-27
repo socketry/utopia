@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 require_relative 'middleware'
+require_relative 'localization'
 
 require_relative 'content/node'
 require_relative 'content/processor'
@@ -105,8 +106,13 @@ module Utopia
 
 		def call(env)
 			request = Rack::Request.new(env)
-			path = Path.create(request.path_info).to_absolute
-
+			path = Path.create(request.path_info)
+			
+			# If the request should be localized:
+			if locale = env[Localization::CURRENT_LOCALE_KEY]
+				path.last.insert(-1, ".#{locale}")
+			end
+			
 			# Check if the request is to a non-specific index. This only works for requests with a given name:
 			basename = path.basename
 			directory_path = File.join(@root, path.dirname.components, basename.name)

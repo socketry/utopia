@@ -39,7 +39,9 @@ use Utopia::Redirector,
 	}
 
 use Utopia::Localization,
-	:default_locale => 'en', :locales => ['en', 'de', 'jp', 'cn']
+	:default_locale => 'en',
+	:locales => ['en', 'de', 'jp', 'zh'],
+	:nonlocalized => ['/_static/']
 
 use Utopia::Controller,
 	cache_controllers: (RACK_ENV == :production)
