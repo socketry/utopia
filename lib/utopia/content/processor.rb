@@ -63,6 +63,12 @@ module Utopia
 
 			def parse(input)
 				@parser.parse(input)
+				
+				unless @stack.empty?
+					current_tag, current_position = @stack.pop
+					
+					raise UnbalancedTagError.new(@scanner, current_position, current_tag.name, 'EOF')
+				end
 			end
 
 			def begin_parse(scanner)
