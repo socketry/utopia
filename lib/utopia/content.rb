@@ -28,8 +28,6 @@ require 'trenni/template'
 
 module Utopia
 	class Content
-		XNODE_EXTENSION = '.xnode'.freeze
-		
 		def initialize(app, options = {})
 			@app = app
 

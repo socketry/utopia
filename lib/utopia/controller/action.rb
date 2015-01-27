@@ -55,7 +55,7 @@ module Utopia
 				
 				if index < path.size
 					name = path[index].to_sym
-				
+					
 					if match_name = self[name]
 						# Match the exact name:
 						match_name.append(path, index+1, actions)
@@ -80,8 +80,6 @@ module Utopia
 				
 				append(relative_path.reverse, 0, actions)
 				
-				# puts "select(#{relative_path}, #{self.inspect}) => #{actions.inspect}"
-				
 				return actions
 			end
 			
@@ -99,12 +97,7 @@ module Utopia
 			end
 			
 			def invoke!(controller, *arguments)
-				if @options[:unbound]
-					# This is the old code path for explicit methods.
-					controller.instance_exec(controller, *arguments, &@callback)
-				else
-					controller.instance_exec(*arguments, &@callback)
-				end
+				controller.instance_exec(*arguments, &@callback)
 			end
 			
 			def inspect

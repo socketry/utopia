@@ -26,6 +26,8 @@ require_relative '../path'
 
 module Utopia
 	class Content
+		XNODE_EXTENSION = '.xnode'.freeze
+		
 		class Link
 			def initialize(kind, path, info = nil)
 				path = Path.create(path)
@@ -118,8 +120,8 @@ module Utopia
 		end
 		
 		module Links
-			XNODE_FILTER = /^(.+)\.xnode$/
-			INDEX_XNODE_FILTER = /^(index(\..+)*)\.xnode$/
+			XNODE_FILTER = /^(.+)#{Regexp.escape XNODE_EXTENSION}$/
+			INDEX_XNODE_FILTER = /^(index(\..+)*)#{Regexp.escape XNODE_EXTENSION}$/
 			LINKS_YAML = "links.yaml"
 
 			def self.symbolize_keys(hash)
@@ -160,7 +162,6 @@ module Utopia
 				:indices => false,
 				:sort => :order,
 				:display => :display,
-				:tags => nil
 			}
 			
 			def self.index(root, top = Path.new, options = {})
@@ -184,7 +185,7 @@ module Utopia
 
 						indices_count = 0
 						Links.indices(fullpath) do |index|
-							index_name = File.basename(index, ".xnode")
+							index_name = File.basename(index, XNODE_EXTENSION)
 							# Values in indices_metadata will override values in directory_metadata:
 							index_metadata = directory_metadata.merge(indices_metadata[index_name] || {})
 
@@ -224,7 +225,7 @@ module Utopia
 				if options[:virtual]
 					metadata.each do |name, details|
 						# Given a virtual named such as "welcome.cn", merge it with metadata from "welcome" if it exists:
-						basename, locale = name.split(".", 2)
+						basename, locale = name.split('.', 2)
 
 						if virtual_metadata[basename]
 							details = virtual_metadata[basename].merge(details || {})
