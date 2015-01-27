@@ -23,7 +23,7 @@ module Utopia
 		# A basename represents a file name with an optional extension. You can specify a specific extension to identify or specify '.' to select any extension after the last trailing dot.
 		def initialize(name, extension = false)
 			if extension and offset = name.rindex(extension)
-				@name = name[0..offset]
+				@name = name[0...offset]
 				@extension = name[offset..-1]
 			else
 				@name = name
@@ -138,6 +138,10 @@ module Utopia
 
 		def join(other)
 			self.class.new(@components + other).simplify
+		end
+
+		def expand(root)
+			root + self
 		end
 
 		def +(other)
