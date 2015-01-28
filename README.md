@@ -59,6 +59,16 @@ Create a new site:
 	$ cd www.example.com
 	$ rake server
 
+### Bower Integration
+
+If you create a site using the utopia generator, it includes a `.bowerrc` configuration which installs components into `public/_static/components`. To install jquery, for example:
+
+	bower install jquery
+
+Then add the appropriate `<script>` tags to `pages/_page.xnode`:
+
+	<script src="/_static/components/jquery/dist/jquery.min.js" type="text/javascript"></script>
+
 ## Usage
 
 The default site includes documentation and examples.
