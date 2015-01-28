@@ -102,6 +102,18 @@ module Utopia::PathSpec
 			expect{path[0] = 'bob'}.to raise_exception(RuntimeError)
 		end
 		
+		it "should give the correct locale" do
+			path = Utopia::Path["foo.en"]
+			
+			expect(path.basename.locale).to be == 'en'
+		end
+		
+		it "should give no locale" do
+			path = Utopia::Path["foo"]
+			
+			expect(path.basename.locale).to be == nil
+		end
+		
 		it "should expand relative paths" do
 			root = Utopia::Path['/root']
 			path = Utopia::Path["dir/foo.html"]

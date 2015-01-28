@@ -114,8 +114,8 @@ module Utopia
 				return other && kind == other.kind && name == other.name && path == other.path
 			end
 			
-			def default_locale
-				@locale == ''
+			def default_locale?
+				@locale == nil
 			end
 		end
 		
@@ -255,7 +255,7 @@ module Utopia
 							if link.locale == options[:locale]
 								specific = link
 								break
-							elsif link.default_locale
+							elsif link.default_locale?
 								specific ||= link
 							end
 						end
