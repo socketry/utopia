@@ -52,6 +52,11 @@ module Utopia
 				basename = Basename.new(name)
 				
 				@name = basename.parts[0]
+				
+				@href = @info.fetch(:uri) do
+					(@path.dirname + @path.basename.parts[0]).to_s if @path
+				end
+				
 				@title = Trenni::Strings.to_title(basename.name)
 				@variant = basename.variant
 			end
@@ -60,21 +65,20 @@ module Utopia
 				@info[name]
 			end
 
+			def respond_to? name
+				@info.key?(name) || super
+			end
+
+			def [] key
+				@info[key]
+			end
+
 			attr :kind
 			attr :name
 			attr :path
+			attr :href # the path without any variant
 			attr :info
 			attr :variant
-
-			def href
-				@info.fetch(:uri) do
-					if @path
-						@path.to_s
-					else
-						nil
-					end
-				end
-			end
 
 			def href?
 				return href != nil
@@ -158,6 +162,7 @@ module Utopia
 				
 				if variant = options[:variant]
 					variants = {}
+					
 					ordered.each do |link|
 						if link.variant == variant
 							variants[link.name] = link
@@ -193,9 +198,11 @@ module Utopia
 				@ordered = []
 				@named = Hash.new{|h,k| h[k] = []}
 				
-				load_links(@metadata.dup) do |link|
-					@ordered << link
-					@named[link.name] << link
+				if File.directory? @path
+					load_links(@metadata.dup) do |link|
+						@ordered << link
+						@named[link.name] << link
+					end
 				end
 			end
 			
@@ -212,7 +219,10 @@ module Utopia
 			end
 			
 			def lookup(name, variant = nil)
-				@named[name].find{|link| link.variant == variant}
+				# This allows generic links to serve any variant requested.
+				if links = @named[name]
+					links.find{|link| link.variant == variant} || links.find{|link| link.variant == nil}
+				end
 			end
 			
 			private

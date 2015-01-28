@@ -26,6 +26,10 @@ module Rack
 			env[Utopia::Localization::CURRENT_LOCALE_KEY]
 		end
 		
+		def default_locale
+			localization.default_locale
+		end
+		
 		def all_locales
 			localization.all_locales
 		end

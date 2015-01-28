@@ -32,10 +32,10 @@ module Utopia::Content::LinkSpec
 		end
 	end
 	
-	describe Utopia::Content::Link.new(:directory, "/foo/bar/") do
+	describe Utopia::Content::Link.new(:directory, "/foo/bar/index") do
 		it "should link should have full path" do
 			expect(subject.name).to be == "bar"
-			expect(subject.path).to be == Utopia::Path.create("/foo/bar/")
+			expect(subject.path).to be == Utopia::Path.create("/foo/bar/index")
 		end
 	end
 	
