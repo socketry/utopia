@@ -45,7 +45,7 @@ module Utopia
 				:xiph, "mp3", "mp4", "wav", "aiff", ["aac", "audio/x-aac"], "mov", "avi", "wmv", "mpg"
 			],
 			:text => [
-				"html", "css", "js", "txt", "rtf", "xml", "pdf"
+				"html", "css", "js", ["map", "application/json"], "txt", "rtf", "xml", "pdf"
 			],
 			:fonts => [
 				"otf", ["eot", "application/vnd.ms-fontobject"], "ttf", "woff"
