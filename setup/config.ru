@@ -40,7 +40,7 @@ use Utopia::Redirector,
 
 use Utopia::Localization,
 	:default_locale => 'en',
-	:locales => ['en', 'de', 'jp', 'zh'],
+	:locales => ['en', 'de', 'ja', 'zh'],
 	:nonlocalized => ['/_static/']
 
 use Utopia::Controller,
