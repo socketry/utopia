@@ -106,11 +106,6 @@ module Utopia
 			request = Rack::Request.new(env)
 			path = Path.create(request.path_info)
 			
-			# If the request should be localized:
-			if locale = env[Localization::CURRENT_LOCALE_KEY]
-				path.last.insert(-1, ".#{locale}")
-			end
-			
 			# Check if the request is to a non-specific index. This only works for requests with a given name:
 			basename = path.basename
 			directory_path = File.join(@root, path.dirname.components, basename.name)
@@ -122,13 +117,9 @@ module Utopia
 				return [307, {"Location" => path.dirname.join(index_path).to_s}, []]
 			end
 
-			# Otherwise look up the node
-			node = lookup_node(path)
-
-			if node
-				if request.head?
-					return [200, {}, []]
-				else
+			locale = env[Localization::CURRENT_LOCALE_KEY]
+			if link = Links.for(@root, path, locale)
+				if node = lookup_node(link.path)
 					response = Rack::Response.new
 					
 					attributes = nil
@@ -141,9 +132,9 @@ module Utopia
 					
 					return response.finish
 				end
-			else
-				return @app.call(env)
 			end
+			
+			return @app.call(env)
 		end
 	end
 end

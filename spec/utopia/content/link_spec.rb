@@ -59,10 +59,12 @@ module Utopia::Content::LinkSpec
 			expect(links[1].to_href).to be == '<a class="link" href="/welcome">Welcome</a>'
 			expect(links[1].kind).to be == :file
 			expect(links[1].href).to be == "/welcome"
+			expect(links[1].name).to be == 'welcome'
 			
 			expect(links[2].title).to be == 'Foo Bar'
 			expect(links[2].kind).to be == :directory
 			expect(links[2].href).to be == "/foo/index"
+			expect(links[2].name).to be == 'foo'
 			
 			expect(links[1]).to be_eql links[1]
 			expect(links[0]).to_not be_eql links[1]
@@ -81,7 +83,7 @@ module Utopia::Content::LinkSpec
 			links = Utopia::Content::Links.index(root, Utopia::Path.create("/"))
 			expect(links.size).to be == 2
 			
-			links = Utopia::Content::Links.index(root, Utopia::Path.create("/"), locale: 'en')
+			links = Utopia::Content::Links.index(root, Utopia::Path.create("/"), variant: 'en')
 			expect(links.size).to be == 1
 		end
 	end

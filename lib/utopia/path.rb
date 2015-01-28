@@ -48,13 +48,12 @@ module Utopia
 		attr :name
 		attr :extension
 		
-		# Used for identifying locale information if present:
 		def parts
-			@parts ||= @name.split('.')[1..-1]
+			@parts ||= @name.split('.')
 		end
 		
-		def locale
-			parts.last
+		def variant
+			parts.last if parts.size > 1
 		end
 		
 		def to_str

@@ -37,35 +37,34 @@ module Utopia
 
 				case @kind
 				when :file
-					@name = path.last
+					name = path.last
 					@path = path
 				when :directory
-					@name = path.dirname.last
+					name = path.dirname.last
 					@path = path
 				when :virtual
-					@name = path.to_s
+					name = path.to_s
 					@path = @info[:path] ? Path.create(@info[:path]) : nil
+				else
+					raise ArgumentError.new("Unknown link kind #{@kind} with path #{path}")
 				end
 				
-				basename = Basename.new(@name)
-				@title = basename.name
-				@locale = basename.locale
+				basename = Basename.new(name)
+				
+				@name = basename.parts[0]
+				@title = Trenni::Strings.to_title(basename.name)
+				@variant = basename.variant
+			end
+
+			def method_missing(name)
+				@info[name]
 			end
 
 			attr :kind
 			attr :name
 			attr :path
 			attr :info
-			attr :locale
-
-			def [] (key)
-				# This allows order by title..
-				if key == :title
-					return @title
-				end
-				
-				return @info[key]
-			end
+			attr :variant
 
 			def href
 				@info.fetch(:uri) do
@@ -82,7 +81,7 @@ module Utopia
 			end
 
 			def title
-				@info[:title] || Trenni::Strings.to_title(@title)
+				@info.fetch(:title, @title)
 			end
 
 			def to_href(options = {})
@@ -119,11 +118,105 @@ module Utopia
 			end
 		end
 		
-		module Links
+		# Links are essentially a static list of information relating to the structure of the content. They are formed from the `links.yaml` file and the actual files on disk. 
+		class Links
+			def self.for(root, path, variant = nil)
+				links = self.new(root, path.dirname)
+				
+				links.lookup(path.last, variant)
+			end
+			
+			DEFAULT_INDEX_OPTIONS = {
+				:directories => true,
+				:files => true,
+				:virtuals => true,
+				:indices => false,
+				:sort => :order,
+				:display => :display,
+			}
+			
+			def self.index(root, path, options = {})
+				options = DEFAULT_INDEX_OPTIONS.merge(options)
+				
+				ordered = self.new(root, path, options).ordered
+				
+				# This option filters a link based on the display parameter.
+				if display_key = options[:display]
+					ordered.reject!{|link| link.info[display_key] == false}
+				end
+				
+				# Named:
+				if name = options[:name]
+					ordered.select!{|link| link.name[options[:name]]}
+				end
+				
+				# Sort:
+				if sort_key = options[:sort]
+					# Sort by sort_key, otherwise by title.
+					ordered.sort_by!{|link| [link.send(sort_key) || options[:sort_default] || 0, link.title]}
+				end
+				
+				if variant = options[:variant]
+					variants = {}
+					ordered.each do |link|
+						if link.variant == variant
+							variants[link.name] = link
+						else
+							variants[link.name] ||= link
+						end
+					end
+					
+					ordered = variants.values
+				end
+				
+				return ordered
+			end
+			
 			XNODE_FILTER = /^(.+)#{Regexp.escape XNODE_EXTENSION}$/
 			INDEX_XNODE_FILTER = /^(index(\..+)*)#{Regexp.escape XNODE_EXTENSION}$/
 			LINKS_YAML = "links.yaml"
-
+			
+			DEFAULT_OPTIONS = {
+				:directories => true,
+				:files => true,
+				:virtuals => true,
+				:indices => true,
+			}
+			
+			def initialize(root, top = Path.new, options = DEFAULT_OPTIONS)
+				@top = top
+				@options = options
+				
+				@path = File.join(root, top.components)
+				@metadata = self.class.metadata(@path)
+				
+				@ordered = []
+				@named = Hash.new{|h,k| h[k] = []}
+				
+				load_links(@metadata.dup) do |link|
+					@ordered << link
+					@named[link.name] << link
+				end
+			end
+			
+			attr :top
+			attr :ordered
+			attr :named
+			
+			def each(variant)
+				return to_enum(:each, variant) unless block_given?
+				
+				ordered.each do |links|
+					yield links.find{|link| link.variant == variant}
+				end
+			end
+			
+			def lookup(name, variant = nil)
+				@named[name].find{|link| link.variant == variant}
+			end
+			
+			private
+			
 			def self.symbolize_keys(hash)
 				# Second level attributes should be symbolic:
 				hash.each do |key, info|
@@ -132,7 +225,7 @@ module Utopia
 				
 				return hash
 			end
-
+			
 			def self.metadata(path)
 				links_path = File.join(path, LINKS_YAML)
 				
@@ -144,153 +237,65 @@ module Utopia
 				
 				return symbolize_keys(hash)
 			end
+			
+			def indices(path, &block)
+				Dir.entries(path).reject{|filename| !filename.match(INDEX_XNODE_FILTER)}
+			end
 
-			def self.indices(path, &block)
-				entries = Dir.entries(path).delete_if{|filename| !filename.match(INDEX_XNODE_FILTER)}
-
-				if block_given?
-					entries.each &block
-				else
-					return entries
+			def load_indices(name, path, metadata)
+				directory_metadata = metadata.delete(name) || {}
+				indices_metadata = Links.metadata(path)
+				
+				indices_count = 0
+				
+				indices(path).each do |filename|
+					index_name = File.basename(filename, XNODE_EXTENSION)
+					# Values in indices_metadata will override values in directory_metadata:
+					index_metadata = directory_metadata.merge(indices_metadata[index_name] || {})
+					
+					directory_link = Link.new(:directory, @top + [name, index_name], index_metadata)
+					
+					yield directory_link
+					
+					indices_count += 1
+				end
+				
+				if indices_count == 0
+					# Specify a nil uri if no index could be found for the directory:
+					yield Link.new(:directory, top + [name, ""], {:uri => nil}.merge(directory_metadata))
 				end
 			end
 
-			DEFAULT_OPTIONS = {
-				:directories => true,
-				:files => true,
-				:virtual => true,
-				:indices => false,
-				:sort => :order,
-				:display => :display,
-			}
-			
-			def self.index(root, top = Path.new, options = {})
-				options = DEFAULT_OPTIONS.merge(options)
-				path = File.join(root, top.components)
-				metadata = Links.metadata(path)
+			def entries(path)
+				Dir.entries(path).reject{|filename| filename.match(/^[\._]/)}
+			end
+
+			def load_links(metadata, &block)
+				# Load all metadata for a given path:
+				metadata = @metadata.dup
 				
-				virtual_metadata = metadata.dup
-
-				links = []
-
-				Dir.entries(path).each do |filename|
-					next if filename.match(/^[\._]/)
-
-					fullpath = File.join(path, filename)
-
-					if File.directory?(fullpath) && options[:directories]
-						name = filename
-						indices_metadata = Links.metadata(fullpath)
-						directory_metadata = metadata.delete(name) || {}
-
-						indices_count = 0
-						Links.indices(fullpath) do |index|
-							index_name = File.basename(index, XNODE_EXTENSION)
-							# Values in indices_metadata will override values in directory_metadata:
-							index_metadata = directory_metadata.merge(indices_metadata[index_name] || {})
-
-							directory_link = Link.new(:directory, top + [filename, index_name], index_metadata)
-
-							# Check for localized directory metadata and update the link:
-							if directory_link.locale
-								localized_metadata = metadata.delete(name + "." + directory_link.locale)
-
-								if localized_metadata
-									directory_link.info.update(localized_metadata)
-								end
-							end
-
-							links << directory_link
-
-							indices_count += 1
-						end
-
-						if indices_count == 0
-							# Specify a nil uri if no index could be found for the directory:
-							links << Link.new(:directory, top + [filename, ""], {:uri => nil}.merge(directory_metadata))
-						end
-					elsif filename.match(INDEX_XNODE_FILTER) && options[:indices] == false
-						name = $1
-						metadata.delete(name)
-
-						# We don't include indices in the list of pages.
-						next
-					elsif filename.match(XNODE_FILTER) && options[:files]
-						name = $1
-
-						links << Link.new(:file, top + name, metadata.delete(name))
-					end
-				end
-
-				if options[:virtual]
-					metadata.each do |name, details|
-						# Given a virtual named such as "welcome.cn", merge it with metadata from "welcome" if it exists:
-						basename, locale = name.split('.', 2)
-
-						if virtual_metadata[basename]
-							details = virtual_metadata[basename].merge(details || {})
-							name = basename
-							details[:locale] = locale
-						end
-
-						links << Link.new(:virtual, name, details)
-					end
-				end
-
-				if options[:display]
-					links = links.delete_if{|link| link[options[:display]] == false}
-				end
-
-				if options[:name]
-					links.reject!{|link| link.name.index(options[:name]) != 0}
-				end
-
-				if options[:locale]
-					reduced = []
-
-					links.group_by(&:name).each do |name, links|
-						specific = nil
-
-						links.each do |link|
-							if link.locale == options[:locale]
-								specific = link
-								break
-							elsif link.default_locale?
-								specific ||= link
-							end
-						end
-
-						reduced << specific if specific
-					end
+				# Check all entries in the given directory:
+				entries(@path).each do |filename|
+					path = File.join(@path, filename)
 					
-					links = reduced
-				end
-				
-				if options[:sort]
-					sort_key = options[:sort]
-					sort_default = options[:sort_default] || 0
-					
-					links = links.sort do |a, b|
-						result = nil
-
-						lhs = a[sort_key] || sort_default
-						rhs = b[sort_key] || sort_default
-						
-						begin
-							result ||= lhs <=> rhs
-						rescue
-							# LOG.debug("Invalid comparison between #{a.path} and #{b.path} using key #{options[:sort]}!")
-						end
-						
-						if result == 0 || result == nil
-							a.title <=> b.title
-						else
-							result
-						end
+					# There are two types of filesystem based links:
+					# 1/ Named files, e.g. foo.xnode, name=foo
+					# 2/ Directories, e.g. bar/index.xnode, name=bar
+					if File.directory?(path) and @options[:directories]
+						load_indices(filename, path, metadata, &block)
+					elsif filename.match(INDEX_XNODE_FILTER) and @options[:indices] == false
+						metadata.delete($1) # We don't include indices in the list of pages.
+					elsif filename.match(XNODE_FILTER) and @options[:files]
+						yield Link.new(:file, @top + $1, metadata.delete($1))
 					end
 				end
 				
-				return links
+				if @options[:virtuals]
+					# After processing all directory entries, we are left with virtual entries in the metadata:
+					metadata.each do |name, info|
+						yield Link.new(:virtual, name, info)
+					end
+				end
 			end
 		end
 	end

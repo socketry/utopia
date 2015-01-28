@@ -47,17 +47,17 @@ module Utopia::ContentSpec
 			expect(links[1].name).to be == 'second'
 		end
 		
-		it "shoud list related links" do
+		it "should list related links" do
 			node = content.lookup_node(Utopia::Path['/related/foo.en'])
 			
 			links = node.related_links
 			
 			expect(links.size).to be == 2
-			expect(links[0].name).to be == 'foo.en'
-			expect(links[0].locale).to be == 'en'
+			expect(links[0].name).to be == 'foo'
+			expect(links[0].variant).to be == 'en'
 			
-			expect(links[1].name).to be == 'foo.jp'
-			expect(links[1].locale).to be == 'jp'
+			expect(links[1].name).to be == 'foo'
+			expect(links[1].variant).to be == 'ja'
 		end
 	end
 end
