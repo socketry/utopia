@@ -63,10 +63,10 @@ module Utopia::PathSpec
 		it "should remove the extension from the basename" do
 			path = Utopia::Path["dir/foo.html"]
 			
-			basename = path.basename(".html")
+			basename = path.basename("html")
 			
 			expect(basename.name).to be == 'foo'
-			expect(basename.extension).to be == '.html'
+			expect(basename.extension).to be == 'html'
 		end
 		
 		it "should be able to convert into a directory" do
