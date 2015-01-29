@@ -228,10 +228,7 @@ module Utopia
 				path = Path[path_info].simplify
 				
 				if locale = env[Localization::CURRENT_LOCALE_KEY]
-					filename = path.last
-					
-					# Modify in place:
-					filename.insert(filename.rindex('.') || -1, ".#{locale}")
+					path.last.insert(path.last.rindex('.') || -1, ".#{locale}")
 				end
 				
 				if file = fetch_file(path)

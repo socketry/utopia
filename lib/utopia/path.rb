@@ -79,6 +79,33 @@ module Utopia
 			
 			super
 		end
+		
+		# Returns the length of the prefix which is shared by two strings.
+		def self.prefix_length(a, b)
+			[a.size, b.size].min.times{|i| return i if a[i] != b[i]}
+		end
+		
+		# Return the shortest relative path to get to path from root:
+		def self.shortest_path(path, root)
+			path = self.create(path)
+			root = self.create(root)
+			
+			root = root.dirname.to_directory unless root.directory?
+			
+			# Find the common prefix:
+			i = prefix_length(path.components, root.components) || 0
+			
+			# The difference between the root path and the required path, taking into account the common prefix:
+			up = (root.components.size - i) - 1
+			
+			raise ArgumentError.new("Invalid shortest path: #{root.inspect} <- #{path.inspect} (up = #{up})") if up < 0
+			
+			return self.create([".."] * up + path.components[i..-1])
+		end
+
+		def shortest_path(root)
+			self.class.shortest_path(self, root)
+		end
 
 		def self.unescape(string)
 			string.tr('+', ' ').gsub(/((?:%[0-9a-fA-F]{2})+)/n) {

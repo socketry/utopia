@@ -50,12 +50,13 @@ module Utopia
 					raise ArgumentError.new("Unknown link kind #{@kind} with path #{path}")
 				end
 				
-				# This is a bit of a hack and should probably be revisited at some point:
-				@href = @info.fetch(:uri) do
+				@title = Trenni::Strings.to_title(@name)
+			end
+
+			def href
+				@href ||= @info.fetch(:uri) do
 					(@path.dirname + @path.basename.parts[0]).to_s if @path
 				end
-				
-				@title = Trenni::Strings.to_title(@name)
 			end
 
 			def [] key
@@ -65,12 +66,19 @@ module Utopia
 			attr :kind
 			attr :name
 			attr :path
-			attr :href # the path without any variant
 			attr :info
 			attr :variant
 
 			def href?
-				return href != nil
+				!!href
+			end
+
+			def relative_href(base = nil)
+				if base and href.start_with? '/'
+					Path.shortest_path(href, base)
+				else
+					href
+				end
 			end
 
 			def title
@@ -80,7 +88,9 @@ module Utopia
 			def to_href(options = {})
 				Trenni::Builder.fragment(options[:builder]) do |builder|
 					if href?
-						builder.inline('a', class: options.fetch(:class, 'link'), href: href) do
+						relative_href(options[:base])
+						
+						builder.inline('a', class: options.fetch(:class, 'link'), href: relative_href(options[:base])) do
 							builder.text(options[:content] || title)
 						end
 					else

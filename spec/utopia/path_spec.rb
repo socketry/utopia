@@ -1,3 +1,5 @@
+#!/usr/bin/env rspec
+
 # Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -126,6 +128,28 @@ module Utopia::PathSpec
 			path = Utopia::Path["dir/foo.html"]
 			
 			expect(root.expand(root)).to be == root
+		end
+		
+		it "should give the shortest path for outer paths" do
+			input = Utopia::Path.create("/a/b/c/index")
+			output = Utopia::Path.create("/a/b/c/d/e/")
+			
+			short = input.shortest_path(output)
+			
+			expect(short.components).to be == ["..", "..", "index"]
+			
+			expect((output + short).simplify).to be == input
+		end
+		
+		it "should give the shortest path for inner paths" do
+			input = Utopia::Path.create("/a/b/c/index")
+			output = Utopia::Path.create("/a/")
+			
+			short = input.shortest_path(output)
+			
+			expect(short.components).to be == ["b", "c", "index"]
+			
+			expect((output + short).simplify).to be == input
 		end
 	end
 end
