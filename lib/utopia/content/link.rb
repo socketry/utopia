@@ -26,8 +26,6 @@ require_relative '../path'
 
 module Utopia
 	class Content
-		XNODE_EXTENSION = '.xnode'.freeze
-		
 		class Link
 			def initialize(kind, path, info = nil)
 				path = Path.create(path)

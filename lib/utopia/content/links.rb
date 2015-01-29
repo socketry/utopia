@@ -22,6 +22,8 @@ require_relative 'link'
 
 module Utopia
 	class Content
+		XNODE_EXTENSION = '.xnode'.freeze
+		
 		# Links are essentially a static list of information relating to the structure of the content. They are formed from the `links.yaml` file and the actual files on disk. 
 		class Links
 			def self.for(root, path, variant = nil)
