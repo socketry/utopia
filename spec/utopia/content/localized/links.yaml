@@ -1,0 +1,16 @@
+one:
+  order: 1
+two.en: &two
+  order: 2
+two.zh:
+  <<: *two
+three:
+  order: 3
+four.en: &four
+  order: 4
+  title: "Four"
+four.zh:
+  order: 4
+  title: "四"
+five.en:
+  order: 5

@@ -21,7 +21,7 @@
 require 'set'
 
 require_relative 'processor'
-require_relative 'link'
+require_relative 'links'
 
 module Utopia
 	class Content
