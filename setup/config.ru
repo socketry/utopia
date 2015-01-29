@@ -1,5 +1,9 @@
 #!/usr/bin/env rackup
 
+# Setup default encoding:
+Encoding.default_external = Encoding::UTF_8
+Encoding.default_internal = Encoding::UTF_8
+
 # Setup the server environment:
 RACK_ENV = ENV.fetch('RACK_ENV', :development).to_sym unless defined?(RACK_ENV)
 
@@ -41,7 +45,7 @@ use Utopia::Redirector,
 use Utopia::Localization,
 	:default_locale => 'en',
 	:locales => ['en', 'de', 'ja', 'zh'],
-	:nonlocalized => ['/_static/']
+	:nonlocalized => ['/_static/', '/_cache/']
 
 use Utopia::Controller,
 	cache_controllers: (RACK_ENV == :production)
