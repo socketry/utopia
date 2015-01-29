@@ -73,7 +73,7 @@ module Utopia
 				# Sort:
 				if sort_key = options[:sort]
 					# Sort by sort_key, otherwise by title.
-					ordered.sort_by!{|link| [link.send(sort_key) || options[:sort_default] || 0, link.title]}
+					ordered.sort_by!{|link| [link[sort_key] || options[:sort_default] || 0, link.title]}
 				end
 				
 				return ordered

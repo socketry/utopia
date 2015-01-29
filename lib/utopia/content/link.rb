@@ -58,14 +58,6 @@ module Utopia
 				@title = Trenni::Strings.to_title(@name)
 			end
 
-			def method_missing(name)
-				@info[name]
-			end
-
-			def respond_to? name
-				@info.key?(name) || super
-			end
-
 			def [] key
 				@info[key]
 			end
