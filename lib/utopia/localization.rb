@@ -62,7 +62,23 @@ module Utopia
 		attr :default_locale
 		
 		def preferred_locales(env)
-			browser_preferred_locales(env) | [@default_locale, nil]
+			request_preferred_locales(env) | browser_preferred_locales(env) | [@default_locale, nil]
+		end
+		
+		def request_preferred_locales(env)
+			path = Path[env['PATH_INFO']]
+			
+			if all_locales.include? path.first
+				request_locale = path.first
+				
+				# Remove the localization prefix.
+				path.delete_at(0)
+				env['PATH_INFO'] = path.to_s
+				
+				return [request_locale]
+			else
+				return []
+			end
 		end
 		
 		def browser_preferred_locales(env)
@@ -109,33 +125,19 @@ module Utopia
 			return @app.call(env) if nonlocalized?(env)
 			
 			env[LOCALIZATION_KEY] = self
-			path = Path[env['PATH_INFO']]
 			
-			# Are we already within a localized hierarchy?
-			if all_locales.include? path.first
-				# This is a localized path with a specific localization, e.g. '/fr/test.txt' so we should rewrite the request to the non-localized path but specify the localized header:
-				env[CURRENT_LOCALE_KEY] = path.first
+			response = nil
+			
+			# We have a non-localized request, but there might be a localized resource. We return the best localization possible:
+			preferred_locales(env).each do |locale|
+				env[CURRENT_LOCALE_KEY] = locale
 				
-				# Remove the localization prefix.
-				path.delete_at(0)
-				env['PATH_INFO'] = path.to_s
+				response = @app.call(env)
 				
-				# This is a direct request to a specific resource:
-				return @app.call(env)
-			else
-				response = nil
-				
-				# We have a non-localized request, but there might be a localized resource. We return the best localization possible:
-				preferred_locales(env).each do |locale|
-					env[CURRENT_LOCALE_KEY] = locale
-					
-					response = @app.call(env)
-					
-					break unless response[0] >= 400
-				end
-				
-				return vary(env, response)
+				break unless response[0] >= 400
 			end
+			
+			return vary(env, response)
 		end
 	end
 end
