@@ -169,7 +169,7 @@ module Utopia
 					
 					# Merge metadata from foo.en into foo/index.en
 					if directory_link.variant
-						if variant_metadata = metadata.delete(filename + '.' + directory_link.variant)
+						if variant_metadata = metadata.delete(directory_link.name + '.' + directory_link.variant)
 							directory_link.info.update(variant_metadata)
 						end
 					end
