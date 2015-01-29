@@ -88,17 +88,13 @@ module Utopia
 		# Return the shortest relative path to get to path from root:
 		def self.shortest_path(path, root)
 			path = self.create(path)
-			root = self.create(root)
-			
-			root = root.dirname.to_directory unless root.directory?
+			root = self.create(root).dirname
 			
 			# Find the common prefix:
 			i = prefix_length(path.components, root.components) || 0
 			
 			# The difference between the root path and the required path, taking into account the common prefix:
-			up = (root.components.size - i) - 1
-			
-			raise ArgumentError.new("Invalid shortest path: #{root.inspect} <- #{path.inspect} (up = #{up})") if up < 0
+			up = root.components.size - i
 			
 			return self.create([".."] * up + path.components[i..-1])
 		end
