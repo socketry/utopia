@@ -26,3 +26,14 @@ end
 on 'index' do
 	success! content: 'Hello World'
 end
+
+class TharSheBlows < StandardError
+end
+
+on 'blow' do
+	raise TharSheBlows.new("Arrrh!")
+end
+
+on 'exception' do
+	raise TharSheBlows.new("Yarrh!")
+end

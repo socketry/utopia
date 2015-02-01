@@ -45,7 +45,7 @@ module Utopia
 			return [400, {"Content-Type" => "text/html"}, body]
 		end
 
-		def redirect(env, ex)
+		def redirect(env, exception)
 			return @app.call(env.merge('PATH_INFO' => @location, 'REQUEST_METHOD' => 'GET'))
 		end
 
@@ -58,19 +58,19 @@ module Utopia
 				
 				log.error "Exception #{exception.to_s.dump}!"
 				
-				ex.backtrace.each do |bt|
-					log.error bt
+				exception.backtrace.each do |line|
+					log.error line
 				end
 				
 				# If the error occurred while accessing the error handler, we finish with a fatal error:
 				if env['PATH_INFO'] == @location
-					return fatal_error(env, ex)
+					return fatal_error(env, exception)
 				else
 					# If redirection fails, we also finish with a fatal error:
 					begin
-						return redirect(env, ex)
+						return redirect(env, exception)
 					rescue
-						return fatal_error(env, ex)
+						return fatal_error(env, exception)
 					end
 				end
 			end
