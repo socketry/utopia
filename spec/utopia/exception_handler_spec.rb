@@ -20,11 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'spec_helper'
-
 require 'rack/mock'
 require 'rack/test'
 
+require 'utopia/controller'
 require 'utopia/exception_handler'
 
 module Utopia::ExceptionHandlerSpec
