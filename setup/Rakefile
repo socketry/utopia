@@ -11,7 +11,7 @@ task :deploy do
 	$stderr.puts "Updating site #{Dir.pwd} as #{`whoami`.chomp}..."
 	sh("sudo -u http git checkout -f")
 	sh("sudo -u http git submodule update -i")
-	sh("sudo -u http bundle install")
+	sh("sudo -u http bundle install --deployment")
 	
 	$stderr.puts "Restarting server..."
 	sh("sudo -u http touch tmp/restart.txt")

@@ -33,7 +33,7 @@ $app = Rake.application = Rake::Application.new
 $app.init('Utopia')
 
 module Setup
-	DIRECTORIES = ["cache", "cache/meta", "cache/body", "lib", "pages", "public"]
+	DIRECTORIES = ["cache", "cache/meta", "cache/body", "lib", "pages", "public", "tmp"]
 	SYMLINKS = {"public/_static" => "../pages/_static"}
 	
 	CONFIGURATION_FILES = ['config.ru', 'Gemfile', 'Rakefile']
