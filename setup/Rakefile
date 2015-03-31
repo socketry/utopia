@@ -3,16 +3,21 @@ task :server do
 	system('puma')
 end
 
+DEPLOY_USER = 'http'
+DEPLOY_GROUP = DEPLOY_USER
+
 task :deploy do
 	$stderr.puts "Updating permissions..."
-	sh("chmod -Rf ug+rwX .")
-	sh("chown -Rf http:http .")
+	# If you push to git with your own user, you need to set the files to be owned by the deployment user:
+	sh("chmod -Rf ug+rwX .") rescue nil
+	sh("chown -Rf #{DEPLOY_USER}:#{DEPLOY_GROUP} .") rescue nil
 	
 	$stderr.puts "Updating site #{Dir.pwd} as #{`whoami`.chomp}..."
-	sh("sudo -u http git checkout -f")
-	sh("sudo -u http git submodule update -i")
-	sh("sudo -u http bundle install --deployment")
+	# Then we need to deploy the relevant bits:
+	sh("sudo -u #{DEPLOY_USER} git checkout -f")
+	sh("sudo -u #{DEPLOY_USER} git submodule update -i")
+	sh("sudo -u #{DEPLOY_USER} bundle install --deployment")
 	
 	$stderr.puts "Restarting server..."
-	sh("sudo -u http touch tmp/restart.txt")
+	sh("sudo -u #{DEPLOY_USER} mkdir tmp && touch tmp/restart.txt")
 end

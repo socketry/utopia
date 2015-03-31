@@ -104,8 +104,6 @@ task :upgrade do
 	
 	destination_root = File.expand_path(ARGV.last || '.', Dir.getwd)
 	setup_root = File.expand_path("../../setup", __FILE__)
-	directories = ["cache", "cache/meta", "cache/body", "lib", "pages", "public"]
-	symlinks = {"public/_static" => "../pages/_static"}
 	branch_name = "utopia-upgrade-#{Utopia::VERSION}"
 	
 	$stderr.puts "Upgrading #{destination_root}..."
