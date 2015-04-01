@@ -164,6 +164,81 @@ task :upgrade do
 	$stderr.puts "*** Thanks for using Utopia! ***"
 end
 
+# Add the following into sudoers for this to work correctly:
+# Users in group wheel can execute all commands as user http with no password.
+# %wheel ALL=(http) NOPASSWD: ALL
+
+POST_RECEIVE = <<EOF
+#!/usr/bin/env ruby
+
+require 'etc'
+
+def sh(*args)
+	puts "-> #{args.join(' ')}"
+	system(*args)
+end
+
+working_tree = `git config core.worktree`.chomp
+
+puts "Updating Site #{working_tree}..."
+
+working_tree_stat = File.stat(working_tree)
+deploy_user = Etc.getpwuid(working_tree_stat.uid).name
+deploy_group = Etc.getgrgid(working_tree_stat.gid).name
+
+puts "Updating permissions..."
+
+Dir.chdir(working_tree) do
+	sh("chmod -Rf ug+rwX .")
+	sh("chown -Rf #{deploy_user}:#{deploy_group} .")
+
+	puts "Updating site #{Dir.pwd} as #{deploy_user}:#{deploy_group}..."
+	
+	sh("sudo -u #{deploy_user} git checkout -f")
+	sh("sudo -u #{deploy_user} git submodule update -i")
+	
+	if File.exist? 'Gemfile'
+		sh("sudo -u #{deploy_user} bundle install --deployment")
+	end
+	
+	ENV['DEPLOY_USER'] = deploy_user
+	ENV['DEPLOY_GROUP'] = deploy_group
+	
+	if File.exist? 'Rakefile'
+		sh("rake deploy") rescue nil
+	end
+	
+	puts "Restarting server..."
+	sh("sudo -u #{deploy_user} mkdir -p tmp && touch tmp/restart.txt")
+end
+
+EOF
+
+namespace :server do
+	task :setup do
+		deploy_user = ENV['DEPLOY_USER'] or 'http'
+		deploy_group = ENV['DEPLOY_GROUP'] or deploy_user or 'http'
+		
+		$stderr.puts("Usage: #{File.basename $0} server:setup $path") & exit if ARGV.size != 2 
+		destination_root = File.expand_path(ARGV.last || '.', Dir.getwd)
+		
+		FileUtils.mkdir_p File.join(destination_root, "public")
+		FileUtils.mkdir_p File.join(destination_root, "tmp")
+		
+		Dir.chdir(destination_root) do
+			# Shared allows multiple users to access the site with the same group:
+			sh("sudo", "-u", deploy_user, "git", "init", "--shared")
+			sh("sudo", "-u", deploy_user, "git", "config", "receive.denyCurrentBranch", "ignore")
+			sh("sudo", "-u", deploy_user, "git", "config", "core.worktree", destination_root)
+			
+			File.open(".git/hooks/post-receive", "w") {|file| file.write(POST_RECEIVE)}
+			FileUtils.chmod 0755, ".git/hooks/post-receive"
+		end
+		
+		sh("chown", "-R", "#{deploy_user}:#{deploy_group}", destination_root)
+	end
+end
+
 task :help do
 	$stderr.puts "To create a new site, use the create task:"
 	$stderr.puts "\t#{File.basename($0)} create path/to/www.example.com"
