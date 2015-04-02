@@ -33,15 +33,23 @@ $app = Rake.application = Rake::Application.new
 $app.init('Utopia')
 
 module Setup
-	DIRECTORIES = ["cache", "cache/meta", "cache/body", "lib", "pages", "public", "tmp"]
-	SYMLINKS = {"public/_static" => "../pages/_static"}
+	BASE = File.expand_path("../../setup", __FILE__)
 	
-	CONFIGURATION_FILES = ['config.ru', 'Gemfile', 'Rakefile']
+	module Site
+		CONFIGURATION_FILES = ['config.ru', 'Gemfile', 'Rakefile', 'README.md']
+		
+		DIRECTORIES = ["cache", "cache/meta", "cache/body", "lib", "pages", "public", "tmp"]
+		SYMLINKS = {"public/_static" => "../pages/_static"}
+		
+		# Removed during upgrade process
+		OLD_DIRECTORIES = ["access_log"]
+		
+		ROOT = File.join(BASE, 'site')
+	end
 	
-	# Removed during upgrade process
-	OLD_DIRECTORIES = ["access_log"]
-	
-	ROOT = File.expand_path("../../setup", __FILE__)
+	module Server
+		ROOT = File.join(BASE, 'server')
+	end
 end
 
 task :create do
@@ -49,38 +57,34 @@ task :create do
 	
 	destination_root = File.expand_path(ARGV.last, Dir.getwd)
 	
-	$stderr.puts "Copying files from #{Setup::ROOT} to #{destination_root}..."
+	$stderr.puts "Copying files from #{Setup::Site::ROOT} to #{destination_root}..."
 	
-	Setup::DIRECTORIES.each do |directory|
+	Setup::Site::DIRECTORIES.each do |directory|
 		FileUtils.mkdir_p(File.join(destination_root, directory))
 	end
 	
-	Find.find(Setup::ROOT) do |source_path|
+	Find.find(Setup::Site::ROOT) do |source_path|
 		# What is this doing?
-		destination_path = File.join(destination_root, source_path[Setup::ROOT.size..-1])
+		destination_path = File.join(destination_root, source_path[Setup::Site::ROOT.size..-1])
 		
 		if File.directory?(source_path)
 			FileUtils.mkdir_p(destination_path)
 		else
-			if File.exist? destination_path
-				$stderr.puts "\tFile already exists: #{destination_path}!"
-			else
-				$stderr.puts "\tCopying #{source_path} to #{destination_path}..."
+			unless File.exist? destination_path
 				FileUtils.copy_entry(source_path, destination_path)
 			end
 		end
 	end
 	
-	Setup::SYMLINKS.each do |path, target|
-		FileUtils.ln_s(target, File.join(destination_root, path))
+	Setup::Site::SYMLINKS.each do |path, target|
+		FileUtils.ln_s(target, File.join(destination_root, path), force: true)
 	end
 	
-	Setup::CONFIGURATION_FILES.each do |configuration_file|
+	Setup::Site::CONFIGURATION_FILES.each do |configuration_file|
 		destination_path = File.join(destination_root, configuration_file)
 		
-		$stderr.puts "Updating #{destination_path}..."
-		
 		buffer = File.read(destination_path).gsub('$UTOPIA_VERSION', Utopia::VERSION)
+		
 		File.open(destination_path, "w") { |file| file.write(buffer) }
 	end
 	
@@ -100,8 +104,10 @@ task :create do
 		end
 	end
 	
-	$stderr.puts "*** Thanks for using Utopia! ***"
-	$stderr.puts "To start the server:\n\tcd #{destination_root}\n\trake server"
+	puts "Thank you for using Utopia!"
+	puts "We sincerely hope that Utopia helps to make your life easier and more enjoyable. ~ Samuel."
+	
+	puts "For your next steps, please checkout the README.md file in your new site!"
 end
 
 task :upgrade do
@@ -116,22 +122,22 @@ task :upgrade do
 		sh('git', 'checkout', '-b', branch_name)
 	end
 	
-	Setup::DIRECTORIES.each do |directory|
+	Setup::Site::DIRECTORIES.each do |directory|
 		FileUtils.mkdir_p(File.join(destination_root, directory))
 	end
 	
-	Setup::OLD_DIRECTORIES.each do |directory|
+	Setup::Site::OLD_DIRECTORIES.each do |directory|
 		path = File.join(destination_root, directory)
 		$stderr.puts "\tRemoving #{path}..."
 		FileUtils.rm_rf(path)
 	end
 	
-	Setup::SYMLINKS.each do |path, target|
+	Setup::Site::SYMLINKS.each do |path, target|
 		FileUtils.ln_s(target, File.join(destination_root, path), force: true)
 	end
 	
-	Setup::CONFIGURATION_FILES.each do |configuration_file|
-		source_path = File.join(Setup::ROOT, configuration_file)
+	Setup::Site::CONFIGURATION_FILES.each do |configuration_file|
+		source_path = File.join(Setup::Site::ROOT, configuration_file)
 		destination_path = File.join(destination_root, configuration_file)
 		
 		$stderr.puts "Updating #{destination_path}..."
@@ -169,10 +175,7 @@ task :upgrade do
 end
 
 namespace :server do
-	task :setup do
-		deploy_user = ENV.fetch('DEPLOY_USER', 'http')
-		deploy_group = ENV.fetch('DEPLOY_GROUP', deploy_user)
-		
+	task :create do
 		$stderr.puts("Usage: #{File.basename $0} server:setup $path") & exit if ARGV.size != 2 
 		destination_root = File.expand_path(ARGV.last || '.', Dir.getwd)
 		
@@ -181,14 +184,12 @@ namespace :server do
 		
 		Dir.chdir(destination_root) do
 			# Shared allows multiple users to access the site with the same group:
-			sh("sudo", "-u", deploy_user, "git", "init", "--shared")
-			sh("sudo", "-u", deploy_user, "git", "config", "receive.denyCurrentBranch", "ignore")
-			sh("sudo", "-u", deploy_user, "git", "config", "core.worktree", destination_root)
+			sh("git", "init", "--shared")
+			sh("git", "config", "receive.denyCurrentBranch", "ignore")
+			sh("git", "config", "core.worktree", destination_root)
 			
-			sh("sudo", "-u", deploy_user, "cp", "-r", File.join(Setup::ROOT, 'git', 'hooks'), File.join(destination_root, '.git', 'hooks'))
+			sh("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git'))
 		end
-		
-		sh("chown", "-R", "#{deploy_user}:#{deploy_group}", destination_root)
 	end
 end
 
@@ -198,6 +199,9 @@ task :help do
 	
 	$stderr.puts "To upgrade an existing site, use the upgrade task:"
 	$stderr.puts "\t#{File.basename($0)} upgrade path/to/www.example.com"
+	
+	$stderr.puts "To create a remote deployment for an existing site, use the server:create task:"
+	$stderr.puts "\t#{File.basename($0)} server:create /srv/http/www.example.com"
 end
 
 task :default => :help

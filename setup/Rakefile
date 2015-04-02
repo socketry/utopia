@@ -1,8 +1,0 @@
-
-task :server do
-	system('puma')
-end
-
-task :deploy do
-	# Post update on server.
-end

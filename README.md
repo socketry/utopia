@@ -14,10 +14,6 @@ Utopia builds on top of Rack with the following middleware:
 - `Utopia::Content`: XML-style template engine with powerful tag behaviours.
 - `Utopia::Session::EncryptedCookie`: Session storage using an encrypted cookie.
 
-For more details please see the main [project page][1].
-
-[1]: http://www.oriontransfer.co.nz/gems/utopia
-
 [![Build Status](https://secure.travis-ci.org/ioquatix/utopia.png)](http://travis-ci.org/ioquatix/utopia)
 [![Code Climate](https://codeclimate.com/github/ioquatix/utopia.png)](https://codeclimate.com/github/ioquatix/utopia)
 [![Coverage Status](https://coveralls.io/repos/ioquatix/utopia/badge.svg)](https://coveralls.io/r/ioquatix/utopia)
@@ -50,6 +46,8 @@ The encrypted cookie session management uses symmetric private key encryption to
 
 ## Installation
 
+### Local Setup
+
 Install utopia:
 
 	$ gem install utopia
@@ -73,6 +71,42 @@ Then add the appropriate `<script>` tags to `pages/_page.xnode`:
 ## Usage
 
 The default site includes documentation and examples.
+
+### Server Setup
+
+Utopia can be used to set up remote sites quickly and easily.
+
+Firstly log into your remote site using `ssh` and install utopia:
+
+	$ ssh remote
+	$ sudo gem install utopia
+
+Then use the utopia command to generate a new remote site:
+
+	$ sudo -u http utopia server:create /srv/http/www.example.com
+
+### Passenger+Nginx Setup
+
+Utopia works well with Passenger+Nginx. Installing Passenger+Nginx is easy:
+
+	$ ssh remote
+	$ sudo gem install passenger
+	$ passenger-install-nginx-module
+
+Then, Nginx is configured like so:
+
+	server {
+		listen 80;
+		server_name www.example.com;
+		root /srv/http/www.example.com/public;
+		passenger_enabled on;
+	}
+
+	server {
+		listen 80;
+		server_name example.com;
+		rewrite ^ http://www.example.com$uri permanent;
+	}
 
 ## Contributing
 
