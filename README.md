@@ -58,7 +58,7 @@ Create a new site:
 	$ cd www.example.com
 	$ rake server
 
-### Bower Integration
+#### Bower Integration
 
 If you create a site using the utopia generator, it includes a `.bowerrc` configuration which installs components into `public/_static/components`. To install jquery, for example:
 
@@ -67,10 +67,6 @@ If you create a site using the utopia generator, it includes a `.bowerrc` config
 Then add the appropriate `<script>` tags to `pages/_page.xnode`:
 
 	<script src="/_static/components/jquery/dist/jquery.min.js" type="text/javascript"></script>
-
-## Usage
-
-The default site includes documentation and examples.
 
 ### Server Setup
 
@@ -84,6 +80,11 @@ Firstly log into your remote site using `ssh` and install utopia:
 Then use the utopia command to generate a new remote site:
 
 	$ sudo -u http utopia server:create /srv/http/www.example.com
+
+On the local site, you can set up a git remote:
+
+	$ git remote add production ssh://remote/srv/http/www.example.com
+	$ git push --set-upstream production master
 
 ### Passenger+Nginx Setup
 
@@ -107,6 +108,10 @@ Then, Nginx is configured like so:
 		server_name example.com;
 		rewrite ^ http://www.example.com$uri permanent;
 	}
+
+## Usage
+
+The default site includes documentation and examples.
 
 ## Contributing
 
