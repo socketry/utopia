@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+
+# Copyright, 2015, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
+require 'etc'
+
+# Add the following into sudoers for this to work correctly:
+# Users in group wheel can execute all commands as user http with no password.
+# %wheel ALL=(http) NOPASSWD: ALL
+
+working_tree = `git config core.worktree`.chomp
+
+puts "Updating Site #{working_tree} with Utopia v#{Utopia::VERSION}..."
+
+# Figure out the user and group of the working tree:
+working_tree_stat = File.stat(working_tree)
+deploy_user = Etc.getpwuid(working_tree_stat.uid).name
+deploy_group = Etc.getgrgid(working_tree_stat.gid).name
+
+puts "Updating permissions..."
+
+Dir.chdir(working_tree) do
+	sh("chmod -Rf ug+rwX .")
+	sh("chown -Rf #{deploy_user}:#{deploy_group} .")
+
+	puts "Updating site #{Dir.pwd} as #{deploy_user}:#{deploy_group}..."
+	
+	sh("sudo -u #{deploy_user} git checkout -f")
+	sh("sudo -u #{deploy_user} git submodule update -i")
+	
+	if File.exist? 'Gemfile'
+		sh("sudo -u #{deploy_user} bundle install --deployment")
+	end
+	
+	ENV['DEPLOY_USER'] = deploy_user
+	ENV['DEPLOY_GROUP'] = deploy_group
+	
+	if File.exist? 'Rakefile'
+		sh("rake deploy") rescue nil
+	end
+	
+	puts "Restarting server..."
+	sh("sudo -u #{deploy_user} mkdir -p tmp && touch tmp/restart.txt")
+end
