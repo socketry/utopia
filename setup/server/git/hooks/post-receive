@@ -52,14 +52,14 @@ Dir.chdir(working_tree) do
 	sh("sudo -u #{deploy_user} git submodule update -i")
 	
 	if File.exist? 'Gemfile'
-		sh("sudo -u #{deploy_user} bundle install --deployment")
+		sh("sudo -u #{deploy_user} bundle install --deployment") or abort("Could not setup bundle!")
 	end
 	
 	ENV['DEPLOY_USER'] = deploy_user
 	ENV['DEPLOY_GROUP'] = deploy_group
 	
 	if File.exist? 'Rakefile'
-		sh("rake deploy")
+		sh("rake deploy") or abort("Deploy task failed!")
 	end
 	
 	puts "Restarting server..."

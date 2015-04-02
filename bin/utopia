@@ -32,6 +32,8 @@ require 'rake'
 $app = Rake.application = Rake::Application.new
 $app.init('Utopia')
 
+verbose(false)
+
 module Setup
 	BASE = File.expand_path("../../setup", __FILE__)
 	
@@ -57,7 +59,7 @@ task :create do
 	
 	destination_root = File.expand_path(ARGV.last, Dir.getwd)
 	
-	$stderr.puts "Copying files from #{Setup::Site::ROOT} to #{destination_root}..."
+	$stderr.puts "Setting up initial site in #{destination_root}..."
 	
 	Setup::Site::DIRECTORIES.each do |directory|
 		FileUtils.mkdir_p(File.join(destination_root, directory))
@@ -91,7 +93,7 @@ task :create do
 	Dir.chdir(destination_root) do
 		if `which bundle`.strip != ''
 			puts "Generating initial package list with bundle..."
-			sh("bundle", "install")
+			sh("bundle", "install", "--quiet")
 		end
 		
 		if `which git`.strip == ""
@@ -100,14 +102,21 @@ task :create do
 			puts "Setting up git repository..."
 			sh("git", "init")
 			sh("git", "add", ".")
-			sh("git", "commit", "-m", "Initial Utopia v#{Utopia::VERSION} site.")
+			sh("git", "commit", "-q", "-m", "Initial Utopia v#{Utopia::VERSION} site.")
 		end
 	end
 	
-	puts "Thank you for using Utopia!"
-	puts "We sincerely hope that Utopia helps to make your life easier and more enjoyable. ~ Samuel."
+	name = `git config user.name || whoami`.chomp
 	
-	puts "For your next steps, please checkout the README.md file in your new site!"
+	puts
+	puts "  #{name},".ljust(78)
+	puts "Thank you for using Utopia!".center(78)
+	puts "We sincerely hope that Utopia helps to".center(78)
+	puts "make your life easier and more enjoyable.".center(78)
+	puts ""
+	puts "For extreme productivity, please consult the online documentation".center(78)
+	puts "https://github.com/ioquatix/utopia".center(78)
+	puts " ~ Samuel.  ".rjust(78)
 end
 
 task :upgrade do
@@ -170,8 +179,6 @@ task :upgrade do
 		sh("git", "checkout", "master")
 		sh("git", "branch", "-d", branch_name)
 	end
-	
-	$stderr.puts "*** Thanks for using Utopia! ***"
 end
 
 namespace :server do
@@ -190,6 +197,10 @@ namespace :server do
 			
 			sh("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git'))
 		end
+		
+		hostname = `hostname`.chomp
+		puts "Now add the remote:\n\tgit remote add production ssh://#{hostname}#{destination_root}"
+		puts "Then push to the server:\n\tgit push --set-upstream production master"
 	end
 end
 
