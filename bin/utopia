@@ -36,7 +36,7 @@ module Setup
 	BASE = File.expand_path("../../setup", __FILE__)
 	
 	module Site
-		CONFIGURATION_FILES = ['config.ru', 'Gemfile', 'Rakefile', 'README.md']
+		CONFIGURATION_FILES = ['config.ru', 'Gemfile', 'Rakefile']
 		
 		DIRECTORIES = ["cache", "cache/meta", "cache/body", "lib", "pages", "public", "tmp"]
 		SYMLINKS = {"public/_static" => "../pages/_static"}
