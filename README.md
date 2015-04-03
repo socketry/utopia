@@ -5,44 +5,9 @@ to build highly complex dynamic websites. It uses the filesystem heavily for
 content and provides functions for interacting with files and directories as
 structure representing the website.
 
-Utopia builds on top of Rack with the following middleware:
-
-- `Utopia::Static`: Serve static files with recursive lookup.
-- `Utopia::Redirector`: Redirect URL patterns and status codes.
-- `Utopia::Localization`: Non-intrusive localization of resources.
-- `Utopia::Controller`: Dynamic behaviour with recursive execution.
-- `Utopia::Content`: XML-style template engine with powerful tag behaviours.
-- `Utopia::Session::EncryptedCookie`: Session storage using an encrypted cookie.
-
 [![Build Status](https://secure.travis-ci.org/ioquatix/utopia.png)](http://travis-ci.org/ioquatix/utopia)
 [![Code Climate](https://codeclimate.com/github/ioquatix/utopia.png)](https://codeclimate.com/github/ioquatix/utopia)
 [![Coverage Status](https://coveralls.io/repos/ioquatix/utopia/badge.svg)](https://coveralls.io/r/ioquatix/utopia)
-
-## Middleware
-
-### Static
-
-This middleware serves static files using the `mime-types` library. By default, it works with `Rack::Sendfile` and `Rack::Cache` and supports `ETag` based caching.
-
-### Redirector
-
-A flexible high level URI rewriting system which includes support for string mappings, regular expressions and status codes (e.g. 404 errors).
-
-### Localization
-
-The localization middleware uses the `Accept-Language` header to guess the preferred locale out of the given options. If a request path maps to a resource, that resource is returned. Otherwise, a localized request is made.
-
-### Controller
-
-A simple recursive controller layer which works in isolation from the view rendering middleware. A controller consists of a set of actions which match against incoming paths and execute code accordingly.
-
-### Content
-
-A tag based content generation system which integrates nicely with HTML5. Supports structures which separate generic page templates from dynamically generated content in an easy and consistent way.
-
-### Session
-
-The encrypted cookie session management uses symmetric private key encryption to store data on the client and avoid tampering.
 
 ## Installation
 
@@ -62,7 +27,7 @@ Create a new site:
 
 If you create a site using the utopia generator, it includes a `.bowerrc` configuration which installs components into `public/_static/components`. To install jquery, for example:
 
-	bower install jquery
+	$ bower install jquery
 
 Then add the appropriate `<script>` tags to `pages/_page.xnode`:
 
@@ -111,7 +76,38 @@ Then, Nginx is configured like so:
 
 ## Usage
 
-The default site includes documentation and examples.
+Utopia builds on top of Rack with the following middleware:
+
+- `Utopia::Static`: Serve static files efficiently.
+- `Utopia::Redirector`: Redirect URL patterns and status codes.
+- `Utopia::Localization`: Non-intrusive localization of resources.
+- `Utopia::Controller`: Dynamic behaviour with recursive execution.
+- `Utopia::Content`: XML-style template engine with powerful tag behaviours.
+- `Utopia::Session::EncryptedCookie`: Session storage using an encrypted cookie.
+
+### Static
+
+This middleware serves static files using the `mime-types` library. By default, it works with `Rack::Sendfile` and `Rack::Cache` and supports `ETag` based caching.
+
+### Redirector
+
+A flexible high level URI rewriting system which includes support for string mappings, regular expressions and status codes (e.g. 404 errors).
+
+### Localization
+
+The localization middleware uses the `Accept-Language` header to guess the preferred locale out of the given options. If a request path maps to a resource, that resource is returned. Otherwise, a localized request is made.
+
+### Controller
+
+A simple recursive controller layer which works in isolation from the view rendering middleware. A controller consists of a set of actions which match against incoming paths and execute code accordingly.
+
+### Content
+
+A tag based content generation system which integrates nicely with HTML5. Supports structures which separate generic page templates from dynamically generated content in an easy and consistent way.
+
+### Session
+
+The encrypted cookie session management uses symmetric private key encryption to store data on the client and avoid tampering.
 
 ## Contributing
 

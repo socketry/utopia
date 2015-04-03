@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright, 2014, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2015, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,9 @@ require 'find'
 require 'rake'
 
 $app = Rake.application = Rake::Application.new
-$app.init('Utopia')
+$app.init(File.basename($0))
+
+Rake::TaskManager.record_task_metadata = true
 
 verbose(false)
 
@@ -54,10 +56,10 @@ module Setup
 	end
 end
 
+desc "Create a local utopia instance which includes a basic website template.\n" +
+     "Uses current working directory or path argument if provided."
 task :create do
-	$stderr.puts("Usage: #{File.basename $0} create $path") & exit if ARGV.size != 2 
-	
-	destination_root = File.expand_path(ARGV.last, Dir.getwd)
+	destination_root = File.expand_path(ARGV.last || '.', Dir.getwd)
 	
 	$stderr.puts "Setting up initial site in #{destination_root}..."
 	
@@ -119,9 +121,9 @@ task :create do
 	puts " ~ Samuel.  ".rjust(78)
 end
 
+desc "Upgrade an existing site to use the latest configuration files from the template.\n" +
+     "Uses current working directory or path argument if provided."
 task :upgrade do
-	$stderr.puts("Usage: #{File.basename $0} upgrade $path") & exit if ARGV.size != 2 
-	
 	destination_root = File.expand_path(ARGV.last || '.', Dir.getwd)
 	branch_name = "utopia-upgrade-#{Utopia::VERSION}"
 	
@@ -182,8 +184,9 @@ task :upgrade do
 end
 
 namespace :server do
+	desc "Create a remote utopia instance suitable for deployment using git.\n" +
+	     "Uses current working directory or path argument if provided."
 	task :create do
-		$stderr.puts("Usage: #{File.basename $0} server:setup $path") & exit if ARGV.size != 2 
 		destination_root = File.expand_path(ARGV.last || '.', Dir.getwd)
 		
 		FileUtils.mkdir_p File.join(destination_root, "public")
@@ -205,14 +208,9 @@ namespace :server do
 end
 
 task :help do
-	$stderr.puts "To create a new site, use the create task:"
-	$stderr.puts "\t#{File.basename($0)} create path/to/www.example.com"
-	
-	$stderr.puts "To upgrade an existing site, use the upgrade task:"
-	$stderr.puts "\t#{File.basename($0)} upgrade path/to/www.example.com"
-	
-	$stderr.puts "To create a remote deployment for an existing site, use the server:create task:"
-	$stderr.puts "\t#{File.basename($0)} server:create /srv/http/www.example.com"
+	$app.options.show_tasks = :describe
+	$app.options.show_task_pattern = Regexp.new('')
+	$app.display_tasks_and_comments
 end
 
 task :default => :help
