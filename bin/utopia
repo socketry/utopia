@@ -164,7 +164,7 @@ task :upgrade do
 			sh("git", "add", "-u")
 			
 			# Stage any new files that we have explicitly added:
-			sh("git", "add", *Setup::CONFIGURATION_FILES, *Setup::SYMLINKS.keys)
+			sh("git", "add", *Setup::Site::CONFIGURATION_FILES, *Setup::Site::SYMLINKS.keys)
 			
 			# Commit all changes:
 			sh("git", "commit", "-m", "Upgrade to utopia #{Utopia::VERSION}.")
