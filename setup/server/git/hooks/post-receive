@@ -63,5 +63,6 @@ Dir.chdir(working_tree) do
 	end
 	
 	puts "Restarting server..."
-	sh("sudo -u #{deploy_user} mkdir -p tmp && touch tmp/restart.txt")
+	sh("sudo -u #{deploy_user} mkdir -p tmp") unless File.exist?('tmp')
+	sh("sudo -u #{deploy_user} touch tmp/restart.txt")
 end
