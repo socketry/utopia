@@ -46,7 +46,9 @@ module Utopia
 		end
 
 		def redirect(env, exception)
-			return @app.call(env.merge('PATH_INFO' => @location, 'REQUEST_METHOD' => 'GET'))
+			response = @app.call(env.merge('PATH_INFO' => @location, 'REQUEST_METHOD' => 'GET'))
+			
+			return [500, response[1], response[2]]
 		end
 
 		def call(env)

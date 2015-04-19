@@ -33,10 +33,17 @@ module Utopia::ExceptionHandlerSpec
 		let(:app) {Rack::Builder.parse_file(File.expand_path('../exception_handler_spec.ru', __FILE__)).first}
 		
 		it "should successfully call the controller method" do
-			get "/controller/blow"
+			get "/controller/blow?fatal=true"
 			
 			expect(last_response.status).to be == 400
 			expect(last_response.body).to be_include 'Fatal Error'
+		end
+		
+		it "should fail with a 500 error" do
+			get "/controller/blow"
+			
+			expect(last_response.status).to be == 500
+			expect(last_response.body).to be_include 'Error Will Robertson'
 		end
 	end
 end
