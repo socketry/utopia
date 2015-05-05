@@ -59,7 +59,7 @@ Dir.chdir(working_tree) do
 	ENV['DEPLOY_GROUP'] = deploy_group
 	
 	if File.exist? 'Rakefile'
-		sh("sudo -u #{deploy_user} rake deploy") or abort("Deploy task failed!")
+		sh("sudo -u #{deploy_user} bundle exec rake deploy") or abort("Deploy task failed!")
 	end
 	
 	puts "Restarting server..."
