@@ -56,6 +56,13 @@ module Utopia::ContentSpec
 			
 			expect(last_response.body).to be == '10'
 		end
+		
+		it "should successfully redirect to the foo page" do
+			get '/content/redirect'
+			
+			expect(last_response.status).to be == 307
+			expect(last_response.headers['Location']).to be == 'foo'
+		end
 	end
 	
 	describe Utopia::Content do
