@@ -25,42 +25,6 @@ require 'rack/test'
 require 'utopia/controller'
 
 module Utopia::ControllerSpec
-	describe Utopia::Controller::Action do
-		it "should resolve callbacks" do
-			actions = Utopia::Controller::Action.new
-			
-			specific_action = actions.define(['a', 'b', 'c']) {puts 'specific_action'}
-			indirect_action = actions.define(['**']) {puts 'indirect_action'}
-			indirect_named_action = actions.define(['**', 'r']) {puts 'indirect_named_action'}
-			
-			expect(specific_action).to_not be == indirect_action
-			expect(indirect_action).to_not be == indirect_named_action
-			
-			expect(actions.select(['a', 'b', 'c'])).to be == [indirect_action, specific_action]
-			expect(actions.select(['q'])).to be == [indirect_action]
-			
-			expect(actions.select(['q', 'r'])).to be == [indirect_action, indirect_named_action]
-			expect(actions.select(['q', 'r', 's'])).to be == [indirect_action]
-		end
-		
-		it "should be greedy matching" do
-			actions = Utopia::Controller::Action.new
-			
-			greedy_action = actions.define(['**', 'r']) {puts 'greedy_action'}
-			
-			expect(actions.select(['g', 'r'])).to be_include greedy_action
-			expect(actions.select(['r'])).to be_include greedy_action
-		end
-		
-		it "should match patterns" do
-			actions = Utopia::Controller::Action.new
-			
-			variable_action = actions.define(['*', 'summary', '*']) {puts 'variable_action'}
-				
-			expect(actions.select(['10', 'summary', '20'])).to be_include variable_action
-		end
-	end
-		
 	class TestController < Utopia::Controller::Base
 		on 'success' do
 			success!
@@ -114,60 +78,10 @@ module Utopia::ControllerSpec
 	end
 	
 	describe Utopia::Controller do
-		include Rack::Test::Methods
-		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('../controller_spec.ru', __FILE__)).first}
-		
-		it "should successfully call the controller method" do
-			get "/controller/hello-world"
-			
-			expect(last_response.status).to be == 200
-			expect(last_response.body).to be == 'Hello World'
-		end
-		
-		it "should successfully call the recursive controller method" do
-			get "/controller/recursive/hello-world"
-			
-			expect(last_response.status).to be == 200
-			expect(last_response.body).to be == 'Hello World'
-		end
-		
-		it "should successfully call the controller method" do
-			get "/controller/flat"
-			
-			expect(last_response.status).to be == 200
-			expect(last_response.body).to be == 'flat'
-		end
-		
-		it "should successfully call the recursive controller method" do
-			get "/controller/recursive/flat"
-			
-			expect(last_response.status).to be == 404
-		end
-		
-		it "should perform ignore the request" do
-			get '/controller/ignore'
-			expect(last_response.status).to be == 404
-		end
-		
-		it "should redirect the request" do
-			get '/controller/redirect'
-			expect(last_response.status).to be == 302
-			expect(last_response.headers['Location']).to be == 'bar'
-		end
-		
-		it "should rewrite the request" do
-			get '/controller/rewrite'
-			expect(last_response.status).to be == 200
-			expect(last_response.body).to be == 'Hello World'
-		end
-	end
-	
-	describe Utopia::Controller do
 		let(:variables) {Utopia::Controller::Variables.new}
 		
 		it "should call controller methods" do
-			request = Rack::Request.new("utopia.controller" => variables)
+			request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 			controller = TestController.new
 		
 			result = controller.process!(request, Utopia::Path["/success"])
@@ -181,7 +95,7 @@ module Utopia::ControllerSpec
 		end
 		
 		it "should call direct controller methods" do
-			request = Rack::Request.new("utopia.controller" => variables)
+			request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 			controller = TestIndirectController.new
 			
 			controller.process!(request, Utopia::Path["/user/update"])
@@ -189,7 +103,7 @@ module Utopia::ControllerSpec
 		end
 		
 		it "should call indirect controller methods" do
-			request = Rack::Request.new("utopia.controller" => variables)
+			request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 			controller = TestIndirectController.new
 			
 			result = controller.process!(request, Utopia::Path["/foo/comment/post"])
@@ -197,7 +111,7 @@ module Utopia::ControllerSpec
 		end
 		
 		it "should call multiple indirect controller methods in order" do
-			request = Rack::Request.new("utopia.controller" => variables)
+			request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 			controller = TestIndirectController.new
 			
 			result = controller.process!(request, Utopia::Path["/comment/delete"])
@@ -205,7 +119,7 @@ module Utopia::ControllerSpec
 		end
 		
 		it "should match single patterns" do
-			request = Rack::Request.new("utopia.controller" => variables)
+			request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 			controller = TestIndirectController.new
 			
 			result = controller.process!(request, Utopia::Path["/foo"])

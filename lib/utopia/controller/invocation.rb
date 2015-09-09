@@ -23,17 +23,24 @@ require_relative '../http'
 module Utopia
 	class Controller
 		class Invocation
-			def self.invoke!(controller_clone, request, path, action, actions)
-				invocation = Invocation.new(request, path, action, actions.relative_path)
-				
-				action.invoke!(controller_clone, request, invocation)
+			def self.invoke!(controller, request, path, action, actions)
+				# Avoid the allocation if it isn't going to be used:
+				case action.arity
+				when 0
+					action.invoke!(controller)
+				when 1
+					action.invoke!(controller, request)
+				else
+					invocation = Invocation.new(request, path, action, actions.relative_path)
+					action.invoke!(controller, request, invocation)
+				end
 			end
 			
-			def initialize(request, path, action, relative_path)
+			def initialize(request, path, relative_path, action)
 				@request = request
 				@path = path
-				@action = action
 				@relative_path = relative_path
+				@action = action
 			end
 			
 			attr :path

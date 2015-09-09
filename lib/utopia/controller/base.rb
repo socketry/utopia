@@ -72,7 +72,7 @@ module Utopia
 				actions = lookup(path)
 				
 				if actions.size > 0
-					variables = request.controller
+					variables = request.env[VARIABLES_KEY]
 					controller_clone = self.clone
 					
 					variables << controller_clone

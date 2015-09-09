@@ -102,6 +102,10 @@ module Utopia
 				return current
 			end
 			
+			def arity
+				@callback ? @callback.arity : 0
+			end
+			
 			def invoke!(controller, *arguments)
 				controller.instance_exec(*arguments, &@callback)
 			end

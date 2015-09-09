@@ -22,28 +22,56 @@
 
 require 'rack/mock'
 require 'rack/test'
-
 require 'utopia/controller'
-require 'utopia/exception_handler'
 
-module Utopia::ExceptionHandlerSpec
-	describe Utopia::ExceptionHandler do
+module Utopia::ControllerSpec
+	describe Utopia::Controller do
 		include Rack::Test::Methods
 		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('exception_handler_spec.ru', __dir__)).first}
+		let(:app) {Rack::Builder.parse_file(File.expand_path('../middleware_spec.ru', __FILE__)).first}
 		
 		it "should successfully call the controller method" do
-			get "/blow?fatal=true"
+			get "/controller/hello-world"
 			
-			expect(last_response.status).to be == 400
-			expect(last_response.body).to be_include 'Fatal Error'
+			expect(last_response.status).to be == 200
+			expect(last_response.body).to be == 'Hello World'
 		end
 		
-		it "should fail with a 500 error" do
-			get "/blow"
+		it "should successfully call the recursive controller method" do
+			get "/controller/recursive/hello-world"
 			
-			expect(last_response.status).to be == 500
-			expect(last_response.body).to be_include 'Error Will Robertson'
+			expect(last_response.status).to be == 200
+			expect(last_response.body).to be == 'Hello World'
+		end
+		
+		it "should successfully call the controller method" do
+			get "/controller/flat"
+			
+			expect(last_response.status).to be == 200
+			expect(last_response.body).to be == 'flat'
+		end
+		
+		it "should successfully call the recursive controller method" do
+			get "/controller/recursive/flat"
+			
+			expect(last_response.status).to be == 404
+		end
+		
+		it "should perform ignore the request" do
+			get '/controller/ignore'
+			expect(last_response.status).to be == 404
+		end
+		
+		it "should redirect the request" do
+			get '/controller/redirect'
+			expect(last_response.status).to be == 302
+			expect(last_response.headers['Location']).to be == 'bar'
+		end
+		
+		it "should rewrite the request" do
+			get '/controller/rewrite'
+			expect(last_response.status).to be == 200
+			expect(last_response.body).to be == 'Hello World'
 		end
 	end
 end

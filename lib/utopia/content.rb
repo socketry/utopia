@@ -122,13 +122,9 @@ module Utopia
 				if link.path and node = lookup_node(link.path)
 					response = Rack::Response.new
 					
-					attributes = nil
+					attributes = request.env.fetch(VARIABLES_KEY, {}).to_hash
 					
-					if request.respond_to?(:controller)
-						attributes = request.controller
-					end
-					
-					node.process!(request, response, (attributes || {}).to_hash)
+					node.process!(request, response, attributes)
 					
 					return response.finish
 				elsif redirect_uri = link[:uri]

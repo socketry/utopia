@@ -1,3 +1,5 @@
+#!/usr/bin/env rspec
+
 # Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,22 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'logger'
+require 'utopia/controller'
 
-require_relative 'http'
-require_relative 'path'
-
-require_relative 'extensions/rack'
-
-module Utopia
-	LOG = Logger.new($stderr)
-	
-	PAGES_PATH = 'pages'.freeze
-	
-	# This is used for shared controller variables which get consumed by the content middleware:
-	VARIABLES_KEY = 'utopia.variables'.freeze
-	
-	def self.default_root(subdirectory = PAGES_PATH, pwd = Dir.pwd)
-		File.expand_path(subdirectory, pwd)
+module Utopia::ControllerSpec
+	describe Utopia::Controller::Invocation do
+		it "should" do
+		end
 	end
 end

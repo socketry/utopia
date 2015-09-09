@@ -134,7 +134,7 @@ module Utopia
 			
 			# A helper method for accessing controller variables from view:
 			def controller
-				@request.controller
+				@request.env[VARIABLES_KEY]
 			end
 
 			def parse_xml(xml_data)

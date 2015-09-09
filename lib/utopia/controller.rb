@@ -24,20 +24,10 @@ require_relative 'controller/variables'
 require_relative 'controller/action'
 require_relative 'controller/base'
 
-class Rack::Request
-	def controller(&block)
-		if block_given?
-			env["utopia.controller"].instance_eval(&block)
-		else
-			env["utopia.controller"]
-		end
-	end
-end
-
 module Utopia
 	class Controller
 		CONTROLLER_RB = "controller.rb".freeze
-
+		
 		def initialize(app, options = {})
 			@app = app
 			@root = options[:root] || Utopia::default_root
@@ -123,7 +113,7 @@ module Utopia
 		end
 		
 		def call(env)
-			variables = (env["utopia.controller"] ||= Variables.new)
+			variables = (env[VARIABLES_KEY] ||= Variables.new)
 			
 			request = Rack::Request.new(env)
 			
