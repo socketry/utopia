@@ -51,6 +51,14 @@ module Utopia::ControllerSpec
 			expect(actions.select(['g', 'r'])).to be_include greedy_action
 			expect(actions.select(['r'])).to be_include greedy_action
 		end
+		
+		it "should match patterns" do
+			actions = Utopia::Controller::Action.new
+			
+			variable_action = actions.define(['*', 'summary', '*']) {puts 'variable_action'}
+				
+			expect(actions.select(['10', 'summary', '20'])).to be_include variable_action
+		end
 	end
 		
 	class TestController < Utopia::Controller::Base

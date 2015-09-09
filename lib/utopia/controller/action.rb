@@ -21,8 +21,7 @@
 module Utopia
 	class Controller
 		class Action < Hash
-			attr_accessor :callback
-			attr_accessor :options
+			attr_accessor :path, :callback, :options
 			
 			def callback?
 				@callback != nil
@@ -73,14 +72,20 @@ module Utopia
 			
 			public
 			
+			class Actions < Array
+				def initialize(relative_path)
+					@relative_path = relative_path
+				end
+				
+				attr :relative_path
+			end
+			
 			# relative_path = 2014/mr-potato
 			# actions => {:** => A}
 			def select(relative_path)
-				actions = []
-				
-				append(relative_path.reverse, 0, actions)
-				
-				return actions
+				Actions.new(relative_path).tap do |actions|
+					append(relative_path.reverse, 0, actions)
+				end.freeze
 			end
 			
 			def define(path, options = {}, &callback)
@@ -90,6 +95,7 @@ module Utopia
 					current = (current[name.to_sym] ||= Action.new)
 				end
 				
+				current.path = path
 				current.options = options
 				current.callback = callback
 				

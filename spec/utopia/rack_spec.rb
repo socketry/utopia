@@ -22,18 +22,6 @@ require 'utopia/extensions/date'
 require 'utopia/extensions/rack'
 
 module Utopia::RackSpec
-	describe Rack::Request do
-		it "should construct the url" do
-			request = Rack::Request.new(
-				'rack.url_scheme' => 'http', 
-				'HTTP_HOST' => 'localhost',
-				'SERVER_PORT' => 80
-			)
-			
-			expect(request.url_with_path("/foo/bar")).to be == "http://localhost/foo/bar"
-		end
-	end
-	
 	describe Rack::Response do
 		it "should specify not to cache content" do
 			response = Rack::Response.new

@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
 	spec.add_dependency "trenni", "~> 1.4.1"
 	spec.add_dependency "mime-types", "~> 2.0"
 	
-	spec.add_dependency "rack", "~> 1.5"
+	spec.add_dependency "rack", "~> 1.6"
 	spec.add_dependency "rack-cache", "~> 1.2.0"
 	
 	spec.add_dependency "mail", "~> 2.6.1"

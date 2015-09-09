@@ -20,29 +20,29 @@
 
 require 'rack'
 
-class Rack::Request
-	def url_with_path(path = "")
-		base_url << path
-	end
-end
-
-class Rack::Response
-	# Specifies that the content shouldn't be cached. Overrides `cache!` if already called.
-	def do_not_cache!
-		self["Cache-Control"] = "no-cache, must-revalidate"
-		self["Expires"] = Time.now.httpdate
+module Rack
+	unless defined? EXPIRES
+		EXPIRES = 'Expires'.freeze
 	end
 	
-	# Specify that the content should be cached.
-	def cache!(duration = 3600)
-		unless (self["Cache-Control"] || "").match(/no-cache/)
-			self["Cache-Control"] = "public, max-age=#{duration}"
-			self["Expires"] = (Time.now + duration).httpdate
+	class Response
+		# Specifies that the content shouldn't be cached. Overrides `cache!` if already called.
+		def do_not_cache!
+			headers[CACHE_CONTROL] = "no-cache, must-revalidate"
+			headers[EXPIRES] = Time.now.httpdate
 		end
-	end
-	
-	# Specify the content type of the response data.
-	def content_type!(value)
-		self["Content-Type"] = value.to_s
+
+		# Specify that the content should be cached.
+		def cache!(duration = 3600)
+			unless headers[CACHE_CONTROL] =~ /no-cache/
+				headers[CACHE_CONTROL] = "public, max-age=#{duration}"
+				headers[EXPIRES] = (Time.now + duration).httpdate
+			end
+		end
+
+		# Specify the content type of the response data.
+		def content_type!(value)
+			headers[CONTENT_TYPE] = value.to_s
+		end
 	end
 end

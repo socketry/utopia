@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 require_relative '../http'
+require_relative 'invocation'
 
 module Utopia
 	class Controller
@@ -79,7 +80,7 @@ module Utopia
 					response = catch(:response) do
 						# By default give nothing - i.e. keep on processing:
 						actions.each do |action|
-							action.invoke!(controller_clone, request, path)
+							Invocation.invoke!(controller_clone, request, path, action, actions)
 						end and nil
 					end
 					

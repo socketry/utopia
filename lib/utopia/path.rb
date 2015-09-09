@@ -163,6 +163,10 @@ module Utopia
 		def to_s
 			to_str
 		end
+		
+		def to_a
+			@components
+		end
 
 		def join(other)
 			self.class.new(@components + other).simplify
