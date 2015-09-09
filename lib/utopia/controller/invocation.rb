@@ -31,7 +31,10 @@ module Utopia
 				when 1
 					action.invoke!(controller, request)
 				else
-					invocation = Invocation.new(request, path, action, actions.relative_path)
+					relative_path = Path[actions.relative_path]
+					
+					invocation = Invocation.new(request, path, relative_path, action)
+					
 					action.invoke!(controller, request, invocation)
 				end
 			end

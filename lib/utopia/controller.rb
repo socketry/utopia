@@ -20,13 +20,15 @@
 
 require_relative 'path'
 
+require_relative 'middleware'
 require_relative 'controller/variables'
 require_relative 'controller/action'
 require_relative 'controller/base'
 
 module Utopia
 	class Controller
-		CONTROLLER_RB = "controller.rb".freeze
+		CONTROLLER_RB = 'controller.rb'.freeze
+		PATH_INFO_KEY = 'PATH_INFO'.freeze
 		
 		def initialize(app, options = {})
 			@app = app
@@ -98,7 +100,7 @@ module Utopia
 						
 						if location
 							# Rewrite relative paths based on the controller's URI:
-							request.env['PATH_INFO'] = Path[location].expand(controller.class.uri_path).to_s
+							request.env[PATH_INFO_KEY] = Path[location].expand(controller.class.uri_path).to_s
 							
 							return invoke_controllers(variables, request, done)
 						end

@@ -24,7 +24,7 @@ require 'rack/mock'
 require 'rack/test'
 require 'utopia/controller'
 
-module Utopia::ControllerSpec
+module Utopia::Controller::MiddlewareSpec
 	describe Utopia::Controller do
 		include Rack::Test::Methods
 		

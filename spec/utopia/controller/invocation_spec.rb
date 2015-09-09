@@ -20,11 +20,58 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'rack/mock'
+
 require 'utopia/controller'
 
-module Utopia::ControllerSpec
+module Utopia::Controller::InvocationSpec
 	describe Utopia::Controller::Invocation do
-		it "should" do
+		class TestController < Utopia::Controller::Base
+			on 'test' do |request, invocation|
+				@invocation = invocation
+			end
+			
+			on '**' do |request, invocation|
+				# if invocation =~ 
+			end
+			
+			def self.uri_path
+				Utopia::Path['/']
+			end
+		end
+		
+		it "should generate an invocation" do
+			controller = Utopia::Controller::Base.new
+		end
+		
+		def mock_request(*args)
+			Rack::Request.new(Rack::MockRequest.env_for(*args))
+		end
+		
+		it "should invoke with arguments" do
+			controller = TestController.new
+			variables = Utopia::Controller::Variables.new
+			
+			expect(controller.class.actions).to be_include :test
+			
+			path = Utopia::Path['/test']
+			request = mock_request(path.to_s)
+			request.env[Utopia::VARIABLES_KEY] = variables
+			
+			response = controller.process!(request, path)
+			
+			expect(response).to be nil
+			
+			invocation = variables[:invocation]
+			expect(invocation).to be_kind_of Utopia::Controller::Invocation
+			
+			expect(invocation.path).to be == path
+			expect(invocation.relative_path).to be == Utopia::Path["test"]
+			expect(invocation.action).to be controller.class.actions[:test]
+		end
+		
+		it "should match wildcards and extract parameters" do
+		
 		end
 	end
 end

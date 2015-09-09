@@ -22,7 +22,7 @@
 
 require 'utopia/controller'
 
-module Utopia::ControllerSpec
+module Utopia::Controller::ActionSpec
 	describe Utopia::Controller::Action do
 		it "should resolve callbacks" do
 			actions = Utopia::Controller::Action.new

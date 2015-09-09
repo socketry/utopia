@@ -58,7 +58,7 @@ module Utopia
 				end
 				
 				def lookup(path)
-					possible_actions = actions.select((path - uri_path).components)
+					possible_actions = actions.select((path - uri_path).to_a)
 				end
 			end
 			
@@ -71,7 +71,7 @@ module Utopia
 			def passthrough(request, path)
 				actions = lookup(path)
 				
-				if actions.size > 0
+				unless actions.empty?
 					variables = request.env[VARIABLES_KEY]
 					controller_clone = self.clone
 					

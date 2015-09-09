@@ -24,7 +24,7 @@ require 'rack/mock'
 require 'rack/test'
 require 'utopia/controller'
 
-module Utopia::ControllerSpec
+module Utopia::Controller::SequenceSpec
 	class TestController < Utopia::Controller::Base
 		on 'success' do
 			success!

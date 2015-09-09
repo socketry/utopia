@@ -83,7 +83,7 @@ module Utopia
 			# relative_path = 2014/mr-potato
 			# actions => {:** => A}
 			def select(relative_path)
-				Actions.new(relative_path).tap do |actions|
+				selection = Actions.new(relative_path).tap do |actions|
 					append(relative_path.reverse, 0, actions)
 				end.freeze
 			end
