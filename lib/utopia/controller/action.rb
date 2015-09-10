@@ -32,15 +32,15 @@ module Utopia
 			end
 			
 			def eql? other
-				super and self.callback.eql? other.callback and self.options.eql? other.options
+				super and @callback.eql? other.callback and @options.eql? other.options and @path.eql? other.path 
 			end
 			
 			def hash
-				[super, callback, options].hash
+				[super, callback, options, path].hash
 			end
 			
 			def == other
-				super and (self.callback == other.callback) and (self.options == other.options)
+				super and @callback == other.callback and @options == other.options and @path == other.path
 			end
 			
 			protected

@@ -68,7 +68,7 @@ module Utopia
 	end
 	
 	class Path
-		include Forwardable
+		extend Forwardable
 		include Comparable
 		
 		SEPARATOR = '/'.freeze
@@ -114,6 +114,19 @@ module Utopia
 
 		def self.[] path
 			self.create(path)
+		end
+
+		def self.split(path)
+			case path
+			when Path
+				return path.to_a
+			when Array
+				return path
+			when String
+				create(path).to_a
+			else
+				[path]
+			end
 		end
 
 		def self.create(path)
@@ -287,23 +300,23 @@ module Utopia
 		end
 
 		def eql? other
-			if self.class == other.class
-				return @components.eql?(other.components)
-			else
-				return false
-			end
+			super and @components.eql? other.components
 		end
-
+		
+		def hash
+			@components.hash
+		end
+		
+		def == other
+			self.to_a == other.to_a
+		end
+		
 		def start_with? other
 			other.components.each_with_index do |part, index|
 				return false if @components[index] != part
 			end
 			
 			return true
-		end
-		
-		def hash
-			@components.hash
 		end
 		
 		def [] index

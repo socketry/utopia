@@ -24,15 +24,14 @@ require 'rack/mock'
 
 require 'utopia/controller'
 
-module Utopia::Controller::InvocationSpec
-	describe Utopia::Controller::Invocation do
+module Utopia::Controller::RewriteSpec
+	describe Utopia::Controller do
 		class TestController < Utopia::Controller::Base
 			on 'test' do |request, path|
-				@invocation = invocation
 			end
 			
-			on '**' do |request, path|
-				rewrite(path) do |components|
+			on /\d+/ do |request, path|
+				rewrite!(path) do |components|
 					@id = Integer(components.shift)
 				end
 			end
@@ -63,13 +62,6 @@ module Utopia::Controller::InvocationSpec
 			response = controller.process!(request, path)
 			
 			expect(response).to be nil
-			
-			invocation = variables[:invocation]
-			expect(invocation).to be_kind_of Utopia::Controller::Invocation
-			
-			expect(invocation.path).to be == path
-			expect(invocation.relative_path).to be == Utopia::Path["test"]
-			expect(invocation.action).to be controller.class.actions[:test]
 		end
 	end
 end

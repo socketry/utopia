@@ -19,7 +19,6 @@
 # THE SOFTWARE.
 
 require_relative '../http'
-require_relative 'invocation'
 
 module Utopia
 	class Controller
@@ -49,16 +48,18 @@ module Utopia
 					@actions ||= Action.new
 				end
 				
-				def on(path, options = {}, &block)
-					if Symbol === path
-						path = ['**', path]
+				def on(first, *path, **options, &block)
+					if first.is_a? Symbol
+						first = ['**', first]
 					end
 					
-					actions.define(Path.create(path).components, options, &block)
+					actions.define(Path.split(first) + path, options, &block)
 				end
 				
 				def lookup(path)
-					possible_actions = actions.select((path - uri_path).to_a)
+					relative_path = (path - uri_path).to_a
+					
+					possible_actions = actions.select(relative_path)
 				end
 			end
 			
