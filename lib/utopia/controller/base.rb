@@ -80,7 +80,7 @@ module Utopia
 					response = catch(:response) do
 						# By default give nothing - i.e. keep on processing:
 						actions.each do |action|
-							Invocation.invoke!(controller_clone, request, path, action, actions)
+							action.invoke!(controller_clone, request, path)
 						end and nil
 					end
 					
@@ -117,6 +117,16 @@ module Utopia
 
 			def rewrite! location
 				throw :rewrite, location.to_str
+			end
+			
+			def rewrite(path, pattern)
+				relative_path = path - self.class.uri_path
+				
+				if relative_path =~ pattern
+					yield relative_path.components
+				
+					rewrite!(self.class.uri_path + relative_path)
+				end
 			end
 
 			def fail!(error = :bad_request)

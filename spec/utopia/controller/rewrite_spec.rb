@@ -27,12 +27,14 @@ require 'utopia/controller'
 module Utopia::Controller::InvocationSpec
 	describe Utopia::Controller::Invocation do
 		class TestController < Utopia::Controller::Base
-			on 'test' do |request, invocation|
+			on 'test' do |request, path|
 				@invocation = invocation
 			end
 			
-			on '**' do |request, invocation|
-				# if invocation =~ 
+			on '**' do |request, path|
+				rewrite(path) do |components|
+					@id = Integer(components.shift)
+				end
 			end
 			
 			def self.uri_path
@@ -68,10 +70,6 @@ module Utopia::Controller::InvocationSpec
 			expect(invocation.path).to be == path
 			expect(invocation.relative_path).to be == Utopia::Path["test"]
 			expect(invocation.action).to be controller.class.actions[:test]
-		end
-		
-		it "should match wildcards and extract parameters" do
-		
 		end
 	end
 end
