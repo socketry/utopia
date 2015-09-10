@@ -112,21 +112,19 @@ module Utopia
 			end
 
 			def redirect! (target, status = 302)
-				respond! :redirect => target.to_str, :status => status
-			end
-
-			def rewrite! location
-				throw :rewrite, location.to_str
+				respond! :redirect => target, :status => status
 			end
 			
-			def rewrite(path, pattern)
-				relative_path = path - self.class.uri_path
-				
-				if relative_path =~ pattern
-					yield relative_path.components
-				
-					rewrite!(self.class.uri_path + relative_path)
+			# Rewrite the current location and invoke the controllers with the new path.
+			# If you provide a block, you are given the chance to modify the controller relative path in place, e.g. to extract parameters from the path.
+			def rewrite! location
+				if block_given?
+					location = location - self.class.uri_path
+					
+					yield location.components
 				end
+				
+				throw :rewrite, location
 			end
 
 			def fail!(error = :bad_request)
@@ -159,7 +157,7 @@ module Utopia
 				end
 
 				if options[:redirect]
-					headers["Location"] = options[:redirect]
+					headers["Location"] = options[:redirect].to_str
 					status = 302 if status < 300 || status >= 400
 				end
 

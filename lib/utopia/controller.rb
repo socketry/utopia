@@ -69,11 +69,7 @@ module Utopia
 				
 				klass.const_set(:CONTROLLER, self)
 				
-				$LOAD_PATH.unshift(base_path)
-				
 				klass.class_eval(File.read(controller_path), controller_path)
-				
-				$LOAD_PATH.delete(base_path)
 				
 				return klass.new
 			else
