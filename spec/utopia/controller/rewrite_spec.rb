@@ -27,13 +27,17 @@ require 'utopia/controller'
 module Utopia::Controller::RewriteSpec
 	describe Utopia::Controller do
 		class TestController < Utopia::Controller::Base
+			prepend Utopia::Controller::Rewrite
+			
 			on 'test' do |request, path|
 			end
 			
-			on /\d+/ do |request, path|
+			match /^(?<id>\d+)/
+			
+			firstly do |request, path|
 				rewrite!(path) do |components|
 					@id = Integer(components.shift)
-				end
+				end rescue nil
 			end
 			
 			def self.uri_path

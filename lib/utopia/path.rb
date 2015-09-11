@@ -18,8 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'forwardable'
-
 module Utopia
 	class Basename
 		# A basename represents a file name with an optional extension. You can specify a specific extension to identify or specify true to select any extension after the last trailing dot.
@@ -68,7 +66,6 @@ module Utopia
 	end
 	
 	class Path
-		extend Forwardable
 		include Comparable
 		
 		SEPARATOR = '/'.freeze
@@ -144,8 +141,10 @@ module Utopia
 
 		attr :components
 
-		def_delegator :components, :include?
-
+		def include?(*args)
+			@components.include?(*args)
+		end
+		
 		def directory?
 			return @components.last == ""
 		end

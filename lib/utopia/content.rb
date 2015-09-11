@@ -114,7 +114,7 @@ module Utopia
 			if File.directory? directory_path
 				index_path = [basename.name, basename.rename("index")]
 				
-				return [307, {"Location" => path.dirname.join(index_path).to_s}, []]
+				return [307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []]
 			end
 
 			locale = env[Localization::CURRENT_LOCALE_KEY]
@@ -128,7 +128,7 @@ module Utopia
 					
 					return response.finish
 				elsif redirect_uri = link[:uri]
-					return [307, {"Location" => redirect_uri}, []]
+					return [307, {HTTP::LOCATION => redirect_uri}, []]
 				end
 			end
 			

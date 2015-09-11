@@ -22,7 +22,7 @@ module Utopia
 	module Tags
 		class Node
 			def self.call(transaction, state)
-				path = Utopia::Path.create(state[:path])
+				path = Path[state[:path]]
 				
 				node = transaction.lookup_node(path)
 				

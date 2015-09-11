@@ -1,4 +1,4 @@
-# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2014, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,44 +18,47 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'rack'
+require_relative '../http'
 
 module Utopia
-	module HTTP
-		STATUS_CODES = {
-			:success => 200,
-			:created => 201,
-			:accepted => 202,
-			:moved => 301,
-			:found => 302,
-			:see_other => 303,
-			:not_modified => 304,
-			:redirect => 307,
-			:bad_request => 400,
-			:unauthorized => 401,
-			:forbidden => 403,
-			:not_found => 404,
-			:unsupported_method => 405,
-			:gone => 410,
-			:teapot => 418,
-			:error => 500,
-			:unimplemented => 501,
-			:unavailable => 503
-		}
-	
-		STATUS_DESCRIPTIONS = {
-			400 => 'Bad Request'.freeze,
-			401 => 'Permission Denied'.freeze,
-			403 => 'Access Forbidden'.freeze,
-			404 => 'Resource Not Found'.freeze,
-			405 => 'Unsupported Method'.freeze,
-			416 => 'Byte range unsatisfiable'.freeze,
-			500 => 'Internal Server Error'.freeze,
-			501 => 'Not Implemented'.freeze,
-			503 => 'Service Unavailable'.freeze
-		}
-		
-		CONTENT_TYPE = 'Content-Type'.freeze
-		LOCATION = 'Location'.freeze
+	class Controller
+		module Rewrite
+			def self.prepended(base)
+				base.extend(ClassMethods)
+			end
+			
+			module ClassMethods
+				def patterns
+					@patterns ||= []
+				end
+				
+				def match(pattern, &block)
+					patterns << [pattern, block]
+				end
+			end
+			
+			def rewrite(path)
+				path = path.to_str
+				
+				@patterns.each do |pattern, block|
+					if matched = pattern.match(path)
+						if block
+							path = block.call(matched)
+						else
+							matched
+						end
+					end
+				end
+			end
+			
+			# Rewrite the path before processing the request if possible.
+			def process!(request, path)
+				if path = rewrite(path)
+					rewrite! path
+				else
+					super
+				end
+			end
+		end
 	end
 end

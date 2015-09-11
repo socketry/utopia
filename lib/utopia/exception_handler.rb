@@ -42,7 +42,7 @@ module Utopia
 			body.puts "</body></html>"
 			body.rewind
 
-			return [400, {"Content-Type" => "text/html"}, body]
+			return [400, {HTTP::CONTENT_TYPE => "text/html"}, body]
 		end
 
 		def redirect(env, exception)

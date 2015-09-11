@@ -37,14 +37,14 @@ module Utopia
 
 	class Redirector
 		# This redirects directories to the directory + 'index' 
-		DIRECTORY_INDEX = [/^(.*)\/$/, lambda{|prefix| [307, {"Location" => "#{prefix}index"}, []]}]
+		DIRECTORY_INDEX = [/^(.*)\/$/, lambda{|prefix| [307, {HTTP::LOCATION => "#{prefix}index"}, []]}]
 		
 		# Redirects a whole source tree to a destination tree, given by the roots.
 		def self.moved(source_root, destination_root)
 			return [
 				/^#{Regexp.escape(source_root)}(.*)$/,
 				lambda do |match|
-					[301, {"Location" => (destination_root + match[1]).to_s}, []]
+					[301, {HTTP::LOCATION => (destination_root + match[1]).to_s}, []]
 				end
 			]
 		end
@@ -112,7 +112,7 @@ module Utopia
 			if uri.respond_to? :call
 				return uri.call(match_data)
 			else
-				return [301, {"Location" => uri.to_s}, []]
+				return [301, {HTTP::LOCATION => uri.to_s}, []]
 			end
 		end
 

@@ -25,6 +25,8 @@ require_relative 'controller/variables'
 require_relative 'controller/action'
 require_relative 'controller/base'
 
+require_relative 'controller/rewrite'
+
 module Utopia
 	class Controller
 		CONTROLLER_RB = 'controller.rb'.freeze

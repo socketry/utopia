@@ -36,12 +36,16 @@ module Utopia
 			end
 			
 			class << self
-				def require_local(path)
-					require File.join(base_path, path)
-				end
-				
 				def direct?(path)
 					path.dirname == uri_path
+				end
+				
+				def patterns
+					@patterns ||= []
+				end
+				
+				def match(pattern, &block)
+					patterns << [pattern, block]
 				end
 				
 				def actions
@@ -150,15 +154,15 @@ module Utopia
 					status = options[:status] || status
 				end
 
-				status = Utopia::HTTP::STATUS_CODES[status] || status
+				status = HTTP::STATUS_CODES[status] || status
 				headers = options[:headers] || {}
 
 				if options[:type]
-					headers['Content-Type'] ||= options[:type]
+					headers[HTTP::CONTENT_TYPE] ||= options[:type]
 				end
 
 				if options[:redirect]
-					headers["Location"] = options[:redirect].to_str
+					headers[HTTP::LOCATION] = options[:redirect].to_str
 					status = 302 if status < 300 || status >= 400
 				end
 
@@ -168,7 +172,7 @@ module Utopia
 				elsif options[:content]
 					body = [options[:content]]
 				elsif status >= 300
-					body = [Utopia::HTTP::STATUS_DESCRIPTIONS[status] || "Status #{status}"]
+					body = [HTTP::STATUS_DESCRIPTIONS[status] || "Status #{status}"]
 				end
 
 				return [status, headers, body]
@@ -176,7 +180,6 @@ module Utopia
 			
 			# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid rack response if the controller can do so.
 			def process!(request, path)
-				# puts "process! #{request} #{path}"
 				passthrough(request, path)
 			end
 		end
