@@ -181,6 +181,14 @@ module Utopia
 			to_str
 		end
 		
+		def match(pattern)
+			to_str.match(pattern)
+		end
+		
+		def =~ (pattern)
+			to_str =~ pattern
+		end
+		
 		def to_a
 			@components
 		end

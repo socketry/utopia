@@ -57,10 +57,16 @@ module Utopia
 						if block
 							path = self.instance_exec(match_data, &block)
 						else
-							self.rewrite_matched(match_data)
+							path = self.rewrite_matched(match_data)
 						end
 					end
+					
+					# If any of the rewrite steps returns nil, we return nil:
+					return nil if path == nil
 				end
+				
+				# We only return an updated path if the path changed:
+				return path unless path == original_path
 			end
 			
 			# Rewrite the path before processing the request if possible.

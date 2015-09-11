@@ -29,7 +29,17 @@ module Utopia::Controller::RewriteSpec
 		class TestController < Utopia::Controller::Base
 			prepend Utopia::Controller::Rewrite
 			
-			rewrite ':id/**'
+			on 'test' do |request, path|
+				@test = true
+			end
+			
+			rewrite /^(?<id>\d+)(\/|$)/ do |match_data|
+				@id = Integer(match_data[:id])
+				
+				match_data.post_match
+			end
+			
+			attr :id
 			
 			def self.uri_path
 				Utopia::Path['/']
@@ -50,13 +60,14 @@ module Utopia::Controller::RewriteSpec
 			
 			expect(controller.class.actions).to be_include :test
 			
-			path = Utopia::Path['/test']
-			request = mock_request(path.to_s)
-			request.env[Utopia::VARIABLES_KEY] = variables
+			matching_path = Utopia::Path['55/test']
+			#request = mock_request(path.to_s)
+			#request.env[Utopia::VARIABLES_KEY] = variables
 			
-			response = controller.process!(request, path)
+			path = controller.rewrite(matching_path)
 			
-			expect(response).to be nil
+			expect(path).to be == 'test'
+			expect(controller.id).to be == 55
 		end
 	end
 end
