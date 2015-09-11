@@ -8,7 +8,7 @@ Encoding.default_internal = Encoding::UTF_8
 RACK_ENV = ENV.fetch('RACK_ENV', :development).to_sym unless defined?(RACK_ENV)
 
 # Allow loading library code from lib directory:
-$LOAD_PATH << File.expand_path("../lib", __FILE__)
+$LOAD_PATH << File.expand_path("lib", __dir__)
 
 require 'utopia'
 require 'rack/cache'

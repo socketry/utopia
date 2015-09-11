@@ -37,7 +37,7 @@ Rake::TaskManager.record_task_metadata = true
 verbose(false)
 
 module Setup
-	BASE = File.expand_path("../../setup", __FILE__)
+	BASE = File.expand_path("../setup", __dir__)
 	
 	module Site
 		CONFIGURATION_FILES = ['config.ru', 'Gemfile', 'Rakefile']

@@ -299,7 +299,7 @@ module Utopia
 		end
 
 		def eql? other
-			super and @components.eql? other.components
+			self.class.eql?(other.class) and @components.eql?(other.components)
 		end
 		
 		def hash

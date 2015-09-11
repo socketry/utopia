@@ -38,7 +38,7 @@ module Utopia
 					@name, @variant = path.last.split('.', 2)
 					@path = path
 				when :directory
-					# raise ArgumentError unless path.last.start_with? 'index'
+					# raise ArgumentError unless path.last.start_with? INDEX
 					
 					@name = path.dirname.last
 					@variant = path.last.split('.', 2)[1]
@@ -101,19 +101,16 @@ module Utopia
 				end
 			end
 			
+			def to_s
+				"\#<#{self.class}(#{self.kind}) title=#{title.inspect} href=#{href.inspect}>"
+			end
+			
 			def eql? other
-				if other && self.class == other.class
-					return kind.eql?(other.kind) && 
-					       name.eql?(other.name) && 
-					       path.eql?(other.path) && 
-					       info.eql?(other.info)
-				else
-					return false
-				end
+				self.class.eql?(other.class) and kind.eql?(other.kind) and name.eql?(other.name) and path.eql?(other.path) and info.eql?(other.info)
 			end
 
 			def == other
-				return other && kind == other.kind && name == other.name && path == other.path
+				other and kind == other.kind and name == other.name and path == other.path
 			end
 			
 			def default_locale?

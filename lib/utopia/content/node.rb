@@ -361,7 +361,7 @@ module Utopia
 			def siblings_path
 				name = @uri_path.last.split('.', 2).first
 				
-				if name == "index"
+				if name == INDEX
 					@uri_path.dirname(2)
 				else
 					@uri_path.dirname

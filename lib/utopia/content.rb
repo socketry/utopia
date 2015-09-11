@@ -28,6 +28,8 @@ require 'trenni/template'
 
 module Utopia
 	class Content
+		INDEX = 'index'.freeze
+		
 		def initialize(app, options = {})
 			@app = app
 
@@ -57,7 +59,7 @@ module Utopia
 				return @tags[name]
 			end
 			
-			if String === name && name.index("/")
+			if String === name && name.index('/')
 				name = Path.create(name)
 			end
 			
@@ -77,7 +79,7 @@ module Utopia
 				end
 
 				if String === name_path
-					tag_path = File.join(root, dir.components, "_" + name_path)
+					tag_path = File.join(root, dir.components, '_' + name_path)
 
 					if File.exist? tag_path
 						return Node.new(self, dir + name, parent_path + name, tag_path)
@@ -112,7 +114,7 @@ module Utopia
 
 			# If the request for /foo/bar{extensions} is actually a directory, rewrite it to /foo/bar/index{extensions}:
 			if File.directory? directory_path
-				index_path = [basename.name, basename.rename("index")]
+				index_path = [basename.name, basename.rename(INDEX)]
 				
 				return [307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []]
 			end

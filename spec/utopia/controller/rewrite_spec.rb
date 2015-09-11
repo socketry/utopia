@@ -29,16 +29,7 @@ module Utopia::Controller::RewriteSpec
 		class TestController < Utopia::Controller::Base
 			prepend Utopia::Controller::Rewrite
 			
-			on 'test' do |request, path|
-			end
-			
-			match /^(?<id>\d+)/
-			
-			firstly do |request, path|
-				rewrite!(path) do |components|
-					@id = Integer(components.shift)
-				end rescue nil
-			end
+			rewrite ':id/**'
 			
 			def self.uri_path
 				Utopia::Path['/']

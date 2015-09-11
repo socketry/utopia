@@ -24,21 +24,21 @@ require 'utopia/content/link'
 
 module Utopia::Content::LinkSpec
 	describe Utopia::Content::Link.new(:file, "/foo/bar/baz") do
-		it "should link should have full path" do
+		it "should be valid file link" do
 			expect(subject.name).to be == "baz"
 			expect(subject.path).to be == Utopia::Path.create("/foo/bar/baz")
 		end
 	end
 	
 	describe Utopia::Content::Link.new(:directory, "/foo/bar/index") do
-		it "should link should have full path" do
+		it "should be valid directory link" do
 			expect(subject.name).to be == "bar"
 			expect(subject.path).to be == Utopia::Path.create("/foo/bar/index")
 		end
 	end
 	
 	describe Utopia::Content::Link.new(:virtual, "bob") do
-		it "should link should have full path" do
+		it "should be valid virtual link" do
 			expect(subject.name).to be == "bob"
 			expect(subject.path).to be == nil
 		end
@@ -46,7 +46,7 @@ module Utopia::Content::LinkSpec
 	
 	describe Utopia::Content::Links do
 		it "should give a list of links" do
-			links = Utopia::Content::Links.index(File.expand_path("../links", __FILE__), Utopia::Path.create("/"))
+			links = Utopia::Content::Links.index(File.expand_path("links", __dir__), Utopia::Path.create("/"))
 			
 			expect(links.size).to be == 3
 			
@@ -69,13 +69,13 @@ module Utopia::Content::LinkSpec
 		end
 		
 		it "should filter links by name" do
-			links = Utopia::Content::Links.index(File.expand_path("../links", __FILE__), Utopia::Path.create("/"), name: /foo/)
+			links = Utopia::Content::Links.index(File.expand_path("links", __dir__), Utopia::Path.create("/"), name: /foo/)
 			
 			expect(links.size).to be == 1
 		end
 		
 		it "should select localized links" do
-			root = File.expand_path("../links", __FILE__)
+			root = File.expand_path("links", __dir__)
 			
 			# Select both test links
 			links = Utopia::Content::Links.index(root, Utopia::Path.create("/foo"))
@@ -86,7 +86,7 @@ module Utopia::Content::LinkSpec
 		end
 		
 		it "should read correct link order for en" do
-			root = File.expand_path("../localized", __FILE__)
+			root = File.expand_path("localized", __dir__)
 			
 			# Select both test links
 			links = Utopia::Content::Links.index(root, Utopia::Path.create("/"), variant: 'en')
@@ -95,7 +95,7 @@ module Utopia::Content::LinkSpec
 		end
 		
 		it "should read correct link order for zh" do
-			root = File.expand_path("../localized", __FILE__)
+			root = File.expand_path("localized", __dir__)
 			
 			# Select both test links
 			links = Utopia::Content::Links.index(root, Utopia::Path.create("/"), variant: 'zh')

@@ -32,20 +32,32 @@ module Utopia
 					@patterns ||= []
 				end
 				
-				def match(pattern, &block)
+				def rewrite(pattern, &block)
 					patterns << [pattern, block]
 				end
 			end
 			
-			def rewrite(path)
-				path = path.to_str
+			def patterns
+				self.class.patterns
+			end
+			
+			def rewrite_matched(match)
+				match.names.each do |name|
+					self.instance_variable_set("@#{name}", match[name])
+				end
 				
-				@patterns.each do |pattern, block|
-					if matched = pattern.match(path)
+				return match.post_match
+			end
+			
+			def rewrite(path)
+				path = original_path = path.to_s
+				
+				patterns.each do |pattern, block|
+					if match_data = path.match(pattern)
 						if block
-							path = block.call(matched)
+							path = self.instance_exec(match_data, &block)
 						else
-							matched
+							self.rewrite_matched(match_data)
 						end
 					end
 				end

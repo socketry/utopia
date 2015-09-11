@@ -25,12 +25,12 @@ module Utopia::ContentSpec
 	describe Utopia::Content do
 		include Rack::Test::Methods
 		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('../content_spec.ru', __FILE__)).first}
+		let(:app) {Rack::Builder.parse_file(File.expand_path('content_spec.ru', __dir__)).first}
 		
 		it "should get a local path" do
 			get '/node/index'
 			
-			expect(last_response.body).to be == File.expand_path('../pages/node', __FILE__)
+			expect(last_response.body).to be == File.expand_path('pages/node', __dir__)
 		end
 		
 		it "should successfully redirect to the index page" do
@@ -66,7 +66,7 @@ module Utopia::ContentSpec
 	end
 	
 	describe Utopia::Content do
-		let(:root) {File.expand_path("../pages", __FILE__)}
+		let(:root) {File.expand_path("pages", __dir__)}
 		let(:content) {Utopia::Content.new(lambda{}, root: root, cache_templates: true)}
 		
 		it "should parse file and expand variables" do

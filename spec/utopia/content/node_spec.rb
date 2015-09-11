@@ -22,7 +22,7 @@ require 'utopia/content'
 
 module Utopia::ContentSpec
 	describe Utopia::Content::Node do
-		let(:root) {File.expand_path("../node", __FILE__)}
+		let(:root) {File.expand_path("node", __dir__)}
 		let(:content) {Utopia::Content.new(lambda{}, root: root)}
 		
 		it "should list siblings in correct order" do
