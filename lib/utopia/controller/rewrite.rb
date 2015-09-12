@@ -27,46 +27,91 @@ module Utopia
 				base.extend(ClassMethods)
 			end
 			
-			module ClassMethods
-				def patterns
-					@patterns ||= []
+			class Rule
+				def initialize(method, arguments, options, &block)
+					@method = method
+					@arguments = arguments
+					@options = options
+					@block = block
 				end
 				
-				def rewrite(pattern, &block)
-					patterns << [pattern, block]
-				end
-			end
-			
-			def patterns
-				self.class.patterns
-			end
-			
-			def rewrite_matched(match)
-				match.names.each do |name|
-					self.instance_variable_set("@#{name}", match[name])
+				attr :method
+				attr :arguments
+				attr :block
+				
+				def tr(input, context)
+					input.tr(*@arguments)
 				end
 				
-				return match.post_match
-			end
-			
-			def rewrite(path)
-				path = original_path = path.to_s
+				def sub(input, context)
+					input.sub(*@arguments, &@block)
+				end
 				
-				patterns.each do |pattern, block|
-					if match_data = path.match(pattern)
-						if block
-							path = self.instance_exec(match_data, &block)
+				def gsub(input, context)
+					input.gsub(*@arguments, &@block)
+				end
+				
+				def match(input, context)
+					if match_data = input.match(*@arguments)
+						if @block
+							context.instance_exec(match_data, &@block)
 						else
-							path = self.rewrite_matched(match_data)
+							context.rewrite_matched(match_data)
+						end
+					else
+						return input
+					end
+				end
+				
+				def apply(input, context)
+					self.send(@method, input, context)
+				end
+			end
+			
+			class Rewriter
+				def initialize
+					@rules = []
+				end
+				
+				def method_missing(name, *arguments, **options, &block)
+					@rules << Rule.new(name, arguments, options, &block)
+				end
+				
+				def apply(path, context)
+					path = original_path = path.to_s
+					
+					# Allow rules to terminate the search:
+					catch(:stop) do
+						@rules.each do |rule|
+							# puts "Applying #{rule.method}(#{rule.arguments}) to #{path}"
+							path = rule.apply(path, context)
+							
+							# If any of the rewrite steps returns nil, we return nil:
+							return nil if path == nil
 						end
 					end
 					
-					# If any of the rewrite steps returns nil, we return nil:
-					return nil if path == nil
+					# We only return an updated path if the path changed:
+					return path unless path == original_path
+				end
+			end
+			
+			module ClassMethods
+				def rewrite
+					@rewriter ||= Rewriter.new
+				end
+			end
+			
+			def rewrite(path)
+				self.class.rewrite.apply(path, self)
+			end
+			
+			def rewrite_matched(match_data)
+				match_data.names.each do |name|
+					self.instance_variable_set("@#{name}", match_data[name])
 				end
 				
-				# We only return an updated path if the path changed:
-				return path unless path == original_path
+				return match_data.post_match
 			end
 			
 			# Rewrite the path before processing the request if possible.

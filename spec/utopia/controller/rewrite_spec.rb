@@ -33,7 +33,9 @@ module Utopia::Controller::RewriteSpec
 				@test = true
 			end
 			
-			rewrite /^(?<id>\d+)(\/|$)/ do |match_data|
+			rewrite.sub /apples/, 'oranges'
+			
+			rewrite.match /^(?<id>\d+)(\/|$)/ do |match_data|
 				@id = Integer(match_data[:id])
 				
 				match_data.post_match
@@ -54,20 +56,10 @@ module Utopia::Controller::RewriteSpec
 			Rack::Request.new(Rack::MockRequest.env_for(*args))
 		end
 		
-		it "should invoke with arguments" do
-			controller = TestController.new
-			variables = Utopia::Controller::Variables.new
-			
-			expect(controller.class.actions).to be_include :test
-			
-			matching_path = Utopia::Path['55/test']
-			#request = mock_request(path.to_s)
-			#request.env[Utopia::VARIABLES_KEY] = variables
-			
-			path = controller.rewrite(matching_path)
-			
-			expect(path).to be == 'test'
-			expect(controller.id).to be == 55
+		let(:controller) {TestController.new}
+		
+		it "should substitude path components" do
+			expect(controller.rewrite("/apples/juice")).to be == "/oranges/juice"
 		end
 	end
 end
