@@ -61,5 +61,12 @@ module Utopia::Controller::RewriteSpec
 		it "should substitude path components" do
 			expect(controller.rewrite("/apples/juice")).to be == "/oranges/juice"
 		end
+		
+		it "should extract id from path" do
+			path = controller.rewrite("53/edit")
+			
+			expect(path).to be == "edit"
+			expect(controller.id).to be == 53
+		end
 	end
 end
