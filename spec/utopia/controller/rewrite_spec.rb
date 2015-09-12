@@ -41,6 +41,14 @@ module Utopia::Controller::RewriteSpec
 				match_data.post_match
 			end
 			
+			rewrite.symbolic ':user_id/summary/:order_id' do |match_data|
+				@user_id = Integer(match_data[:user_id])
+				@order_id = Integer(match_data[:order_id])
+				
+				# What to have here?
+				# return 'summary' + match_data.post_match
+			end
+			
 			attr :id
 			
 			def self.uri_path
