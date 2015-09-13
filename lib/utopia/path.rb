@@ -381,7 +381,7 @@ module Utopia
 		end
 	end
 	
-	def Path(path)
+	def self.Path(path)
 		Path.create(path)
 	end
 end

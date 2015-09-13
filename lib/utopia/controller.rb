@@ -80,7 +80,7 @@ module Utopia
 		end
 		
 		def invoke_controllers(variables, request, done = Set.new)
-			path = Path.create(request.path_info)
+			path = Path[request.path_info]
 			controller_path = Path.new
 			
 			path.descend do |controller_path|

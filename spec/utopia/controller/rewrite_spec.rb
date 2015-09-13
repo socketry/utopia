@@ -38,16 +38,15 @@ module Utopia::Controller::RewriteSpec
 			rewrite.match /^(?<id>\d+)(\/|$)/ do |match_data|
 				@id = Integer(match_data[:id])
 				
-				match_data.post_match
+				next match_data.post_match
 			end
 			
-			rewrite.symbolic ':user_id/summary/:order_id' do |match_data|
-				@user_id = Integer(match_data[:user_id])
-				@order_id = Integer(match_data[:order_id])
-				
-				# What to have here?
-				# return 'summary' + match_data.post_match
-			end
+			#rewrite.prefix(user_id: Integer, summary: 'Summary', order_id: Integer) do |match_data|
+			#	@user_id = Integer(match_data[:user_id])
+			#	@order_id = Integer(match_data[:order_id])
+			#	
+			#	return match_data.post_match
+			#end
 			
 			attr :id
 			

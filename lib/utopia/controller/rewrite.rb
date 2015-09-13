@@ -40,24 +40,32 @@ module Utopia
 				attr :block
 				
 				def tr(input, context)
-					input.tr(*@arguments)
+					String(input).tr(*@arguments)
 				end
 				
 				def sub(input, context)
-					input.sub(*@arguments, &@block)
+					String(input).sub(*@arguments, &@block)
 				end
 				
 				def gsub(input, context)
-					input.gsub(*@arguments, &@block)
+					String(input).gsub(*@arguments, &@block)
 				end
 				
 				def match(input, context)
-					if match_data = input.match(*@arguments)
+					if match_data = String(input).match(*@arguments)
 						if @block
 							context.instance_exec(match_data, &@block)
 						else
 							context.rewrite_matched(match_data)
 						end
+					else
+						return input
+					end
+				end
+				
+				# prefix :business_id, 'summary', :poi_id
+				def prefix(input, context)
+					if match_data = Path[input].match(@arguments)
 					else
 						return input
 					end
@@ -78,7 +86,7 @@ module Utopia
 				end
 				
 				def apply(path, context)
-					path = original_path = path.to_s
+					path = original_path = path
 					
 					# Allow rules to terminate the search:
 					catch(:stop) do
