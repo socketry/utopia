@@ -35,6 +35,10 @@ module Utopia
 				def [] key
 					@named_parts[key]
 				end
+				
+				def names
+					@named_parts.keys
+				end
 			end
 			
 			# patterns = {key: /\d+/, 'foo', }

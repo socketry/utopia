@@ -35,18 +35,21 @@ module Utopia::Controller::RewriteSpec
 			
 			rewrite.sub /apples/, 'oranges'
 			
+			rewrite.prefix(user_id: Integer, summary: 'summary', order_id: Integer) do |match_data|
+				@user_id = match_data[:user_id]
+				@order_id = match_data[:order_id]
+				
+				next match_data.post_match
+			end
+			
+			attr :user_id
+			attr :order_id
+			
 			rewrite.match /^(?<id>\d+)(\/|$)/ do |match_data|
 				@id = Integer(match_data[:id])
 				
 				next match_data.post_match
 			end
-			
-			#rewrite.prefix(user_id: Integer, summary: 'Summary', order_id: Integer) do |match_data|
-			#	@user_id = Integer(match_data[:user_id])
-			#	@order_id = Integer(match_data[:order_id])
-			#	
-			#	return match_data.post_match
-			#end
 			
 			attr :id
 			
@@ -74,6 +77,14 @@ module Utopia::Controller::RewriteSpec
 			
 			expect(path).to be == "edit"
 			expect(controller.id).to be == 53
+		end
+		
+		it "should match path prefix and extract parameters" do
+			path = controller.rewrite("10/summary/20/edit")
+			
+			expect(path).to be == "edit"
+			expect(controller.user_id).to be == 10
+			expect(controller.order_id).to be == 20
 		end
 	end
 end

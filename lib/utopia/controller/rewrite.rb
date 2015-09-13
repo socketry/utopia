@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 require_relative '../http'
+require_relative '../path/matcher'
 
 module Utopia
 	class Controller
@@ -56,16 +57,24 @@ module Utopia
 						if @block
 							context.instance_exec(match_data, &@block)
 						else
-							context.rewrite_matched(match_data)
+							context.rewrite_match(match_data)
 						end
 					else
 						return input
 					end
 				end
 				
-				# prefix :business_id, 'summary', :poi_id
 				def prefix(input, context)
-					if match_data = Path[input].match(@arguments)
+					@matcher ||= Path::Matcher.new(@options)
+					
+					puts "Matching #{input} against #{@matcher.inspect}"
+					
+					if match_data = @matcher.match(Path[input])
+						if @block
+							context.instance_exec(match_data, &@block)
+						else
+							context.rewrite_prefix(match_data)
+						end
 					else
 						return input
 					end
@@ -114,12 +123,16 @@ module Utopia
 				self.class.rewrite.apply(path, self)
 			end
 			
-			def rewrite_matched(match_data)
+			def rewrite_match(match_data)
 				match_data.names.each do |name|
 					self.instance_variable_set("@#{name}", match_data[name])
 				end
 				
 				return match_data.post_match
+			end
+			
+			def rewrite_prefix(match_data)
+				rewrite_match(match_data)
 			end
 			
 			# Rewrite the path before processing the request if possible.

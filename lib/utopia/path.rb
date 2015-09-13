@@ -315,7 +315,13 @@ module Utopia
 		end
 		
 		def == other
-			self.to_a == other.to_a
+			return false unless other
+			
+			if other.is_a? String
+				self.to_s == other
+			else
+				self.to_a == other.to_a
+			end
 		end
 		
 		def start_with? other
