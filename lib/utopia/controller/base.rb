@@ -123,14 +123,7 @@ module Utopia
 			end
 			
 			# Rewrite the current location and invoke the controllers with the new path.
-			# If you provide a block, you are given the chance to modify the controller relative path in place, e.g. to extract parameters from the path.
 			def rewrite! location
-				if block_given?
-					location = location - self.class.uri_path
-					
-					yield location.components
-				end
-				
 				throw :rewrite, location
 			end
 

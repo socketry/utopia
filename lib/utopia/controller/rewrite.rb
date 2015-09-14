@@ -140,12 +140,12 @@ module Utopia
 			end
 			
 			# Rewrite the path before processing the request if possible.
-			def process!(request, path)
-				if path = rewrite(path)
-					rewrite! path
-				else
-					super
+			def passthrough(request, path)
+				if rewritten_path = rewrite(path)
+					rewrite! rewritten_path
 				end
+				
+				super
 			end
 		end
 	end

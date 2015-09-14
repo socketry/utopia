@@ -79,9 +79,8 @@ module Utopia
 			end
 		end
 		
-		def invoke_controllers(variables, request, done = Set.new)
-			path = Path[request.path_info]
-			controller_path = Path.new
+		def invoke_controllers(request, path = nil, done = Set.new)
+			path ||= Path[request.path_info]
 			
 			path.descend do |controller_path|
 				# puts "Invoke controller: #{controller_path}"
@@ -97,10 +96,12 @@ module Utopia
 						end
 						
 						if location
-							# Rewrite relative paths based on the controller's URI:
-							request.env[PATH_INFO_KEY] = Path[location].expand(controller.class.uri_path).to_s
+							location = Path[location].expand(controller.class.uri_path)
 							
-							return invoke_controllers(variables, request, done)
+							# Rewrite relative paths based on the controller's URI:
+							request.env[PATH_INFO_KEY] = location.to_s
+							
+							return invoke_controllers(request, location, done)
 						end
 						
 						done << controller
@@ -117,7 +118,7 @@ module Utopia
 			
 			request = Rack::Request.new(env)
 			
-			if result = invoke_controllers(variables, request)
+			if result = invoke_controllers(request)
 				return result
 			end
 			
