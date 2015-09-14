@@ -121,11 +121,6 @@ module Utopia
 			def redirect! (target, status = 302)
 				respond! :redirect => target, :status => status
 			end
-			
-			# Rewrite the current location and invoke the controllers with the new path.
-			def rewrite! location
-				throw :rewrite, location
-			end
 
 			def fail!(error = :bad_request)
 				respond! error
@@ -176,10 +171,7 @@ module Utopia
 			
 			# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid rack response if the controller can do so.
 			def process!(request, path)
-				# We invoke controller functionality with the relative path:
-				relative_path = (path - self.class.uri_path)
-				
-				passthrough(request, relative_path)
+				passthrough(request, path)
 			end
 		end
 	end

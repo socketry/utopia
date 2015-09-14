@@ -67,11 +67,5 @@ module Utopia::Controller::MiddlewareSpec
 			expect(last_response.status).to be == 302
 			expect(last_response.headers['Location']).to be == 'bar'
 		end
-		
-		it "should rewrite the request" do
-			get '/controller/rewrite'
-			expect(last_response.status).to be == 200
-			expect(last_response.body).to be == 'Hello World'
-		end
 	end
 end

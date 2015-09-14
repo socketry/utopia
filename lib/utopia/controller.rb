@@ -79,35 +79,22 @@ module Utopia
 			end
 		end
 		
-		def invoke_controllers(request, path = nil, done = Set.new)
-			path ||= Path[request.path_info]
-			
-			path.descend do |controller_path|
-				# puts "Invoke controller: #{controller_path}"
+		def invoke_controllers(request)
+			relative_path = Path[request.path_info]
+			controller_path = Path.new
+
+			while relative_path.components.any?
+				controller_path.components << relative_path.components.shift
+				
 				if controller = lookup_controller(controller_path)
-					# We only want to invoke controllers which have not already been invoked:
-					unless done.include? controller
-						# If we get throw :rewrite, location, the URL has been rewritten and we need to request again:
-						location = catch(:rewrite) do
-							# Invoke the controller and if it returns a result, send it back out:
-							if result = controller.process!(request, path)
-								return result
-							end
-						end
-						
-						if location
-							location = Path[location].expand(controller.class.uri_path)
-							
-							# Rewrite relative paths based on the controller's URI:
-							request.env[PATH_INFO_KEY] = location.to_s
-							
-							return invoke_controllers(request, location, done)
-						end
-						
-						done << controller
+					if result = controller.process!(request, relative_path)
+						return result
 					end
 				end
 			end
+			
+			# The controllers may have rewriten the path so we update the path info:
+			request.env[PATH_INFO_KEY] = controller_path.to_s
 			
 			# No controller gave a useful result:
 			return nil

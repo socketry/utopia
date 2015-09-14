@@ -74,6 +74,8 @@ module Utopia
 			@components = components
 		end
 
+		attr :components, true
+
 		def freeze
 			@components.freeze
 			
@@ -151,38 +153,40 @@ module Utopia
 			end
 		end
 
-		attr :components
-
 		def include?(*args)
 			@components.include?(*args)
 		end
 		
 		def directory?
-			return @components.last == ""
+			return @components.last == ''
 		end
 
 		def to_directory
 			if directory?
 				return self
 			else
-				return join([""])
+				return join([''])
 			end
 		end
 
+		def relative?
+			@components.first != ''
+		end
+
 		def absolute?
-			return @components.first == ""
+			@components.first == ''
 		end
 
 		def to_absolute
 			if absolute?
 				return self
 			else
-				return self.class.new([""] + @components)
+				return self.class.new([''] + @components)
 			end
 		end
 
 		def to_str
-			if @components == [""]
+			if @components == ['']
 				SEPARATOR
 			else
 				@components.join(SEPARATOR)
@@ -243,17 +247,17 @@ module Utopia
 		end
 
 		def simplify
-			result = absolute? ? [""] : []
+			result = absolute? ? [''] : []
 
 			@components.each do |bit|
 				if bit == ".."
 					result.pop
-				elsif bit != "." && bit != ""
+				elsif bit != "." && bit != ''
 					result << bit
 				end
 			end
 
-			result << "" if directory?
+			result << '' if directory?
 			
 			return self.class.new(result)
 		end
@@ -283,7 +287,7 @@ module Utopia
 				yield self.class.new(parent_path.dup)
 			end
 		end
-
+		
 		def ascend(&block)
 			return to_enum(:ascend) unless block_given?
 			

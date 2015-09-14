@@ -23,6 +23,9 @@ require_relative '../path/matcher'
 
 module Utopia
 	class Controller
+		class RewriteError < ArgumentError
+		end
+		
 		module Rewrite
 			def self.prepended(base)
 				base.extend(ClassMethods)
@@ -103,7 +106,6 @@ module Utopia
 					# Allow rules to terminate the search:
 					catch(:stop) do
 						@rules.each do |rule|
-							puts "Applying #{rule.method}(#{rule.arguments} #{rule.options}) to #{path}"
 							path = rule.apply(path, context)
 							
 							# If any of the rewrite steps returns nil, we return nil:
@@ -142,7 +144,10 @@ module Utopia
 			# Rewrite the path before processing the request if possible.
 			def passthrough(request, path)
 				if rewritten_path = rewrite(path)
-					rewrite! rewritten_path
+					raise RewriteError.new("Rewritten path must be relative to the controller!") unless rewritten_path.relative?
+					
+					# Copy the components into the relative path:
+					path.components = rewritten_path.components
 				end
 				
 				super
