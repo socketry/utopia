@@ -69,20 +69,22 @@ module Utopia::Controller::RewriteSpec
 		let(:controller) {TestController.new}
 		
 		it "should substitude path components" do
-			expect(controller.rewrite("/apples/juice")).to be == "/oranges/juice"
+			path = Utopia::Path["apples/juice"]
+			
+			expect(controller.rewrite(path)).to be == Utopia::Path["oranges/juice"]
 		end
 		
 		it "should extract id from path" do
-			path = controller.rewrite("53/edit")
+			path = controller.rewrite(Utopia::Path["53/edit"])
 			
-			expect(path).to be == "edit"
+			expect(path).to be == Utopia::Path["edit"]
 			expect(controller.id).to be == 53
 		end
 		
 		it "should match path prefix and extract parameters" do
-			path = controller.rewrite("10/summary/20/edit")
+			path = controller.rewrite(Utopia::Path["10/summary/20/edit"])
 			
-			expect(path).to be == "edit"
+			expect(path).to be == Utopia::Path["edit"]
 			expect(controller.user_id).to be == 10
 			expect(controller.order_id).to be == 20
 		end

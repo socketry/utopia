@@ -22,6 +22,8 @@ require_relative '../http'
 
 module Utopia
 	class Controller
+		EMPTY_BODY = [].freeze
+		
 		class Base
 			def self.base_path
 				self.const_get(:BASE_PATH)
@@ -157,22 +159,23 @@ module Utopia
 				status = HTTP::STATUS_CODES[status] || status
 				headers = options[:headers] || {}
 
-				if options[:type]
-					headers[HTTP::CONTENT_TYPE] ||= options[:type]
+				if type = options[:type]
+					headers[HTTP::CONTENT_TYPE] ||= type
 				end
 
-				if options[:redirect]
-					headers[HTTP::LOCATION] = options[:redirect].to_str
+				if redirect = options[:redirect]
+					headers[HTTP::LOCATION] = redirect.to_s
 					status = 302 if status < 300 || status >= 400
 				end
 
-				body = []
 				if options[:body]
 					body = options[:body]
 				elsif options[:content]
 					body = [options[:content]]
 				elsif status >= 300
 					body = [HTTP::STATUS_DESCRIPTIONS[status] || "Status #{status}"]
+				else
+					body = EMPTY_BODY
 				end
 
 				return [status, headers, body]
@@ -180,7 +183,10 @@ module Utopia
 			
 			# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid rack response if the controller can do so.
 			def process!(request, path)
-				passthrough(request, path)
+				# We invoke controller functionality with the relative path:
+				relative_path = (path - self.class.uri_path)
+				
+				passthrough(request, relative_path)
 			end
 		end
 	end

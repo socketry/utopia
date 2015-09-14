@@ -38,6 +38,7 @@ module Utopia
 				
 				attr :method
 				attr :arguments
+				attr :options
 				attr :block
 				
 				def tr(input, context)
@@ -67,8 +68,6 @@ module Utopia
 				def prefix(input, context)
 					@matcher ||= Path::Matcher.new(@options)
 					
-					puts "Matching #{input} against #{@matcher.inspect}"
-					
 					if match_data = @matcher.match(Path[input])
 						if @block
 							context.instance_exec(match_data, &@block)
@@ -94,13 +93,17 @@ module Utopia
 					@rules << Rule.new(name, arguments, options, &block)
 				end
 				
+				def stop
+					throw :stop
+				end
+				
 				def apply(path, context)
 					path = original_path = path
 					
 					# Allow rules to terminate the search:
 					catch(:stop) do
 						@rules.each do |rule|
-							# puts "Applying #{rule.method}(#{rule.arguments}) to #{path}"
+							puts "Applying #{rule.method}(#{rule.arguments} #{rule.options}) to #{path}"
 							path = rule.apply(path, context)
 							
 							# If any of the rewrite steps returns nil, we return nil:
@@ -120,6 +123,7 @@ module Utopia
 			end
 			
 			def rewrite(path)
+				# Rewrite the path if possible, may return a String or Path:
 				self.class.rewrite.apply(path, self)
 			end
 			
