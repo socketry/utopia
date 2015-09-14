@@ -32,58 +32,26 @@ module Utopia
 			end
 			
 			class Rule
-				def initialize(method, arguments, options, &block)
-					@method = method
+				def initialize(arguments, &block)
 					@arguments = arguments
-					@options = options
 					@block = block
 				end
 				
-				attr :method
 				attr :arguments
-				attr :options
 				attr :block
 				
-				def tr(input, context)
-					String(input).tr(*@arguments)
-				end
-				
-				def sub(input, context)
-					String(input).sub(*@arguments, &@block)
-				end
-				
-				def gsub(input, context)
-					String(input).gsub(*@arguments, &@block)
-				end
-				
-				def match(input, context)
-					if match_data = String(input).match(*@arguments)
-						if @block
-							context.instance_exec(match_data, &@block)
-						else
-							context.rewrite_match(match_data)
-						end
-					else
-						return input
-					end
-				end
-				
-				def prefix(input, context)
-					@matcher ||= Path::Matcher.new(@options)
+				def apply(request, input, context)
+					@matcher ||= Path::Matcher.new(@arguments)
 					
-					if match_data = @matcher.match(Path[input])
+					if match_data = @matcher.match(input)
 						if @block
-							context.instance_exec(match_data, &@block)
+							context.instance_exec(*match_data.named_parts.values, match_data: match_data, request: request, &@block)
 						else
-							context.rewrite_prefix(match_data)
+							context.rewrite_prefix(match_data, request)
 						end
 					else
 						return input
 					end
-				end
-				
-				def apply(input, context)
-					self.send(@method, input, context)
 				end
 			end
 			
@@ -92,29 +60,16 @@ module Utopia
 					@rules = []
 				end
 				
-				def method_missing(name, *arguments, **options, &block)
-					@rules << Rule.new(name, arguments, options, &block)
+				def prefix(**arguments, &block)
+					@rules << Rule.new(arguments, &block)
 				end
 				
-				def stop
-					throw :stop
-				end
-				
-				def apply(path, context)
-					path = original_path = path
-					
-					# Allow rules to terminate the search:
-					catch(:stop) do
-						@rules.each do |rule|
-							path = rule.apply(path, context)
-							
-							# If any of the rewrite steps returns nil, we return nil:
-							return nil if path == nil
-						end
+				def apply(request, path, context)
+					@rules.each do |rule|
+						path = rule.apply(request, path, context)
 					end
 					
-					# We only return an updated path if the path changed:
-					return path unless path == original_path
+					return path
 				end
 			end
 			
@@ -124,12 +79,12 @@ module Utopia
 				end
 			end
 			
-			def rewrite(path)
+			def rewrite(request, path)
 				# Rewrite the path if possible, may return a String or Path:
-				self.class.rewrite.apply(path, self)
+				self.class.rewrite.apply(request, path, self)
 			end
 			
-			def rewrite_match(match_data)
+			def rewrite_prefix(match_data, request)
 				match_data.names.each do |name|
 					self.instance_variable_set("@#{name}", match_data[name])
 				end
@@ -137,18 +92,9 @@ module Utopia
 				return match_data.post_match
 			end
 			
-			def rewrite_prefix(match_data)
-				rewrite_match(match_data)
-			end
-			
 			# Rewrite the path before processing the request if possible.
 			def passthrough(request, path)
-				if rewritten_path = rewrite(path)
-					raise RewriteError.new("Rewritten path must be relative to the controller!") unless rewritten_path.relative?
-					
-					# Copy the components into the relative path:
-					path.components = rewritten_path.components
-				end
+				path.components = rewrite(request, path).components
 				
 				super
 			end

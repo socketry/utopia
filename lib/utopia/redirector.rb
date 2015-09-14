@@ -88,7 +88,7 @@ module Utopia
 
 		public
 		
-		def initialize(app, options = {})
+		def initialize(app, **options)
 			@app = app
 
 			@strings = options[:strings] || {}

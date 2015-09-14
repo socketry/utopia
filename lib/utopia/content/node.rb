@@ -315,8 +315,9 @@ module Utopia
 				@controller.lookup_node(path)
 			end
 
-			def local_path(path = ".", base = nil)
-				path = Path.create(path)
+			def local_path(path = '.', base = nil)
+				path = Path[path]
+				
 				root = Pathname.new(@controller.root)
 				
 				if path.absolute?
@@ -342,8 +343,8 @@ module Utopia
 				uri_path.dirname
 			end
 
-			def links(path = ".", options = {}, &block)
-				path = uri_path.dirname + Path.create(path)
+			def links(path = '.', **options, &block)
+				path = uri_path.dirname + Path[path]
 				links = Links.index(@controller.root, path, options)
 				
 				if block_given?
@@ -368,7 +369,7 @@ module Utopia
 				end
 			end
 
-			def sibling_links(options = {})
+			def sibling_links(**options)
 				return Links.index(@controller.root, siblings_path, options)
 			end
 

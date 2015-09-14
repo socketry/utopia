@@ -85,7 +85,7 @@ module Utopia
 				@info.fetch(:title, @title)
 			end
 
-			def to_href(options = {})
+			def to_href(**options)
 				Trenni::Builder.fragment(options[:builder]) do |builder|
 					if href?
 						relative_href(options[:base])

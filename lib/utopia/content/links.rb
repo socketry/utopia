@@ -41,7 +41,7 @@ module Utopia
 				:display => :display,
 			}
 			
-			def self.index(root, path, options = {})
+			def self.index(root, path, **options)
 				options = DEFAULT_INDEX_OPTIONS.merge(options)
 				
 				ordered = self.new(root, path, options).ordered

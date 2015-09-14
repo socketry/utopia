@@ -28,11 +28,24 @@ require_relative 'controller/base'
 require_relative 'controller/rewrite'
 
 module Utopia
+	module Controllers
+		def self.class_name_for_controller(controller)
+			controller.uri_path.to_a.collect{|_| _.capitalize}.join + "_#{controller.object_id}"
+		end
+		
+		def self.define(klass)
+			self.const_set(
+				class_name_for_controller(klass),
+				klass,
+			)
+		end
+	end
+	
 	class Controller
 		CONTROLLER_RB = 'controller.rb'.freeze
 		PATH_INFO_KEY = 'PATH_INFO'.freeze
 		
-		def initialize(app, options = {})
+		def initialize(app, **options)
 			@app = app
 			@root = options[:root] || Utopia::default_root
 
@@ -72,6 +85,9 @@ module Utopia
 				klass.const_set(:CONTROLLER, self)
 				
 				klass.class_eval(File.read(controller_path), controller_path)
+				
+				# Give the controller a useful name:
+				# Controllers.define(klass)
 				
 				return klass.new
 			else

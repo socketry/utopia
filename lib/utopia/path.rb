@@ -105,6 +105,7 @@ module Utopia
 			self.class.shortest_path(self, root)
 		end
 
+		# Converts '+' into whitespace and hex encoded characters into their equivalent characters.
 		def self.unescape(string)
 			string.tr('+', ' ').gsub(/((?:%[0-9a-fA-F]{2})+)/n) {
 				[$1.delete('%')].pack('H*')
@@ -139,7 +140,7 @@ module Utopia
 				[path]
 			end
 		end
-
+		
 		def self.create(path)
 			case path
 			when Path
@@ -148,7 +149,7 @@ module Utopia
 				return self.new(path)
 			when String
 				return self.new(unescape(path).split(SEPARATOR, -1))
-			when Symbol
+			else
 				return self.new([path])
 			end
 		end
@@ -229,6 +230,10 @@ module Utopia
 			else
 				return join([other.to_s])
 			end
+		end
+
+		def with_prefix(*args)
+			self.class.create(*args) + self
 		end
 
 		# Computes the difference of the path.

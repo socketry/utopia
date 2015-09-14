@@ -194,7 +194,7 @@ module Utopia
 
 		public
 
-		def initialize(app, options = {})
+		def initialize(app, **options)
 			@app = app
 			@root = options[:root] || Utopia::default_root
 

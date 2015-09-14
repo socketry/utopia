@@ -33,9 +33,7 @@ module Utopia::Controller::RewriteSpec
 				@test = true
 			end
 			
-			rewrite.sub /apples/, 'oranges'
-			
-			rewrite.prefix(user_id: Integer, summary: 'summary', order_id: Integer) do |match_data|
+			rewrite.prefix(user_id: Integer, summary: 'summary', order_id: Integer) do |match_data:, request:|
 				@user_id = match_data[:user_id]
 				@order_id = match_data[:order_id]
 				
@@ -45,44 +43,15 @@ module Utopia::Controller::RewriteSpec
 			attr :user_id
 			attr :order_id
 			
-			rewrite.match /^(?<id>\d+)(\/|$)/ do |match_data|
-				@id = Integer(match_data[:id])
-				
-				next match_data.post_match
-			end
-			
-			attr :id
-			
 			def self.uri_path
 				Utopia::Path['/']
 			end
 		end
 		
-		it "should generate an invocation" do
-			controller = Utopia::Controller::Base.new
-		end
-		
-		def mock_request(*args)
-			Rack::Request.new(Rack::MockRequest.env_for(*args))
-		end
-		
 		let(:controller) {TestController.new}
 		
-		it "should substitude path components" do
-			path = Utopia::Path["apples/juice"]
-			
-			expect(controller.rewrite(path)).to be == Utopia::Path["oranges/juice"]
-		end
-		
-		it "should extract id from path" do
-			path = controller.rewrite(Utopia::Path["53/edit"])
-			
-			expect(path).to be == Utopia::Path["edit"]
-			expect(controller.id).to be == 53
-		end
-		
 		it "should match path prefix and extract parameters" do
-			path = controller.rewrite(Utopia::Path["10/summary/20/edit"])
+			path = controller.rewrite({}, Utopia::Path["10/summary/20/edit"])
 			
 			expect(path).to be == Utopia::Path["edit"]
 			expect(controller.user_id).to be == 10

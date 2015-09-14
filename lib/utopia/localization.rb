@@ -49,7 +49,7 @@ module Utopia
 		LOCALIZATION_KEY = 'utopia.localization'.freeze
 		CURRENT_LOCALE_KEY = 'utopia.localization.current_locale'.freeze
 		
-		def initialize(app, options = {})
+		def initialize(app, **options)
 			@app = app
 
 			@default_locale = options[:default_locale] || "en"

@@ -28,7 +28,7 @@ module Utopia
 	module Session
 		# Stores all session data client side using a private symmetric encrpytion key.
 		class EncryptedCookie
-			def initialize(app, options = {})
+			def initialize(app, **options)
 				@app = app
 				@cookie_name = options.delete(:cookie_name) || (RACK_SESSION + ".encrypted")
 

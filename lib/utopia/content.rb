@@ -30,7 +30,7 @@ module Utopia
 	class Content
 		INDEX = 'index'.freeze
 		
-		def initialize(app, options = {})
+		def initialize(app, **options)
 			@app = app
 
 			@root = File.expand_path(options[:root] || Utopia::default_root)

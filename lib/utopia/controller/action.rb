@@ -80,7 +80,7 @@ module Utopia
 				end.freeze
 			end
 			
-			def define(path, options = {}, &callback)
+			def define(path, **options, &callback)
 				current = self
 				
 				path.reverse.each do |name|
