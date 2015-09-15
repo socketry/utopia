@@ -90,10 +90,13 @@ module Utopia
 				:indices => true,
 			}
 			
-			def initialize(root, top = Path.new, options = DEFAULT_OPTIONS)
+			def initialize(root, top = Path.root, options = DEFAULT_OPTIONS)
+				raise ArgumentError.new("top path must be absolute") unless top.absolute?
+				
 				@top = top
 				@options = options
 				
+				# top.components.first == '', but this isn't a problem here.
 				@path = File.join(root, top.components)
 				@metadata = self.class.metadata(@path)
 				

@@ -82,6 +82,10 @@ module Utopia
 			super
 		end
 		
+		def self.root
+			self.new([''])
+		end
+		
 		# Returns the length of the prefix which is shared by two strings.
 		def self.prefix_length(a, b)
 			[a.size, b.size].min.times{|i| return i if a[i] != b[i]}
