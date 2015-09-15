@@ -49,8 +49,7 @@ module Utopia
 				attr :closing_tag
 
 				def to_s
-					"Unbalanced Tag Error. " \
-					"Line #{@starting_line[:line_number]}: #{@current_tag} has been closed by #{@closing_tag} on line #{@ending_line[:line_number]}!"
+					"Unbalanced Tag Error. Line #{@starting_line[:line_number]}: #{@current_tag} has been closed by #{@closing_tag} on line #{@ending_line[:line_number]}!"
 				end
 			end
 
