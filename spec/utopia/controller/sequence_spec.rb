@@ -83,6 +83,7 @@ module Utopia::Controller::SequenceSpec
 		it "should call controller methods" do
 			request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 			controller = TestController.new
+			variables << controller
 		
 			result = controller.process!(request, Utopia::Path["/success"])
 			expect(result).to be == [200, {}, []]
@@ -97,6 +98,7 @@ module Utopia::Controller::SequenceSpec
 		it "should call direct controller methods" do
 			request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 			controller = TestIndirectController.new
+			variables << controller
 			
 			controller.process!(request, Utopia::Path["/user/update"])
 			expect(variables['sequence']).to be == 'EA'
@@ -105,6 +107,7 @@ module Utopia::Controller::SequenceSpec
 		it "should call indirect controller methods" do
 			request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 			controller = TestIndirectController.new
+			variables << controller
 			
 			result = controller.process!(request, Utopia::Path["/foo/comment/post"])
 			expect(variables['sequence']).to be == 'EB'
@@ -113,6 +116,7 @@ module Utopia::Controller::SequenceSpec
 		it "should call multiple indirect controller methods in order" do
 			request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 			controller = TestIndirectController.new
+			variables << controller
 			
 			result = controller.process!(request, Utopia::Path["/comment/delete"])
 			expect(variables['sequence']).to be == 'EDC'
@@ -121,6 +125,7 @@ module Utopia::Controller::SequenceSpec
 		it "should match single patterns" do
 			request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 			controller = TestIndirectController.new
+			variables << controller
 			
 			result = controller.process!(request, Utopia::Path["/foo"])
 			expect(variables['sequence']).to be == 'EF'

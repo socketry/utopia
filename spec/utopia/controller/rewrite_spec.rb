@@ -29,9 +29,11 @@ module Utopia::Controller::RewriteSpec
 		class TestController < Utopia::Controller::Base
 			prepend Utopia::Controller::Rewrite
 			
-			on 'test' do |request, path|
-				@test = true
+			on 'edit' do |request, path|
+				@edit = true
 			end
+			
+			attr :edit
 			
 			rewrite.extract_prefix user_id: Integer, summary: 'summary', order_id: Integer
 			
@@ -45,12 +47,20 @@ module Utopia::Controller::RewriteSpec
 		
 		let(:controller) {TestController.new}
 		
+		def mock_request(*args)
+			request = Rack::Request.new(Rack::MockRequest.env_for(*args))
+			return request, Utopia::Path[request.path_info]
+		end
+		
 		it "should match path prefix and extract parameters" do
-			path = controller.rewrite({}, Utopia::Path["10/summary/20/edit"])
+			request, path, variables = mock_request("/10/summary/20/edit")
+			relative_path = path - controller.class.uri_path
 			
-			expect(path).to be == Utopia::Path["edit"]
+			controller.process!(request, relative_path)
+			
 			expect(controller.user_id).to be == 10
 			expect(controller.order_id).to be == 20
+			expect(controller.edit).to be true
 		end
 	end
 end

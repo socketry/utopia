@@ -98,11 +98,18 @@ module Utopia
 		def invoke_controllers(request)
 			relative_path = Path[request.path_info]
 			controller_path = Path.new
-
+			variables = request.env[VARIABLES_KEY]
+			
 			while relative_path.components.any?
 				controller_path.components << relative_path.components.shift
 				
 				if controller = lookup_controller(controller_path)
+					# Don't modify the original controller:
+					controller = controller.clone
+					
+					# Append the controller to the set of controller variables, updates the controller with all current instance variables.
+					variables << controller
+					
 					if result = controller.process!(request, relative_path)
 						return result
 					end

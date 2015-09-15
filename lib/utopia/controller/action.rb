@@ -77,7 +77,7 @@ module Utopia
 			def select(relative_path)
 				selection = [].tap do |actions|
 					append(relative_path.reverse, 0, actions)
-				end.freeze
+				end
 			end
 			
 			def define(path, **options, &callback)

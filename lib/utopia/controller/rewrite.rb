@@ -60,7 +60,7 @@ module Utopia
 						
 						return match_data.post_match
 					else
-						return input
+						return path
 					end
 				end
 			end
@@ -81,6 +81,10 @@ module Utopia
 					
 					return path
 				end
+				
+				def invoke!(context, request, path)
+					path.components = apply(context, request, path).components
+				end
 			end
 			
 			module ClassMethods
@@ -89,14 +93,9 @@ module Utopia
 				end
 			end
 			
-			def rewrite(request, path)
-				# Rewrite the path if possible, may return a String or Path:
-				self.class.rewrite.apply(self, request, path)
-			end
-			
 			# Rewrite the path before processing the request if possible.
 			def passthrough(request, path)
-				path.components = rewrite(request, path).components
+				self.class.rewrite.invoke!(self, request, path)
 				
 				super
 			end

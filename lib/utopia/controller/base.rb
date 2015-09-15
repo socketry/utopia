@@ -70,29 +70,24 @@ module Utopia
 			end
 			
 			# Given a path, look up all matched actions.
-			def lookup(path)
+			def actions_for_request(request, path)
 				self.class.lookup(path)
 			end
 			
 			# Given a request, call associated actions if at least one exists.
 			def passthrough(request, path)
-				actions = lookup(path)
+				actions = actions_for_request(request, path)
 				
 				unless actions.empty?
-					variables = request.env[VARIABLES_KEY]
-					controller_clone = self.clone
-					
-					variables << controller_clone
-					
 					response = catch(:response) do
 						# By default give nothing - i.e. keep on processing:
 						actions.each do |action|
-							action.invoke!(controller_clone, request, path)
+							action.invoke!(self, request, path)
 						end and nil
 					end
 					
 					if response
-						return controller_clone.respond_with(*response)
+						return self.respond_with(*response)
 					end
 				end
 				
