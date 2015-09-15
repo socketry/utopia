@@ -32,7 +32,7 @@ module Utopia
 			end
 			
 			class Rule
-				def initialize(arguments, &block)
+				def initialize(arguments, block)
 					@arguments = arguments
 					@block = block
 				end
@@ -40,15 +40,25 @@ module Utopia
 				attr :arguments
 				attr :block
 				
-				def apply(request, input, context)
+				def apply_match_to_context(match_data, context)
+					match_data.names.each do |name|
+						context.instance_variable_set("@#{name}", match_data[name])
+					end
+				end
+			end
+			
+			class ExtractPrefixRule < Rule
+				def apply(context, request, path)
 					@matcher ||= Path::Matcher.new(@arguments)
 					
-					if match_data = @matcher.match(input)
+					if match_data = @matcher.match(path)
+						apply_match_to_context(match_data, context)
+						
 						if @block
-							context.instance_exec(*match_data.named_parts.values, match_data: match_data, request: request, &@block)
-						else
-							context.rewrite_prefix(match_data, request)
+							context.instance_exec(request, path, match_data, &@block)
 						end
+						
+						return match_data.post_match
 					else
 						return input
 					end
@@ -60,13 +70,13 @@ module Utopia
 					@rules = []
 				end
 				
-				def prefix(**arguments, &block)
-					@rules << Rule.new(arguments, &block)
+				def extract_prefix(**arguments, &block)
+					@rules << ExtractPrefixRule.new(arguments, block)
 				end
 				
-				def apply(request, path, context)
+				def apply(context, request, path)
 					@rules.each do |rule|
-						path = rule.apply(request, path, context)
+						path = rule.apply(context, request, path)
 					end
 					
 					return path
@@ -81,15 +91,7 @@ module Utopia
 			
 			def rewrite(request, path)
 				# Rewrite the path if possible, may return a String or Path:
-				self.class.rewrite.apply(request, path, self)
-			end
-			
-			def rewrite_prefix(match_data, request)
-				match_data.names.each do |name|
-					self.instance_variable_set("@#{name}", match_data[name])
-				end
-				
-				return match_data.post_match
+				self.class.rewrite.apply(self, request, path)
 			end
 			
 			# Rewrite the path before processing the request if possible.

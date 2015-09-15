@@ -33,12 +33,7 @@ module Utopia::Controller::RewriteSpec
 				@test = true
 			end
 			
-			rewrite.prefix(user_id: Integer, summary: 'summary', order_id: Integer) do |match_data:, request:|
-				@user_id = match_data[:user_id]
-				@order_id = match_data[:order_id]
-				
-				next match_data.post_match
-			end
+			rewrite.extract_prefix user_id: Integer, summary: 'summary', order_id: Integer
 			
 			attr :user_id
 			attr :order_id
