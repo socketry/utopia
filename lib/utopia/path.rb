@@ -119,19 +119,7 @@ module Utopia
 		def self.[] path
 			self.create(path)
 		end
-		
-		# Expand a relative path relative to a root.
-		def self.expand(path, root)
-			case path
-			when Path
-				return path.expand(root)
-			when String
-				return path if path.start_with?('/')
-			end
-			
-			Path[path].expand(root)
-		end
-		
+
 		def self.split(path)
 			case path
 			when Path
@@ -200,14 +188,6 @@ module Utopia
 
 		def to_s
 			to_str
-		end
-		
-		def match(pattern)
-			to_str.match(pattern)
-		end
-		
-		def =~ (pattern)
-			to_str =~ pattern
 		end
 		
 		def to_a
