@@ -74,20 +74,25 @@ module Utopia
 				self.class.lookup(path)
 			end
 			
+			def catch_response
+				response = catch(:response) do
+					yield and nil
+				end
+				
+				if response
+					return self.respond_with(*response)
+				end
+			end
+			
 			# Given a request, call associated actions if at least one exists.
 			def passthrough(request, path)
 				actions = actions_for_request(request, path)
 				
 				unless actions.empty?
-					response = catch(:response) do
-						# By default give nothing - i.e. keep on processing:
+					return catch_response do
 						actions.each do |action|
 							action.invoke!(self, request, path)
-						end and nil
-					end
-					
-					if response
-						return self.respond_with(*response)
+						end
 					end
 				end
 				

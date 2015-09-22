@@ -40,6 +40,10 @@ module Utopia::Controller::RewriteSpec
 			attr :user_id
 			attr :order_id
 			
+			rewrite.extract_prefix fail: 'fail' do
+				fail! 444
+			end
+			
 			def self.uri_path
 				Utopia::Path['/']
 			end
@@ -61,6 +65,15 @@ module Utopia::Controller::RewriteSpec
 			expect(controller.user_id).to be == 10
 			expect(controller.order_id).to be == 20
 			expect(controller.edit).to be true
+		end
+		
+		it "should allow rewrite to fail request" do
+			request, path, variables = mock_request("/fail")
+			relative_path = path - controller.class.uri_path
+			
+			response = controller.process!(request, relative_path)
+			
+			expect(response[0]).to be == 444
 		end
 	end
 end

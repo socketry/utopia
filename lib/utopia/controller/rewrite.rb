@@ -95,9 +95,9 @@ module Utopia
 			
 			# Rewrite the path before processing the request if possible.
 			def passthrough(request, path)
-				self.class.rewrite.invoke!(self, request, path)
-				
-				super
+				catch_response do
+					self.class.rewrite.invoke!(self, request, path)
+				end || super
 			end
 		end
 	end
