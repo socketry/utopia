@@ -5,8 +5,8 @@ to build highly complex dynamic websites. It uses the filesystem heavily for
 content and provides functions for interacting with files and directories as
 structure representing the website.
 
-[![Build Status](https://secure.travis-ci.org/ioquatix/utopia.png)](http://travis-ci.org/ioquatix/utopia)
-[![Code Climate](https://codeclimate.com/github/ioquatix/utopia.png)](https://codeclimate.com/github/ioquatix/utopia)
+[![Build Status](https://secure.travis-ci.org/ioquatix/utopia.svg)](http://travis-ci.org/ioquatix/utopia)
+[![Code Climate](https://codeclimate.com/github/ioquatix/utopia.svg)](https://codeclimate.com/github/ioquatix/utopia)
 [![Coverage Status](https://coveralls.io/repos/ioquatix/utopia/badge.svg)](https://coveralls.io/r/ioquatix/utopia)
 
 ## Installation
