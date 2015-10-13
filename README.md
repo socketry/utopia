@@ -1,4 +1,4 @@
-# Utopia
+# ![Utopia](materials/utopia.png?raw=true)
 
 Utopia is a website generation framework which provides a robust set of tools
 to build highly complex dynamic websites. It uses the filesystem heavily for
