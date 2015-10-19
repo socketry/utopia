@@ -22,6 +22,8 @@ require_relative 'processor'
 require_relative 'links'
 require_relative 'transaction'
 
+require 'pathname'
+
 module Utopia
 	class Content
 		class Node
