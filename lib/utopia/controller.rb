@@ -27,6 +27,8 @@ require_relative 'controller/base'
 
 require_relative 'controller/rewrite'
 
+require 'concurrent/map'
+
 module Utopia
 	module Controllers
 		def self.class_name_for_controller(controller)
@@ -48,18 +50,18 @@ module Utopia
 		def initialize(app, **options)
 			@app = app
 			@root = options[:root] || Utopia::default_root
-
-			@controllers = {}
 			
-			@cache_controllers = options[:cache_controllers] || false
+			if options[:cache_controllers]
+				@controllers = Concurrent::Map.new
+			end
 		end
 		
 		attr :app
 		
 		def lookup_controller(path)
-			if @cache_controllers
-				return @controllers.fetch(path.to_s) do |key|
-					@controllers[key] = load_controller_file(path)
+			if @controllers
+				@controllers.fetch_or_store(path.to_s) do
+					load_controller_file(path)
 				end
 			else
 				return load_controller_file(path)

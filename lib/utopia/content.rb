@@ -26,17 +26,21 @@ require_relative 'content/processor'
 
 require 'trenni/template'
 
+require 'concurrent/map'
+
 module Utopia
 	class Content
 		INDEX = 'index'.freeze
 		
 		def initialize(app, **options)
 			@app = app
-
+			
 			@root = File.expand_path(options[:root] || Utopia::default_root)
-
-			@templates = options[:cache_templates] ? {} : nil
-
+			
+			if options[:cache_templates]
+				@templates = Concurrent::Map.new
+			end
+			
 			@tags = options.fetch(:tags, {})
 		end
 
@@ -45,14 +49,14 @@ module Utopia
 
 		def fetch_xml(path)
 			if @templates
-				@templates.fetch(path) do |key|
-					@templates[key] = Trenni::Template.load(path)
+				@templates.fetch_or_store(path.to_s) do
+					Trenni::Template.load(path)
 				end
 			else
 				Trenni::Template.load(path)
 			end
 		end
-
+		
 		# Look up a named tag such as <entry />
 		def lookup_tag(name, parent_path)
 			if @tags.key? name
