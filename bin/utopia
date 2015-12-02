@@ -99,7 +99,7 @@ task :create do
 		end
 		
 		if `which git`.strip == ""
-			$stderr.puts "Now is a good time to learn about git : http://git-scm.com/"
+			$stderr.puts "Now is a good time to learn about git: http://git-scm.com/"
 		elsif !File.exist?('.git')
 			puts "Setting up git repository..."
 			sh("git", "init")
