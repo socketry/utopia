@@ -60,6 +60,11 @@ module Utopia::StaticSpec
 			expect(last_response.body).to be == 'localized.ja.txt'
 		end
 		
+		it "should get a non-localized resource" do
+			get "/en/test.txt"
+			expect(last_response.body).to be == 'Hello World!'
+		end
+		
 		it "should respond with accepted language localization" do
 			get '/localized.txt', {}, 'HTTP_ACCEPT_LANGUAGE' => 'ja,en'
 			

@@ -87,8 +87,11 @@ module Utopia
 				yield env.merge(CURRENT_LOCALE_KEY => locale) if locales.add? locale
 			end
 			
-			request_preferred_locales(env) do |locale, path|
-				yield env.merge(CURRENT_LOCALE_KEY => locale, Rack::PATH_INFO => path) if locales.add? locale
+			request_preferred_locale(env) do |locale, path|
+				# We have extracted a locale from the path, so from this point on we should use the updated path:
+				env = env.merge(Rack::PATH_INFO => path.to_s)
+				
+				yield env.merge(CURRENT_LOCALE_KEY => locale) if locales.add? locale
 			end
 			
 			browser_preferred_locales(env).each do |locale|
@@ -112,7 +115,7 @@ module Utopia
 			matching_hosts.flat_map{|host_pattern, locale| locale}
 		end
 		
-		def request_preferred_locales(env)
+		def request_preferred_locale(env)
 			path = Path[env[Rack::PATH_INFO]]
 			
 			if @all_locales.include? path.first
@@ -175,7 +178,7 @@ module Utopia
 			
 			# We have a non-localized request, but there might be a localized resource. We return the best localization possible:
 			preferred_locales(env) do |env|
-				# puts "Trying locale: #{env[CURRENT_LOCALE_KEY]}"
+				# puts "Trying locale: #{env[CURRENT_LOCALE_KEY]}: #{env[Rack::PATH_INFO]}..."
 				
 				response = @app.call(env)
 				
