@@ -105,8 +105,7 @@ module Utopia::PathSpec
 		it "should give the correct locale" do
 			path = Utopia::Path["foo.en"]
 			
-			expect(path.basename.locale).to_not be == nil
-			expect(path.basename.locale.language).to be == 'en'
+			expect(path.basename.locale).to be == 'en'
 		end
 		
 		it "should give no locale" do

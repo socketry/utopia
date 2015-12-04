@@ -52,10 +52,10 @@ module Utopia::ContentSpec
 			
 			expect(links.size).to be == 2
 			expect(links[0].name).to be == 'foo'
-			expect(links[0].locale.language).to be == 'en'
+			expect(links[0].locale).to be == 'en'
 			
 			expect(links[1].name).to be == 'foo'
-			expect(links[1].locale.language).to be == 'ja'
+			expect(links[1].locale).to be == 'ja'
 		end
 	end
 end

@@ -53,7 +53,7 @@ module Utopia
 		end
 		
 		def locale
-			@locale ||= Locale.load(parts.last) if parts.size > 1
+			parts.last if parts.size > 1
 		end
 		
 		def to_str
@@ -322,10 +322,10 @@ module Utopia
 		def == other
 			return false unless other
 			
-			if other.is_a? String
-				self.to_s == other
-			else
-				self.to_a == other.to_a
+			case other
+			when String then self.to_s == other
+			when Array then self.to_a == other
+			else other.is_a?(self.class) && @components == other.components
 			end
 		end
 		

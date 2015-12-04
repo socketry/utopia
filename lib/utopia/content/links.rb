@@ -57,8 +57,6 @@ module Utopia
 				end
 				
 				if locale = options[:locale]
-					locale = Utopia::Locale.load(locale)
-					
 					locales = {}
 					
 					ordered.each do |link|

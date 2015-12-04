@@ -52,7 +52,6 @@ module Utopia
 				end
 				
 				@title = Trenni::Strings.to_title(@name)
-				@locale = Locale.load(@locale)
 			end
 
 			def href

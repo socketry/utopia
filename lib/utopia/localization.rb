@@ -54,8 +54,12 @@ module Utopia
 		def initialize(app, **options)
 			@app = app
 			
+			@all_locales = options[:locales]
+			
 			# Locales here are represented as an array of strings, e.g. ['en', 'ja', 'cn', 'de'].
-			@default_locales = options[:default_locales] || [nil]
+			unless @default_locales = options[:default_locales] 
+				@default_locales = @all_locales + [nil]
+			end
 			
 			if @default_locale = options[:default_locale]
 				@default_locales.unshift(default_locale)
@@ -63,11 +67,11 @@ module Utopia
 				@default_locale = @default_locales.first
 			end
 			
-			@all_locales = options[:locales] || @default_locales.compact
-			
 			@hosts = options[:hosts] || {}
 			
 			@nonlocalized = options.fetch(:nonlocalized, [])
+			
+			puts "All:#{@all_locales.inspect} defaults:#{@default_locales.inspect} default:#{default_locale}"
 		end
 
 		attr :all_locales
