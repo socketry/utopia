@@ -221,7 +221,7 @@ module Utopia
 		attr :extensions
 
 		def call(env)
-			path_info = env['PATH_INFO']
+			path_info = env[Rack::PATH_INFO]
 			extension = File.extname(path_info)
 
 			if @extensions.key? extension.downcase

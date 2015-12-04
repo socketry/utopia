@@ -45,7 +45,6 @@ module Utopia
 	
 	class Controller
 		CONTROLLER_RB = 'controller.rb'.freeze
-		PATH_INFO_KEY = 'PATH_INFO'.freeze
 		
 		def initialize(app, **options)
 			@app = app
@@ -119,7 +118,7 @@ module Utopia
 			end
 			
 			# The controllers may have rewriten the path so we update the path info:
-			request.env[PATH_INFO_KEY] = controller_path.to_s
+			request.env[Rack::PATH_INFO] = controller_path.to_s
 			
 			# No controller gave a useful result:
 			return nil

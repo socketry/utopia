@@ -60,7 +60,7 @@ module Utopia::Content::LinksSpec
 			links = Utopia::Content::Links.index(root, Utopia::Path.create("/foo"))
 			expect(links.size).to be == 2
 			
-			links = Utopia::Content::Links.index(root, Utopia::Path.create("/foo"), variant: 'en')
+			links = Utopia::Content::Links.index(root, Utopia::Path.create("/foo"), locale: 'en')
 			expect(links.size).to be == 1
 		end
 		
@@ -68,7 +68,7 @@ module Utopia::Content::LinksSpec
 			root = File.expand_path("localized", __dir__)
 			
 			# Select both test links
-			links = Utopia::Content::Links.index(root, Utopia::Path.create("/"), variant: 'en')
+			links = Utopia::Content::Links.index(root, Utopia::Path.create("/"), locale: 'en')
 			
 			expect(links.collect(&:title)).to be == ['One', 'Two', 'Three', 'Four', 'Five']
 		end
@@ -77,7 +77,7 @@ module Utopia::Content::LinksSpec
 			root = File.expand_path("localized", __dir__)
 			
 			# Select both test links
-			links = Utopia::Content::Links.index(root, Utopia::Path.create("/"), variant: 'zh')
+			links = Utopia::Content::Links.index(root, Utopia::Path.create("/"), locale: 'zh')
 			
 			expect(links.collect(&:title)).to be == ['One', 'Two', 'Three', '四']
 		end

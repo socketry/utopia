@@ -1,6 +1,7 @@
 
 use Utopia::Localization,
-	locales: ['en', 'jp', 'de']
+	locales: ['en', 'ja', 'de'], default_locale: 'en',
+	hosts: {/foobar\.com$/ => 'en', /foobar\.co\.jp$/ => 'ja', /foobar\.de$/ => 'de'}
 
 use Utopia::Static,
 	root: File.expand_path('../pages', __FILE__)

@@ -21,9 +21,8 @@
 require 'rack'
 
 module Rack
-	unless defined? EXPIRES
-		EXPIRES = 'Expires'.freeze
-	end
+	EXPIRES = 'Expires'.freeze unless defined? EXPIRES
+	HTTP_HOST = 'HTTP_HOST'.freeze unless defined? HTTP_HOST
 	
 	class Response
 		# Specifies that the content shouldn't be cached. Overrides `cache!` if already called.

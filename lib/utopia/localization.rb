@@ -49,11 +49,23 @@ module Utopia
 		LOCALIZATION_KEY = 'utopia.localization'.freeze
 		CURRENT_LOCALE_KEY = 'utopia.localization.current_locale'.freeze
 		
+		DEFAULT_LOCALE = 'en'
+		
 		def initialize(app, **options)
 			@app = app
-
-			@default_locale = options[:default_locale] || "en"
-			@all_locales = options[:locales] || ["en"]
+			
+			# Locales here are represented as an array of strings, e.g. ['en', 'ja', 'cn', 'de'].
+			@default_locales = options[:default_locales] || [nil]
+			
+			if @default_locale = options[:default_locale]
+				@default_locales.unshift(default_locale)
+			else
+				@default_locale = @default_locales.first
+			end
+			
+			@all_locales = options[:locales] || @default_locales.compact
+			
+			@hosts = options[:hosts] || {}
 			
 			@nonlocalized = options.fetch(:nonlocalized, [])
 		end
@@ -62,22 +74,50 @@ module Utopia
 		attr :default_locale
 		
 		def preferred_locales(env)
-			request_preferred_locales(env) | browser_preferred_locales(env) | [@default_locale, nil]
+			return to_enum(:preferred_locales, env) unless block_given?
+			
+			# Keep track of what locales have been tried:
+			locales = Set.new
+			
+			host_preferred_locales(env).each do |locale|
+				yield env.merge(CURRENT_LOCALE_KEY => locale) if locales.add? locale
+			end
+			
+			request_preferred_locales(env) do |locale, path|
+				yield env.merge(CURRENT_LOCALE_KEY => locale, Rack::PATH_INFO => path) if locales.add? locale
+			end
+			
+			browser_preferred_locales(env).each do |locale|
+				yield env.merge(CURRENT_LOCALE_KEY => locale) if locales.add? locale
+			end
+			
+			@default_locales.each do |locale|
+				yield env.merge(CURRENT_LOCALE_KEY => locale) if locales.add? locale
+			end
+		end
+		
+		def host_preferred_locales(env)
+			http_host = env[Rack::HTTP_HOST]
+			
+			locales = []
+			
+			# Get a list of all hosts which match the incoming htt_host:
+			matching_hosts = @hosts.select{|host_pattern, locale| http_host =~ host_pattern}
+			
+			# Extract all the valid locales:
+			matching_hosts.flat_map{|host_pattern, locale| locale}
 		end
 		
 		def request_preferred_locales(env)
-			path = Path[env['PATH_INFO']]
+			path = Path[env[Rack::PATH_INFO]]
 			
-			if all_locales.include? path.first
+			if @all_locales.include? path.first
 				request_locale = path.first
 				
-				# Remove the localization prefix.
+				# Remove the localization prefix:
 				path.delete_at(0)
-				env['PATH_INFO'] = path.to_s
 				
-				return [request_locale]
-			else
-				return []
+				yield request_locale, path
 			end
 		end
 		
@@ -86,17 +126,17 @@ module Utopia
 			
 			# No user prefered languages:
 			return [] unless accept_languages
-
+			
 			languages = accept_languages.split(',').map { |language|
 				language.split(';q=').tap{|x| x[1] = (x[1] || 1.0).to_f}
 			}.sort{|a, b| b[1] <=> a[1]}.collect(&:first)
 			
-			# Returns languages based on the order of the first argument
+			# Returns available languages based on the order of the first argument:
 			return languages & @all_locales
 		end
 		
 		def nonlocalized?(env)
-			path_info = env['PATH_INFO']
+			path_info = env[Rack::PATH_INFO]
 			
 			@nonlocalized.any? { |pattern| path_info[pattern] != nil }
 		end
@@ -115,13 +155,14 @@ module Utopia
 			# Althought this header is generally not supported, we supply it anyway as it is useful for debugging:
 			if locale = env[CURRENT_LOCALE_KEY]
 				# Set the Content-Location to point to the localized URI as requested:
-				headers['Content-Location'] = "/#{locale}" + env['PATH_INFO']
+				headers['Content-Location'] = "/#{locale}" + env[Rack::PATH_INFO]
 			end
 			
 			return response
 		end
 		
 		def call(env)
+			# Pass the request through with no localization if it is a nonlocalized path:
 			return @app.call(env) if nonlocalized?(env)
 			
 			env[LOCALIZATION_KEY] = self
@@ -129,8 +170,8 @@ module Utopia
 			response = nil
 			
 			# We have a non-localized request, but there might be a localized resource. We return the best localization possible:
-			preferred_locales(env).each do |locale|
-				env[CURRENT_LOCALE_KEY] = locale
+			preferred_locales(env) do |env|
+				# puts "Trying locale: #{env[CURRENT_LOCALE_KEY]}"
 				
 				response = @app.call(env)
 				

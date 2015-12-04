@@ -1,3 +1,4 @@
+#!/usr/bin/env rspec
 # Copyright, 2014, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,44 +19,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'utopia/content'
+require 'utopia/locale'
 
-module Utopia::ContentSpec
-	describe Utopia::Content::Node do
-		let(:root) {File.expand_path("node", __dir__)}
-		let(:content) {Utopia::Content.new(lambda{}, root: root)}
-		
-		it "should list siblings in correct order" do
-			node = content.lookup_node(Utopia::Path['/ordered/first'])
+module Utopia::LocaleSpec
+	describe Utopia::Locale do
+		it "should load from string" do
+			locale = Utopia::Locale.load('en-US')
 			
-			links = node.sibling_links
-			
-			expect(links.size).to be == 2
-			expect(links[0].name).to be == 'first'
-			expect(links[1].name).to be == 'second'
+			expect(locale.language).to be == 'en'
+			expect(locale.country).to be == 'US'
+			expect(locale.variant).to be == nil
 		end
 		
-		it "should list all links in correct order" do
-			node = content.lookup_node(Utopia::Path['/ordered/index'])
-			
-			links = node.links
-			
-			expect(links.size).to be == 2
-			expect(links[0].name).to be == 'first'
-			expect(links[1].name).to be == 'second'
+		it "should load from nil and return nil" do
+			expect(Utopia::Locale.load(nil)).to be == nil
 		end
 		
-		it "should list related links" do
-			node = content.lookup_node(Utopia::Path['/related/foo.en'])
+		it "should dump nil and give nil" do
+			expect(Utopia::Locale.dump(nil)).to be == nil
+		end
+		
+		it "should dump locale and give string" do
+			locale = Utopia::Locale.new('en', 'US')
 			
-			links = node.related_links
-			
-			expect(links.size).to be == 2
-			expect(links[0].name).to be == 'foo'
-			expect(links[0].locale.language).to be == 'en'
-			
-			expect(links[1].name).to be == 'foo'
-			expect(links[1].locale.language).to be == 'ja'
+			expect(Utopia::Locale.dump(locale)).to be == 'en-US'
 		end
 	end
 end

@@ -1,4 +1,4 @@
-# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2015, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,5 +19,25 @@
 # THE SOFTWARE.
 
 module Utopia
-	VERSION = "1.2.0"
+	class Locale < Struct.new(:language, :country, :variant)
+		def to_s
+			to_a.compact.join('-')
+		end
+		
+		def self.dump(instance)
+			if instance
+				instance.to_s
+			end
+		end
+		
+		def self.load(instance)
+			if instance.is_a? String
+				self.new(*instance.split('-', 3))
+			elsif instance.is_a? Array
+				return self.new(*instance)
+			elsif instance.is_a? self
+				return instance
+			end
+		end
+	end
 end

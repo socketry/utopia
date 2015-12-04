@@ -52,8 +52,8 @@ module Utopia
 			@parts ||= @name.split('.')
 		end
 		
-		def variant
-			parts.last if parts.size > 1
+		def locale
+			@locale ||= Locale.load(parts.last) if parts.size > 1
 		end
 		
 		def to_str

@@ -23,6 +23,7 @@ require 'trenni/builder'
 
 require_relative '../content'
 require_relative '../path'
+require_relative '../locale'
 
 module Utopia
 	class Content
@@ -35,22 +36,23 @@ module Utopia
 
 				case @kind
 				when :file
-					@name, @variant = path.last.split('.', 2)
+					@name, @locale = path.last.split('.', 2)
 					@path = path
 				when :directory
 					# raise ArgumentError unless path.last.start_with? INDEX
 					
 					@name = path.dirname.last
-					@variant = path.last.split('.', 2)[1]
+					@locale = path.last.split('.', 2)[1]
 					@path = path
 				when :virtual
-					@name, @variant = path.to_s.split('.', 2)
+					@name, @locale = path.to_s.split('.', 2)
 					@path = @info[:path] ? Path.create(@info[:path]) : nil
 				else
 					raise ArgumentError.new("Unknown link kind #{@kind} with path #{path}")
 				end
 				
 				@title = Trenni::Strings.to_title(@name)
+				@locale = Locale.load(@locale)
 			end
 
 			def href
@@ -67,7 +69,7 @@ module Utopia
 			attr :name
 			attr :path
 			attr :info
-			attr :variant
+			attr :locale
 
 			def href?
 				!!href

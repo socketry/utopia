@@ -4,15 +4,15 @@ use Utopia::Session::EncryptedCookie, secret: "97111cabf4c1a5e85b8029cf7c61aa444
 run lambda { |env|
 	request = Rack::Request.new(env)
 	
-	if env['PATH_INFO'] =~ /login/
+	if env[Rack::PATH_INFO] =~ /login/
 		env['rack.session']['login'] = 'true'
 		
 		[200, {}, []]
-	elsif env['PATH_INFO'] =~ /session-set/
+	elsif env[Rack::PATH_INFO] =~ /session-set/
 		env['rack.session'][request[:key]] = request[:value]
 		
 		[200, {}, []]
-	elsif env['PATH_INFO'] =~ /session-get/
+	elsif env[Rack::PATH_INFO] =~ /session-get/
 		[200, {}, [env['rack.session'][request[:key]]]]
 	else
 		[404, {}, []]

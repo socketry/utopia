@@ -117,7 +117,7 @@ module Utopia
 		end
 
 		def call(env)
-			base_path = env['PATH_INFO']
+			base_path = env[Rack::PATH_INFO]
 
 			if uri = @strings[base_path]
 				return redirect(@strings[base_path], base_path)
@@ -134,11 +134,11 @@ module Utopia
 			response = @app.call(env)
 
 			if @errors && response[0] >= 400 && uri = @errors[response[0]]
-				error_request = env.merge("PATH_INFO" => uri, "REQUEST_METHOD" => "GET")
+				error_request = env.merge(Rack::PATH_INFO => uri, Rack::REQUEST_METHOD => Rack::GET)
 				error_response = @app.call(error_request)
 
 				if error_response[0] >= 400
-					raise FailedRequestError.new(env['PATH_INFO'], response[0], uri, error_response[0])
+					raise FailedRequestError.new(env[Rack::PATH_INFO], response[0], uri, error_response[0])
 				else
 					# Feed the error code back with the error document
 					error_response[0] = response[0]

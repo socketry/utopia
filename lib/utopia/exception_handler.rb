@@ -35,7 +35,7 @@ module Utopia
 
 			body.puts "<!DOCTYPE html><html><head><title>Fatal Error</title></head><body>"
 			body.puts "<h1>Fatal Error</h1>"
-			body.puts "<p>While requesting resource #{Trenni::Strings::to_html env['PATH_INFO']}, a fatal error occurred.</p>"
+			body.puts "<p>While requesting resource #{Trenni::Strings::to_html env[Rack::PATH_INFO]}, a fatal error occurred.</p>"
 			body.puts "<blockquote><strong>#{Trenni::Strings::to_html exception.class.name}</strong>: #{Trenni::Strings::to_html exception.to_s}</blockquote>"
 			body.puts "<p>There is nothing more we can do to fix the problem at this point.</p>"
 			body.puts "<p>We apologize for the inconvenience.</p>"
@@ -46,7 +46,7 @@ module Utopia
 		end
 
 		def redirect(env, exception)
-			response = @app.call(env.merge('PATH_INFO' => @location, 'REQUEST_METHOD' => 'GET'))
+			response = @app.call(env.merge(Rack::PATH_INFO => @location, Rack::REQUEST_METHOD => Rack::GET))
 			
 			return [500, response[1], response[2]]
 		end
@@ -65,7 +65,7 @@ module Utopia
 				end
 				
 				# If the error occurred while accessing the error handler, we finish with a fatal error:
-				if env['PATH_INFO'] == @location
+				if env[Rack::PATH_INFO] == @location
 					return fatal_error(env, exception)
 				else
 					# If redirection fails, we also finish with a fatal error:

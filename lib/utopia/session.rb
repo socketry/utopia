@@ -20,6 +20,6 @@
 
 module Utopia
 	module Session
-		RACK_SESSION = "rack.session"
+		RACK_SESSION = "rack.session".freeze
 	end
 end

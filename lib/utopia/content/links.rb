@@ -26,10 +26,10 @@ module Utopia
 		
 		# Links are essentially a static list of information relating to the structure of the content. They are formed from the `links.yaml` file and the actual files on disk. 
 		class Links
-			def self.for(root, path, variant = nil)
+			def self.for(root, path, locale = nil)
 				links = self.new(root, path.dirname)
 				
-				links.lookup(path.last, variant)
+				links.lookup(path.last, locale)
 			end
 			
 			DEFAULT_INDEX_OPTIONS = {
@@ -56,18 +56,20 @@ module Utopia
 					ordered.select!{|link| link.name[options[:name]]}
 				end
 				
-				if variant = options[:variant]
-					variants = {}
+				if locale = options[:locale]
+					locale = Utopia::Locale.load(locale)
+					
+					locales = {}
 					
 					ordered.each do |link|
-						if link.variant == variant
-							variants[link.name] = link
-						elsif link.variant == nil
-							variants[link.name] ||= link
+						if link.locale == locale
+							locales[link.name] = link
+						elsif link.locale == nil
+							locales[link.name] ||= link
 						end
 					end
 					
-					ordered = variants.values
+					ordered = locales.values
 				end
 				
 				# Sort:
@@ -115,18 +117,18 @@ module Utopia
 			attr :ordered
 			attr :named
 			
-			def each(variant)
-				return to_enum(:each, variant) unless block_given?
+			def each(locale)
+				return to_enum(:each, locale) unless block_given?
 				
 				ordered.each do |links|
-					yield links.find{|link| link.variant == variant}
+					yield links.find{|link| link.locale == locale}
 				end
 			end
 			
-			def lookup(name, variant = nil)
-				# This allows generic links to serve any variant requested.
+			def lookup(name, locale = nil)
+				# This allows generic links to serve any locale requested.
 				if links = @named[name]
-					links.find{|link| link.variant == variant} || links.find{|link| link.variant == nil}
+					links.find{|link| link.locale == locale} || links.find{|link| link.locale == nil}
 				end
 			end
 			
@@ -171,9 +173,10 @@ module Utopia
 					directory_link = Link.new(:directory, @top + [name, index_name], index_metadata)
 					
 					# Merge metadata from foo.en into foo/index.en
-					if directory_link.variant
-						if variant_metadata = metadata.delete(directory_link.name + '.' + directory_link.variant)
-							directory_link.info.update(variant_metadata)
+					if directory_link.locale
+						localized_key = "#{directory_link.name}.#{directory_link.locale}"
+						if localized_metadata = metadata.delete(localized_key)
+							directory_link.info.update(localized_metadata)
 						end
 					end
 					

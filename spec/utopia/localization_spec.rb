@@ -38,21 +38,32 @@ module Utopia::StaticSpec
 			expect(last_response.body).to be == 'localized.en.txt'
 		end
 		
-		it "should respond with the requested localization" do
+		it "should localize request based on path" do
 			get '/en/localized.txt'
 			expect(last_response.body).to be == 'localized.en.txt'
-
+			
 			get '/de/localized.txt'
 			expect(last_response.body).to be == 'localized.de.txt'
-
-			get '/jp/localized.txt'
-			expect(last_response.body).to be == 'localized.jp.txt'
+			
+			get '/ja/localized.txt'
+			expect(last_response.body).to be == 'localized.ja.txt'
+		end
+		
+		it "should localize request based on domain name" do
+			get '/localized.txt', {}, 'HTTP_HOST' => 'foobar.com'
+			expect(last_response.body).to be == 'localized.en.txt'
+			
+			get '/localized.txt', {}, 'HTTP_HOST' => 'foobar.de'
+			expect(last_response.body).to be == 'localized.de.txt'
+			
+			get '/localized.txt', {}, 'HTTP_HOST' => 'foobar.co.jp'
+			expect(last_response.body).to be == 'localized.ja.txt'
 		end
 		
 		it "should respond with accepted language localization" do
-			get '/localized.txt', {}, 'HTTP_ACCEPT_LANGUAGE' => 'jp,en'
+			get '/localized.txt', {}, 'HTTP_ACCEPT_LANGUAGE' => 'ja,en'
 			
-			expect(last_response.body).to be == 'localized.jp.txt'
+			expect(last_response.body).to be == 'localized.ja.txt'
 		end
 	end
 end

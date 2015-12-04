@@ -102,16 +102,17 @@ module Utopia::PathSpec
 			expect{path[0] = 'bob'}.to raise_exception(RuntimeError)
 		end
 		
-		it "should give the correct variant" do
+		it "should give the correct locale" do
 			path = Utopia::Path["foo.en"]
 			
-			expect(path.basename.variant).to be == 'en'
+			expect(path.basename.locale).to_not be == nil
+			expect(path.basename.locale.language).to be == 'en'
 		end
 		
-		it "should give no variant" do
+		it "should give no locale" do
 			path = Utopia::Path["foo"]
 			
-			expect(path.basename.variant).to be == nil
+			expect(path.basename.locale).to be == nil
 		end
 		
 		it "should expand relative paths" do
