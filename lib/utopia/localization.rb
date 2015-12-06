@@ -71,7 +71,7 @@ module Utopia
 			
 			@nonlocalized = options.fetch(:nonlocalized, [])
 			
-			puts "All:#{@all_locales.inspect} defaults:#{@default_locales.inspect} default:#{default_locale}"
+			# puts "All:#{@all_locales.inspect} defaults:#{@default_locales.inspect} default:#{default_locale}"
 		end
 
 		attr :all_locales
