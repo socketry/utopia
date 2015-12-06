@@ -35,6 +35,7 @@ module Utopia
 			:unauthorized => 401,
 			:forbidden => 403,
 			:not_found => 404,
+			:not_allowed => 405,
 			:unsupported_method => 405,
 			:gone => 410,
 			:teapot => 418,
@@ -42,13 +43,34 @@ module Utopia
 			:unimplemented => 501,
 			:unavailable => 503
 		}
-	
+		
+		# For a more detailed description see https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
 		STATUS_DESCRIPTIONS = {
+			200 => 'OK'.freeze,
+			201 => 'Created'.freeze,
+			202 => 'Accepted'.freeze,
+			203 => 'Non-Authoritive Information'.freeze,
+			204 => 'No Content'.freeze,
+			205 => 'Reset Content'.freeze,
+			206 => 'Partial Content'.freeze,
+			300 => 'Multiple Choices'.freeze,
+			301 => 'Moved Permanently'.freeze,
+			302 => 'Found'.freeze,
+			303 => 'See Other'.freeze,
+			304 => 'Not Modified'.freeze,
+			305 => 'Use Proxy'.freeze,
+			307 => 'Temporary Redirect'.freeze,
+			308 => 'Permanent Redirect'.freeze,
 			400 => 'Bad Request'.freeze,
 			401 => 'Permission Denied'.freeze,
+			402 => 'Payment Required'.freeze,
 			403 => 'Access Forbidden'.freeze,
 			404 => 'Resource Not Found'.freeze,
 			405 => 'Unsupported Method'.freeze,
+			406 => 'Not Acceptable'.freeze,
+			408 => 'Request Timeout'.freeze,
+			409 => 'Request Conflict'.freeze,
+			410 => 'Resource Removed'.freeze,
 			416 => 'Byte range unsatisfiable'.freeze,
 			500 => 'Internal Server Error'.freeze,
 			501 => 'Not Implemented'.freeze,
@@ -57,5 +79,32 @@ module Utopia
 		
 		CONTENT_TYPE = 'Content-Type'.freeze
 		LOCATION = 'Location'.freeze
+		
+		class Status
+			def initialize(code, valid_range = 100...600)
+				if code.is_a? Symbol
+					code = STATUS_CODES[code]
+				end
+				
+				unless 100...600
+					raise ArgumentError.new("Status must be in range #{valid_range}, was given #{code}!")
+				end
+				
+				@code = code
+			end
+			
+			def to_i
+				@code
+			end
+			
+			def to_s
+				STATUS_DESCRIPTIONS[@code] || @code.to_s
+			end
+			
+			# Allow to be used for rack body:
+			def each
+				yield to_s
+			end
+		end
 	end
 end

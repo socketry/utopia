@@ -22,8 +22,6 @@ require_relative '../http'
 
 module Utopia
 	class Controller
-		EMPTY_BODY = [].freeze
-		
 		class Base
 			def self.base_path
 				self.const_get(:BASE_PATH)
@@ -75,12 +73,8 @@ module Utopia
 			end
 			
 			def catch_response
-				response = catch(:response) do
+				catch(:response) do
 					yield and nil
-				end
-				
-				if response
-					return self.respond_with(*response)
 				end
 			end
 			
@@ -106,68 +100,59 @@ module Utopia
 				end
 			end
 
+			# Call into the next app as defined by rack.
 			def call(env)
 				self.class.controller.app.call(env)
 			end
-
-			def respond!(*args)
-				throw :response, args
+			
+			# This will cause the middleware to generate a response.
+			def respond!(response)
+				throw :response, response
 			end
 
+				# This will cause the controller middleware to pass on the request.
 			def ignore!
 				throw :response, nil
 			end
 
+			# Respond with a redirect to the given target.
 			def redirect! (target, status = 302)
-				respond! :redirect => target, :status => status
-			end
-
-			def fail!(error = :bad_request)
-				respond! error
-			end
-
-			def success!(*args)
-				respond! :success, *args
+				status = HTTP::Status.new(status, 300...400)
+				location = target.to_s
+				
+				respond! [status.to_i, {HTTP::LOCATION => location}, [status.to_s]]
 			end
 			
-			def respond_with(*args)
-				return args[0] if args[0] == nil || Array === args[0]
-
-				status = 200
-				options = nil
-
-				if Numeric === args[0] || Symbol === args[0]
-					status = args[0]
-					options = args[1] || {}
-				else
-					options = args[0]
-					status = options[:status] || status
-				end
-
-				status = HTTP::STATUS_CODES[status] || status
-				headers = options[:headers] || {}
-
-				if type = options[:type]
-					headers[HTTP::CONTENT_TYPE] ||= type
-				end
-
-				if redirect = options[:redirect]
-					headers[HTTP::LOCATION] = redirect.to_s
-					status = 302 if status < 300 || status >= 400
-				end
-
-				if options[:body]
-					body = options[:body]
-				elsif options[:content]
-					body = [options[:content]]
-				elsif status >= 300
-					body = [HTTP::STATUS_DESCRIPTIONS[status] || "Status #{status}"]
-				else
-					body = EMPTY_BODY
-				end
-
-				return [status, headers, body]
+			# Respond with an error which indiciates some kind of failure.
+			def fail!(error = 400, headers: {}, **options)
+				status = HTTP::Status.new(error, 400...600)
+				
+				body = body_for(status, headers, options)
+				respond! [status.to_i, headers, body || [status.to_s]]
 			end
+			
+			def succeed!(status: 200, headers: {}, **options)
+				status = HTTP::Status.new(status, 200...300)
+				
+				if options[:type]
+					headers[Rack::CONTENT_TYPE] = options[:type].to_s
+				end
+				
+				body = body_for(status, headers, options)
+				respond! [status.to_i, headers, body || []]
+			end
+			
+			# Generate the body for the given status, headers and options.
+			def body_for(status, headers, options)
+				if body = options[:body]
+					return body
+				elsif content = options[:content]
+					return [content]
+				end
+			end
+			
+			# Legacy method name:
+			alias success! succeed!
 			
 			# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid rack response if the controller can do so.
 			def process!(request, path)
