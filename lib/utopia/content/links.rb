@@ -145,7 +145,7 @@ module Utopia
 				links_path = File.join(path, LINKS_YAML)
 				
 				hash = if File.exist?(links_path)
-					YAML::load(File.read(links_path)) || {}
+					YAML::load_file(links_path) || {}
 				else
 					{}
 				end
