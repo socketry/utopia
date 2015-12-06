@@ -4,9 +4,6 @@ use Utopia::Localization,
 	hosts: {/foobar\.com$/ => 'en', /foobar\.co\.jp$/ => 'ja', /foobar\.de$/ => 'de'}
 
 use Utopia::Static,
-	root: File.expand_path('../pages', __FILE__)
-
-use Utopia::Content,
-	root: File.expand_path('../pages', __FILE__)
+	root: File.expand_path('localization_spec', __dir__)
 
 run lambda { |env| [404, {}, []] }
