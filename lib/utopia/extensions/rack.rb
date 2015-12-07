@@ -42,7 +42,15 @@ module Rack
 
 		# Specify the content type of the response data.
 		def content_type!(value)
-			headers[CONTENT_TYPE] = value.to_s
+			self.content_type = value
+		end
+		
+		def content_type= value
+			headers[CONTENT_TYPE] = value
+		end
+		
+		def content_type
+			headers[CONTENT_TYPE]
 		end
 	end
 end
