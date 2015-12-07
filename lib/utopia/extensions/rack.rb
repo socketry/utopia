@@ -21,6 +21,7 @@
 require 'rack'
 
 module Rack
+	# Compatibility with older versions of rack:
 	EXPIRES = 'Expires'.freeze unless defined? EXPIRES
 	HTTP_HOST = 'HTTP_HOST'.freeze unless defined? HTTP_HOST
 	
@@ -32,9 +33,9 @@ module Rack
 		end
 
 		# Specify that the content should be cached.
-		def cache!(duration = 3600)
+		def cache!(duration = 3600, access = "public")
 			unless headers[CACHE_CONTROL] =~ /no-cache/
-				headers[CACHE_CONTROL] = "public, max-age=#{duration}"
+				headers[CACHE_CONTROL] = "#{access}, max-age=#{duration}"
 				headers[EXPIRES] = (Time.now + duration).httpdate
 			end
 		end
