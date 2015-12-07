@@ -115,12 +115,17 @@ module Utopia
 				throw :response, nil
 			end
 
-			# Respond with a redirect to the given target.
+			# Request relative redirect. Respond with a redirect to the given target.
 			def redirect! (target, status = 302)
 				status = HTTP::Status.new(status, 300...400)
 				location = target.to_s
 				
 				respond! [status.to_i, {HTTP::LOCATION => location}, [status.to_s]]
+			end
+			
+			# Controller relative redirect.
+			def goto!(target, status = 302)
+				redirect! self.class.uri_path + target
 			end
 			
 			# Respond with an error which indiciates some kind of failure.
