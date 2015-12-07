@@ -124,11 +124,11 @@ module Utopia
 			end
 			
 			# Respond with an error which indiciates some kind of failure.
-			def fail!(error = 400, headers: {}, **options)
+			def fail!(error = 400, message = nil)
 				status = HTTP::Status.new(error, 400...600)
 				
-				body = body_for(status, headers, options)
-				respond! [status.to_i, headers, body || [status.to_s]]
+				message ||= status.to_s
+				respond! [status.to_i, {}, [message]]
 			end
 			
 			def succeed!(status: 200, headers: {}, **options)
