@@ -37,16 +37,19 @@ module Utopia
 				@env[LOCALIZATION_KEY]
 			end
 			
+			# Returns the current locale or nil if not localized.
 			def current_locale
 				@env[CURRENT_LOCALE_KEY]
 			end
 			
+			# Returns the default locale or nil if not localized.
 			def default_locale
-				localization.default_locale
+				localization && localization.default_locale
 			end
 			
+			# Returns an empty array if not localized.
 			def all_locales
-				localization.all_locales
+				localization && localization.all_locales || []
 			end
 		end
 		
