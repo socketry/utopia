@@ -152,6 +152,10 @@ module Utopia
 				return current.attributes
 			end
 
+			def localization
+				@localization ||= Utopia::Localization[request]
+			end
+
 			def current
 				@begin_tags[-1]
 			end
