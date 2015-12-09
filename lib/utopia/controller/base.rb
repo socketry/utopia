@@ -49,14 +49,6 @@ module Utopia
 					path.dirname == uri_path
 				end
 				
-				def patterns
-					@patterns ||= []
-				end
-				
-				def match(pattern, &block)
-					patterns << [pattern, block]
-				end
-				
 				def actions
 					@actions ||= Action.new
 				end
