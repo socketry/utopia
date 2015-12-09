@@ -57,6 +57,12 @@ module Utopia
 		
 		attr :app
 		
+		def freeze
+			@root.freeze
+			
+			super
+		end
+		
 		def lookup_controller(path)
 			if @controllers
 				@controllers.fetch_or_store(path.to_s) do

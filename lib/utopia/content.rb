@@ -42,10 +42,18 @@ module Utopia
 			end
 			
 			@tags = options.fetch(:tags, {})
+			
+			self.freeze
+		end
+
+		def freeze
+			@root.freeze
+			@tags.freeze
+			
+			super
 		end
 
 		attr :root
-		attr :passthrough
 
 		def fetch_xml(path)
 			if @templates

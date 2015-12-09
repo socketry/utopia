@@ -196,7 +196,7 @@ module Utopia
 
 		def initialize(app, **options)
 			@app = app
-			@root = options[:root] || Utopia::default_root
+			@root = (options[:root] || Utopia::default_root).freeze
 
 			if options[:types]
 				@extensions = load_mime_types(options[:types])
@@ -204,7 +204,17 @@ module Utopia
 				@extensions = load_mime_types(MIME_TYPES[:default])
 			end
 
-			@cache_control = options[:cache_control] || "public, max-age=3600"
+			@cache_control = (options[:cache_control] || "public, max-age=3600")
+			
+			self.freeze
+		end
+
+		def freeze
+			@root.freeze
+			@extensions.freeze
+			@cache_control.freeze
+			
+			super
 		end
 
 		def fetch_file(path)

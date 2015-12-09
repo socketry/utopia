@@ -86,8 +86,20 @@ module Utopia
 			@nonlocalized = options.fetch(:nonlocalized, [])
 			
 			# puts "All:#{@all_locales.inspect} defaults:#{@default_locales.inspect} default:#{default_locale}"
+			
+			self.freeze
 		end
-
+		
+		def freeze
+			@all_locale.freeze
+			@default_locales.freeze
+			@default_locale.freeze
+			@hosts.freeze
+			@nonlocalized.freeze
+			
+			super
+		end
+		
 		attr :all_locales
 		attr :default_locale
 		

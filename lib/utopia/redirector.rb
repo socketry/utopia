@@ -37,7 +37,7 @@ module Utopia
 
 	class Redirector
 		# This redirects directories to the directory + 'index' 
-		DIRECTORY_INDEX = [/^(.*)\/$/, lambda{|prefix| [307, {HTTP::LOCATION => "#{prefix}index"}, []]}]
+		DIRECTORY_INDEX = [/^(.*)\/$/, lambda{|prefix| [307, {HTTP::LOCATION => "#{prefix}index"}, []]}].freeze
 		
 		# Redirects a whole source tree to a destination tree, given by the roots.
 		def self.moved(source_root, destination_root)
@@ -106,6 +106,16 @@ module Utopia
 			@patterns = normalize_patterns(@patterns)
 
 			@errors = options[:errors]
+			
+			self.freeze
+		end
+
+		def freeze
+			@strings.freeze
+			@patterns.freeze
+			@errors.freeze
+			
+			super
 		end
 
 		def redirect(uri, match_data)

@@ -26,8 +26,16 @@ module Utopia
 	class ExceptionHandler
 		def initialize(app, location)
 			@app = app
-
+			
 			@location = location
+			
+			self.freeze
+		end
+
+		def freeze
+			@location.freeze
+			
+			super
 		end
 
 		def fatal_error(env, exception)

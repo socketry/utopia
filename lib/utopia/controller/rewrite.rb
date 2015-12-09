@@ -35,6 +35,15 @@ module Utopia
 				def initialize(arguments, block)
 					@arguments = arguments
 					@block = block
+					
+					self.freeze
+				end
+				
+				def freeze
+					@arguments.freeze
+					@block.freeze
+					
+					super
 				end
 				
 				attr :arguments
@@ -48,9 +57,19 @@ module Utopia
 			end
 			
 			class ExtractPrefixRule < Rule
-				def apply(context, request, path)
-					@matcher ||= Path::Matcher.new(@arguments)
+				def initialize(arguments, block)
+					@matcher = Path::Matcher.new(arguments)
 					
+					super
+				end
+				
+				def freeze
+					@matcher.freeze
+					
+					super
+				end
+				
+				def apply(context, request, path)
 					if match_data = @matcher.match(path)
 						apply_match_to_context(match_data, context)
 						
