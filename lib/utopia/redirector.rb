@@ -76,9 +76,9 @@ module Utopia
 			normalized = []
 			
 			patterns.each do |pattern|
-				uri = pattern.pop
+				*keys, uri = *pattern
 				
-				pattern.each do |key|
+				keys.each do |key|
 					normalized.push([key, uri])
 				end
 			end
