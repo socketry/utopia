@@ -30,6 +30,12 @@ module Utopia::Controller::MiddlewareSpec
 		
 		let(:app) {Rack::Builder.parse_file(File.expand_path('../middleware_spec.ru', __FILE__)).first}
 		
+		it "should successfully call empty controller" do
+			get "/empty/index"
+			
+			expect(last_response.status).to be == 404
+		end
+		
 		it "should successfully call the controller method" do
 			get "/controller/hello-world"
 			

@@ -62,9 +62,12 @@ module Utopia
 				end
 				
 				def lookup(path)
-					relative_path = (path - uri_path).to_a
-					
-					possible_actions = actions.select(relative_path)
+					if @actions
+						relative_path = (path - uri_path).to_a
+						return @actions.select(relative_path)
+					else
+						[]
+					end
 				end
 			end
 			
