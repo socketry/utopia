@@ -53,6 +53,8 @@ module Utopia
 			if options[:cache_controllers]
 				@controllers = Concurrent::Map.new
 			end
+			
+			self.freeze
 		end
 		
 		attr :app
