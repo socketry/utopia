@@ -110,12 +110,18 @@ module Utopia
 				def rewrite
 					@rewriter ||= Rewriter.new
 				end
+				
+				def rewrite_request(controller, request, path)
+					if @rewriter
+						@rewriter.invoke!(controller, request, path)
+					end
+				end
 			end
 			
 			# Rewrite the path before processing the request if possible.
 			def passthrough(request, path)
 				catch_response do
-					self.class.rewrite.invoke!(self, request, path)
+					self.class.rewrite_request(self, request, path)
 				end || super
 			end
 		end
