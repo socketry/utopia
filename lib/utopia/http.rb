@@ -22,6 +22,8 @@ require 'rack'
 
 module Utopia
 	module HTTP
+		# A list of commonly used HTTP status codes.
+		# For help choosing the right status code, see http://racksburg.com/choosing-an-http-status-code/
 		STATUS_CODES = {
 			:success => 200,
 			:created => 201,
@@ -44,7 +46,8 @@ module Utopia
 			:unavailable => 503
 		}
 		
-		# For a more detailed description see https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+		# A list of human readable descriptions for a given status code.
+		# For a more detailed description, see https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
 		STATUS_DESCRIPTIONS = {
 			200 => 'OK'.freeze,
 			201 => 'Created'.freeze,
@@ -80,6 +83,7 @@ module Utopia
 		CONTENT_TYPE = 'Content-Type'.freeze
 		LOCATION = 'Location'.freeze
 		
+		# A small HTTP status wrapper that verifies the status code within a given range.
 		class Status
 			def initialize(code, valid_range = 100...600)
 				if code.is_a? Symbol
