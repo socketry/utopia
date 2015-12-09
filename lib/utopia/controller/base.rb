@@ -36,6 +36,15 @@ module Utopia
 			end
 			
 			class << self
+				def freeze
+					# This ensures that all class variables are frozen.
+					self.instance_variables.each do |name|
+						self.instance_variable_get(name).freeze
+					end
+					
+					super
+				end
+				
 				def direct?(path)
 					path.dirname == uri_path
 				end

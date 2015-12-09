@@ -96,6 +96,10 @@ module Utopia
 				# Give the controller a useful name:
 				# Controllers.define(klass)
 				
+				# We lock down the controller class to prevent unsafe modifications:
+				klass.freeze
+				
+				# Create an instance of the controller:
 				return klass.new
 			else
 				return nil
