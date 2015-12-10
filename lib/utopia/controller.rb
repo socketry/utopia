@@ -71,7 +71,7 @@ module Utopia
 					load_controller_file(path)
 				end
 			else
-				return load_controller_file(path)
+				load_controller_file(path)
 			end
 		end
 		
