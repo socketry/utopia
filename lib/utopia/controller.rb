@@ -75,8 +75,7 @@ module Utopia
 			end
 		end
 		
-		def load_controller_file(path)
-			uri_path = path
+		def load_controller_file(uri_path)
 			base_path = File.join(@root, uri_path.components)
 			
 			controller_path = File.join(base_path, CONTROLLER_RB)
@@ -86,10 +85,10 @@ module Utopia
 				klass = Class.new(Base)
 				
 				# base_path is expected to be a string representing a filesystem path:
-				klass.const_set(:BASE_PATH, base_path)
+				klass.const_set(:BASE_PATH, base_path.freeze)
 				
 				# uri_path is expected to be an instance of Path:
-				klass.const_set(:URI_PATH, uri_path)
+				klass.const_set(:URI_PATH, uri_path.dup.freeze)
 				
 				klass.const_set(:CONTROLLER, self)
 				
