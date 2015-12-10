@@ -73,5 +73,15 @@ module Utopia::Controller::MiddlewareSpec
 			expect(last_response.status).to be == 302
 			expect(last_response.headers['Location']).to be == 'bar'
 		end
+		
+		# This was a bug, where by the controller URI_PATH was being mutated by Controller#invoke_controllers.
+		it "should give the correct URI_PATH" do
+			get '/redirect/test/bar'
+			expect(last_response.status).to be == 200
+			
+			get '/redirect/test/foo'
+			expect(last_response.status).to be == 200
+			expect(last_response.body).to be == '/redirect'
+		end
 	end
 end
