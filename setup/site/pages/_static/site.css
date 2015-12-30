@@ -1,23 +1,40 @@
 
 body {
 	font-family: Verdana, Helvetica, Arial;
-	background-color: #ccc;
-	padding: 50px;
+	padding: 0;
+	margin: 0;
+	
+	background-color: #fafafa;
+}
+
+#header {
+	margin: 1em 0 1em 0;
+	
+	background-color: white;
+	
+	background-image: url(/_static/utopia-background.svg);
+	
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+#header img {
+	display: block;
+	margin: auto;
+	height: 120px;
 }
 
 p {
-	color: #333;
+	color: #555;
 }
 
 p strong {
-	color: black;
+	color: #222;
 }
 
 h1, h2, h3, h4, h5, h6 {
-	color: #eee;
-	margin-top: 2em;
-	margin-bottom: 1em;
-	text-shadow: 0px 1px 4px rgba(0, 0, 0, 0.7);
+	color: #333;
+	margin: 2em 1em 1em 1em;
+	color: #4E8DD9;
 }
 
 img {
@@ -33,7 +50,7 @@ a:hover {
 }
 
 p, dl, h3 {
-	margin: 1em;
+	margin: 2em;
 }
 
 h3 {
@@ -44,27 +61,14 @@ ul {
 	margin-bottom: 1em;
 }
 
-h3, h4, h5, h6 {
+h2, h3, h4, h5, h6 {
 	font-weight: normal;
 }
 
 body.front h1 {
 	font-weight: normal;
 	font-size: 60pt;
-	color: white;
-	text-shadow:
-	0 1px 0 #ccc,
-	0 2px 0 #c9c9c9,
-	0 3px 0 #bbb,
-	0 4px 0 #b9b9b9,
-	0 5px 0 #aaa,
-	0 6px 1px rgba(0,0,0,.1),
-	0 0 5px rgba(0,0,0,.1),
-	0 1px 3px rgba(0,0,0,.3),
-	0 3px 5px rgba(0,0,0,.2),
-	0 5px 10px rgba(0,0,0,.25),
-	0 10px 10px rgba(0,0,0,.2),
-	0 20px 20px rgba(0,0,0,.15);
-	
+	color: #F89432;
+
 	text-align: center;
 }

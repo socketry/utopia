@@ -16,6 +16,7 @@
 
 	<body class="#{attributes['class']}">
 		<div id="header">
+			<img src="/_static/utopia.svg" />
 		</div>
 
 		<div id="page">
