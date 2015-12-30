@@ -79,7 +79,7 @@ module Utopia
 			end
 
 			def cdata(text)
-				@delegate.cdata(Trenni::Strings::to_html(text))
+				@delegate.cdata("<![CDATA[#{text}]]>")
 			end
 
 			def comment(text)

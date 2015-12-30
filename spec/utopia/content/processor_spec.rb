@@ -73,7 +73,7 @@ module Utopia::Content::ProcessorSpec
 				[:tag_begin, foo_tag],
 				[:cdata, "Bob &amp; Barley"],
 				[:cdata, "<!-- Comment -->"],
-				[:cdata, "Hello &amp; World"],
+				[:cdata, "<![CDATA[Hello & World]]>"],
 				[:tag_end, foo_tag],
 			]
 			
