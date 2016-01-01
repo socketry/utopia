@@ -1,6 +1,19 @@
 
+html {
+	font-family: "PT Sans", Verdana, Helvetica, Arial, sans-serif;
+}
+@media (min-width: 48em) {
+	html {
+		font-size: 16px;
+	}
+}
+@media (min-width: 58em) {
+	html {
+		font-size: 20px;
+	}
+}
+
 body {
-	font-family: Verdana, Helvetica, Arial;
 	padding: 0;
 	margin: 0;
 	
@@ -20,7 +33,7 @@ body {
 #header img {
 	display: block;
 	margin: auto;
-	height: 120px;
+	height: 4em;
 }
 
 p {
@@ -67,7 +80,7 @@ h2, h3, h4, h5, h6 {
 
 body.front h1 {
 	font-weight: normal;
-	font-size: 60pt;
+	font-size: 300%;
 	color: #F89432;
 
 	text-align: center;
