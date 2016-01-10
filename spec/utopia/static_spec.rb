@@ -37,10 +37,11 @@ module Utopia::StaticSpec
 		end
 		
 		it "should return partial content" do
-			get "/test.txt", {}, 'HTTP_RANGE' => 'bytes=0-4'
+			get "/test.txt", {}, 'HTTP_RANGE' => 'bytes=1-4'
 			
 			expect(last_response.status).to be == 206 
-			expect(last_response.body).to be == "Hello"
+			expect(last_response.content_length).to be == 4
+			expect(last_response.body).to be == "ello"
 		end
 	end
 end
