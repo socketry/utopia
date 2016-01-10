@@ -57,7 +57,7 @@ module Utopia::Controller::RewriteSpec
 		end
 		
 		it "should match path prefix and extract parameters" do
-			request, path, variables = mock_request("/10/summary/20/edit")
+			request, path = mock_request("/10/summary/20/edit")
 			relative_path = path - controller.class.uri_path
 			
 			controller.process!(request, relative_path)
@@ -68,7 +68,7 @@ module Utopia::Controller::RewriteSpec
 		end
 		
 		it "should allow rewrite to fail request" do
-			request, path, variables = mock_request("/fail")
+			request, path = mock_request("/fail")
 			relative_path = path - controller.class.uri_path
 			
 			response = controller.process!(request, relative_path)

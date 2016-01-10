@@ -53,7 +53,7 @@ module Utopia
 				
 				# Named:
 				if name = options[:name]
-					ordered.select!{|link| link.name[options[:name]]}
+					ordered.select!{|link| link.name[name]}
 				end
 				
 				if locale = options[:locale]

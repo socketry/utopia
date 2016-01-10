@@ -80,7 +80,7 @@ module Utopia
 				links = Links.index(@controller.root, path, options)
 				
 				if block_given?
-					links.each &block
+					links.each(&block)
 				else
 					links
 				end
@@ -88,7 +88,8 @@ module Utopia
 
 			def related_links
 				name = @uri_path.last.split('.', 2).first
-				links = Links.index(@controller.root, uri_path.dirname, :name => name, :indices => true)
+				
+				return Links.index(@controller.root, uri_path.dirname, :name => name, :indices => true)
 			end
 
 			def siblings_path

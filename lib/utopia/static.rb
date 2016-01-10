@@ -134,14 +134,15 @@ module Utopia
 					# TODO: Support multiple byte-ranges, for now just send entire file:
 					response[0] = 200
 					response[1]["Content-Length"] = size.to_s
-					@range = 0..size-1
+					@range = 0...size
 				else
 					# Partial content:
 					@range = ranges[0]
+					partial_size = @range.count
+					
 					response[0] = 206
-					response[1]["Content-Range"] = "bytes #{@range.begin}-#{@range.end}/#{size}"
-					response[1]["Content-Length"] = (@range.end - @range.begin+1).to_s
-					size = @range.end - @range.begin + 1
+					response[1]["Content-Length"] = partial_size.to_s
+					response[1]["Content-Range"] = "bytes #{@range.min}-#{@range.max}/#{size}"
 				end
 
 				# LOG.debug {"Serving file #{full_path.inspect}, range #{@range.inspect}"}
@@ -169,12 +170,12 @@ module Utopia
 					when Array
 						result["." + type[0]] = type[1]
 					when String
-						mt = MIME::Types.of(type).select{|mt| !mt.obsolete?}.each do |mt|
-							extract_extensions.call(mt)
+						MIME::Types.of(type).select{|mime_type| !mime_type.obsolete?}.each do |mime_type|
+							extract_extensions.call(mime_type)
 						end
 					when Regexp
-						MIME::Types[type].select{|mt| !mt.obsolete?}.each do |mt|
-							extract_extensions.call(mt)
+						MIME::Types[type].select{|mime_type| !mime_type.obsolete?}.each do |mime_type|
+							extract_extensions.call(mime_type)
 						end
 					when MIME::Type
 						extract_extensions.call(type)

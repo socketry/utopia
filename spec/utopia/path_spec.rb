@@ -123,7 +123,6 @@ module Utopia::PathSpec
 		
 		it "shouldn't expand absolute paths" do
 			root = Utopia::Path['/root']
-			path = Utopia::Path["dir/foo.html"]
 			
 			expect(root.expand(root)).to be == root
 		end

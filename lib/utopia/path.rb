@@ -74,7 +74,7 @@ module Utopia
 			@components = components
 		end
 
-		attr :components, true
+		attr_accessor :components
 
 		def freeze
 			@components.freeze

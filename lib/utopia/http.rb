@@ -90,7 +90,7 @@ module Utopia
 					code = STATUS_CODES[code]
 				end
 				
-				unless 100...600
+				unless valid_range.include? code
 					raise ArgumentError.new("Status must be in range #{valid_range}, was given #{code}!")
 				end
 				

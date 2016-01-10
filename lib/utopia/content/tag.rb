@@ -41,9 +41,17 @@ module Utopia
 				@closed = false
 			end
 
-			attr :name
-			attr :attributes
-			attr :closed, true
+			def freeze
+				@name.freeze
+				@attributes.freeze
+				@closed.freeze
+				
+				super
+			end
+
+			attr_accessor :name
+			attr_accessor :attributes
+			attr_accessor :closed
 
 			def [](key)
 				@attributes[key]

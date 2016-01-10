@@ -38,7 +38,9 @@ module Utopia
 			@root = File.expand_path(options[:root] || Utopia::default_root)
 			
 			if options[:cache_templates]
-				@templates = Concurrent::Map.new
+				@template_cache = Concurrent::Map.new
+			else
+				@template_cache = nil
 			end
 			
 			@tags = options.fetch(:tags, {})
@@ -56,8 +58,8 @@ module Utopia
 		attr :root
 
 		def fetch_xml(path)
-			if @templates
-				@templates.fetch_or_store(path.to_s) do
+			if @template_cache
+				@template_cache.fetch_or_store(path.to_s) do
 					Trenni::Template.load(path)
 				end
 			else

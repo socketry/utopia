@@ -92,6 +92,7 @@ module Utopia::Controller::SequenceSpec
 			expect(result).to be == [400, {}, ["Bad Request"]]
 		
 			result = controller.process!(request, Utopia::Path["/variable"])
+			expect(result).to be == nil
 			expect(variables.to_hash).to be == {"variable"=>:value}
 		end
 		
@@ -110,6 +111,7 @@ module Utopia::Controller::SequenceSpec
 			variables << controller
 			
 			result = controller.process!(request, Utopia::Path["/foo/comment/post"])
+			expect(result).to be nil
 			expect(variables['sequence']).to be == 'EB'
 		end
 		
@@ -119,6 +121,7 @@ module Utopia::Controller::SequenceSpec
 			variables << controller
 			
 			result = controller.process!(request, Utopia::Path["/comment/delete"])
+			expect(result).to be nil
 			expect(variables['sequence']).to be == 'EDC'
 		end
 		
@@ -128,6 +131,7 @@ module Utopia::Controller::SequenceSpec
 			variables << controller
 			
 			result = controller.process!(request, Utopia::Path["/foo"])
+			expect(result).to be nil
 			expect(variables['sequence']).to be == 'EF'
 		end
 	end

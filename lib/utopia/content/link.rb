@@ -21,7 +21,6 @@
 require 'yaml'
 require 'trenni/builder'
 
-require_relative '../content'
 require_relative '../path'
 require_relative '../locale'
 

@@ -91,7 +91,7 @@ module Utopia
 		end
 		
 		def freeze
-			@all_locale.freeze
+			@all_locales.freeze
 			@default_locales.freeze
 			@default_locale.freeze
 			@hosts.freeze
@@ -131,8 +131,6 @@ module Utopia
 		
 		def host_preferred_locales(env)
 			http_host = env[Rack::HTTP_HOST]
-			
-			locales = []
 			
 			# Get a list of all hosts which match the incoming htt_host:
 			matching_hosts = @hosts.select{|host_pattern, locale| http_host =~ host_pattern}
@@ -203,10 +201,10 @@ module Utopia
 			response = nil
 			
 			# We have a non-localized request, but there might be a localized resource. We return the best localization possible:
-			preferred_locales(env) do |env|
+			preferred_locales(env) do |localized_env|
 				# puts "Trying locale: #{env[CURRENT_LOCALE_KEY]}: #{env[Rack::PATH_INFO]}..."
 				
-				response = @app.call(env)
+				response = @app.call(localized_env)
 				
 				break unless response[0] >= 400
 			end

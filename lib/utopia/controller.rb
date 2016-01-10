@@ -51,7 +51,9 @@ module Utopia
 			@root = options[:root] || Utopia::default_root
 			
 			if options[:cache_controllers]
-				@controllers = Concurrent::Map.new
+				@controller_cache = Concurrent::Map.new
+			else
+				@controller_cache = nil
 			end
 			
 			self.freeze
@@ -66,8 +68,8 @@ module Utopia
 		end
 		
 		def lookup_controller(path)
-			if @controllers
-				@controllers.fetch_or_store(path.to_s) do
+			if @controller_cache
+				@controller_cache.fetch_or_store(path.to_s) do
 					load_controller_file(path)
 				end
 			else
@@ -136,7 +138,7 @@ module Utopia
 		end
 		
 		def call(env)
-			variables = (env[VARIABLES_KEY] ||= Variables.new)
+			env[VARIABLES_KEY] ||= Variables.new
 			
 			request = Rack::Request.new(env)
 			
