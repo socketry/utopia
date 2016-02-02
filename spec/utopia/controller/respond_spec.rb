@@ -20,9 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'rack/test'
 require 'rack/mock'
 require 'json'
 
+require 'utopia/content'
 require 'utopia/controller'
 
 module Utopia::Controller::RespondSpec
@@ -111,6 +113,27 @@ module Utopia::Controller::RespondSpec
 			expect(status).to be == 200
 			expect(headers['Content-Type']).to be == "text/plain"
 			expect(body.join).to be == '{:user_id=>10}'
+		end
+	end
+	
+	describe Utopia::Controller do
+		include Rack::Test::Methods
+		
+		let(:app) {Rack::Builder.parse_file(File.expand_path('respond_spec.ru', __dir__)).first}
+		
+		it "should get html error page" do
+			get '/errors/file-not-found'
+			
+			expect(last_response.status).to be == 200
+			expect(last_response.headers['Content-Type']).to be == 'text/html'
+		end
+		
+		it "should get json error response" do
+			get '/errors/file-not-found', nil, {'HTTP_ACCEPT' => "application/json"}
+			
+			expect(last_response.status).to be == 404
+			expect(last_response.headers['Content-Type']).to be == 'application/json'
+			expect(last_response.body).to be == '{"message":"File not found"}'
 		end
 	end
 end
