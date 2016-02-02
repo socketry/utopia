@@ -23,9 +23,6 @@ require_relative '../path/matcher'
 
 module Utopia
 	class Controller
-		class RewriteError < ArgumentError
-		end
-		
 		module Rewrite
 			def self.prepended(base)
 				base.extend(ClassMethods)
