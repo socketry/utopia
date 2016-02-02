@@ -48,6 +48,7 @@ module Utopia
 				attr :content_type
 				attr :block
 				
+				# Given a specific context, modify the response to suit the given `content_type`.
 				def apply(context, response)
 					status, headers, body = response
 					
@@ -76,6 +77,7 @@ module Utopia
 					super
 				end
 				
+				# Given a list of content types (e.g. from browser_preferred_content_types), return the best converter.
 				def for(patterns)
 					patterns.each do |pattern|
 						type, subtype = pattern.split('/')
@@ -88,6 +90,7 @@ module Utopia
 					return nil
 				end
 				
+				# Add a converter to the collection.
 				def << converter
 					type, subtype = converter.content_type.split('/')
 					
@@ -122,6 +125,7 @@ module Utopia
 					super
 				end
 				
+				# Parse the list of browser preferred content types and return ordered by priority.
 				def browser_preferred_content_types(env)
 					if accept_content_types = env[HTTP_ACCEPT]
 						return HTTP::prioritised_list(accept_content_types)
@@ -130,22 +134,27 @@ module Utopia
 					end
 				end
 				
+				# Add a converter for the specified content type. Call the block with the response content if the request accepts the specified content_type.
 				def with(content_type, &block)
 					@converters << Converter.new(content_type, block)
 				end
 				
+				# Add a converter for JSON when requests accept 'application/json'
 				def with_json
 					@converters << TO_JSON
 				end
 				
+				# Add a converter for YAML when requests accept 'application/x-yaml'.
 				def with_yaml
 					@converters << TO_YAML
 				end
 				
+				# If the content type could not be matched, invoke the provided block and use it's result as the response.
 				def otherwise(&block)
 					@otherwise = block
 				end
 				
+				# If the content type could not be matched, ignore it and don't use the result of the controller layer.
 				def otherwise_passthrough
 					@otherwise = proc { nil }
 				end
@@ -162,6 +171,7 @@ module Utopia
 					end
 				end
 				
+				# Generate a not acceptable response which unless customised with `otherwise`, will result in a generic 406 Not Acceptable response.
 				def not_acceptable_response(context, response)
 					if @otherwise
 						context.instance_exec(response, &@otherwise)
