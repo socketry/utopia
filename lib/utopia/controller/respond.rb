@@ -103,15 +103,11 @@ module Utopia
 				end
 				
 				def browser_preferred_content_types(env)
-					accept_content_types = env[HTTP::ACCEPT]
-					
-					# No browser preferred :
-					return [] unless accept_content_types
-					
-					# Generates a list of content types, e.g. ['text/html', 'text/*', '*/*']
-					accept_content_types.split(',').map { |content_type|
-						content_type.split(';q=').tap{|x| x[1] = (x[1] || 1.0).to_f}
-					}.sort{|a, b| b[1] <=> a[1]}.collect(&:first)
+					if accept_content_types = env[HTTP::ACCEPT]
+						return HTTP::prioritised_list(accept_content_types)
+					else
+						return []
+					end
 				end
 				
 				def with(content_type, &block)

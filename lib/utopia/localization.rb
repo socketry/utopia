@@ -158,9 +158,8 @@ module Utopia
 			# No user prefered languages:
 			return [] unless accept_languages
 			
-			languages = accept_languages.split(',').map { |language|
-				language.split(';q=').tap{|x| x[1] = (x[1] || 1.0).to_f}
-			}.sort{|a, b| b[1] <=> a[1]}.collect(&:first)
+			# Extract the ordered list of languages:
+			languages = HTTP::prioritised_list(accept_languages)
 			
 			# Returns available languages based on the order of the first argument:
 			return languages & @all_locales

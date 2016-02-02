@@ -84,6 +84,17 @@ module Utopia
 		LOCATION = 'Location'.freeze
 		ACCEPT = 'Accept'.freeze
 		
+		# Suitable to provide an ordered list of from an Accept or Acccept-Language header.
+		def self.prioritised_list(header_value)
+			header_value.
+				split(',').
+				map{|item| item.split(';q=').
+					tap{|x| x[1] = (x[1] || 1.0).to_f}
+				}.
+				sort{|a, b| b[1] <=> a[1]}.
+				collect(&:first)
+		end
+		
 		# A small HTTP status wrapper that verifies the status code within a given range.
 		class Status
 			def initialize(code, valid_range = 100...600)
