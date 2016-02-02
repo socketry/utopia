@@ -21,15 +21,14 @@
 module Utopia
 	class Controller
 		class Action < Hash
-			def initialize
-				@path = nil
+			def initialize(options = {}, &block)
 				@options = options
-				@callback = nil
+				@callback = block
 				
-				super
+				super()
 			end
 			
-			attr_accessor :path, :callback, :options
+			attr_accessor :callback, :options
 			
 			def callback?
 				@callback != nil
@@ -40,15 +39,15 @@ module Utopia
 			end
 			
 			def eql? other
-				super and @callback.eql? other.callback and @options.eql? other.options and @path.eql? other.path 
+				super and @callback.eql? other.callback and @options.eql? other.options
 			end
 			
 			def hash
-				[super, callback, options, path].hash
+				[super, @callback, @options].hash
 			end
 			
 			def == other
-				super and @callback == other.callback and @options == other.options and @path == other.path
+				super and @callback == other.callback and @options == other.options
 			end
 			
 			protected
@@ -91,19 +90,14 @@ module Utopia
 			def define(path, **options, &callback)
 				current = self
 				
-				path.reverse.each do |name|
+				path.reverse_each do |name|
 					current = (current[name.to_sym] ||= Action.new)
 				end
 				
-				current.path = path
 				current.options = options
 				current.callback = callback
 				
 				return current
-			end
-			
-			def arity
-				@callback ? @callback.arity : 0
 			end
 			
 			def invoke!(controller, *arguments)

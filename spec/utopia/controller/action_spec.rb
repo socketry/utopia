@@ -24,6 +24,20 @@ require 'utopia/controller'
 
 module Utopia::Controller::ActionSpec
 	describe Utopia::Controller::Action do
+		it "should be a hash key" do
+			a = Utopia::Controller::Action.new
+			b = Utopia::Controller::Action.new
+			c = Utopia::Controller::Action.new {sleep}
+			
+			expect(a).to be == b
+			expect(a.hash).to be == b.hash
+			expect(a).to be_eql b
+			
+			expect(a).to_not be == c
+			expect(a.hash).to_not be == c.hash
+			expect(a).to_not be_eql c
+		end
+		
 		it "should resolve callbacks" do
 			actions = Utopia::Controller::Action.new
 			
