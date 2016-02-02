@@ -78,7 +78,7 @@ module Utopia
 			500 => 'Internal Server Error'.freeze,
 			501 => 'Not Implemented'.freeze,
 			503 => 'Service Unavailable'.freeze
-		}
+		}.merge(Rack::Utils::HTTP_STATUS_CODES)
 		
 		CONTENT_TYPE = 'Content-Type'.freeze
 		LOCATION = 'Location'.freeze
