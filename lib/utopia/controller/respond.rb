@@ -96,6 +96,7 @@ module Utopia
 			end
 			
 			class Responder
+				HTTP_ACCEPT = 'HTTP_ACCEPT'.freeze
 				NOT_ACCEPTABLE_RESPONSE = [406, {}, []].freeze
 				
 				def initialize
@@ -103,7 +104,7 @@ module Utopia
 				end
 				
 				def browser_preferred_content_types(env)
-					if accept_content_types = env[HTTP::ACCEPT]
+					if accept_content_types = env[HTTP_ACCEPT]
 						return HTTP::prioritised_list(accept_content_types)
 					else
 						return []

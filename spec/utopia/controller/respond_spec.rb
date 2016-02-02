@@ -91,7 +91,7 @@ module Utopia::Controller::RespondSpec
 			request, path = mock_request("/fetch")
 			relative_path = path - controller.class.uri_path
 			
-			request.env['Accept'] = "application/json"
+			request.env['HTTP_ACCEPT'] = "application/json"
 			
 			status, headers, body = controller.process!(request, relative_path)
 			
@@ -104,7 +104,7 @@ module Utopia::Controller::RespondSpec
 			request, path = mock_request("/fetch")
 			relative_path = path - controller.class.uri_path
 			
-			request.env['Accept'] = "text/*"
+			request.env['HTTP_ACCEPT'] = "text/*"
 			
 			status, headers, body = controller.process!(request, relative_path)
 			
