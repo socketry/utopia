@@ -23,6 +23,7 @@ require_relative '../path/matcher'
 
 module Utopia
 	class Controller
+		# This controller layer provides a convenient way to respond to different requested content types.
 		module Respond
 			def self.prepended(base)
 				base.extend(ClassMethods)
@@ -74,6 +75,7 @@ module Utopia
 					
 					super
 				end
+				
 				def for(patterns)
 					patterns.each do |pattern|
 						type, subtype = pattern.split('/')
@@ -105,6 +107,9 @@ module Utopia
 				HTTP_ACCEPT = 'HTTP_ACCEPT'.freeze
 				NOT_ACCEPTABLE_RESPONSE = [406, {}, []].freeze
 				
+				TO_JSON = Converter.new('application/json', lambda{|content| content.to_json}).freeze
+				TO_YAML = Converter.new('application/x-yaml', lambda{|content| content.to_yaml}).freeze
+				
 				def initialize
 					@converters = Converters.new
 					@otherwise = nil
@@ -116,6 +121,7 @@ module Utopia
 					
 					super
 				end
+				
 				def browser_preferred_content_types(env)
 					if accept_content_types = env[HTTP_ACCEPT]
 						return HTTP::prioritised_list(accept_content_types)
@@ -126,6 +132,14 @@ module Utopia
 				
 				def with(content_type, &block)
 					@converters << Converter.new(content_type, block)
+				end
+				
+				def with_json
+					@converters << TO_JSON
+				end
+				
+				def with_yaml
+					@converters << TO_YAML
 				end
 				
 				def otherwise(&block)
