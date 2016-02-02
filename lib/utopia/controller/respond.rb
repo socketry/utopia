@@ -107,6 +107,7 @@ module Utopia
 				
 				def initialize
 					@converters = Converters.new
+					@otherwise = nil
 				end
 				
 				def freeze
@@ -127,17 +128,31 @@ module Utopia
 					@converters << Converter.new(content_type, block)
 				end
 				
+				def otherwise(&block)
+					@otherwise = block
+				end
+				
+				def otherwise_passthrough
+					@otherwise = proc { nil }
+				end
+				
 				def invoke!(context, request, path, response)
 					content_types = browser_preferred_content_types(request.env)
 					
 					converter = @converters.for(content_types)
 					
 					if converter
-						return converter.apply(context, response)
+						converter.apply(context, response)
 					else
-						LOG.debug(self.class.name) {"Could not find valid converter. Client requested #{content_types.inspect}."}
-						# No converter could be found
-						return NOT_ACCEPTABLE_RESPONSE
+						not_acceptable_response(context, response)
+					end
+				end
+				
+				def not_acceptable_response(context, response)
+					if @otherwise
+						context.instance_exec(response, &@otherwise)
+					else
+						NOT_ACCEPTABLE_RESPONSE
 					end
 				end
 			end
@@ -150,6 +165,8 @@ module Utopia
 				def response_for(context, request, path, response)
 					if @responder
 						@responder.invoke!(context, request, path, response)
+					else
+						response
 					end
 				end
 			end
@@ -157,7 +174,7 @@ module Utopia
 			# Rewrite the path before processing the request if possible.
 			def passthrough(request, path)
 				if response = super
-					self.class.response_for(self, request, path, response) || response
+					self.class.response_for(self, request, path, response)
 				end
 			end
 		end
