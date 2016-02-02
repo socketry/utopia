@@ -61,7 +61,58 @@ module Utopia
 				:media, :text, :archive, :images, :fonts
 			]
 		}
-
+		
+		class MimeTypeLoader
+			def initialize(library)
+				@extensions = {}
+				@library = library
+			end
+			
+			attr :extensions
+			
+			def self.extensions_for(types, library = MIME_TYPES)
+				loader = self.new(library)
+				loader.expand(types)
+				return loader.extensions
+			end
+			
+			def extract_extensions(mime_types)
+				mime_types.select{|mime_type| !mime_type.obsolete?}.each do |mime_type|
+					mime_type.extensions.each do |ext|
+						@extensions["." + ext] = mime_type.content_type
+					end
+				end
+			end
+			
+			def expand(types)
+				types.each do |type|
+					current_count = @extensions.size
+					
+					begin
+						case type
+						when Symbol
+							self.expand(MIME_TYPES[type])
+						when Array
+							@extensions["." + type[0]] = type[1]
+						when String
+							self.extract_extensions MIME::Types.of(type)
+						when Regexp
+							self.extract_extensions MIME::Types[type]
+						when MIME::Type
+							self.extract_extensions.call([type])
+						end
+					rescue
+						LOG.error{"#{self.class.name}: Error while processing #{type.inspect}!"}
+						raise $!
+					end
+					
+					if @extensions.size == current_count
+						LOG.warn{"#{self.class.name}: Could not find any mime type for #{type.inspect}"}
+					end
+				end
+			end
+		end
+		
 		private
 
 		class LocalFile
@@ -151,59 +202,13 @@ module Utopia
 			end
 		end
 
-		def load_mime_types(types)
-			result = {}
-
-			extract_extensions = lambda do |mime_type|
-				# LOG.info "Extracting #{mime_type.inspect}"
-				mime_type.extensions.each{|ext| result["." + ext] = mime_type.content_type}
-			end
-
-			types.each do |type|
-				current_count = result.size
-				# LOG.info "Processing #{type.inspect}"
-				
-				begin
-					case type
-					when Symbol
-						result = load_mime_types(MIME_TYPES[type]).merge(result)
-					when Array
-						result["." + type[0]] = type[1]
-					when String
-						MIME::Types.of(type).select{|mime_type| !mime_type.obsolete?}.each do |mime_type|
-							extract_extensions.call(mime_type)
-						end
-					when Regexp
-						MIME::Types[type].select{|mime_type| !mime_type.obsolete?}.each do |mime_type|
-							extract_extensions.call(mime_type)
-						end
-					when MIME::Type
-						extract_extensions.call(type)
-					end
-				rescue
-					LOG.error "#{self.class.name}: Error while processing #{type.inspect}!"
-					raise $!
-				end
-				
-				if result.size == current_count
-					LOG.warn "#{self.class.name}: Could not find any mime type for #{type.inspect}"
-				end
-			end
-
-			return result
-		end
-
 		public
 
 		def initialize(app, **options)
 			@app = app
 			@root = (options[:root] || Utopia::default_root).freeze
 
-			if options[:types]
-				@extensions = load_mime_types(options[:types])
-			else
-				@extensions = load_mime_types(MIME_TYPES[:default])
-			end
+			@extensions = MimeTypeLoader.extensions_for(options[:types] || MIME_TYPES[:default])
 
 			@cache_control = (options[:cache_control] || "public, max-age=3600")
 			
