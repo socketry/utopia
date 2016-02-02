@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 require 'rack/mock'
+require 'json'
 
 require 'utopia/controller'
 
@@ -55,6 +56,61 @@ module Utopia::Controller::RespondSpec
 		
 		it "should fail to match if no media types specified" do
 			expect(subject.for(["text/*", "*/*"])).to be nil
+		end
+	end
+	
+	describe Utopia::Controller do
+		class TestController < Utopia::Controller::Base
+			prepend Utopia::Controller::Respond
+			
+			respond.with("application/json") do |content|
+				JSON::dump(content)
+			end
+			
+			respond.with("text/plain") do |content|
+				content.inspect
+			end
+			
+			on 'fetch' do |request, path|
+				success! content: {user_id: 10}
+			end
+			
+			def self.uri_path
+				Utopia::Path['/']
+			end
+		end
+		
+		let(:controller) {TestController.new}
+		
+		def mock_request(*args)
+			request = Rack::Request.new(Rack::MockRequest.env_for(*args))
+			return request, Utopia::Path[request.path_info]
+		end
+		
+		it "should serialize response as JSON" do
+			request, path = mock_request("/fetch")
+			relative_path = path - controller.class.uri_path
+			
+			request.env['Accept'] = "application/json"
+			
+			status, headers, body = controller.process!(request, relative_path)
+			
+			expect(status).to be == 200
+			expect(headers['Content-Type']).to be == "application/json"
+			expect(body.join).to be == '{"user_id":10}'
+		end
+		
+		it "should serialize response as text" do
+			request, path = mock_request("/fetch")
+			relative_path = path - controller.class.uri_path
+			
+			request.env['Accept'] = "text/*"
+			
+			status, headers, body = controller.process!(request, relative_path)
+			
+			expect(status).to be == 200
+			expect(headers['Content-Type']).to be == "text/plain"
+			expect(body.join).to be == '{:user_id=>10}'
 		end
 	end
 end

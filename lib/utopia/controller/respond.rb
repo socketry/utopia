@@ -48,7 +48,15 @@ module Utopia
 				attr :block
 				
 				def apply(context, response)
-					context.instance_exec(response, &@block)
+					status, headers, body = response
+					
+					# Generate a new body:
+					body = body.collect{|content| context.instance_exec(content, &@block)}
+					
+					# Update the headers with the requested content type:
+					headers = headers.merge(HTTP::CONTENT_TYPE => @content_type)
+					
+					return [status, headers, body]
 				end
 			end
 			
@@ -88,14 +96,14 @@ module Utopia
 			end
 			
 			class Responder
-				HTTP_ACCEPT = 'Accept'.freeze
+				NOT_ACCEPTABLE_RESPONSE = [406, {}, []].freeze
 				
 				def initialize
-					@converters = {}
+					@converters = Converters.new
 				end
 				
 				def browser_preferred_content_types(env)
-					accept_content_types = env[HTTP_ACCEPT]
+					accept_content_types = env[HTTP::ACCEPT]
 					
 					# No browser preferred :
 					return [] unless accept_content_types
@@ -106,11 +114,22 @@ module Utopia
 					}.sort{|a, b| b[1] <=> a[1]}.collect(&:first)
 				end
 				
-				def with(content_type, **arguments, &block)
-					@converters[content_type] << Converter.new(content_type, arguments, block)
+				def with(content_type, &block)
+					@converters << Converter.new(content_type, block)
 				end
 				
 				def invoke!(context, request, path, response)
+					content_types = browser_preferred_content_types(request.env)
+					
+					converter = @converters.for(content_types)
+					
+					if converter
+						return converter.apply(context, response)
+					else
+						LOG.debug(self.class.name) {"Could not find valid converter. Client requested #{content_types.inspect}."}
+						# No converter could be found
+						return NOT_ACCEPTABLE_RESPONSE
+					end
 				end
 			end
 			
@@ -128,9 +147,9 @@ module Utopia
 			
 			# Rewrite the path before processing the request if possible.
 			def passthrough(request, path)
-				response = super
-				
-				self.class.response_for(self, request, path, response) || response
+				if response = super
+					self.class.response_for(self, request, path, response) || response
+				end
 			end
 		end
 	end

@@ -6,6 +6,8 @@ gemspec
 group :development do
 	gem 'pry'
 	gem 'pry-coolline'
+	
+	gem 'json'
 end
 
 group :test do
