@@ -126,6 +126,7 @@ module Utopia::Controller::RespondSpec
 			
 			expect(last_response.status).to be == 200
 			expect(last_response.headers['Content-Type']).to be == 'text/html'
+			expect(last_response.body).to be_include "<heading>File Not Found</heading>"
 		end
 		
 		it "should get json error response" do
