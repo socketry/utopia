@@ -68,6 +68,12 @@ module Utopia
 					@media_types = Hash.new{|h,k| h[k] = {}}
 				end
 				
+				def freeze
+					@media_types.freeze
+					@media_types.each{|key,value| value.freeze}
+					
+					super
+				end
 				def for(patterns)
 					patterns.each do |pattern|
 						type, subtype = pattern.split('/')
@@ -103,6 +109,12 @@ module Utopia
 					@converters = Converters.new
 				end
 				
+				def freeze
+					@converters.freeze
+					@otherwise.freeze
+					
+					super
+				end
 				def browser_preferred_content_types(env)
 					if accept_content_types = env[HTTP_ACCEPT]
 						return HTTP::prioritised_list(accept_content_types)
