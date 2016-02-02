@@ -26,6 +26,7 @@ require_relative 'controller/action'
 require_relative 'controller/base'
 
 require_relative 'controller/rewrite'
+require_relative 'controller/respond'
 
 require 'concurrent/map'
 
