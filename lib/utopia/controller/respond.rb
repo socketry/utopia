@@ -68,11 +68,17 @@ module Utopia
 				
 				def initialize
 					@media_types = Hash.new{|h,k| h[k] = {}}
+					
+					# Primarily for implementing #freeze efficiently.
+					@all = []
 				end
 				
 				def freeze
 					@media_types.freeze
 					@media_types.each{|key,value| value.freeze}
+					
+					@all.freeze
+					@all.each(&:freeze)
 					
 					super
 				end
@@ -103,6 +109,7 @@ module Utopia
 					end
 					
 					@media_types[type][subtype] = converter
+					@all << converter
 				end
 			end
 			

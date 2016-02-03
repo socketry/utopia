@@ -59,6 +59,14 @@ module Utopia::Controller::RespondSpec
 		it "should fail to match if no media types specified" do
 			expect(subject.for(["text/*", "*/*"])).to be nil
 		end
+		
+		it "should freeze converters" do
+			subject << text_html_converter
+			
+			subject.freeze
+			
+			expect(text_html_converter).to be_frozen
+		end
 	end
 	
 	describe Utopia::Controller do
