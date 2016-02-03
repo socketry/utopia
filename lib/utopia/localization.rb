@@ -159,9 +159,10 @@ module Utopia
 			return [] unless accept_languages
 			
 			# Extract the ordered list of languages:
-			languages = HTTP::prioritised_list(accept_languages)
+			languages = HTTP::Accept::Languages.parse(accept_languages).collect(&:locale)
 			
 			# Returns available languages based on the order of the first argument:
+			# TODO: If the user asked for 'en', this should match any locale in @all_locales that begin with 'en'.
 			return languages & @all_locales
 		end
 		

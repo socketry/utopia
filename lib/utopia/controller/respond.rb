@@ -135,7 +135,7 @@ module Utopia
 				# Parse the list of browser preferred content types and return ordered by priority.
 				def browser_preferred_content_types(env)
 					if accept_content_types = env[HTTP_ACCEPT]
-						return HTTP::prioritised_list(accept_content_types)
+						HTTP::Accept::MediaTypes.parse(accept_content_types).collect(&:mime_type)
 					else
 						return []
 					end
