@@ -98,7 +98,7 @@ module Utopia
 					return path
 				end
 				
-				def invoke!(context, request, path)
+				def call(context, request, path)
 					path.components = apply(context, request, path).components
 				end
 			end
@@ -110,7 +110,7 @@ module Utopia
 				
 				def rewrite_request(controller, request, path)
 					if @rewriter
-						@rewriter.invoke!(controller, request, path)
+						@rewriter.call(controller, request, path)
 					end
 				end
 			end

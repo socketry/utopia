@@ -100,7 +100,7 @@ module Utopia
 				return current
 			end
 			
-			def invoke!(controller, *arguments)
+			def call(controller, *arguments)
 				controller.instance_exec(*arguments, self, &@callback)
 			end
 			

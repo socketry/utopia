@@ -89,7 +89,7 @@ module Utopia
 				unless actions.empty?
 					return catch_response do
 						actions.each do |action|
-							action.invoke!(self, request, path)
+							action.call(self, request, path)
 						end
 					end
 				end

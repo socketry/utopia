@@ -159,7 +159,7 @@ module Utopia
 					@otherwise = proc { nil }
 				end
 				
-				def invoke!(context, request, path, response)
+				def call(context, request, path, response)
 					content_types = browser_preferred_content_types(request.env)
 					
 					converter = @converters.for(content_types)
@@ -188,7 +188,7 @@ module Utopia
 				
 				def response_for(context, request, path, response)
 					if @responder
-						@responder.invoke!(context, request, path, response)
+						@responder.call(context, request, path, response)
 					else
 						response
 					end
