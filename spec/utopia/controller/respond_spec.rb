@@ -36,18 +36,22 @@ module Utopia::Controller::RespondSpec
 			subject << text_html_converter
 			subject << text_plain_converter
 			
-			expect(subject.for(["text/plain", "text/*", "*/*"])).to be text_plain_converter
+			media_types = HTTP::Accept::MediaTypes.parse("text/plain, text/*, */*")
+			expect(subject.for(media_types).first).to be == text_plain_converter
 			
-			expect(subject.for(["text/html", "text/*", "*/*"])).to be text_html_converter
+			media_types = HTTP::Accept::MediaTypes.parse("text/html, text/*, */*")
+			expect(subject.for(media_types).first).to be == text_html_converter
 		end
 		
 		it "should match the wildcard subtype converter" do
 			subject << text_html_converter
 			subject << text_plain_converter
 			
-			expect(subject.for(["text/*", "*/*"])).to be text_html_converter
+			media_types = HTTP::Accept::MediaTypes.parse("text/*, */*")
+			expect(subject.for(media_types).first).to be == text_html_converter
 			
-			expect(subject.for(["*/*"])).to be text_html_converter
+			media_types = HTTP::Accept::MediaTypes.parse("*/*")
+			expect(subject.for(media_types).first).to be == text_html_converter
 		end
 		
 		it "should fail to match if no media types match" do
@@ -143,6 +147,22 @@ module Utopia::Controller::RespondSpec
 			expect(last_response.status).to be == 404
 			expect(last_response.headers['Content-Type']).to be == 'application/json'
 			expect(last_response.body).to be == '{"message":"File not found"}'
+		end
+		
+		it "should get version 1 response" do
+			get '/api/fetch', nil, {'HTTP_ACCEPT' => "application/json;version=1"}
+			
+			expect(last_response.status).to be == 200
+			expect(last_response.headers['Content-Type']).to be == 'application/json'
+			expect(last_response.body).to be == '{"message":"Hello World"}'
+		end
+		
+		it "should get version 2 response" do
+			get '/api/fetch', nil, {'HTTP_ACCEPT' => "application/json;version=2"}
+			
+			expect(last_response.status).to be == 200
+			expect(last_response.headers['Content-Type']).to be == 'application/json'
+			expect(last_response.body).to be == '{"message":"Goodbye World"}'
 		end
 	end
 end

@@ -29,36 +29,58 @@ module Utopia
 				base.extend(ClassMethods)
 			end
 			
-			# A specific conversion to a given content_type, e.g. 'application/json'.
-			class Converter
-				def initialize(content_type, block)
-					@content_type = content_type
-					@block = block
-					
-					self.freeze
-				end
-				
-				def freeze
-					@content_type.freeze
-					@block.freeze
-					
-					super
-				end
-				
-				attr :content_type
-				attr :block
-				
-				# Given a specific context, modify the response to suit the given `content_type`.
-				def apply(context, response)
+			module Converter
+				def self.update_response(response, updated_headers)
 					status, headers, body = response
 					
 					# Generate a new body:
-					body = body.collect{|content| context.instance_exec(content, &@block)}
+					body = body.collect{|content| yield content}
 					
 					# Update the headers with the requested content type:
-					headers = headers.merge(HTTP::CONTENT_TYPE => @content_type)
+					headers = headers.merge(updated_headers)
 					
 					return [status, headers, body]
+				end
+				
+				class Callback < Struct.new(:content_type, :block)
+					def headers
+						{HTTP::CONTENT_TYPE => self.content_type}
+					end
+					
+					def call(context, response, media_range)
+						Converter.update_response(response, headers) do |content|
+							context.instance_exec(content, media_range, &block)
+						end
+					end
+				end
+				
+				def self.new(*args)
+					Callback.new(*args)
+				end
+				
+				module ToJSON
+					APPLICATION_JSON = 'application/json'.freeze
+					HEADERS = {HTTP::CONTENT_TYPE => APPLICATION_JSON}.freeze
+					
+					def self.content_type
+						APPLICATION_JSON
+					end
+					
+					def self.serialize(content, media_range)
+						options = {}
+						
+						if version = media_range.parameters['version']
+							options[:version] = version.to_s
+						end
+						
+						return content.to_json(options)
+					end
+					
+					def self.call(context, response, media_range)
+						Converter.update_response(response, HEADERS) do |content|
+							self.serialize(content, media_range)
+						end
+					end
 				end
 			end
 			
@@ -84,12 +106,12 @@ module Utopia
 				end
 				
 				# Given a list of content types (e.g. from browser_preferred_content_types), return the best converter.
-				def for(patterns)
-					patterns.each do |pattern|
-						type, subtype = pattern.split('/')
+				def for(media_types)
+					media_types.each do |media_range|
+						type, subtype = media_range.split
 						
 						if converter = @media_types[type][subtype]
-							return converter
+							return converter, media_range
 						end
 					end
 					
@@ -117,9 +139,6 @@ module Utopia
 				HTTP_ACCEPT = 'HTTP_ACCEPT'.freeze
 				NOT_ACCEPTABLE_RESPONSE = [406, {}, []].freeze
 				
-				TO_JSON = Converter.new('application/json', lambda{|content| content.to_json}).freeze
-				TO_YAML = Converter.new('application/x-yaml', lambda{|content| content.to_yaml}).freeze
-				
 				def initialize
 					@converters = Converters.new
 					@otherwise = nil
@@ -133,9 +152,9 @@ module Utopia
 				end
 				
 				# Parse the list of browser preferred content types and return ordered by priority.
-				def browser_preferred_content_types(env)
+				def browser_preferred_media_types(env)
 					if accept_content_types = env[HTTP_ACCEPT]
-						HTTP::Accept::MediaTypes.parse(accept_content_types).collect(&:mime_type)
+						HTTP::Accept::MediaTypes.parse(accept_content_types)
 					else
 						return []
 					end
@@ -143,17 +162,12 @@ module Utopia
 				
 				# Add a converter for the specified content type. Call the block with the response content if the request accepts the specified content_type.
 				def with(content_type, &block)
-					@converters << Converter.new(content_type, block)
+					@converters << Converter::Callback.new(content_type, block)
 				end
 				
 				# Add a converter for JSON when requests accept 'application/json'
 				def with_json
-					@converters << TO_JSON
-				end
-				
-				# Add a converter for YAML when requests accept 'application/x-yaml'.
-				def with_yaml
-					@converters << TO_YAML
+					@converters << Converter::ToJSON
 				end
 				
 				# If the content type could not be matched, invoke the provided block and use it's result as the response.
@@ -167,12 +181,12 @@ module Utopia
 				end
 				
 				def call(context, request, path, response)
-					content_types = browser_preferred_content_types(request.env)
+					media_types = browser_preferred_media_types(request.env)
 					
-					converter = @converters.for(content_types)
+					converter, media_range = @converters.for(media_types)
 					
 					if converter
-						converter.apply(context, response)
+						converter.call(context, response, media_range)
 					else
 						not_acceptable_response(context, response)
 					end
