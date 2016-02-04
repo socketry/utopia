@@ -28,51 +28,6 @@ require 'utopia/content'
 require 'utopia/controller'
 
 module Utopia::Controller::RespondSpec
-	describe Utopia::Controller::Respond::Converters do
-		let(:text_html_converter) {Utopia::Controller::Respond::Converter.new("text/html", lambda {})}
-		let(:text_plain_converter) {Utopia::Controller::Respond::Converter.new("text/plain", lambda {})}
-		
-		it "should give the correct converter when specified completely" do
-			subject << text_html_converter
-			subject << text_plain_converter
-			
-			media_types = HTTP::Accept::MediaTypes.parse("text/plain, text/*, */*")
-			expect(subject.for(media_types).first).to be == text_plain_converter
-			
-			media_types = HTTP::Accept::MediaTypes.parse("text/html, text/*, */*")
-			expect(subject.for(media_types).first).to be == text_html_converter
-		end
-		
-		it "should match the wildcard subtype converter" do
-			subject << text_html_converter
-			subject << text_plain_converter
-			
-			media_types = HTTP::Accept::MediaTypes.parse("text/*, */*")
-			expect(subject.for(media_types).first).to be == text_html_converter
-			
-			media_types = HTTP::Accept::MediaTypes.parse("*/*")
-			expect(subject.for(media_types).first).to be == text_html_converter
-		end
-		
-		it "should fail to match if no media types match" do
-			subject << text_plain_converter
-			
-			expect(subject.for(["application/json"])).to be nil
-		end
-		
-		it "should fail to match if no media types specified" do
-			expect(subject.for(["text/*", "*/*"])).to be nil
-		end
-		
-		it "should freeze converters" do
-			subject << text_html_converter
-			
-			subject.freeze
-			
-			expect(text_html_converter).to be_frozen
-		end
-	end
-	
 	describe Utopia::Controller do
 		class TestController < Utopia::Controller::Base
 			prepend Utopia::Controller::Respond

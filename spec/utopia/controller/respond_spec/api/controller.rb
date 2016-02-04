@@ -8,6 +8,7 @@ class VersionedResponse
 		JSON::dump(self.as_json(options))
 	end
 	
+	# Modelled after http://api.rubyonrails.org/classes/ActiveModel/Serializers/JSON.html
 	def as_json(options = {})
 		if options[:version] == '1'
 			{"message" => "Hello World"}

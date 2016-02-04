@@ -84,63 +84,12 @@ module Utopia
 				end
 			end
 			
-			# Contains a set of converters which can be queried 
-			class Converters
-				WILDCARD = '*'.freeze
-				
-				def initialize
-					@media_types = Hash.new{|h,k| h[k] = {}}
-					
-					# Primarily for implementing #freeze efficiently.
-					@all = []
-				end
-				
-				def freeze
-					@media_types.freeze
-					@media_types.each{|key,value| value.freeze}
-					
-					@all.freeze
-					@all.each(&:freeze)
-					
-					super
-				end
-				
-				# Given a list of content types (e.g. from browser_preferred_content_types), return the best converter.
-				def for(media_types)
-					media_types.each do |media_range|
-						type, subtype = media_range.split
-						
-						if converter = @media_types[type][subtype]
-							return converter, media_range
-						end
-					end
-					
-					return nil
-				end
-				
-				# Add a converter to the collection.
-				def << converter
-					type, subtype = converter.content_type.split('/')
-					
-					if @media_types.empty?
-						@media_types[WILDCARD][WILDCARD] = converter
-					end
-					
-					if @media_types[type].empty?
-						@media_types[type][WILDCARD] = converter
-					end
-					
-					@media_types[type][subtype] = converter
-					@all << converter
-				end
-			end
-			
 			class Responder
 				HTTP_ACCEPT = 'HTTP_ACCEPT'.freeze
 				NOT_ACCEPTABLE_RESPONSE = [406, {}, []].freeze
 				
 				def initialize
-					@converters = Converters.new
+					@converters = HTTP::Accept::MediaTypes::Map.new
 					@otherwise = nil
 				end
 				

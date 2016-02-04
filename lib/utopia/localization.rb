@@ -68,7 +68,7 @@ module Utopia
 		def initialize(app, **options)
 			@app = app
 			
-			@all_locales = options[:locales]
+			@all_locales = HTTP::Accept::Languages::Locales.new(options[:locales])
 			
 			# Locales here are represented as an array of strings, e.g. ['en', 'ja', 'cn', 'de'].
 			unless @default_locales = options[:default_locales] 
@@ -84,8 +84,6 @@ module Utopia
 			@hosts = options[:hosts] || {}
 			
 			@nonlocalized = options.fetch(:nonlocalized, [])
-			
-			# puts "All:#{@all_locales.inspect} defaults:#{@default_locales.inspect} default:#{default_locale}"
 			
 			self.freeze
 		end
@@ -142,9 +140,7 @@ module Utopia
 		def request_preferred_locale(env)
 			path = Path[env[Rack::PATH_INFO]]
 			
-			if @all_locales.include? path.first
-				request_locale = path.first
-				
+			if request_locale = @all_locales.patterns[path.first]
 				# Remove the localization prefix:
 				path.delete_at(0)
 				
@@ -159,11 +155,10 @@ module Utopia
 			return [] unless accept_languages
 			
 			# Extract the ordered list of languages:
-			languages = HTTP::Accept::Languages.parse(accept_languages).collect(&:locale)
+			languages = HTTP::Accept::Languages.parse(accept_languages)
 			
-			# Returns available languages based on the order of the first argument:
-			# TODO: If the user asked for 'en', this should match any locale in @all_locales that begin with 'en'.
-			return languages & @all_locales
+			# Returns available languages based on the order languages:
+			return @all_locales & languages
 		end
 		
 		def nonlocalized?(env)
