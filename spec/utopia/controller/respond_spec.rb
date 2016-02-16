@@ -100,7 +100,7 @@ module Utopia::Controller::RespondSpec
 			get '/errors/file-not-found', nil, {'HTTP_ACCEPT' => "application/json"}
 			
 			expect(last_response.status).to be == 404
-			expect(last_response.headers['Content-Type']).to be == 'application/json'
+			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
 			expect(last_response.body).to be == '{"message":"File not found"}'
 		end
 		
@@ -108,7 +108,7 @@ module Utopia::Controller::RespondSpec
 			get '/api/fetch', nil, {'HTTP_ACCEPT' => "application/json;version=1"}
 			
 			expect(last_response.status).to be == 200
-			expect(last_response.headers['Content-Type']).to be == 'application/json'
+			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
 			expect(last_response.body).to be == '{"message":"Hello World"}'
 		end
 		
@@ -116,7 +116,7 @@ module Utopia::Controller::RespondSpec
 			get '/api/fetch', nil, {'HTTP_ACCEPT' => "application/json;version=2"}
 			
 			expect(last_response.status).to be == 200
-			expect(last_response.headers['Content-Type']).to be == 'application/json'
+			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
 			expect(last_response.body).to be == '{"message":"Goodbye World"}'
 		end
 	end
