@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
 	
 	spec.add_dependency 'http-accept', '~> 1.1.1'
 	
-	spec.add_dependency 'mail', '~> 2.6.1'
+	spec.add_dependency 'mail', '~> 2.6.3'
 	
 	spec.add_dependency 'concurrent-ruby', '~> 1.0.0'
 	
