@@ -58,6 +58,7 @@ module Utopia
 					Callback.new(*args)
 				end
 				
+				# To accept incoming requests with content-type JSON (e.g. POST with JSON data), consider using `Rack::PostBodyContentTypeParser`.
 				module ToJSON
 					APPLICATION_JSON = 'application/json'.freeze
 					HEADERS = {HTTP::CONTENT_TYPE => APPLICATION_JSON}.freeze
