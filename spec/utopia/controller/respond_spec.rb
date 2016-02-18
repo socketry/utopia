@@ -89,6 +89,9 @@ module Utopia::Controller::RespondSpec
 		let(:app) {Rack::Builder.parse_file(File.expand_path('respond_spec.ru', __dir__)).first}
 		
 		it "should get html error page" do
+			# Standard web browser header:
+			header 'Accept', 'text/html, text/*, */*'
+			
 			get '/errors/file-not-found'
 			
 			expect(last_response.status).to be == 200
@@ -97,7 +100,9 @@ module Utopia::Controller::RespondSpec
 		end
 		
 		it "should get json error response" do
-			get '/errors/file-not-found', nil, {'HTTP_ACCEPT' => "application/json"}
+			header 'Accept', 'application/json'
+			
+			get '/errors/file-not-found'
 			
 			expect(last_response.status).to be == 404
 			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
@@ -105,7 +110,9 @@ module Utopia::Controller::RespondSpec
 		end
 		
 		it "should get version 1 response" do
-			get '/api/fetch', nil, {'HTTP_ACCEPT' => "application/json;version=1"}
+			header 'Accept', 'application/json;version=1'
+			
+			get '/api/fetch'
 			
 			expect(last_response.status).to be == 200
 			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
@@ -113,11 +120,22 @@ module Utopia::Controller::RespondSpec
 		end
 		
 		it "should get version 2 response" do
-			get '/api/fetch', nil, {'HTTP_ACCEPT' => "application/json;version=2"}
+			header 'Accept', 'application/json;version=2'
+			
+			get '/api/fetch'
 			
 			expect(last_response.status).to be == 200
 			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
 			expect(last_response.body).to be == '{"message":"Goodbye World"}'
+		end
+		
+		
+		it "should work even if no accept header specified" do
+			get '/api/fetch'
+			
+			expect(last_response.status).to be == 200
+			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.body).to be == '{}'
 		end
 	end
 end

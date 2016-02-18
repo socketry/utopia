@@ -23,7 +23,7 @@ require_relative '../path/matcher'
 
 module Utopia
 	class Controller
-		# This controller layer provides a convenient way to respond to different requested content types.
+		# This controller layer provides a convenient way to respond to different requested content types. The order in which you add converters matters, as it determins how the incoming Accept: header is mapped, e.g. the first converter is also defined as matching the media range */*.
 		module Respond
 			def self.prepended(base)
 				base.extend(ClassMethods)
@@ -42,9 +42,13 @@ module Utopia
 					return [status, headers, body]
 				end
 				
-				class Callback < Struct.new(:content_type, :block)
+				Callback = Struct.new(:content_type, :block) do
 					def headers
 						{HTTP::CONTENT_TYPE => self.content_type}
+					end
+					
+					def split(*args)
+						self.content_type.split(*args)
 					end
 					
 					def call(context, response, media_range)
@@ -67,6 +71,10 @@ module Utopia
 						APPLICATION_JSON
 					end
 					
+					def self.split(*args)
+						self.content_type.split(*args)
+					end
+					
 					def self.serialize(content, media_range)
 						options = {}
 						
@@ -85,29 +93,34 @@ module Utopia
 				end
 			end
 			
+			module Passthrough
+				WILDCARD = HTTP::Accept::MediaTypes::MediaRange.new('*/*').freeze
+				
+				def self.split(*args)
+					self.media_range.split(*args)
+				end
+				
+				def self.media_range
+					WILDCARD
+				end
+				
+				def self.call(context, response, media_range)
+					return nil
+				end
+			end
+			
 			class Responder
 				HTTP_ACCEPT = 'HTTP_ACCEPT'.freeze
 				NOT_ACCEPTABLE_RESPONSE = [406, {}, []].freeze
 				
 				def initialize
 					@converters = HTTP::Accept::MediaTypes::Map.new
-					@otherwise = nil
 				end
 				
 				def freeze
 					@converters.freeze
-					@otherwise.freeze
 					
 					super
-				end
-				
-				# Parse the list of browser preferred content types and return ordered by priority.
-				def browser_preferred_media_types(env)
-					if accept_content_types = env[HTTP_ACCEPT]
-						HTTP::Accept::MediaTypes.parse(accept_content_types)
-					else
-						return []
-					end
 				end
 				
 				# Add a converter for the specified content type. Call the block with the response content if the request accepts the specified content_type.
@@ -115,37 +128,23 @@ module Utopia
 					@converters << Converter::Callback.new(content_type, block)
 				end
 				
+				def with_passthrough
+					@converters << Passthrough
+				end
+				
 				# Add a converter for JSON when requests accept 'application/json'
 				def with_json
 					@converters << Converter::ToJSON
 				end
 				
-				# If the content type could not be matched, invoke the provided block and use it's result as the response.
-				def otherwise(&block)
-					@otherwise = block
-				end
-				
-				# If the content type could not be matched, ignore it and don't use the result of the controller layer.
-				def otherwise_passthrough
-					@otherwise = proc { nil }
-				end
-				
 				def call(context, request, path, response)
-					media_types = browser_preferred_media_types(request.env)
+					# Parse the list of browser preferred content types and return ordered by priority:
+					media_types = HTTP::Accept::MediaTypes.browser_preferred_media_types(request.env)
 					
 					converter, media_range = @converters.for(media_types)
 					
 					if converter
 						converter.call(context, response, media_range)
-					else
-						not_acceptable_response(context, response)
-					end
-				end
-				
-				# Generate a not acceptable response which unless customised with `otherwise`, will result in a generic 406 Not Acceptable response.
-				def not_acceptable_response(context, response)
-					if @otherwise
-						context.instance_exec(response, &@otherwise)
 					else
 						NOT_ACCEPTABLE_RESPONSE
 					end
@@ -169,7 +168,9 @@ module Utopia
 			# Rewrite the path before processing the request if possible.
 			def passthrough(request, path)
 				if response = super
-					self.class.response_for(self, request, path, response)
+					response = self.class.response_for(self, request, path, response)
+					
+					response
 				end
 			end
 		end

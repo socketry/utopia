@@ -1,6 +1,5 @@
 
 prepend Respond
-
 respond.with_json
 
 class VersionedResponse
@@ -14,6 +13,8 @@ class VersionedResponse
 			{"message" => "Hello World"}
 		elsif options[:version] == '2'
 			{"message" => "Goodbye World"}
+		else
+			{}
 		end
 	end
 end

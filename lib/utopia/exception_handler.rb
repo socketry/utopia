@@ -37,40 +37,55 @@ module Utopia
 			
 			super
 		end
-
+		
+		private def write_exception_to_stream(stream, env, exception, include_backtrace = false)
+			buffer = []
+			
+			buffer << "While requesting resource #{env[Rack::PATH_INFO].inspect}, a fatal error occurred:"
+			
+			while exception != nil
+				buffer << "\t#{exception.class.name}: #{exception.to_s}"
+				
+				if include_backtrace
+					exception.backtrace.each do |line|
+						buffer << "\t\t#{line}"
+					end
+				end
+				
+				exception = exception.cause
+			end
+			
+			# We do this in one go so that lines don't get mixed up.
+			stream.puts buffer.join("\n")
+		end
+		
+		# Generate a very simple fatal error response. This function should be unlikely to fail. Additionally, it generates a lowest common denominator response which should be suitable as a response to any kind of request. Ideally, this response is also not good or useful for any kind of higher level browser or API client, as this is not a normal error path but one that represents broken behaviour.
 		def fatal_error(env, exception)
 			body = StringIO.new
-
-			body.puts "<!DOCTYPE html><html><head><title>Fatal Error</title></head><body>"
-			body.puts "<h1>Fatal Error</h1>"
-			body.puts "<p>While requesting resource #{Trenni::Strings::to_html env[Rack::PATH_INFO]}, a fatal error occurred.</p>"
-			body.puts "<blockquote><strong>#{Trenni::Strings::to_html exception.class.name}</strong>: #{Trenni::Strings::to_html exception.to_s}</blockquote>"
-			body.puts "<p>There is nothing more we can do to fix the problem at this point.</p>"
-			body.puts "<p>We apologize for the inconvenience.</p>"
-			body.puts "</body></html>"
+			
+			write_exception_to_stream(body, env, exception)
 			body.rewind
-
-			return [400, {HTTP::CONTENT_TYPE => "text/html"}, body]
+			
+			return [500, {HTTP::CONTENT_TYPE => "text/plain"}, body]
 		end
-
+		
+		def log_exception(env, exception)
+			# An error has occurred, log it:
+			output = env['rack.errors'] || $stderr
+			write_exception_to_stream(output, env, exception, true)
+		end
+		
 		def redirect(env, exception)
 			response = @app.call(env.merge(Rack::PATH_INFO => @location, Rack::REQUEST_METHOD => Rack::GET))
 			
 			return [500, response[1], response[2]]
 		end
-
+		
 		def call(env)
 			begin
 				return @app.call(env)
 			rescue Exception => exception
-				# An error has occurred, log it:
-				log = ::Logger.new(env['rack.errors'] || $stderr)
-				
-				log.error "Exception #{exception.to_s.dump}!"
-				
-				exception.backtrace.each do |line|
-					log.error line
-				end
+				log_exception(env, exception)
 				
 				# If the error occurred while accessing the error handler, we finish with a fatal error:
 				if env[Rack::PATH_INFO] == @location
