@@ -26,8 +26,6 @@ require_relative 'path'
 require_relative 'extensions/rack'
 
 module Utopia
-	LOG = Logger.new($stderr)
-	
 	PAGES_PATH = 'pages'.freeze
 	
 	# This is used for shared controller variables which get consumed by the content middleware:

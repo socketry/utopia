@@ -84,6 +84,9 @@ module Utopia
 				end
 			end
 			
+			class ExpansionError < ArgumentError
+			end
+			
 			def expand(types)
 				types.each do |type|
 					current_count = @extensions.size
@@ -102,12 +105,11 @@ module Utopia
 							self.extract_extensions.call([type])
 						end
 					rescue
-						LOG.error{"#{self.class.name}: Error while processing #{type.inspect}!"}
-						raise $!
+						raise ExpansionError.new("#{self.class.name}: Error while processing #{type.inspect}!")
 					end
 					
 					if @extensions.size == current_count
-						LOG.warn{"#{self.class.name}: Could not find any mime type for #{type.inspect}"}
+						raise ExpansionError.new("#{self.class.name}: Could not find any mime type for #{type.inspect}")
 					end
 				end
 			end
@@ -178,7 +180,7 @@ module Utopia
 				ranges = Rack::Utils.byte_ranges(env, size)
 				response = [200, response_headers, self]
 
-				# LOG.info("Requesting ranges: #{ranges.inspect} (#{size})")
+				# puts "Requesting ranges: #{ranges.inspect} (#{size})"
 
 				if ranges == nil or ranges.size != 1
 					# No ranges, or multiple ranges (which we don't support).
@@ -196,7 +198,7 @@ module Utopia
 					response[1]["Content-Range"] = "bytes #{@range.min}-#{@range.max}/#{size}"
 				end
 
-				# LOG.debug {"Serving file #{full_path.inspect}, range #{@range.inspect}"}
+				# puts "Serving file #{full_path.inspect}, range #{@range.inspect}"
 
 				return response
 			end
