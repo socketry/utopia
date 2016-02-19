@@ -47,17 +47,15 @@ module Utopia
 	class Controller
 		CONTROLLER_RB = 'controller.rb'.freeze
 		
-		def initialize(app, **options)
+		def initialize(app, root: nil, cache_controllers: false)
 			@app = app
-			@root = options[:root] || Utopia::default_root
+			@root = root || Utopia::default_root
 			
-			if options[:cache_controllers]
+			if cache_controllers
 				@controller_cache = Concurrent::Map.new
 			else
 				@controller_cache = nil
 			end
-			
-			self.freeze
 		end
 		
 		attr :app
