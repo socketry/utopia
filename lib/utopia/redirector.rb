@@ -41,6 +41,7 @@ module Utopia
 		
 		# Redirects a whole source tree to a destination tree, given by the roots.
 		def self.moved(source_root, destination_root)
+			# TODO: Add an expires header? http://jacquesmattheij.com/301-redirects-a-dangerous-one-way-street
 			return [
 				/^#{Regexp.escape(source_root)}(.*)$/,
 				lambda do |match|
