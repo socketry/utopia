@@ -86,7 +86,7 @@ module Utopia
 		
 		CONTENT_TYPE = 'Content-Type'.freeze
 		LOCATION = 'Location'.freeze
-		# ACCEPT = 'Accept'.freeze
+		CACHE_CONTROL = 'Cache-Control'.freeze
 		
 		# A small HTTP status wrapper that verifies the status code within a given range.
 		class Status

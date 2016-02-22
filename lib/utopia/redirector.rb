@@ -40,21 +40,12 @@ module Utopia
 		DIRECTORY_INDEX = [/^(.*)\/$/, lambda{|prefix| [307, {HTTP::LOCATION => "#{prefix}index"}, []]}].freeze
 		
 		# Redirects a whole source tree to a destination tree, given by the roots.
-		def self.moved(source_root, destination_root)
-			# TODO: Add an expires header? http://jacquesmattheij.com/301-redirects-a-dangerous-one-way-street
-			return [
-				/^#{Regexp.escape(source_root)}(.*)$/,
-				lambda do |match|
-					[301, {HTTP::LOCATION => (destination_root + match[1]).to_s}, []]
-				end
-			]
+		def self.moved(source_root, destination_root, max_age = 3600*24)
+			return [/^#{Regexp.escape(source_root)}(.*)$/, lambda{|match| destination_root + match[1]}]
 		end
 		
 		def self.starts_with(source_root, destination_uri)
-			return [
-				/^#{Regexp.escape(source_root)}/,
-				destination_uri
-			]
+			return [/^#{Regexp.escape(source_root)}/, destination_uri]
 		end
 		
 		private
@@ -118,13 +109,23 @@ module Utopia
 			
 			super
 		end
-
-		def redirect(uri, match_data)
+		
+		def cache_control(max_age)
+			# http://jacquesmattheij.com/301-redirects-a-dangerous-one-way-street
+			"max-age=#{max_age}"
+		end
+		
+		# We cache 301 redirects for 24 hours.
+		DEFAULT_MAX_AGE = 3600*24
+		
+		def redirect(uri, match_data, status: 301, max_age: DEFAULT_MAX_AGE)
+			cache_control = self.cache_control(max_age)
+			
 			if uri.respond_to? :call
-				return uri.call(match_data)
-			else
-				return [301, {HTTP::LOCATION => uri.to_s}, []]
+				uri = uri.call(match_data)
 			end
+			
+			return [status, {HTTP::LOCATION => uri.to_s, HTTP::CACHE_CONTROL => cache_control}, []]
 		end
 
 		def call(env)
