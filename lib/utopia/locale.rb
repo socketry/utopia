@@ -19,7 +19,7 @@
 # THE SOFTWARE.
 
 module Utopia
-	class Locale < Struct.new(:language, :country, :variant)
+	Locale = Struct.new(:language, :country, :variant) do
 		def to_s
 			to_a.compact.join('-')
 		end
@@ -36,7 +36,7 @@ module Utopia
 			elsif instance.is_a? Array
 				return self.new(*instance)
 			elsif instance.is_a? self
-				return instance
+				return instance.frozen? ? instance : instance.dup
 			end
 		end
 	end
