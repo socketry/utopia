@@ -100,7 +100,7 @@ module Utopia
 			# Copy the instance variables from the previous controller to the next controller (usually only a few). This allows controllers to share effectively the same instance variables while still being separate classes/instances.
 			def copy_instance_variables(from)
 				from.instance_variables.each do |name|
-					instance_variable_set(name, from.instance_variable_get(name))
+					self.instance_variable_set(name, from.instance_variable_get(name))
 				end
 			end
 

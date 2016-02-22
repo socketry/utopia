@@ -24,25 +24,34 @@ module Utopia
 			def initialize
 				@controllers = []
 			end
+			
+			def top
+				@controllers.last
+			end
 
 			def << controller
-				top = @controllers.last
+				if top = self.top
+					# This ensures that most variables will be at the top and controllers can naturally interactive with instance variables:
+					controller.copy_instance_variables(top)
+				end
 				
 				@controllers << controller
 				
-				# This ensures that most variables will be at the top and controllers can naturally interactive with instance variables.
-				controller.copy_instance_variables(top) if top
+				return self
 			end
-
-			def fetch(key)
-				@controllers.reverse_each do |controller|
+			
+			# We use self as a seninel
+			def fetch(key, default=self)
+				if controller = self.top
 					if controller.instance_variables.include?(key)
 						return controller.instance_variable_get(key)
 					end
 				end
 				
 				if block_given?
-					yield key
+					yield(key)
+				elsif !default.equal?(self)
+					return default
 				else
 					raise KeyError.new(key)
 				end
@@ -50,20 +59,20 @@ module Utopia
 
 			def to_hash
 				attributes = {}
-
-				@controllers.each do |controller|
+				
+				if controller = self.top
 					controller.instance_variables.each do |name|
 						key = name[1..-1]
 						
 						attributes[key] = controller.instance_variable_get(name)
 					end
 				end
-
+				
 				return attributes
 			end
 
 			def [] key
-				fetch("@#{key}".to_sym) { nil }
+				fetch("@#{key}".to_sym, nil)
 			end
 		end
 	end

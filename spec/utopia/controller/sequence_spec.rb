@@ -93,7 +93,7 @@ module Utopia::Controller::SequenceSpec
 		
 			result = controller.process!(request, Utopia::Path["/variable"])
 			expect(result).to be == nil
-			expect(variables.to_hash).to be == {"variable"=>:value}
+			expect(variables.to_hash).to be == {"variable" => :value}
 		end
 		
 		it "should call direct controller methods" do
