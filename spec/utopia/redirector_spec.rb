@@ -44,6 +44,10 @@ RSpec.describe Utopia::Redirector do
 		get "/foo"
 		
 		expect(last_response.status).to be == 404
-		expect(last_response.body).to be == "File Not Found :("
+		expect(last_response.body).to be == "File not found :("
+	end
+	
+	it "should blow up if internal error redirect also fails" do
+		expect{get "/teapot"}.to raise_error Utopia::FailedRequestError
 	end
 end
