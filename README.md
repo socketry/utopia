@@ -79,7 +79,7 @@ Then, Nginx is configured like so:
 Utopia builds on top of Rack with the following middleware:
 
 - `Utopia::Static`: Serve static files efficiently.
-- `Utopia::Redirector`: Redirect URL patterns and status codes.
+- `Utopia::Redirection`: Redirect URL patterns and status codes.
 - `Utopia::Localization`: Non-intrusive localization of resources.
 - `Utopia::Controller`: Dynamic behaviour with recursive execution.
 - `Utopia::Content`: XML-style template engine with powerful tag behaviours.
@@ -89,9 +89,9 @@ Utopia builds on top of Rack with the following middleware:
 
 This middleware serves static files using the `mime-types` library. By default, it works with `Rack::Sendfile` and `Rack::Cache` and supports `ETag` based caching.
 
-### Redirector
+### Redirection
 
-A flexible high level URI rewriting system which includes support for string mappings, regular expressions and status codes (e.g. 404 errors).
+A set of flexible URI rewriting middleware which includes support for string mappings, regular expressions and status codes (e.g. 404 errors).
 
 ### Localization
 

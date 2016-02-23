@@ -31,16 +31,13 @@ end
 
 use Rack::ContentLength
 
-use Utopia::Redirector,
-	patterns: [
-		Utopia::Redirector::DIRECTORY_INDEX
-	],
-	strings: {
-		'/' => '/welcome/index',
-	},
-	errors: {
-		404 => "/errors/file-not-found"
-	}
+use Utopia::Redirection::DirectoryIndex
+
+use Utopia::Redirection::Rewrite,
+	'/' => '/welcome/index'
+
+use Utopia::Redirection::Errors,
+	404 => '/errors/file-not-found'
 
 use Utopia::Localization,
 	:default_locale => 'en',

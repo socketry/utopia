@@ -19,10 +19,18 @@
 # THE SOFTWARE.
 
 require_relative 'rack_helper'
-require 'utopia/redirector'
+require 'utopia/redirection'
 
-RSpec.describe Utopia::Redirector do
-	include_context "rack app", "redirector_spec.ru"
+RSpec.describe Utopia::Redirection do
+	include_context "rack app", "redirection_spec.ru"
+	
+	it "should redirect directory to index" do
+		get "/welcome/"
+		
+		expect(last_response.status).to be == 307
+		expect(last_response.headers['Location']).to be == '/welcome/index'
+		expect(last_response.headers['Cache-Control']).to include("max-age=86400")
+	end
 	
 	it "should be permanently moved" do
 		get "/a"
@@ -36,7 +44,7 @@ RSpec.describe Utopia::Redirector do
 		get "/"
 		
 		expect(last_response.status).to be == 301
-		expect(last_response.headers['Location']).to be == '/c'
+		expect(last_response.headers['Location']).to be == '/welcome/index'
 		expect(last_response.headers['Cache-Control']).to include("max-age=86400")
 	end
 	
@@ -48,6 +56,20 @@ RSpec.describe Utopia::Redirector do
 	end
 	
 	it "should blow up if internal error redirect also fails" do
-		expect{get "/teapot"}.to raise_error Utopia::FailedRequestError
+		expect{get "/teapot"}.to raise_error Utopia::Redirection::RequestFailure
+	end
+	
+	it "should redirect deep url to top" do
+		get "/hierarchy/a/b/c/d/e"
+		
+		expect(last_response.status).to be == 301
+		expect(last_response.headers['Location']).to be == '/hierarchy'
+	end
+	
+	it "should get a weird status" do
+		get "/weird"
+		
+		expect(last_response.status).to be == 333
+		expect(last_response.headers['Location']).to be == '/status'
 	end
 end

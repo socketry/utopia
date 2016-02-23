@@ -25,7 +25,7 @@ require_relative 'utopia/controller'
 require_relative 'utopia/exception_handler'
 require_relative 'utopia/localization'
 require_relative 'utopia/mail_exceptions'
-require_relative 'utopia/redirector'
+require_relative 'utopia/redirection'
 require_relative 'utopia/static'
 
 require_relative 'utopia/tags/deferred'
