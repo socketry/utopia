@@ -31,10 +31,10 @@ end
 
 use Rack::ContentLength
 
-use Utopia::Redirection::DirectoryIndex
-
 use Utopia::Redirection::Rewrite,
 	'/' => '/welcome/index'
+
+use Utopia::Redirection::DirectoryIndex
 
 use Utopia::Redirection::Errors,
 	404 => '/errors/file-not-found'
