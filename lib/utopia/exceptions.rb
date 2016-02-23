@@ -1,6 +1,4 @@
-#!/usr/bin/env rspec
-
-# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2016, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,33 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'rack/mock'
-require 'rack/test'
+require_relative 'exceptions/handler'
+require_relative 'exceptions/mailer'
 
-require 'utopia/controller'
-require 'utopia/exception_handler'
-
-module Utopia::ExceptionHandlerSpec
-	describe Utopia::ExceptionHandler do
-		include Rack::Test::Methods
-		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('exception_handler_spec.ru', __dir__)).first}
-		
-		it "should successfully call the controller method" do
-			# This request will raise an exception, and then redirect to the /exception url which will fail again, and cause a fatal error.
-			
-			get "/blow?fatal=true"
-			
-			expect(last_response.status).to be == 500
-			expect(last_response.headers['Content-Type']).to be == 'text/plain'
-			expect(last_response.body).to be_include 'fatal error'
-		end
-		
-		it "should fail with a 500 error" do
-			get "/blow"
-			
-			expect(last_response.status).to be == 500
-			expect(last_response.body).to be_include 'Error Will Robertson'
-		end
+module Utopia
+	module Exceptions
 	end
 end

@@ -14,8 +14,8 @@ require 'utopia'
 require 'rack/cache'
 
 if RACK_ENV == :production
-	use Utopia::ExceptionHandler, "/errors/exception"
-	use Utopia::MailExceptions
+	use Utopia::Exceptions::Handler
+	use Utopia::Exceptions::Mailer
 elsif RACK_ENV == :development
 	use Rack::ShowExceptions
 end

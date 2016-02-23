@@ -1,3 +1,5 @@
+#!/usr/bin/env rspec
+
 # Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,16 +20,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'utopia/version'
+require_relative '../rack_helper'
+require 'utopia/exceptions'
 
-require_relative 'utopia/content'
-require_relative 'utopia/controller'
-require_relative 'utopia/localization'
-require_relative 'utopia/exceptions'
-require_relative 'utopia/redirection'
-require_relative 'utopia/static'
-
-require_relative 'utopia/tags/deferred'
-require_relative 'utopia/tags/environment'
-require_relative 'utopia/tags/node'
-require_relative 'utopia/tags/override'
+RSpec.describe Utopia::Exceptions::Handler do
+	include_context "rack app", File.expand_path("handler_spec.ru", __dir__)
+	
+	it "should successfully call the controller method" do
+		# This request will raise an exception, and then redirect to the /exception url which will fail again, and cause a fatal error.
+		get "/blow?fatal=true"
+		
+		expect(last_response.status).to be == 500
+		expect(last_response.headers['Content-Type']).to be == 'text/plain'
+		expect(last_response.body).to be_include 'fatal error'
+	end
+	
+	it "should fail with a 500 error" do
+		get "/blow"
+		
+		expect(last_response.status).to be == 500
+		expect(last_response.body).to be_include 'Error Will Robertson'
+	end
+end

@@ -38,18 +38,25 @@ module Utopia
 			# Maps an error code to a given string
 			def initialize(app, codes = {})
 				@codes = codes
+				
 				@app = app
+			end
+			
+			def freeze
+				@codes.freeze
+				
+				super
 			end
 			
 			def call(env)
 				response = @app.call(env)
 				
-				if response[0] >= 400 and uri = @codes[response[0]]
-					error_request = env.merge(Rack::PATH_INFO => uri, Rack::REQUEST_METHOD => Rack::GET)
+				if response[0] >= 400 and location = @codes[response[0]]
+					error_request = env.merge(Rack::PATH_INFO => location, Rack::REQUEST_METHOD => Rack::GET)
 					error_response = @app.call(error_request)
 
 					if error_response[0] >= 400
-						raise RequestFailure.new(env[Rack::PATH_INFO], response[0], uri, error_response[0])
+						raise RequestFailure.new(env[Rack::PATH_INFO], response[0], location, error_response[0])
 					else
 						# Feed the error code back with the error document:
 						error_response[0] = response[0]
@@ -75,6 +82,13 @@ module Utopia
 				@app = app
 				@status = status
 				@max_age = max_age
+			end
+			
+			def freeze
+				@status.freeze
+				@max_age.freeze
+				
+				super
 			end
 			
 			attr :status
