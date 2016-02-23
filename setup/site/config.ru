@@ -18,6 +18,7 @@ if RACK_ENV == :production
 	use Utopia::Exceptions::Mailer
 elsif RACK_ENV == :development
 	use Rack::ShowExceptions
+	use Utopia::Static, root: 'public'
 end
 
 use Rack::Sendfile
@@ -49,6 +50,12 @@ use Utopia::Controller,
 
 use Utopia::Static
 
+if RACK_ENV != :production
+	# Serve static files from public/ when not running in a production environment:
+	use Utopia::Static, root: 'public'
+end
+
+# Serve dynamic content
 use Utopia::Content,
 	cache_templates: (RACK_ENV == :production),
 	tags: {
