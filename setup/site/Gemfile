@@ -5,6 +5,8 @@ gem "utopia", "~> $UTOPIA_VERSION"
 # gem "utopia-tags-gallery"
 # gem "utopia-tags-google-analytics"
 
+gem "rake"
+
 group :development do
 	gem "puma"
 end
