@@ -14,16 +14,21 @@ require 'utopia'
 require 'rack/cache'
 
 if RACK_ENV == :production
+	# Handle exceptions in production with a error page and send an email notification:
 	use Utopia::Exceptions::Handler
 	use Utopia::Exceptions::Mailer
-elsif RACK_ENV == :development
-	use Rack::ShowExceptions
+else
+	# We want to propate exceptions up when running tests:
+	use Rack::ShowExceptions unless RACK_ENV == :test
+	
+	# Serve the public directory in a similar way to the web server:
 	use Utopia::Static, root: 'public'
 end
 
 use Rack::Sendfile
 
 if RACK_ENV == :production
+	# Cache dynamically generated content where possible:
 	use Rack::Cache,
 		metastore: "file:#{Utopia::default_root("cache/meta")}",
 		entitystore: "file:#{Utopia::default_root("cache/body")}",
