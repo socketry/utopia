@@ -22,10 +22,16 @@ RSpec.describe "utopia tool" do
 	let(:utopia) {File.expand_path("../../bin/utopia", __dir__)}
 	
 	it "should generate sample site" do
-		Dir.mktmpdir('test-site') do |dir|
+		Dir.mktmpdir do |dir|
 			system(utopia, "create", dir)
 			
 			expect(Dir.entries(dir)).to include(".bowerrc", ".git", "Gemfile", "README.md", "Rakefile", "cache", "config.ru", "lib", "pages", "public", "tmp")
+			
+			Dir.chdir(dir) do
+				system("bundle", "install", "--deployment")
+				
+				expect($?).to be == 0
+			end
 		end
 	end
 end
