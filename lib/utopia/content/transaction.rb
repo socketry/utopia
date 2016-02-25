@@ -33,8 +33,10 @@ module Utopia
 			attr :tag
 		end
 		
-		# A single request through content middleware.
-		class Transaction
+		# A single request through content middleware. We use a struct to hide instance varibles since we instance_exec within this context.
+		Transaction = Struct.new(:request, :response, :begin_tags, :end_tags) do
+			# extend Gem::Deprecate
+			
 			# The state of a single tag being rendered.
 			class State
 				def initialize(tag, node)
@@ -122,15 +124,8 @@ module Utopia
 			end
 
 			def initialize(request, response)
-				@begin_tags = []
-				@end_tags = []
-
-				@request = request
-				@response = response
+				super(request, response, [], [])
 			end
-
-			attr :request
-			attr :response
 			
 			# A helper method for accessing controller variables from view:
 			def controller
@@ -142,13 +137,13 @@ module Utopia
 			end
 
 			# Begin tags represents a list from outer to inner most tag.
-			# At any point in parsing xml, begin_tags is a list of the inner most tag,
+			# At any point in parsing markup, begin_tags is a list of the inner most tag,
 			# then the next outer tag, etc. This list is used for doing dependent lookups.
-			attr :begin_tags
+			# attr :begin_tags
 
 			# End tags represents a list of execution order. This is the order that end tags
 			# have appeared when evaluating nodes.
-			attr :end_tags
+			# attr :end_tags
 
 			def attributes
 				return current.attributes
