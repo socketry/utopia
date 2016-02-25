@@ -26,10 +26,10 @@ require_relative 'tag'
 module Utopia
 	class Content
 		class Processor
-			def self.parse_xml(xml_data, delegate)
+			def self.parse_markup(markup, delegate)
 				processor = self.new(delegate)
 				
-				processor.parse(xml_data)
+				processor.parse(markup)
 			end
 
 			class UnbalancedTagError < StandardError

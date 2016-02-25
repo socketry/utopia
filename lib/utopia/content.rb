@@ -57,7 +57,7 @@ module Utopia
 
 		attr :root
 
-		def fetch_xml(path)
+		def fetch_template(path)
 			if @template_cache
 				@template_cache.fetch_or_store(path.to_s) do
 					Trenni::Template.load(path)

@@ -26,7 +26,7 @@ module Utopia
 			end
 			
 			def self.call(transaction, state)
-				transaction.parse_xml(state.content)
+				transaction.parse_markup(state.content)
 			end
 		end
 	end

@@ -107,9 +107,11 @@ module Utopia
 			end
 
 			def call(transaction, state)
-				xml_data = @controller.fetch_xml(@file_path).evaluate(transaction)
+				template = @controller.fetch_template(@file_path)
 				
-				transaction.parse_xml(xml_data)
+				markup = template.evaluate(transaction)
+				
+				transaction.parse_markup(markup)
 			end
 
 			def process!(request, response, attributes = {})

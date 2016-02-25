@@ -33,7 +33,7 @@ module Utopia
 				only = state[:only].split(",").collect(&:to_sym) rescue []
 
 				if defined?(@environment) and only.include?(@environment)
-					transaction.parse_xml(state.content)
+					transaction.parse_markup(state.content)
 				end
 			end
 		end

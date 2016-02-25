@@ -22,6 +22,7 @@ require_relative 'links'
 
 module Utopia
 	class Content
+		# This error is thrown if a tag doesn't match up when parsing the 
 		class UnbalancedTagError < StandardError
 			def initialize(tag)
 				@tag = tag
@@ -57,10 +58,12 @@ module Utopia
 
 				attr :deferred
 
+				DEFERRED_TAG_NAME = "deferred".freeze
+
 				def defer(value = nil, &block)
 					@deferred << block
-				
-					Tag.closed("deferred", :id => @deferred.size - 1).to_html
+					
+					Tag.closed(DEFERRED_TAG_NAME, :id => @deferred.size - 1).to_html
 				end
 
 				def [](key)
@@ -74,9 +77,9 @@ module Utopia
 					if node.respond_to? :call
 						node.call(transaction, self)
 					else
-						transaction.parse_xml(@content)
+						transaction.parse_markup(@content)
 					end
-
+					
 					return @buffer.string
 				end
 
@@ -131,11 +134,11 @@ module Utopia
 			
 			# A helper method for accessing controller variables from view:
 			def controller
-				@request.env[VARIABLES_KEY]
+				request.env[VARIABLES_KEY]
 			end
 
-			def parse_xml(xml_data)
-				Processor.parse_xml(xml_data, self)
+			def parse_markup(markup)
+				Processor.parse_markup(markup, self)
 			end
 
 			# Begin tags represents a list from outer to inner most tag.
@@ -156,19 +159,19 @@ module Utopia
 			end
 
 			def current
-				@begin_tags[-1]
+				self.begin_tags[-1]
 			end
 
 			def content
-				@end_tags[-1].content
+				self.end_tags[-1].content
 			end
 
 			def parent
-				end_tags[-2]
+				self.end_tags[-2]
 			end
 
 			def first
-				@begin_tags[0]
+				self.begin_tags.first
 			end
 
 			def tag(name, attributes = {}, &block)
@@ -181,8 +184,10 @@ module Utopia
 				tag_end(tag)
 			end
 
+			CONTENT_TAG_NAME = "content".freeze
+
 			def tag_complete(tag, node = nil)
-				if tag.name == "content"
+				if tag.name == CONTENT_TAG_NAME
 					current.markup(content)
 				else
 					node ||= lookup(tag)
@@ -201,7 +206,7 @@ module Utopia
 
 				if node
 					state = State.new(tag, node)
-					@begin_tags << state
+					self.begin_tags << state
 
 					if node.respond_to? :tag_begin
 						node.tag_begin(self, state)
@@ -232,18 +237,20 @@ module Utopia
 			alias deferred_tag partial
 
 			def tag_end(tag = nil)
+				# Get the current tag which we are completing/ending:
 				top = current
-
+				
+				
 				if top.tags.empty?
 					if top.node.respond_to? :tag_end
 						top.node.tag_end(self, top)
 					end
 
-					@end_tags << top
+					self.end_tags << top
 					buffer = top.call(self)
 
-					@begin_tags.pop
-					@end_tags.pop
+					self.begin_tags.pop
+					self.end_tags.pop
 
 					if current
 						current.markup(buffer)
@@ -258,8 +265,7 @@ module Utopia
 			end
 
 			def render_node(node, attributes = {})
-				state = State.new(attributes, node)
-				@begin_tags << state
+				self.begin_tags << State.new(attributes, node)
 
 				return tag_end
 			end
@@ -269,15 +275,15 @@ module Utopia
 				result = tag
 				node = nil
 
-				@begin_tags.reverse_each do |state|
+				self.begin_tags.reverse_each do |state|
 					result = state.lookup(result)
 					
 					node ||= state.node if state.node.respond_to? :lookup
 
-					return result if Node === result
+					return result if result.is_a?(Node)
 				end
 
-				@end_tags.reverse_each do |state|
+				self.end_tags.reverse_each do |state|
 					return state.node.lookup(result) if state.node.respond_to? :lookup
 				end
 
@@ -285,8 +291,8 @@ module Utopia
 			end
 
 			def method_missing(name, *args)
-				@begin_tags.reverse_each do |state|
-					if state.node.respond_to? name
+				self.begin_tags.reverse_each do |state|
+					if state.node.respond_to?(name)
 						return state.node.send(name, *args)
 					end
 				end

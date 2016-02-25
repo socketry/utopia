@@ -79,15 +79,15 @@ module Utopia::ContentSpec
 			expect(output.string).to be == '<h1>Hello World</h1>'
 		end
 		
-		it "should fetch xml and use cache" do
+		it "should fetch template and use cache" do
 			node_path = File.expand_path('../pages/index.xnode', __FILE__)
 			
-			template = content.fetch_xml(node_path)
+			template = content.fetch_template(node_path)
 			
 			expect(template).to be_kind_of Trenni::Template
 			
 			# Check that the same object is returned:
-			expect(template).to be content.fetch_xml(node_path)
+			expect(template).to be content.fetch_template(node_path)
 		end
 	end
 end
