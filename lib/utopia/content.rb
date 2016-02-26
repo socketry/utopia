@@ -67,12 +67,7 @@ module Utopia
 			end
 		end
 		
-		# Look up a named tag such as <entry />
-		def lookup_tag(name, parent_path)
-			if @tags.key? name
-				return @tags[name]
-			end
-			
+		private def fetch_tag(name, parent_path)
 			if String === name && name.index('/')
 				name = Path.create(name)
 			end
@@ -84,24 +79,37 @@ module Utopia
 			else
 				name_path = name + XNODE_EXTENSION
 			end
-
-			parent_path.ascend do |dir|
-				tag_path = File.join(root, dir.components, name_path)
+			
+			components = parent_path.components.dup
+			
+			while components.any?
+				tag_path = File.join(root, components, name_path)
 
 				if File.exist? tag_path
-					return Node.new(self, dir + name, parent_path + name, tag_path)
+					return Node.new(self, Path[components] + name, parent_path + name, tag_path)
 				end
 
 				if String === name_path
-					tag_path = File.join(root, dir.components, '_' + name_path)
+					tag_path = File.join(root, components, '_' + name_path)
 
 					if File.exist? tag_path
-						return Node.new(self, dir + name, parent_path + name, tag_path)
+						return Node.new(self, Path[components] + name, parent_path + name, tag_path)
 					end
 				end
+				
+				components.pop
 			end
 			
 			return nil
+		end
+		
+		# Look up a named tag such as <entry />
+		def lookup_tag(name, parent_path)
+			if @tags.key? name
+				return @tags[name]
+			end
+			
+			return fetch_tag(name, parent_path)
 		end
 		
 		# The request_path is an absolute uri path, e.g. /foo/bar. If an xnode file exists on disk for this exact path, it is instantiated, otherwise nil.

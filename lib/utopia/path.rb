@@ -203,14 +203,16 @@ module Utopia
 		end
 
 		def +(other)
-			if other.kind_of? Array
-				return join(other)
-			elsif other.kind_of? Path
+			if other.kind_of? Path
 				if other.absolute?
 					return other
 				else
 					return join(other.components)
 				end
+			elsif other.kind_of? Array
+				return join(other)
+			elsif other.kind_of? String
+				return join(other.split(SEPARATOR, -1))
 			else
 				return join([other.to_s])
 			end
@@ -268,27 +270,25 @@ module Utopia
 		def descend(&block)
 			return to_enum(:descend) unless block_given?
 			
-			parent_path = []
+			components = []
 			
 			@components.each do |component|
-				parent_path << component
+				components << component
 				
-				yield self.class.new(parent_path.dup)
+				yield self.class.new(components.dup)
 			end
 		end
 		
 		def ascend(&block)
 			return to_enum(:ascend) unless block_given?
 			
-			next_parent = self
+			components = self.components.dup
 			
-			begin
-				parent = next_parent
+			while components.any?
+				yield self.class.new(components.dup)
 				
-				yield parent
-				
-				next_parent = parent.dirname
-			end until next_parent.eql?(parent)
+				components.pop
+			end
 		end
 
 		def split(at)
