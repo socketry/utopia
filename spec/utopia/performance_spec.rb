@@ -22,9 +22,10 @@ require_relative 'rack_helper'
 
 require 'benchmark/ips' if ENV['BENCHMARK']
 require 'ruby-prof' if ENV['PROFILE']
+require 'flamegraph' if ENV['FLAMEGRAPH']
 
 RSpec.describe "Utopia Performance" do
-	include_context "rack app", "benchmark_spec/config.ru"
+	include_context "rack app", "performance_spec/config.ru"
 	
 	if defined? Benchmark
 		def benchmark(name = nil)
@@ -42,9 +43,22 @@ RSpec.describe "Utopia Performance" do
 				yield 1000
 			end
 			
-			# result.eliminate_methods!([/Integer/, /Rack::Test/])
+			result.eliminate_methods!([/^((?!Utopia).)*$/])
 			printer = RubyProf::FlatPrinter.new(result)
 			printer.print($stderr, min_percent: 1.0)
+			
+			printer = RubyProf::GraphHtmlPrinter.new(result)
+			filename = name.gsub('/', '_') + '.html'
+			File.open(filename, "w") do |file|
+				printer.print(file)
+			end
+		end
+	elsif defined? Flamegraph
+		def benchmark(name)
+			filename = name.gsub('/', '_') + '.html'
+			Flamegraph.generate(filename) do
+				yield 1
+			end
 		end
 	else
 		def benchmark(name)
