@@ -1,0 +1,17 @@
+<page class="front">
+	<heading>Welcome to Utopia</heading>
+	
+	<p><strong>Utopia is designed to simplify web development.</strong> Utopia is a fully featured stack for both content-heavy sites and dynamic web applications.</p>
+	
+	<h2>Server Side Tag Based Markup</h2>
+	
+	<p>Server side tags reduce the amount of duplicate view code especially for content-heavy sites.</p>
+	
+	<h2>Recursive Controller Layer</h2>
+	
+	<p>Nested controllers make access control a breeze.</p>
+	
+	<h2>Standards Based Localization</h2>
+	
+	<p>Automatically sniff the user's desired language and provide content in the correct language.</p>
+</page>

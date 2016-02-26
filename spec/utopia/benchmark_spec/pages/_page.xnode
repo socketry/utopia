@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<?r response.content_type = "text/html; charset=utf-8" ?>
+		<?r response.cache! ?>
+		
+		<?r if title = (attributes["title"] || @title) ?>
+			<title>#{title.gsub(/<.*?>/, "")} - Utopia</title>
+		<?r else ?>
+			<title>Utopia</title>
+		<?r end ?>
+		
+		<link rel="icon" type="image/png" href="/_static/icon.png" />
+		<link rel="stylesheet" href="/_static/site.css" type="text/css" media="screen" />
+	</head>
+
+	<body class="#{attributes['class']}">
+		<div id="header">
+			<img src="/_static/utopia.svg" />
+		</div>
+
+		<div id="page">
+			<content />
+		</div>
+	</body>
+</html>

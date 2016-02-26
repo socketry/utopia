@@ -1,0 +1,2 @@
+<?r @title ||= content ?>
+<h1><content/></h1>
