@@ -35,7 +35,7 @@ if RACK_ENV == :production
 		verbose: RACK_ENV == :development
 end
 
-use Rack::ContentLength
+use Utopia::ContentLength
 
 use Utopia::Redirection::Rewrite,
 	'/' => '/welcome/index'
@@ -54,11 +54,6 @@ use Utopia::Controller,
 	cache_controllers: (RACK_ENV == :production)
 
 use Utopia::Static
-
-if RACK_ENV != :production
-	# Serve static files from public/ when not running in a production environment:
-	use Utopia::Static, root: 'public'
-end
 
 # Serve dynamic content
 use Utopia::Content,

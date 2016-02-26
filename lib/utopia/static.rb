@@ -144,9 +144,11 @@ module Utopia
 				File.mtime(full_path).httpdate
 			end
 
-			def size
+			def bytesize
 				File.size(full_path)
 			end
+
+			alias size bytesize
 
 			def each
 				File.open(full_path, "rb") do |file|
@@ -176,6 +178,9 @@ module Utopia
 				return true
 			end
 
+			CONTENT_LENGTH = Rack::CONTENT_LENGTH
+			CONTENT_RANGE = "Content-Range".freeze
+
 			def serve(env, response_headers)
 				ranges = Rack::Utils.byte_ranges(env, size)
 				response = [200, response_headers, self]
@@ -186,7 +191,7 @@ module Utopia
 					# No ranges, or multiple ranges (which we don't support).
 					# TODO: Support multiple byte-ranges, for now just send entire file:
 					response[0] = 200
-					response[1]["Content-Length"] = size.to_s
+					response[1][CONTENT_LENGTH] = size.to_s
 					@range = 0...size
 				else
 					# Partial content:
@@ -194,17 +199,17 @@ module Utopia
 					partial_size = @range.count
 					
 					response[0] = 206
-					response[1]["Content-Length"] = partial_size.to_s
-					response[1]["Content-Range"] = "bytes #{@range.min}-#{@range.max}/#{size}"
+					response[1][CONTENT_LENGTH] = partial_size.to_s
+					response[1][CONTENT_RANGE] = "bytes #{@range.min}-#{@range.max}/#{size}"
 				end
-
-				# puts "Serving file #{full_path.inspect}, range #{@range.inspect}"
-
+				
 				return response
 			end
 		end
 
 		public
+
+		DEFAULT_CACHE_CONTROL = 'public, max-age=3600'.freeze
 
 		def initialize(app, **options)
 			@app = app
@@ -212,7 +217,7 @@ module Utopia
 
 			@extensions = MimeTypeLoader.extensions_for(options[:types] || MIME_TYPES[:default])
 
-			@cache_control = (options[:cache_control] || "public, max-age=3600")
+			@cache_control = (options[:cache_control] || DEFAULT_CACHE_CONTROL)
 			
 			self.freeze
 		end
@@ -237,7 +242,13 @@ module Utopia
 		end
 
 		attr :extensions
-
+		
+		LAST_MODIFIED = 'Last-Modified'.freeze
+		CONTENT_TYPE = HTTP::CONTENT_TYPE
+		CACHE_CONTROL = HTTP::CACHE_CONTROL
+		ETAG = 'ETag'.freeze
+		ACCEPT_RANGES = 'Accept-Ranges'.freeze
+		
 		def call(env)
 			path_info = env[Rack::PATH_INFO]
 			extension = File.extname(path_info)
@@ -251,11 +262,11 @@ module Utopia
 				
 				if file = fetch_file(path)
 					response_headers = {
-						"Last-Modified" => file.mtime_date,
-						"Content-Type" => @extensions[extension],
-						"Cache-Control" => @cache_control,
-						"ETag" => file.etag,
-						"Accept-Ranges" => "bytes"
+						LAST_MODIFIED => file.mtime_date,
+						CONTENT_TYPE => @extensions[extension],
+						CACHE_CONTROL => @cache_control,
+						ETAG => file.etag,
+						ACCEPT_RANGES => "bytes"
 					}
 
 					if file.modified?(env)

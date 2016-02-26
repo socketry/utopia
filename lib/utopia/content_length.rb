@@ -1,4 +1,4 @@
-# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2016, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,17 +18,33 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'utopia/version'
+require_relative 'middleware'
 
-require_relative 'utopia/content'
-require_relative 'utopia/controller'
-require_relative 'utopia/localization'
-require_relative 'utopia/exceptions'
-require_relative 'utopia/redirection'
-require_relative 'utopia/static'
-require_relative 'utopia/content_length'
-
-require_relative 'utopia/tags/deferred'
-require_relative 'utopia/tags/environment'
-require_relative 'utopia/tags/node'
-require_relative 'utopia/tags/override'
+module Utopia
+	# A faster implementation of Rack::ContentLength which doesn't rewrite body, but does expect it to either be an Array or an object that responds to #bytesize.
+	class ContentLength
+		def initialize(app)
+			@app = app
+		end
+		
+		def content_length_of(body)
+			if body.is_a? Array
+				return body.map(&:bytesize).reduce(0, :+)
+			else
+				return body.bytesize
+			end
+		end
+		
+		def call(env)
+			response = @app.call(env)
+			
+			unless response[2].empty? or response[1].include?(Rack::CONTENT_LENGTH)
+				if content_length = self.content_length_of(response[2])
+					response[1][Rack::CONTENT_LENGTH] = content_length
+				end
+			end
+			
+			return response
+		end
+	end
+end
