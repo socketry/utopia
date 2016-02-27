@@ -33,98 +33,21 @@ module Utopia
 			attr :tag
 		end
 		
+		DEFERRED_TAG_NAME = "deferred".freeze
+		CONTENT_TAG_NAME = "content".freeze
+		
 		# A single request through content middleware. We use a struct to hide instance varibles since we instance_exec within this context.
-		Transaction = Struct.new(:request, :response, :begin_tags, :end_tags) do
+		class Transaction
 			# extend Gem::Deprecate
 			
-			# The state of a single tag being rendered.
-			class State
-				def initialize(tag, node)
-					@node = node
-
-					@buffer = StringIO.new
-					@overrides = {}
-
-					@tags = []
-					@attributes = tag.to_hash
-
-					@content = nil
-					@deferred = []
-				end
-
-				attr :attributes
-				attr :overrides
-				attr :content
-				attr :node
-				attr :tags
-
-				attr :deferred
-
-				DEFERRED_TAG_NAME = "deferred".freeze
-
-				def defer(value = nil, &block)
-					@deferred << block
-					
-					Tag.closed(DEFERRED_TAG_NAME, :id => @deferred.size - 1).to_html
-				end
-
-				def [](key)
-					@attributes[key.to_s]
-				end
-
-				def call(transaction)
-					@content = @buffer.string
-					@buffer = StringIO.new
-					
-					if node.respond_to? :call
-						node.call(transaction, self)
-					else
-						transaction.parse_markup(@content)
-					end
-					
-					return @buffer.string
-				end
-
-				def lookup(tag)
-					if override = @overrides[tag.name]
-						if override.respond_to? :call
-							return override.call(tag)
-						elsif String === override
-							return Tag.new(override, tag.attributes)
-						else
-							return override
-						end
-					else
-						return tag
-					end
-				end
-
-				def cdata(text)
-					@buffer.write(text)
-				end
-
-				def markup(text)
-					cdata(text)
-				end
-
-				def tag_complete(tag)
-					tag.write_full_html(@buffer)
-				end
-
-				def tag_begin(tag)
-					@tags << tag
-					tag.write_open_html(@buffer)
-				end
-
-				def tag_end(tag)
-					raise UnbalancedTagError(tag) unless @tags.pop.name == tag.name
-
-					tag.write_close_html(@buffer)
-				end
-			end
-
-			def initialize(request, response)
-				super(request, response, [], [])
+			def initialize(request, response, attributes = {})
+				@request = request
+				@response = response
+				
+				@attributes = attributes
+				
+				@begin_tags = []
+				@end_tags = []
 			end
 			
 			# A helper method for accessing controller variables from view:
@@ -136,38 +59,21 @@ module Utopia
 				Processor.parse_markup(markup, self)
 			end
 
+			attr :request
+
+			attr :response
+
+			# Per-transaction global attributes.
+			attr :attributes
+
 			# Begin tags represents a list from outer to inner most tag.
 			# At any point in parsing markup, begin_tags is a list of the inner most tag,
 			# then the next outer tag, etc. This list is used for doing dependent lookups.
-			# attr :begin_tags
+			attr :begin_tags
 
 			# End tags represents a list of execution order. This is the order that end tags
 			# have appeared when evaluating nodes.
-			# attr :end_tags
-
-			def attributes
-				return current.attributes
-			end
-
-			def localization
-				@localization ||= Utopia::Localization[request]
-			end
-
-			def current
-				self.begin_tags[-1]
-			end
-
-			def content
-				self.end_tags[-1].content
-			end
-
-			def parent
-				self.end_tags[-2]
-			end
-
-			def first
-				self.begin_tags.first
-			end
+			attr :end_tags
 
 			def tag(name, attributes = {}, &block)
 				tag = Tag.new(name, attributes)
@@ -178,8 +84,6 @@ module Utopia
 
 				tag_end(tag)
 			end
-
-			CONTENT_TAG_NAME = "content".freeze
 
 			def tag_complete(tag, node = nil)
 				if tag.name == CONTENT_TAG_NAME
@@ -218,18 +122,6 @@ module Utopia
 			def cdata(text)
 				current.cdata(text)
 			end
-
-			def partial(*args, &block)
-				if block_given?
-					current.defer(&block)
-				else
-					current.defer do
-						tag(*args)
-					end
-				end
-			end
-
-			alias deferred_tag partial
 
 			def tag_end(tag = nil)
 				# Get the current tag which we are completing/ending:
@@ -284,15 +176,107 @@ module Utopia
 
 				return nil
 			end
+			
+			# The current tag being processed/rendered. Prefer to access state directly.
+			def current
+				@begin_tags.last
+			end
 
-			def method_missing(name, *args)
-				self.begin_tags.reverse_each do |state|
-					if state.node.respond_to?(name)
-						return state.node.send(name, *args)
+			# The content of the node 
+			def content
+				@end_tags.last.content
+			end
+
+			def parent
+				@end_tags[-2]
+			end
+
+			def first
+				@begin_tags.first
+			end
+		end
+		
+		# The state of a single tag being rendered within a Transaction instance.
+		class Transaction::State
+			def initialize(tag, node, attributes = tag.to_hash)
+				@node = node
+
+				@buffer = StringIO.new
+				@overrides = {}
+
+				@tags = []
+				@attributes = attributes
+
+				@content = nil
+				@deferred = []
+			end
+
+			attr :attributes
+			attr :overrides
+			attr :content
+			attr :node
+			attr :tags
+
+			attr :deferred
+
+			def defer(value = nil, &block)
+				@deferred << block
+				
+				Tag.closed(DEFERRED_TAG_NAME, :id => @deferred.size - 1).to_html
+			end
+			
+			def [](key)
+				@attributes[key.to_s]
+			end
+
+			def lookup(tag)
+				if override = @overrides[tag.name]
+					if override.respond_to? :call
+						return override.call(tag)
+					elsif String === override
+						return Tag.new(override, tag.attributes)
+					else
+						return override
 					end
+				else
+					return tag
 				end
+			end
 
-				super
+			def call(transaction)
+				@content = @buffer.string
+				@buffer = StringIO.new
+				
+				if node.respond_to? :call
+					node.call(transaction, self)
+				else
+					transaction.parse_markup(@content)
+				end
+				
+				return @buffer.string
+			end
+
+			def cdata(text)
+				@buffer.write(text)
+			end
+
+			def markup(text)
+				cdata(text)
+			end
+
+			def tag_complete(tag)
+				tag.write_full_html(@buffer)
+			end
+
+			def tag_begin(tag)
+				@tags << tag
+				tag.write_open_html(@buffer)
+			end
+
+			def tag_end(tag)
+				raise UnbalancedTagError(tag) unless @tags.pop.name == tag.name
+
+				tag.write_close_html(@buffer)
 			end
 		end
 	end

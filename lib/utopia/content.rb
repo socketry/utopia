@@ -67,6 +67,7 @@ module Utopia
 			end
 		end
 		
+		# This function looks up a named tag in a given path. It's a hotspot and needs improvement.
 		private def fetch_tag(name, parent_path)
 			if String === name && name.index('/')
 				name = Path.create(name)

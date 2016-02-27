@@ -109,7 +109,8 @@ module Utopia
 			def call(transaction, state)
 				template = @controller.fetch_template(@file_path)
 				
-				markup = template.evaluate(transaction)
+				context = Context.new(transaction, state)
+				markup = template.evaluate(context)
 				
 				transaction.parse_markup(markup)
 			end
@@ -117,6 +118,49 @@ module Utopia
 			def process!(request, response, attributes = {})
 				transaction = Transaction.new(request, response)
 				response.write(transaction.render_node(self, attributes))
+			end
+		end
+		
+		# This is a special context in which functions and attributes are exposed to the template.
+		Node::Context = Struct.new(:transaction, :state) do
+			def partial(*args, &block)
+				if block_given?
+					state.defer(&block)
+				else
+					state.defer do |transaction|
+						transaction.tag(*args)
+					end
+				end
+			end
+			
+			def request
+				transaction.request
+			end
+			
+			def response
+				transaction.response
+			end
+			
+			def attributes
+				state.attributes
+			end
+			
+			def controller
+				transaction.controller
+			end
+			
+			alias current state
+			
+			def content
+				transaction.content
+			end
+
+			def parent
+				transaction.parent
+			end
+
+			def first
+				transaction.first
 			end
 		end
 	end
