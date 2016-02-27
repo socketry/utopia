@@ -117,12 +117,22 @@ module Utopia
 
 			def process!(request, response, attributes = {})
 				transaction = Transaction.new(request, response)
-				response.write(transaction.render_node(self, attributes))
+				output = transaction.render_node(self, attributes)
+				response.write(output)
 			end
 		end
 		
-		# This is a special context in which functions and attributes are exposed to the template.
+		# This is a special context in which a limited set of well defined methods are exposed in the content view.
 		Node::Context = Struct.new(:transaction, :state) do
+			def initialize(transaction, state)
+				# We expose all attributes as instance variables within the context:
+				state.attributes.each do |key, value|
+					self.instance_variable_set("@#{key}".to_sym, value)
+				end
+				
+				super
+			end
+			
 			def partial(*args, &block)
 				if block_given?
 					state.defer(&block)
@@ -143,6 +153,10 @@ module Utopia
 			
 			def attributes
 				state.attributes
+			end
+			
+			def [] key
+				state.attributes.fetch(key) {transaction.attributes[key]}
 			end
 			
 			def controller

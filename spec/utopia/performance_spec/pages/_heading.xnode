@@ -1,2 +1,2 @@
-<?r @title ||= content ?>
+<?r transaction[:title] ||= content ?>
 <h1><content/></h1>

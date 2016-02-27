@@ -4,7 +4,7 @@
 		<?r response.content_type = "text/html; charset=utf-8" ?>
 		<?r response.cache! ?>
 		
-		<?r if title = (attributes["title"] || @title) ?>
+		<?r if title = self[:title] ?>
 			<title>#{title.gsub(/<.*?>/, "")} - Utopia</title>
 		<?r else ?>
 			<title>Utopia</title>

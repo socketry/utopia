@@ -59,8 +59,10 @@ module Utopia
 				Processor.parse_markup(markup, self)
 			end
 
+			# The Rack::Request for this transaction.
 			attr :request
 
+			# The mutable Rack::Response for this transaction.
 			attr :response
 
 			# Per-transaction global attributes.
