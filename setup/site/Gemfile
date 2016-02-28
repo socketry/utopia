@@ -8,5 +8,10 @@ gem "utopia", "~> $UTOPIA_VERSION"
 gem "rake"
 
 group :development do
+	# For `rake server`:
 	gem "puma"
+	
+	# For `rake console`:
+	gem "pry"
+	gem "rack-test"
 end

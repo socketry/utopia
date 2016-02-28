@@ -61,7 +61,7 @@ desc "Create a local utopia instance which includes a basic website template.\n"
 task :create do
 	destination_root = File.expand_path(ARGV.last || '.', Dir.getwd)
 	
-	$stderr.puts "Setting up initial site in #{destination_root}..."
+	$stderr.puts "Setting up initial site in #{destination_root} for Utopia v#{Utopia::VERSION}..."
 	
 	Setup::Site::DIRECTORIES.each do |directory|
 		FileUtils.mkdir_p(File.join(destination_root, directory))
