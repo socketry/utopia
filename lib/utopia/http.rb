@@ -45,6 +45,7 @@ module Utopia
 			:unsupported_method => 405,
 			:gone => 410,
 			:teapot => 418,
+			:unprocessible => 422, # The best status code for a client-side ArgumentError.
 			:error => 500,
 			:unimplemented => 501,
 			:unavailable => 503
@@ -79,6 +80,7 @@ module Utopia
 			409 => 'Request Conflict'.freeze,
 			410 => 'Resource Removed'.freeze,
 			416 => 'Byte range unsatisfiable'.freeze,
+			422 => 'Unprocessible Entity'.freeze,
 			500 => 'Internal Server Error'.freeze,
 			501 => 'Not Implemented'.freeze,
 			503 => 'Service Unavailable'.freeze
