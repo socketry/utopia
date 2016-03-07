@@ -28,3 +28,5 @@ task :console => :environment do
 	
 	Pry.start
 end
+
+task :default => :server
