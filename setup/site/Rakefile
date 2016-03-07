@@ -12,7 +12,8 @@ end
 
 desc 'Run a server for testing your web application'
 task :server => :environment do
-	system('puma')
+	port = ENV.fetch('SERVER_PORT', 9292)
+	system('puma', '-p', port)
 end
 
 desc 'Start an interactive console for your web application'
