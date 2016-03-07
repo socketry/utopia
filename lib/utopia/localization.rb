@@ -23,42 +23,6 @@ require_relative 'middleware'
 module Utopia
 	# If you request a URL which has localized content, a localized redirect would be returned based on the content requested.
 	class Localization
-		# A wrapper to provide easy access to locale related data in the request.
-		class RequestWrapper
-			def initialize(request)
-				if request.is_a? Rack::Request
-					@env = request.env
-				else
-					@env = request
-				end
-			end
-			
-			def localization
-				@env[LOCALIZATION_KEY]
-			end
-			
-			# Returns the current locale or nil if not localized.
-			def current_locale
-				@env[CURRENT_LOCALE_KEY]
-			end
-			
-			# Returns the default locale or nil if not localized.
-			def default_locale
-				localization && localization.default_locale
-			end
-			
-			# Returns an empty array if not localized.
-			def all_locales
-				localization && localization.all_locales || []
-			end
-		end
-		
-		def self.[] request
-			RequestWrapper.new(request)
-		end
-		
-		RESOURCE_NOT_FOUND = [400, {}, []].freeze
-		
 		HTTP_ACCEPT_LANGUAGE = 'HTTP_ACCEPT_LANGUAGE'.freeze
 		LOCALIZATION_KEY = 'utopia.localization'.freeze
 		CURRENT_LOCALE_KEY = 'utopia.localization.current_locale'.freeze
