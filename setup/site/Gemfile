@@ -6,6 +6,7 @@ gem "utopia", "~> $UTOPIA_VERSION"
 # gem "utopia-tags-google-analytics"
 
 gem "rake"
+gem "bundler"
 
 group :development do
 	# For `rake server`:

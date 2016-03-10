@@ -26,43 +26,45 @@ require 'etc'
 # Users in group wheel can execute all commands as user http with no password.
 # %wheel ALL=(http) NOPASSWD: ALL
 
-working_tree = `git config core.worktree`.chomp
+GIT_WORK_TREE = `git config core.worktree`.chomp
 
-puts "Updating Site #{working_tree}..."
+# We convert GIT_DIR to an absolute path:
+ENV['GIT_DIR'] = File.join(Dir.pwd, ENV['GIT_DIR'])
 
-# Figure out the user and group of the working tree:
-working_tree_stat = File.stat(working_tree)
-deploy_user = Etc.getpwuid(working_tree_stat.uid).name
-deploy_group = Etc.getgrgid(working_tree_stat.gid).name
+# We deploy the site as the user and group of the directory for the working tree:
+File.stat(GIT_WORK_TREE).tap do |stat|
+	ENV['DEPLOY_USER'] = DEPLOY_USER = Etc.getpwuid(stat.uid).name
+	ENV['DEPLOY_GROUP'] = DEPLOY_GROUP = Etc.getgrgid(stat.gid).name
+end
 
-SUDO = "sudo -u #{deploy_user}"
+WHOAMI = `whoami`.chomp!
+
+# We should find out if we need to use sudo or not:
+SUDO = if WHOAMI != DEPLOY_USER
+	["sudo", "-u", "DEPLOY_USER"]
+end
 
 def sh(*args)
 	puts args.join(' ')
 	system(*args)
 end
 
-def sudo(command)
-	sh("#{SUDO} #{command}")
+def sudo(*command)
+	sh(*SUDO, *command)
 end
 
-puts "Updating permissions..."
-
-Dir.chdir(working_tree) do
-	sh("chmod -Rf ug+rwX .")
-	sh("chown -Rf #{deploy_user}:#{deploy_group} .")
-
-	puts "Updating site #{Dir.pwd} as #{deploy_user}:#{deploy_group}..."
+puts "Deploying to #{GIT_WORK_TREE} as #{DEPLOY_USER}:#{DEPLOY_GROUP}..."
+Dir.chdir(GIT_WORK_TREE) do
+	# Pass on our rights to the files we just uploaded to the deployment user/group:
+	sh("chmod", "-Rf", "ug+rwX", ".")
+	sh("chown", "-Rf", "#{DEPLOY_USER}:#{DEPLOY_GROUP}", ".")
 	
-	sudo("git checkout -f")
-	sudo("git submodule update -i")
+	sudo("git", "checkout", "-f")
+	sudo("git", "submodule", "update", "-i")
 	
 	if File.exist? 'Gemfile'
 		sudo("bundle install --deployment --clean --jobs=4 --retry=2") or abort("Could not setup bundle!")
 	end
-	
-	ENV['DEPLOY_USER'] = deploy_user
-	ENV['DEPLOY_GROUP'] = deploy_group
 	
 	if File.exist? 'Rakefile'
 		sudo("bundle exec rake deploy") or abort("Deploy task failed!")

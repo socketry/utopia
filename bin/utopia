@@ -20,14 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'rubygems'
-require 'rake'
-
 require_relative '../lib/utopia/version'
 
+require 'rake'
 require 'fileutils'
 require 'find'
-require 'rake'
 
 $app = Rake.application = Rake::Application.new
 $app.init(File.basename($0))
@@ -93,9 +90,11 @@ task :create do
 	end
 	
 	Dir.chdir(destination_root) do
+		puts "Setting up site in #{destination_root}..."
+		
 		if `which bundle`.strip != ''
 			puts "Generating initial package list with bundle..."
-			sh("bundle", "install", "--quiet")
+			sh("bundle", "install")
 		end
 		
 		if `which git`.strip == ""
