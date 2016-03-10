@@ -53,6 +53,6 @@ RSpec.describe Utopia::Controller::Variables do
 	it "should convert to hash" do
 		subject << a << b
 		
-		expect(subject.to_hash).to be == {'x' => 10, 'y' => 20}
+		expect(subject.to_hash).to be == {x: 10, y: 20}
 	end
 end

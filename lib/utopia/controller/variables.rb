@@ -62,7 +62,7 @@ module Utopia
 				
 				if controller = self.top
 					controller.instance_variables.each do |name|
-						key = name[1..-1]
+						key = name[1..-1].to_sym
 						
 						attributes[key] = controller.instance_variable_get(name)
 					end
