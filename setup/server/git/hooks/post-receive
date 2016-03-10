@@ -26,11 +26,6 @@ require 'etc'
 # Users in group wheel can execute all commands as user http with no password.
 # %wheel ALL=(http) NOPASSWD: ALL
 
-def sh(*args)
-	puts args.join(' ')
-	system(*args)
-end
-
 working_tree = `git config core.worktree`.chomp
 
 puts "Updating Site #{working_tree}..."
@@ -40,6 +35,17 @@ working_tree_stat = File.stat(working_tree)
 deploy_user = Etc.getpwuid(working_tree_stat.uid).name
 deploy_group = Etc.getgrgid(working_tree_stat.gid).name
 
+SUDO = "sudo -u #{deploy_user}"
+
+def sh(*args)
+	puts args.join(' ')
+	system(*args)
+end
+
+def sudo(command)
+	sh("#{SUDO} #{command}")
+end
+
 puts "Updating permissions..."
 
 Dir.chdir(working_tree) do
@@ -48,21 +54,21 @@ Dir.chdir(working_tree) do
 
 	puts "Updating site #{Dir.pwd} as #{deploy_user}:#{deploy_group}..."
 	
-	sh("sudo -u #{deploy_user} git checkout -f")
-	sh("sudo -u #{deploy_user} git submodule update -i")
+	sudo("git checkout -f")
+	sudo("git submodule update -i")
 	
 	if File.exist? 'Gemfile'
-		sh("sudo -u #{deploy_user} bundle install --deployment") or abort("Could not setup bundle!")
+		sudo("bundle install --deployment --clean --jobs=4 --retry=2") or abort("Could not setup bundle!")
 	end
 	
 	ENV['DEPLOY_USER'] = deploy_user
 	ENV['DEPLOY_GROUP'] = deploy_group
 	
 	if File.exist? 'Rakefile'
-		sh("sudo -u #{deploy_user} bundle exec rake deploy") or abort("Deploy task failed!")
+		sudo("bundle exec rake deploy") or abort("Deploy task failed!")
 	end
 	
 	puts "Restarting server..."
-	sh("sudo -u #{deploy_user} mkdir -p tmp") unless File.exist?('tmp')
-	sh("sudo -u #{deploy_user} touch tmp/restart.txt")
+	sudo("mkdir -p tmp") unless File.exist?('tmp')
+	sudo("touch tmp/restart.txt")
 end
