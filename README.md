@@ -74,6 +74,17 @@ Then, Nginx is configured like so:
 		rewrite ^ http://www.example.com$uri permanent;
 	}
 
+#### Compression
+
+We suggest [enabling gzip compression](https://zoompf.com/blog/2012/02/lose-the-wait-http-compression):
+
+	gzip on;
+	gzip_vary on;
+	gzip_comp_level 6;
+	gzip_http_version 1.1;
+	gzip_proxied any;
+	gzip_types text/* image/svg+xml application/json application/javascript;
+
 ## Usage
 
 Utopia builds on top of Rack with the following middleware:
