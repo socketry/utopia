@@ -143,6 +143,14 @@ module Utopia
 				end
 			end
 			
+			def controller
+				transaction.controller
+			end
+			
+			def localization
+				transaction.localization
+			end
+			
 			def request
 				transaction.request
 			end
@@ -157,10 +165,6 @@ module Utopia
 			
 			def [] key
 				state.attributes.fetch(key) {transaction.attributes[key]}
-			end
-			
-			def controller
-				transaction.controller
 			end
 			
 			alias current state

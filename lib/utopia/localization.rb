@@ -24,13 +24,9 @@ module Utopia
 	# If you request a URL which has localized content, a localized redirect would be returned based on the content requested.
 	class Localization
 		# A wrapper to provide easy access to locale related data in the request.
-		class RequestWrapper
-			def initialize(request)
-				if request.is_a? Rack::Request
-					@env = request.env
-				else
-					@env = request
-				end
+		class Wrapper
+			def initialize(env)
+				@env = env
 			end
 			
 			def localization
@@ -54,7 +50,7 @@ module Utopia
 		end
 		
 		def self.[] request
-			RequestWrapper.new(request)
+			Wrapper.new(request.env)
 		end
 		
 		RESOURCE_NOT_FOUND = [400, {}, []].freeze

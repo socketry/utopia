@@ -47,6 +47,10 @@ module Utopia
 	class Controller
 		CONTROLLER_RB = 'controller.rb'.freeze
 		
+		def self.[] request
+			request.env[VARIABLES_KEY]
+		end
+		
 		def initialize(app, root: nil, cache_controllers: false)
 			@app = app
 			@root = root || Utopia::default_root

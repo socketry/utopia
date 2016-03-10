@@ -52,7 +52,11 @@ module Utopia
 			
 			# A helper method for accessing controller variables from view:
 			def controller
-				request.env[VARIABLES_KEY]
+				@controller ||= Utopia::Controller[request]
+			end
+			
+			def localization
+				@localization ||= Utopia::Localization[request]
 			end
 
 			def parse_markup(markup)
