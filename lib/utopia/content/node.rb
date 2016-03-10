@@ -143,6 +143,8 @@ module Utopia
 				end
 			end
 			
+			alias deferred_tag partial
+			
 			def controller
 				transaction.controller
 			end
