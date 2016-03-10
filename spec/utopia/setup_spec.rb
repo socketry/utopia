@@ -20,11 +20,12 @@
 
 require 'fileutils'
 
-RSpec.describe "utopia tool" do
+RSpec.describe "utopia executable" do
 	let(:utopia) {File.expand_path("../../bin/utopia", __dir__)}
 	
 	before(:all) do
-		sh("rake", "build")
+		# We need to build a package to test deployment:
+		system("rake", "build")
 		
 		ENV.delete 'BUNDLE_BIN_PATH'
 		ENV.delete 'BUNDLE_GEMFILE'
@@ -37,11 +38,17 @@ RSpec.describe "utopia tool" do
 		return $?
 	end
 	
+	def install_packages(dir)
+		package_path = File.expand_path("../../pkg/utopia-#{Utopia::VERSION}.gem", __dir__)
+		
+		# We do a bit of a hack here to ensure the package is available:
+		FileUtils.mkpath File.join(dir, "vendor/cache")
+		FileUtils.cp package_path, File.join(dir, "vendor/cache")
+	end
+	
 	it "should generate sample site" do
 		Dir.mktmpdir('test-site') do |dir|
-			# We do a bit of a hack here to ensure the package is available:
-			FileUtils.mkpath File.join(dir, "vendor/cache")
-			FileUtils.cp "pkg/utopia-#{Utopia::VERSION}.gem", File.join(dir, "vendor/cache")
+			install_packages(dir)
 			
 			result = sh(utopia, "create", dir)
 			expect(result).to be == 0
@@ -52,8 +59,7 @@ RSpec.describe "utopia tool" do
 	
 	it "should generate a sample server" do
 		Dir.mktmpdir('test-server') do |dir|
-			FileUtils.mkpath File.join(dir, "vendor/cache")
-			FileUtils.cp "pkg/utopia-#{Utopia::VERSION}.gem", File.join(dir, "vendor/cache")
+			install_packages(dir)
 			
 			result = sh(utopia, "server:create", dir)
 			expect(result).to be == 0
@@ -66,8 +72,7 @@ RSpec.describe "utopia tool" do
 		Dir.mktmpdir('test') do |dir|
 			site_path = File.join(dir, 'site')
 			
-			FileUtils.mkpath File.join(site_path, "vendor/cache")
-			FileUtils.cp "pkg/utopia-#{Utopia::VERSION}.gem", File.join(site_path, "vendor/cache")
+			install_packages(site_path)
 			
 			server_path = File.join(dir, 'server')
 			

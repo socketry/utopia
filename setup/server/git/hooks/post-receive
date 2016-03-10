@@ -44,33 +44,33 @@ SUDO = if WHOAMI != DEPLOY_USER
 	["sudo", "-u", "DEPLOY_USER"]
 end
 
-def sh(*args)
-	puts args.join(' ')
-	system(*args)
+def sh(command)
+	puts command.join(' ')
+	system(*command) or abort("Deployment failed!")
 end
 
-def sudo(*command)
-	sh(*SUDO, *command)
+def sudo(command)
+	sh([*SUDO, *command])
 end
 
 puts "Deploying to #{GIT_WORK_TREE} as #{DEPLOY_USER}:#{DEPLOY_GROUP}..."
 Dir.chdir(GIT_WORK_TREE) do
 	# Pass on our rights to the files we just uploaded to the deployment user/group:
-	sh("chmod", "-Rf", "ug+rwX", ".")
-	sh("chown", "-Rf", "#{DEPLOY_USER}:#{DEPLOY_GROUP}", ".")
+	sh %W{chmod -Rf ug+rwX .}
+	sh %W{chown -Rf #{DEPLOY_USER}:#{DEPLOY_GROUP} .}
 	
-	sudo("git", "checkout", "-f")
-	sudo("git", "submodule", "update", "-i")
+	sudo %W{git checkout -f}
+	sudo %W{git submodule update -i}
 	
 	if File.exist? 'Gemfile'
-		sudo(%W{bundle install --deployment --clean --jobs=4 --retry=2 --quiet}) or abort("Could not setup bundle!")
+		sudo %W{bundle install --deployment --clean --jobs=4 --retry=2 --quiet}
 	end
 	
 	if File.exist? 'Rakefile'
-		sudo(%W{bundle exec rake deploy}) or abort("Deploy task failed!")
+		sudo %W{bundle exec rake deploy}
 	end
 	
 	puts "Restarting server..."
-	sudo("mkdir", "-p", "tmp") unless File.exist?('tmp')
-	sudo("touch", "tmp/restart.txt")
+	sudo %W{mkdir -p tmp} unless File.exist?('tmp')
+	sudo %W{touch tmp/restart.txt}
 end

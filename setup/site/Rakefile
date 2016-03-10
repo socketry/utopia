@@ -2,7 +2,6 @@
 desc 'Run by git post-update hook when deployed to a web server'
 task :deploy do
 	# This task is typiclly run after the site is updated but before the server is restarted.
-	puts "Preparing to deploy site in #{Dir.pwd.inspect}..."
 end
 
 desc 'Set up the environment for running your web application'
