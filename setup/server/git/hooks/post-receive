@@ -63,14 +63,14 @@ Dir.chdir(GIT_WORK_TREE) do
 	sudo("git", "submodule", "update", "-i")
 	
 	if File.exist? 'Gemfile'
-		sudo("bundle install --deployment --clean --jobs=4 --retry=2") or abort("Could not setup bundle!")
+		sudo(%W{bundle install --deployment --clean --jobs=4 --retry=2 --quiet}) or abort("Could not setup bundle!")
 	end
 	
 	if File.exist? 'Rakefile'
-		sudo("bundle exec rake deploy") or abort("Deploy task failed!")
+		sudo(%W{bundle exec rake deploy}) or abort("Deploy task failed!")
 	end
 	
 	puts "Restarting server..."
-	sudo("mkdir -p tmp") unless File.exist?('tmp')
-	sudo("touch tmp/restart.txt")
+	sudo("mkdir", "-p", "tmp") unless File.exist?('tmp')
+	sudo("touch", "tmp/restart.txt")
 end

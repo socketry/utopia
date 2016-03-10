@@ -94,7 +94,7 @@ task :create do
 		
 		if `which bundle`.strip != ''
 			puts "Generating initial package list with bundle..."
-			sh("bundle", "install")
+			sh("bundle", "install", "--quiet")
 		end
 		
 		if `which git`.strip == ""
