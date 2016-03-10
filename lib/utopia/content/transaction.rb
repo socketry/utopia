@@ -232,7 +232,7 @@ module Utopia
 			end
 			
 			def [](key)
-				@attributes[key.to_s]
+				@attributes[key]
 			end
 
 			def lookup(tag)

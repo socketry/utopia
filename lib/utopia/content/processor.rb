@@ -25,6 +25,29 @@ require_relative 'tag'
 
 module Utopia
 	class Content
+		class SymbolicHash < Hash
+			def [] key
+				raise KeyError.new("attribute #{key} is a string, prefer a symbol") if key.is_a? String
+				super key.to_sym
+			end
+			
+			def []= key, value
+				super key.to_sym, value
+			end
+			
+			def fetch(key, *args, &block)
+				key = key.to_sym
+				
+				super
+			end
+			
+			def include? key
+				key = key.to_sym
+				
+				super
+			end
+		end
+		
 		class Processor
 			def self.parse_markup(markup, delegate)
 				processor = self.new(delegate)
@@ -92,7 +115,7 @@ module Utopia
 
 			def begin_tag(tag_name, begin_tag_type)
 				if begin_tag_type == :opened
-					@stack << [Tag.new(tag_name, {}), @scanner.pos]
+					@stack << [Tag.new(tag_name, SymbolicHash.new), @scanner.pos]
 				else
 					current_tag, current_position = @stack.pop
 			
@@ -120,7 +143,7 @@ module Utopia
 			end
 
 			def attribute(name, value)
-				@stack.last[0].attributes[name] = value
+				@stack.last[0].attributes[name.to_sym] = value
 			end
 
 			def instruction(content)
