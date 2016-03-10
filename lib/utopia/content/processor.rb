@@ -73,6 +73,10 @@ module Utopia
 			def begin_parse(scanner)
 				@scanner = scanner
 			end
+			
+			def doctype(attributes)
+				@delegate.cdata("<!DOCTYPE#{attributes}>")
+			end
 
 			def text(text)
 				@delegate.cdata(text)
@@ -83,7 +87,7 @@ module Utopia
 			end
 
 			def comment(text)
-				@delegate.cdata("<!#{text}>")
+				@delegate.cdata("<!--#{text}-->")
 			end
 
 			def begin_tag(tag_name, begin_tag_type)

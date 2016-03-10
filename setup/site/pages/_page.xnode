@@ -14,7 +14,7 @@
 		<link rel="stylesheet" href="/_static/site.css" type="text/css" media="screen" />
 	</head>
 
-	<body class="#{attributes['class']}">
+	<body class="#{attributes[:class]}">
 		<div id="header">
 			<img src="/_static/utopia.svg" />
 		</div>
