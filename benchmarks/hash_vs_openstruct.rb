@@ -10,6 +10,16 @@ EMAIL = "test@example.org"
 
 test = nil
 
+class ObjectHash
+	def []= key, value
+		instance_variable_set(key, value)
+	end
+	
+	def [] key
+		instance_variable_get(key)
+	end
+end
+
 # There IS a measuarble difference:
 Benchmark.ips do |x|
 	x.report("Hash") do |i|
@@ -26,6 +36,16 @@ Benchmark.ips do |x|
 			
 			test = p.name + p.email
 	 end
+	end
+	
+	x.report("ObjectHash") do |i|
+		i.times do
+			o = ObjectHash.new
+			o[:@name] = NAME
+			o[:@email] = EMAIL
+			
+			test = o[:@name] + o[:@email]
+		end
 	end
 	
 	x.compare!
