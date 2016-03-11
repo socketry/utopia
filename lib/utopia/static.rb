@@ -179,8 +179,8 @@ module Utopia
 			end
 
 			CONTENT_LENGTH = Rack::CONTENT_LENGTH
-			CONTENT_RANGE = "Content-Range".freeze
-
+			CONTENT_RANGE = 'Content-Range'.freeze
+			
 			def serve(env, response_headers)
 				ranges = Rack::Utils.byte_ranges(env, size)
 				response = [200, response_headers, self]
