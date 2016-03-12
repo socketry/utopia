@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright, 2015, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2016, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -41,12 +41,16 @@ WHOAMI = `whoami`.chomp!
 
 # We should find out if we need to use sudo or not:
 SUDO = if WHOAMI != DEPLOY_USER
-	["sudo", "-u", "DEPLOY_USER"]
+	["sudo", "-u", DEPLOY_USER]
 end
+
+CommandFailure = Class.new(StandardError)
 
 def sh(command)
 	puts command.join(' ')
-	system(*command) or abort("Deployment failed!")
+	unless system(*command)
+		raise CommandFailure.new("#{command.join(' ')} failed with #{$?}!")
+	end
 end
 
 def sudo(command)
@@ -56,8 +60,8 @@ end
 puts "Deploying to #{GIT_WORK_TREE} as #{DEPLOY_USER}:#{DEPLOY_GROUP}..."
 Dir.chdir(GIT_WORK_TREE) do
 	# Pass on our rights to the files we just uploaded to the deployment user/group:
-	sh %W{chmod -Rf ug+rwX .}
-	sh %W{chown -Rf #{DEPLOY_USER}:#{DEPLOY_GROUP} .}
+	sh %W{chmod -Rf ug+rwX .} rescue nil
+	sh %W{chown -Rf #{DEPLOY_USER}:#{DEPLOY_GROUP} .} rescue nil
 	
 	sudo %W{git checkout -f}
 	sudo %W{git submodule update -i}
