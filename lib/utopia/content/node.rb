@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'processor'
+require_relative 'markup'
 require_relative 'links'
 require_relative 'transaction'
 
@@ -110,7 +110,7 @@ module Utopia
 				template = @controller.fetch_template(@file_path)
 				
 				context = Context.new(transaction, state)
-				markup = template.evaluate(context)
+				markup = template.to_buffer(context)
 				
 				transaction.parse_markup(markup)
 			end

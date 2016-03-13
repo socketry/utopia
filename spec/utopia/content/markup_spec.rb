@@ -20,9 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'utopia/content/link'
+require 'utopia/content/markup'
 
-module Utopia::Content::ProcessorSpec
+module Utopia::Content::MarkupSpec
 	class TestDelegate
 		def initialize
 			@events = []
@@ -35,7 +35,7 @@ module Utopia::Content::ProcessorSpec
 		end
 	end
 	
-	describe Utopia::Content::Processor do
+	describe Utopia::Content::Markup do
 		it "should format open tags correctly" do
 			foo_tag = Utopia::Content::Tag.new("foo", bar: nil, baz: 'bob')
 			
@@ -45,11 +45,18 @@ module Utopia::Content::ProcessorSpec
 			expect(foo_tag.to_s('content')).to be == '<foo bar baz="bob">content</foo>'
 		end
 		
-		it "should parse single tag" do
+		def parse(string)
 			delegate = TestDelegate.new
-			processor = Utopia::Content::Processor.new(delegate)
 			
-			processor.parse %Q{<foo></foo>}
+			buffer = Trenni::Buffer.new(string)
+			Utopia::Content::Markup.new(buffer, delegate).parse!
+			
+			return delegate
+		end
+		
+		it "should parse single tag" do
+			
+			delegate = parse %Q{<foo></foo>}
 			
 			foo_tag = Utopia::Content::Tag.new("foo")
 			expected_events = [
@@ -63,10 +70,7 @@ module Utopia::Content::ProcessorSpec
 		end
 		
 		it "should parse and escape text" do
-			delegate = TestDelegate.new
-			processor = Utopia::Content::Processor.new(delegate)
-			
-			processor.parse %Q{<foo>Bob &amp; Barley<!-- Comment --><![CDATA[Hello & World]]></foo>}
+			delegate = parse %Q{<foo>Bob &amp; Barley<!-- Comment --><![CDATA[Hello & World]]></foo>}
 			
 			foo_tag = Utopia::Content::Tag.new("foo")
 			expected_events = [
@@ -81,17 +85,11 @@ module Utopia::Content::ProcessorSpec
 		end
 		
 		it "should fail with incorrect closing tag" do
-			delegate = TestDelegate.new
-			processor = Utopia::Content::Processor.new(delegate)
-			
-			expect{processor.parse %Q{<p>Foobar</dl>}}.to raise_exception(Utopia::Content::Processor::UnbalancedTagError)
+			expect{parse %Q{<p>Foobar</dl>}}.to raise_exception(Utopia::Content::Markup::UnbalancedTagError)
 		end
 		
 		it "should fail with unclosed tag" do
-			delegate = TestDelegate.new
-			processor = Utopia::Content::Processor.new(delegate)
-			
-			expect{processor.parse %Q{<p>Foobar}}.to raise_exception(Utopia::Content::Processor::UnbalancedTagError)
+			expect{parse %Q{<p>Foobar}}.to raise_exception(Utopia::Content::Markup::UnbalancedTagError)
 		end
 	end
 end

@@ -25,7 +25,7 @@ RSpec.describe "utopia executable" do
 	
 	before(:all) do
 		# We need to build a package to test deployment:
-		system("rake", "build")
+		system("rake", "build") or abort("Could not build package for setup spec!")
 		
 		ENV.delete 'BUNDLE_BIN_PATH'
 		ENV.delete 'BUNDLE_GEMFILE'

@@ -22,7 +22,7 @@ require_relative 'middleware'
 require_relative 'localization'
 
 require_relative 'content/node'
-require_relative 'content/processor'
+require_relative 'content/markup'
 
 require 'trenni/template'
 

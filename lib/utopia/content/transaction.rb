@@ -60,7 +60,7 @@ module Utopia
 			end
 
 			def parse_markup(markup)
-				Processor.parse_markup(markup, self)
+				Markup.parse!(markup, self)
 			end
 
 			# The Rack::Request for this transaction.

@@ -48,11 +48,12 @@ module Utopia
 			end
 		end
 		
-		class Processor
-			def self.parse_markup(markup, delegate)
-				processor = self.new(delegate)
+		class Markup
+			def self.parse!(markup, delegate)
+				# This is for compatibility with the existing API which passes in a string:
+				markup = Buffer.new(markup) if markup.is_a? String
 				
-				processor.parse(markup)
+				self.new(markup, delegate).parse!
 			end
 
 			class UnbalancedTagError < StandardError
@@ -62,8 +63,8 @@ module Utopia
 					@current_tag = current_tag
 					@closing_tag = closing_tag
 					
-					@starting_line = Trenni::Parser::Location.new(@scanner.string, @start_position)
-					@ending_line = Trenni::Parser::Location.new(@scanner.string, @scanner.pos)
+					@starting_line = Trenni::Location.new(@scanner.string, @start_position)
+					@ending_line = Trenni::Location.new(@scanner.string, @scanner.pos)
 				end
 
 				attr :scanner
@@ -76,15 +77,14 @@ module Utopia
 				end
 			end
 
-			def initialize(delegate)
+			def initialize(buffer, delegate)
+				@buffer = buffer
 				@delegate = delegate
 				@stack = []
-
-				@parser = Trenni::Parser.new(self)
 			end
 
-			def parse(input)
-				@parser.parse(input)
+			def parse!
+				Trenni::Parser.new(@buffer, self).parse!
 				
 				unless @stack.empty?
 					current_tag, current_position = @stack.pop
