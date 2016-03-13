@@ -51,7 +51,7 @@ module Utopia
 		class Markup
 			def self.parse!(markup, delegate)
 				# This is for compatibility with the existing API which passes in a string:
-				markup = Buffer.new(markup) if markup.is_a? String
+				markup = Trenni::Buffer.new(markup) if markup.is_a? String
 				
 				self.new(markup, delegate).parse!
 			end
