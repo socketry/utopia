@@ -27,10 +27,16 @@ module Utopia::ContentSpec
 		
 		let(:app) {Rack::Builder.parse_file(File.expand_path('content_spec.ru', __dir__)).first}
 		
+		it "should generate identical html" do
+			get "/test"
+			
+			expect(last_response.body).to be == File.read(File.expand_path('content_spec/test.xnode', __dir__))
+		end
+		
 		it "should get a local path" do
 			get '/node/index'
 			
-			expect(last_response.body).to be == File.expand_path('pages/node', __dir__)
+			expect(last_response.body).to be == File.expand_path('content_spec/node', __dir__)
 		end
 		
 		it "should successfully redirect to the index page" do
@@ -66,7 +72,7 @@ module Utopia::ContentSpec
 	end
 	
 	describe Utopia::Content do
-		let(:root) {File.expand_path("pages", __dir__)}
+		let(:root) {File.expand_path('content_spec', __dir__)}
 		let(:content) {Utopia::Content.new(lambda{}, root: root, cache_templates: true)}
 		
 		it "should parse file and expand variables" do
@@ -80,7 +86,7 @@ module Utopia::ContentSpec
 		end
 		
 		it "should fetch template and use cache" do
-			node_path = File.expand_path('../pages/index.xnode', __FILE__)
+			node_path = File.expand_path('../content_spec/index.xnode', __FILE__)
 			
 			template = content.fetch_template(node_path)
 			
