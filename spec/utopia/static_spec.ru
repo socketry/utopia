@@ -1,4 +1,4 @@
 
-use Utopia::Static, root: File.expand_path('../pages', __FILE__)
+use Utopia::Static, root: File.expand_path('static_spec', __dir__)
 
 run lambda {|env| [404, {}, []]}
