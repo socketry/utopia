@@ -98,7 +98,7 @@ module Utopia
 			end
 			
 			def doctype(attributes)
-				@delegate.cdata("<!DOCTYPE#{attributes}>")
+				@delegate.cdata("<!DOCTYPE #{attributes}>")
 			end
 
 			def text(text)
