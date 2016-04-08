@@ -148,6 +148,10 @@ module Utopia
 				File.size(full_path)
 			end
 
+			def empty?
+				bytesize == 0
+			end
+
 			alias size bytesize
 
 			def each
