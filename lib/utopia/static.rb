@@ -148,6 +148,7 @@ module Utopia
 				File.size(full_path)
 			end
 
+			# This reflects whether calling each would yield anything.
 			def empty?
 				bytesize == 0
 			end
