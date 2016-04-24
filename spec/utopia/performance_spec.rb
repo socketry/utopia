@@ -30,6 +30,10 @@ RSpec.describe "Utopia Performance" do
 	if defined? Benchmark
 		def benchmark(name = nil)
 			Benchmark.ips do |benchmark|
+				# Collect more data for benchmark:
+				benchmark.time = 20
+				benchmark.warmup = 10
+				
 				benchmark.report(name) do |i|
 					yield i
 				end
