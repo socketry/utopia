@@ -124,15 +124,6 @@ module Utopia
 		
 		# This is a special context in which a limited set of well defined methods are exposed in the content view.
 		Node::Context = Struct.new(:transaction, :state) do
-			def initialize(transaction, state)
-				# We expose all attributes as instance variables within the context:
-				state.attributes.each do |key, value|
-					self.instance_variable_set("@#{key}".to_sym, value)
-				end
-				
-				super
-			end
-			
 			def partial(*args, &block)
 				if block_given?
 					state.defer(&block)
