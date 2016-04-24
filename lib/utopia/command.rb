@@ -24,8 +24,6 @@ require 'fileutils'
 require 'find'
 
 require 'samovar'
-require 'samovar/command/track_time'
-require 'samovar/command/system'
 
 module Utopia
 	module Command
