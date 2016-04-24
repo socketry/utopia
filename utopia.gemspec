@@ -27,6 +27,8 @@ Gem::Specification.new do |spec|
 	spec.add_dependency 'trenni', '~> 1.6.0'
 	spec.add_dependency 'mime-types', ['>= 2.0', '< 4']
 	
+	spec.add_dependency 'samovar', '~> 1.1.0'
+	
 	spec.add_dependency 'rack', '~> 1.6'
 	spec.add_dependency 'rack-cache', '~> 1.2.0'
 	

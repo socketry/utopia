@@ -50,7 +50,7 @@ RSpec.describe "utopia executable" do
 		Dir.mktmpdir('test-site') do |dir|
 			install_packages(dir)
 			
-			result = sh(utopia, "create", dir)
+			result = sh(utopia, "--in", dir, "site", "create")
 			expect(result).to be == 0
 			
 			expect(Dir.entries(dir)).to include(".bowerrc", ".git", "Gemfile", "Gemfile.lock", "README.md", "Rakefile", "cache", "config.ru", "lib", "pages", "public", "tmp")
@@ -61,7 +61,7 @@ RSpec.describe "utopia executable" do
 		Dir.mktmpdir('test-server') do |dir|
 			install_packages(dir)
 			
-			result = sh(utopia, "server:create", dir)
+			result = sh(utopia, "--in", dir, "server", "create")
 			expect(result).to be == 0
 			
 			expect(Dir.entries(dir)).to include(".git")
@@ -76,10 +76,10 @@ RSpec.describe "utopia executable" do
 			
 			server_path = File.join(dir, 'server')
 			
-			result = sh(utopia, "create", site_path)
+			result = sh(utopia, "--in", site_path, "site", "create")
 			expect(result).to be == 0
 			
-			result = sh(utopia, "server:create", server_path)
+			result = sh(utopia, "--in", server_path, "server", "create")
 			expect(result).to be == 0
 			
 			Dir.chdir(site_path) do
