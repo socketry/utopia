@@ -129,7 +129,7 @@ module Utopia
 						
 						if `which bundle`.strip != ''
 							puts "Generating initial package list with bundle..."
-							system("bundle", "install", "--quiet")
+							system("bundle", "install")
 						end
 						
 						if `which git`.strip == ""
