@@ -30,6 +30,9 @@ RSpec.describe "utopia executable" do
 		ENV.delete 'BUNDLE_BIN_PATH'
 		ENV.delete 'BUNDLE_GEMFILE'
 		ENV.delete 'RUBYOPT'
+		
+		# This allows the utopia command to load the correct library:
+		ENV['RUBYLIB'] = File.expand_path("../../lib", __dir__)
 	end
 	
 	def sh(*args)
