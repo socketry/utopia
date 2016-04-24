@@ -2,8 +2,8 @@ language: ruby
 sudo: false
 before_install:
   # For testing purposes:
-  - git config --global user.email "you@example.com"
-  - git config --global user.name "Your Name"
+  - git config --global user.email "samuel@oriontransfer.net"
+  - git config --global user.name "Samuel Williams"
 rvm:
   - 2.1.8
   - 2.2.4
