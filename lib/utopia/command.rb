@@ -246,7 +246,7 @@ module Utopia
 				'server' => Server
 			
 			def root
-				@options[:root] || Dir.getwd
+				File.expand_path(@options.fetch(:root, ''), Dir.getwd)
 			end
 			
 			def invoke(program_name: File.basename($0))
