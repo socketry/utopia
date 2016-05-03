@@ -74,6 +74,13 @@ Then, Nginx is configured like so:
 		rewrite ^ http://www.example.com$uri permanent;
 	}
 
+### Arch Linux
+
+Packages for deploying Passenger+Nginx on Arch are available in the AUR. There are issues with the official packages so please avoid them.
+
+- [nginx-mainline-passenger](https://aur.archlinux.org/packages/nginx-mainline-passenger/)
+- [passenger-nginx-module](https://aur.archlinux.org/packages/passenger-nginx-module/)
+
 #### Compression
 
 We suggest [enabling gzip compression](https://zoompf.com/blog/2012/02/lose-the-wait-http-compression):
