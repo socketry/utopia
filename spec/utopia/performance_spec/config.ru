@@ -1,7 +1,6 @@
 #!/usr/bin/env rackup
 
 require 'utopia'
-require 'rack/cache'
 
 # use Rack::ContentLength
 use Utopia::ContentLength
