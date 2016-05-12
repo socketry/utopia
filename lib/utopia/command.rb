@@ -32,13 +32,13 @@ module Utopia
 			BASE = File.expand_path("../../setup", __dir__)
 			
 			module Site
-				CONFIGURATION_FILES = ['config.ru', 'Gemfile', 'Rakefile']
+				CONFIGURATION_FILES = ['config.ru', 'config/environment.rb', 'Gemfile', 'Rakefile', 'tasks/utopia.rake']
 				
-				DIRECTORIES = ["lib", "pages", "public", "tmp"]
+				DIRECTORIES = ["config", "lib", "pages", "public", "tasks", "tmp"]
 				SYMLINKS = {"public/_static" => "../pages/_static"}
 				
 				# Removed during upgrade process
-				OLD_DIRECTORIES = ["access_log"]
+				OLD_DIRECTORIES = ["access_log", "cache"]
 				
 				ROOT = File.join(BASE, 'site')
 			end
