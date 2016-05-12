@@ -11,7 +11,6 @@ RACK_ENV = ENV.fetch('RACK_ENV', :development).to_sym unless defined?(RACK_ENV)
 $LOAD_PATH << File.expand_path("lib", __dir__)
 
 require 'utopia'
-require 'rack/cache'
 
 if RACK_ENV == :production
 	# Handle exceptions in production with a error page and send an email notification:
@@ -26,14 +25,6 @@ else
 end
 
 use Rack::Sendfile
-
-if RACK_ENV == :production
-	# Cache dynamically generated content where possible:
-	use Rack::Cache,
-		metastore: "file:#{Utopia::default_root("cache/meta")}",
-		entitystore: "file:#{Utopia::default_root("cache/body")}",
-		verbose: RACK_ENV == :development
-end
 
 use Utopia::ContentLength
 
