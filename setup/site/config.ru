@@ -1,16 +1,6 @@
 #!/usr/bin/env rackup
 
-# Setup default encoding:
-Encoding.default_external = Encoding::UTF_8
-Encoding.default_internal = Encoding::UTF_8
-
-# Setup the server environment:
-RACK_ENV = ENV.fetch('RACK_ENV', :development).to_sym unless defined?(RACK_ENV)
-
-# Allow loading library code from lib directory:
-$LOAD_PATH << File.expand_path("lib", __dir__)
-
-require 'utopia'
+require_relative 'config/environment'
 
 if RACK_ENV == :production
 	# Handle exceptions in production with a error page and send an email notification:
