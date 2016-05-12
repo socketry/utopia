@@ -34,7 +34,7 @@ module Utopia
 			module Site
 				CONFIGURATION_FILES = ['config.ru', 'Gemfile', 'Rakefile']
 				
-				DIRECTORIES = ["cache", "cache/meta", "cache/body", "lib", "pages", "public", "tmp"]
+				DIRECTORIES = ["lib", "pages", "public", "tmp"]
 				SYMLINKS = {"public/_static" => "../pages/_static"}
 				
 				# Removed during upgrade process
