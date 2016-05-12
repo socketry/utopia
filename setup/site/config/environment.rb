@@ -6,6 +6,7 @@ Encoding.default_internal = Encoding::UTF_8
 # Load environment variables:
 environment_path = File.expand_path('environment.yaml', __dir__)
 if File.exist? environment_path
+	require 'yaml'
 	ENV.update(YAML.load_file(environment_path))
 end
 
