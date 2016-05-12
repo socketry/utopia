@@ -17,5 +17,3 @@ $LOAD_PATH << File.expand_path("lib", __dir__)
 
 # Load utopia framework:
 require 'utopia'
-
-# require_relative "../lib/my-code"
