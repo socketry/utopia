@@ -28,11 +28,7 @@ module Utopia
 		end
 		
 		def content_length_of(body)
-			if body.is_a? Array
-				return body.map(&:bytesize).reduce(0, :+)
-			else
-				return body.bytesize
-			end
+			return body.map(&:bytesize).reduce(0, :+)
 		end
 		
 		def call(env)
