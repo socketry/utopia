@@ -59,6 +59,7 @@ module Utopia
 				end
 			end
 
+			# Look up from the `links.yaml` metadata with a given symbolic key.
 			def [] key
 				@info[key]
 			end
