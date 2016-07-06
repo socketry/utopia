@@ -251,7 +251,7 @@ module Utopia
 			
 			def invoke(program_name: File.basename($0))
 				if @options[:version]
-					puts "utopia v#{Teapot::VERSION}"
+					puts "utopia v#{VERSION}"
 				elsif @options[:help] or @command.nil?
 					print_usage(program_name)
 				else
