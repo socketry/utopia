@@ -173,6 +173,10 @@ module Utopia
 			def first
 				transaction.first
 			end
+			
+			def links(*arguments, &block)
+				state.node.links(*arguments, &block)
+			end
 		end
 	end
 end
