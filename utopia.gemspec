@@ -25,11 +25,11 @@ Gem::Specification.new do |spec|
 	spec.required_ruby_version = '~> 2.0'
 	
 	spec.add_dependency 'trenni', '~> 1.6'
-	spec.add_dependency 'mime-types', ['>= 2.0', '< 4']
+	spec.add_dependency 'mime-types', '~> 3.0'
 	
 	spec.add_dependency 'samovar', '~> 1.1'
 	
-	spec.add_dependency 'rack', '~> 1.6'
+	spec.add_dependency 'rack', '~> 2.0'
 	
 	spec.add_dependency 'http-accept', '~> 1.4'
 	
