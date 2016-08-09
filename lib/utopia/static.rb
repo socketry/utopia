@@ -187,7 +187,7 @@ module Utopia
 			CONTENT_RANGE = 'Content-Range'.freeze
 			
 			def serve(env, response_headers)
-				ranges = Rack::Utils.byte_ranges(env, size)
+				ranges = Rack::Utils.get_byte_ranges(env['HTTP_RANGE'], size)
 				response = [200, response_headers, self]
 
 				# puts "Requesting ranges: #{ranges.inspect} (#{size})"
