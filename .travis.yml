@@ -5,7 +5,6 @@ before_install:
   - git config --global user.email "samuel@oriontransfer.net"
   - git config --global user.name "Samuel Williams"
 rvm:
-  - 2.1.8
   - 2.2.4
   - 2.3.0
   - ruby-head
