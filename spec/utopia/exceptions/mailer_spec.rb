@@ -25,22 +25,18 @@ require_relative '../rack_helper'
 require 'utopia/exceptions'
 require 'utopia/controller'
 
-RSpec.describe Utopia::Exceptions::Handler do
-	include_context "rack app", File.expand_path("handler_spec.ru", __dir__)
+RSpec.describe Utopia::Exceptions::Mailer do
+	include_context "rack app", File.expand_path("mailer_spec.ru", __dir__)
 	
-	it "should successfully call the controller method" do
-		# This request will raise an exception, and then redirect to the /exception url which will fail again, and cause a fatal error.
-		get "/blow?fatal=true"
-		
-		expect(last_response.status).to be == 500
-		expect(last_response.headers['Content-Type']).to be == 'text/plain'
-		expect(last_response.body).to be_include 'fatal error'
+	before(:each) do
+		Mail::TestMailer.deliveries.clear
 	end
 	
-	it "should fail with a 500 error" do
-		get "/blow"
+	it "should send an email to report the failure" do
+		expect{get "/blow"}.to raise_error('Arrrh!')
 		
-		expect(last_response.status).to be == 500
-		expect(last_response.body).to be_include 'Error Will Robertson'
+		last_mail = Mail::TestMailer.deliveries.last
+		
+		expect(last_mail.to_s).to include("GET", "blow", "request.ip", "HTTP_", "TharSheBlows")
 	end
 end

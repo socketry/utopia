@@ -55,7 +55,12 @@ module Utopia
 			
 			private
 			
-			REQUEST_KEYS = [:ip, :referrer, :path, :user_agent]
+			REQUEST_KEYS = [
+				:ip,
+				:referrer,
+				:path,
+				:user_agent,
+			]
 			
 			def generate_body(exception, env)
 				io = StringIO.new
@@ -74,6 +79,12 @@ module Utopia
 				
 				request.params.each do |key, value|
 					io.puts "request.params.#{key}: #{value.inspect}"
+				end
+				
+				io.puts
+				
+				env.select{|key,_| key.start_with? 'HTTP_'}.each do |key, value|
+					io.puts "#{key}: #{value.inspect}"
 				end
 				
 				io.puts
