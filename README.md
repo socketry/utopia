@@ -105,7 +105,7 @@ Utopia builds on top of Rack with the following middleware:
 
 ### Static
 
-This middleware serves static files using the `mime-types` library. By default, it works with `Rack::Sendfile` and `Rack::Cache` and supports `ETag` based caching.
+This middleware serves static files using the `mime-types` library. By default, it works with `Rack::Sendfile` and supports `ETag` based caching. Normally, you'd prefer to put static files into `public/_static` but it's also acceptable to put static content into `pages/` if it makes sense.
 
 ### Redirection
 

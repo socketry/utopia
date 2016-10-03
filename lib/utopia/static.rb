@@ -27,8 +27,9 @@ require 'digest/sha1'
 require 'mime/types'
 
 module Utopia
-	# Serve static files and include recursive name resolution using @rel@ directory entries.
+	# Serve static files from the specified root directory.
 	class Static
+		# Default mime-types which are common for files served over HTTP:
 		MIME_TYPES = {
 			:xiph => {
 				"ogx" => "application/ogg",
@@ -62,6 +63,7 @@ module Utopia
 			]
 		}
 		
+		# A class to assist with loading mime-type metadata.
 		class MimeTypeLoader
 			def initialize(library)
 				@extensions = {}
@@ -116,7 +118,8 @@ module Utopia
 		end
 		
 		private
-
+		
+		# Represents a local file on disk which can be served directly, or passed upstream to sendfile.
 		class LocalFile
 			def initialize(root, path)
 				@root = root

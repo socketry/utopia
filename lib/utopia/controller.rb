@@ -31,6 +31,7 @@ require_relative 'controller/respond'
 require 'concurrent/map'
 
 module Utopia
+	# A container for controller classes which are loaded from disk.
 	module Controllers
 		def self.class_name_for_controller(controller)
 			controller.uri_path.to_a.collect{|_| _.capitalize}.join + "_#{controller.object_id}"
@@ -44,7 +45,9 @@ module Utopia
 		end
 	end
 	
+	# A middleware which loads controller classes and invokes functionality based on the requested path.
 	class Controller
+		# The controller filename.
 		CONTROLLER_RB = 'controller.rb'.freeze
 		
 		def self.[] request
