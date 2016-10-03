@@ -73,6 +73,7 @@ module Utopia
 			super
 		end
 		
+		# Fetch the controller for the given relative path. May be cached.
 		def lookup_controller(path)
 			if @controller_cache
 				@controller_cache.fetch_or_store(path.to_s) do
@@ -83,6 +84,7 @@ module Utopia
 			end
 		end
 		
+		# Loads the controller file for the given relative url_path.
 		def load_controller_file(uri_path)
 			base_path = File.join(@root, uri_path.components)
 			
@@ -115,6 +117,7 @@ module Utopia
 			end
 		end
 		
+		# Invoke the controller layer for a given request. The request path may be rewritten.
 		def invoke_controllers(request)
 			relative_path = Path[request.path_info]
 			controller_path = Path.new

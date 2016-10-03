@@ -79,8 +79,7 @@ module Utopia
 			
 			public
 			
-			# relative_path = 2014/mr-potato
-			# actions => {:** => A}
+			# Given a relative path, select all possible actions in the order they shuold be evaluated.
 			def select(relative_path)
 				[].tap do |actions|
 					append(relative_path.reverse, 0, actions)

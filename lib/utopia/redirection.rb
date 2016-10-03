@@ -21,7 +21,7 @@
 require_relative 'middleware'
 
 module Utopia
-	# A middleware which redirects requests from one path to another.
+	# A middleware which assists with redirecting from one path to another.
 	module Redirection
 		class RequestFailure < StandardError
 			def initialize(resource_path, resource_status, error_path, error_status)
