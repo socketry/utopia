@@ -23,14 +23,17 @@ require_relative '../http'
 module Utopia
 	class Controller
 		class Base
+			# A string which is the full path to the directory which contains the controller.
 			def self.base_path
 				self.const_get(:BASE_PATH)
 			end
-		
+			
+			# A relative path to the controller directory relative to the controller root directory.
 			def self.uri_path
 				self.const_get(:URI_PATH)
 			end
-		
+			
+			# The controller middleware itself.
 			def self.controller
 				self.const_get(:CONTROLLER)
 			end

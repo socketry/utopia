@@ -23,6 +23,12 @@ require_relative '../path/matcher'
 
 module Utopia
 	class Controller
+		# This controller layer rewrites the path before executing controller actions. When the rule matches, the supplied block is executed.
+		# @example
+		# prepend Rewrite
+		# rewrite.extract_prefix id: Integer do
+		#   @user = User.find(@id)
+		# end
 		module Rewrite
 			def self.prepended(base)
 				base.extend(ClassMethods)

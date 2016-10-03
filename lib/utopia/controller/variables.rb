@@ -20,6 +20,7 @@
 
 module Utopia
 	class Controller
+		# Provides a stack-based instance variable lookup mechanism. It can flatten a stack of controllers into a single hash.
 		class Variables
 			def initialize
 				@controllers = []

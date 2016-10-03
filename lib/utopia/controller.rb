@@ -118,6 +118,7 @@ module Utopia
 			variables = request.env[VARIABLES_KEY]
 			
 			while relative_path.components.any?
+				# We copy one path component from the relative path to the controller path at a time. The controller, when invoked, can modify the relative path (by assigning to relative_path.components). This allows for controller-relative rewrites, but only the remaining path postfix can be modified.
 				controller_path.components << relative_path.components.shift
 				
 				if controller = lookup_controller(controller_path)
