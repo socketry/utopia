@@ -117,7 +117,7 @@ module Utopia
 				throw :response, response
 			end
 
-				# This will cause the controller middleware to pass on the request.
+			# This will cause the controller middleware to pass on the request.
 			def ignore!
 				throw :response, nil
 			end
@@ -143,6 +143,7 @@ module Utopia
 				respond! [status.to_i, {}, [message]]
 			end
 			
+			# Succeed the request and immediately respond.
 			def succeed!(status: 200, headers: {}, **options)
 				status = HTTP::Status.new(status, 200...300)
 				
