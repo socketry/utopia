@@ -124,9 +124,9 @@ module Utopia
 		end
 		
 		class DirectoryIndex < Redirection
-			def initialize(app, index = 'index')
+			def initialize(app, index: 'index')
 				@app = app
-				@index = 'index'
+				@index = index
 				
 				super(app)
 			end

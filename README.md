@@ -1,13 +1,20 @@
 # ![Utopia](materials/utopia.png?raw=true)
 
-Utopia is a website generation framework which provides a robust set of tools
-to build highly complex dynamic websites. It uses the filesystem heavily for
-content and provides functions for interacting with files and directories as
-structure representing the website.
+Utopia is a website generation framework which provides a robust set of tools to build highly complex dynamic websites. It uses the filesystem heavily for content and provides functions for interacting with files and directories as structure representing the website.
 
 [![Build Status](https://secure.travis-ci.org/ioquatix/utopia.svg)](http://travis-ci.org/ioquatix/utopia)
 [![Code Climate](https://codeclimate.com/github/ioquatix/utopia.svg)](https://codeclimate.com/github/ioquatix/utopia)
 [![Coverage Status](https://coveralls.io/repos/ioquatix/utopia/badge.svg)](https://coveralls.io/r/ioquatix/utopia)
+
+## Motivation
+
+The [original Utopia project](https://github.com/ioquatix/utopia-php) was written in PHP in the early 2000s. It consisted of an XML parser, a database layer and some code to assist with business logic. It was initially designed to reduce the amount of HTML required to build both content-centric websites and business apps. At the time, CSS was very poorly supported and thus a lot of the time, you'd be using quite complex `<table>` elements to generate simple things like boxes with drop shadows, etc. Utopia provided a core concept - a node - which was essentially a small snippet of HTML, which could be composed into other nodes simply by using a named tag. Attributes and content were passed in, and thus you could easily build complex pages with simple semantic markup.
+
+At the time, the available frameworks were pretty basic. Utopia was a working, albeit poor, implementation of MVC and supported several commercial websites I developed at the time. I made it, partly just because I could, but also because it served a commercial purpose.
+
+Eventually one day I started using Ruby on Rails. There are aspects of the Rails framework which I like. However, at the time I was using it (starting with version 0.8), I found that it's flat organisation of controllers and views very limiting. I feel that nested controllers and views make a lot more sense. Heirarchical structures help organise information in way that is easy to manage. Utopia embraces this principle, and applies it to both the controller and view layers. I also developed a [model layer with similar principles](https://github.com/ioquatix/relaxo-model).
+
+So, Utopia exists because it suits my way of thinking about web applications, and it's conceptual core has been refined for over a decade. It provides a considered amount of both flexibility, and opinionated behaviour.
 
 ## Installation
 
@@ -106,29 +113,96 @@ Utopia builds on top of Rack with the following middleware:
 - `Utopia::Content`: XML-style template engine with powerful tag behaviours.
 - `Utopia::Session::EncryptedCookie`: Session storage using an encrypted cookie.
 
+The implementation of Utopia is considered thread-safe and reentrant. However, this does not guarantee that the code YOU write will be so.
+
 ### Static
 
 This middleware serves static files using the `mime-types` library. By default, it works with `Rack::Sendfile` and supports `ETag` based caching. Normally, you'd prefer to put static files into `public/_static` but it's also acceptable to put static content into `pages/` if it makes sense.
+
+	use Utopia::Static,
+		# The root path to serve files from:
+		root: "path/to/root",
+		# The mime-types to recognize/serve:
+		types: [:default, :xiph],
+		# Cache-Control header for files:
+		cache_control: 'public, max-age=7200'
 
 ### Redirection
 
 A set of flexible URI rewriting middleware which includes support for string mappings, regular expressions and status codes (e.g. 404 errors).
 
+	# String (fast hash lookup) rewriting:
+	use Utopia::Redirection::Rewrite,
+		'/' => '/welcome/index'
+
+	# Redirect directories (e.g. /) to an index file (e.g. /index):
+	use Utopia::Redirection::DirectoryIndex,
+		index: 'index.html'
+	
+	# Redirect (error) status codes to actual pages:
+	use Utopia::Redirection::Errors,
+		404 => '/errors/file-not-found'
+
 ### Localization
 
 The localization middleware uses the `Accept-Language` header to guess the preferred locale out of the given options. If a request path maps to a resource, that resource is returned. Otherwise, a localized request is made.
+
+	use Utopia::Localization,
+		:default_locale => 'en',
+		:locales => ['en', 'de', 'ja', 'zh'],
+		:nonlocalized => ['/_static/', '/_cache/']
+
+Somewhere further down the chain, you can localize a resource:
+
+	localization = Utopia::Localization[request]
+	show_welcome(localization.current_locale)
 
 ### Controller
 
 A simple recursive controller layer which works in isolation from the view rendering middleware. A controller consists of a set of actions which match against incoming paths and execute code accordingly.
 
+	use Utopia::Controller,
+		root: 'path/to/root',
+		cache_controllers: (RACK_ENV == :production)
+
+A controller is a file within the root directory (or subdirectory) with the name `controller.rb`. This code is dynamically loaded into an anonymous class and executed. The default implementation uses path-based actions, e.g.
+
+	on 'show' do |request|
+		@post = Post.find_by_id(request[:id])
+	end
+
 ### Content
 
 A tag based content generation system which integrates nicely with HTML5. Supports structures which separate generic page templates from dynamically generated content in an easy and consistent way.
 
+	use Utopia::Content,
+		cache_templates: (RACK_ENV == :production),
+		tags: {
+			'deferred' => Utopia::Tags::Deferred,
+			'override' => Utopia::Tags::Override,
+			'node' => Utopia::Tags::Node,
+			'environment' => Utopia::Tags::Environment.for(RACK_ENV)
+		}
+
+A basic template looks something like:
+
+	<page>
+		<heading>Create User</heading>
+		<form action="#">
+			<input name="name" />
+			<input type="submit" />
+		</form>
+	</page>
+
 ### Session
 
 The encrypted cookie session management uses symmetric private key encryption to store data on the client and avoid tampering.
+
+	use Utopia::Session::EncryptedCookie,
+		:expire_after => 3600,
+		:secret => '40 or more random characters for your secret key'
+
+All session data is stored on the client, but it's encrypted with a salt and the secret key. It would be hard for the client to decrypt the data without the secret.
 
 ## Contributing
 

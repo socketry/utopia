@@ -219,6 +219,10 @@ module Utopia
 
 		DEFAULT_CACHE_CONTROL = 'public, max-age=3600'.freeze
 
+		# Initialize the middleware with the provided options.
+		# @option options [String] :root The root directory to serve files from.
+		# @option options [Array] :types The mime-types (and file extensions) to recognize/serve.
+		# @option options [String] :cache_control The cache-control header to set.
 		def initialize(app, **options)
 			@app = app
 			@root = (options[:root] || Utopia::default_root).freeze
