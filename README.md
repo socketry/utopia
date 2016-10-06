@@ -19,9 +19,10 @@ Install utopia:
 
 Create a new site:
 
-	$ utopia create www.example.com
+	$ mkdir www.example.com
 	$ cd www.example.com
-	$ rake server
+	$ utopia site create
+	$ rake
 
 #### Bower Integration
 
@@ -44,7 +45,9 @@ Firstly log into your remote site using `ssh` and install utopia:
 
 Then use the utopia command to generate a new remote site:
 
-	$ sudo -u http utopia server:create /srv/http/www.example.com
+	$ mkdir /srv/http/www.example.com
+	$ cd /srv/http/www.example.com
+	$ sudo -u http utopia server create
 
 On the local site, you can set up a git remote:
 
