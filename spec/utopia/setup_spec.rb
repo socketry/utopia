@@ -22,6 +22,8 @@ require 'fileutils'
 
 RSpec.describe "utopia executable" do
 	let(:utopia) {File.expand_path("../../bin/utopia", __dir__)}
+	let(:gemspec) {Gem::Specification.load File.expand_path("../../utopia.gemspec", __dir__)}
+	let(:package_path) {File.expand_path("../../pkg/#{gemspec.file_name}", __dir__)}
 	
 	before(:all) do
 		# We need to build a package to test deployment:
@@ -42,8 +44,6 @@ RSpec.describe "utopia executable" do
 	end
 	
 	def install_packages(dir)
-		package_path = File.expand_path("../../pkg/utopia-#{Utopia::VERSION}.gem", __dir__)
-		
 		# We do a bit of a hack here to ensure the package is available:
 		FileUtils.mkpath File.join(dir, "vendor/cache")
 		FileUtils.cp package_path, File.join(dir, "vendor/cache")
