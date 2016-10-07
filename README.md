@@ -8,13 +8,13 @@ Utopia is a website generation framework which provides a robust set of tools to
 
 ## Motivation
 
-The [original Utopia project](https://github.com/ioquatix/utopia-php) was written in PHP in the early 2000s. It consisted of an XML parser, a database layer and some code to assist with business logic. It was initially designed to reduce the amount of HTML required to build both content-centric websites and business apps. At the time, CSS was very poorly supported and thus a lot of the time, you'd be using quite complex `<table>` elements to generate simple things like boxes with drop shadows, etc. Utopia provided a core concept - a node - which was essentially a small snippet of HTML, which could be composed into other nodes simply by using a named tag. Attributes and content were passed in, and thus you could easily build complex pages with simple semantic markup.
+The [original Utopia project](https://github.com/ioquatix/utopia-php) was written in PHP in the early 2000s. It consisted of an XML parser, a database layer and some code to assist with business logic. It was initially designed to reduce the amount of HTML required to build both content-centric websites and business apps. At the time, CSS was very poorly supported and thus a lot of the time, you'd be using quite complex `<table>`s with embedded `<img>`s to generate simple things like boxes with drop shadows, etc. Utopia provided a core concept - a node - which was essentially a small snippet of HTML, which could be composed into other nodes simply by using a named tag (similar to ColdFusion). Attributes and content were passed in, and thus you could easily build complex pages with simple semantic markup.
 
 At the time, the available frameworks were pretty basic. Utopia was a working, albeit poor, implementation of MVC and supported several commercial websites I developed at the time. I made it, partly just because I could, but also because it served a commercial purpose.
 
-Eventually one day I started using Ruby on Rails. There are aspects of the Rails framework which I like. However, at the time I was using it (starting with version 0.8), I found that it's flat organisation of controllers and views very limiting. I feel that nested controllers and views make a lot more sense. Heirarchical structures help organise information in way that is easy to manage. Utopia embraces this principle, and applies it to both the controller and view layers. I also developed a [model layer with similar principles](https://github.com/ioquatix/relaxo-model).
+Eventually one day I started using Ruby on Rails. There are aspects of the Rails framework which I like. However, at the time I was using it (starting with version 0.8), I found that it's flat organisation of controllers and views very limiting. Nested controllers and views make it easier to manage complexity in a web application. Utopia embraces this principle, and applies it to both the controller and view layers. I also developed a [model layer with similar principles](https://github.com/ioquatix/relaxo-model).
 
-So, Utopia exists because it suits my way of thinking about web applications, and it's conceptual core has been refined for over a decade. It provides a considered amount of both flexibility, and opinionated behaviour.
+So, Utopia exists because it suits my way of thinking about web applications, and it's conceptual core has been refined for over a decade. It provides a considered amount of both flexibility, and opinionated behavior.
 
 ## Installation
 
@@ -60,6 +60,8 @@ On the local site, you can set up a git remote:
 
 	$ git remote add production ssh://remote/srv/http/www.example.com
 	$ git push --set-upstream production master
+
+When you push to the remote site, `rake deploy` will be run after the code is updated, finally, `rake restart` will be run which ideally should restart the application server.
 
 ### Passenger+Nginx Setup
 
@@ -184,7 +186,7 @@ A tag based content generation system which integrates nicely with HTML5. Suppor
 			'environment' => Utopia::Tags::Environment.for(RACK_ENV)
 		}
 
-A basic template looks something like:
+A basic template `create.xnode` looks something like:
 
 	<page>
 		<heading>Create User</heading>
@@ -193,6 +195,8 @@ A basic template looks something like:
 			<input type="submit" />
 		</form>
 	</page>
+
+This template would typically be designed with supporting `_page.xnode` and `_heading.xnode` in the same directory or, more typically, somewhere further up the directory hierarchy.
 
 ### Session
 
