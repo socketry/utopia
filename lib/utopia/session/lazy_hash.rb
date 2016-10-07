@@ -18,8 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative '../session'
-
 module Utopia
 	class Session
 		# A simple hash table which fetches it's values only when required.
