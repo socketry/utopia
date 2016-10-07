@@ -50,6 +50,40 @@ module Utopia::SessionSpec
 		end
 	end
 	
+	describe Utopia::Session do
+		include Rack::Test::Methods
+		
+		let(:app) {Rack::Builder.parse_file(File.expand_path('../session_spec.ru', __FILE__)).first}
+		
+		before(:each) do
+			# Initial user agent:
+			header 'User-Agent', 'A'
+			
+			get "/session-set?key=foo&value=bar"
+		end
+		
+		it "should be able to retrive the value if there are no changes" do
+			get "/session-get?key=foo"
+			expect(last_response.body).to be == "bar"
+		end
+		
+		it "should fail if user agent is changed" do
+			# Change user agent:
+			header 'User-Agent', 'B'
+			
+			get "/session-get?key=foo"
+			expect(last_response.body).to be == ""
+		end
+		
+		it "should fail if ip address is changed" do
+			# Change user agent:
+			header 'X-Forwarded-For', '127.0.0.10'
+			
+			get "/session-get?key=foo"
+			expect(last_response.body).to be == ""
+		end
+	end
+	
 	describe Utopia::Session::LazyHash do
 		it "should load hash when required" do
 			loaded = false

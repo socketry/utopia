@@ -61,18 +61,40 @@ module Utopia
 			end
 		end
 		
-		# Load session
+		def build_initial_session(request)
+			# These fields must match as per the checks performed in `valid_session?`:
+			{
+				remote_ip: request.ip,
+				user_agent: request.user_agent,
+			}
+		end
+		
+		# Load session from user supplied cookie. If the data is invalid or otherwise fails validation, `build_iniital_session` is invoked.
+		# @return hash of values.
 		def load_session_values(env)
-			values = {}
-			
 			request = Rack::Request.new(env)
-			data = request.cookies[@cookie_name]
 			
-			if data
-				values = decrypt(data) rescue values
+			# Decrypt the data from the user if possible:
+			if data = request.cookies[@cookie_name]
+				if values = decrypt(data) and valid_session?(request, values)
+					return values
+				end
 			end
 			
-			return values
+			# If we couldn't create a session
+			return build_initial_session(request)
+		end
+		
+		def valid_session?(request, values)
+			if values[:remote_ip] != request.ip
+				return false
+			end
+			
+			if values[:user_agent] != request.user_agent
+				return false
+			end
+			
+			return true
 		end
 		
 		def commit(values, headers)
