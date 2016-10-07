@@ -1,6 +1,7 @@
 #!/usr/bin/env rackup
 
 require 'utopia'
+require 'json'
 
 # use Rack::ContentLength
 use Utopia::ContentLength
