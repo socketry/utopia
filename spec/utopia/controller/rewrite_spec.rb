@@ -27,7 +27,7 @@ require 'utopia/controller'
 module Utopia::Controller::RewriteSpec
 	describe Utopia::Controller do
 		class TestController < Utopia::Controller::Base
-			prepend Utopia::Controller::Rewrite
+			prepend Utopia::Controller::Rewrite, Utopia::Controller::Actions
 			
 			on 'edit' do |request, path|
 				@edit = true

@@ -1,5 +1,5 @@
 
-prepend Respond
+prepend Respond, Actions
 
 # If the request doesn't match application/json specifically, it would be passed through:
 respond.with_passthrough

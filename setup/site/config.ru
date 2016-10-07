@@ -32,7 +32,7 @@ use Utopia::Localization,
 	:nonlocalized => ['/_static/', '/_cache/']
 
 use Utopia::Controller,
-	cache_controllers: (RACK_ENV == :production)
+	cache_controllers: (RACK_ENV == :production),
 
 use Utopia::Static
 

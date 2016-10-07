@@ -51,32 +51,6 @@ module Utopia
 				def direct?(path)
 					path.dirname == uri_path
 				end
-				
-				def actions
-					@actions ||= Action.new
-				end
-				
-				def on(first, *path, **options, &block)
-					if first.is_a? Symbol
-						first = ['**', first]
-					end
-					
-					actions.define(Path.split(first) + path, options, &block)
-				end
-				
-				def lookup(path)
-					if @actions
-						relative_path = (path - uri_path).to_a
-						return @actions.select(relative_path)
-					else
-						[]
-					end
-				end
-			end
-			
-			# Given a path, look up all matched actions.
-			def actions_for_request(request, path)
-				self.class.lookup(path)
 			end
 			
 			def catch_response
@@ -85,18 +59,8 @@ module Utopia
 				end
 			end
 			
-			# Given a request, call associated actions if at least one exists.
+			# This controller does nothing.
 			def passthrough(request, path)
-				actions = actions_for_request(request, path)
-				
-				unless actions.empty?
-					return catch_response do
-						actions.each do |action|
-							action.call(self, request, path)
-						end
-					end
-				end
-				
 				return nil
 			end
 
@@ -163,9 +127,6 @@ module Utopia
 					return [content]
 				end
 			end
-			
-			# Legacy method name:
-			alias success! succeed!
 			
 			# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid rack response if the controller can do so.
 			def process!(request, path)

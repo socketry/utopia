@@ -37,20 +37,6 @@ module Utopia::Controller::MiddlewareSpec
 		end
 		
 		it "should successfully call the controller method" do
-			get "/controller/hello-world"
-			
-			expect(last_response.status).to be == 200
-			expect(last_response.body).to be == 'Hello World'
-		end
-		
-		it "should successfully call the recursive controller method" do
-			get "/controller/recursive/hello-world"
-			
-			expect(last_response.status).to be == 200
-			expect(last_response.body).to be == 'Hello World'
-		end
-		
-		it "should successfully call the controller method" do
 			get "/controller/flat"
 			
 			expect(last_response.status).to be == 200

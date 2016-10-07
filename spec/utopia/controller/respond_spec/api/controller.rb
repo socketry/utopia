@@ -1,5 +1,5 @@
 
-prepend Respond
+prepend Respond, Actions
 respond.with_json
 
 class VersionedResponse
@@ -23,5 +23,5 @@ end
 # Accept: application/json;version=1
 # Accept: application/json;version=2
 on 'fetch' do
-	success! content: VersionedResponse.new
+	succeed! content: VersionedResponse.new
 end

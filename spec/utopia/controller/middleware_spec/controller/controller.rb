@@ -1,14 +1,8 @@
 
+prepend Actions
+
 on 'flat' do
-	success! content: "flat"
-end
-
-on '**/hello-world' do
-	success! content: @hello_world
-end
-
-on '**' do
-	@hello_world = "Hello World"
+	succeed! content: "flat"
 end
 
 on 'ignore' do
@@ -20,5 +14,5 @@ on 'redirect' do
 end
 
 on 'index' do
-	success! content: 'Hello World'
+	succeed! content: 'Hello World'
 end

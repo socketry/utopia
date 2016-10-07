@@ -92,6 +92,8 @@ module Utopia
 					@rules = []
 				end
 				
+				attr :rules
+				
 				def extract_prefix(**arguments, &block)
 					@rules << ExtractPrefixRule.new(arguments, block)
 				end

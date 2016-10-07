@@ -1,6 +1,8 @@
 
-on '**' do |request, path|
-	#puts "**: #{URI_PATH.inspect}"
+prepend Actions
+
+before do |request, path|
+	# puts "**: #{URI_PATH.inspect}"
 	
 	if path.include? 'foo'
 		# This should ALWAYS give /redirect

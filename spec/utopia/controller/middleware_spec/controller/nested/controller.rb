@@ -1,4 +1,4 @@
 
 on 'foobar' do
-	success! content: "Foobar"
+	succeed! content: "Foobar"
 end

@@ -22,11 +22,11 @@ require_relative 'path'
 
 require_relative 'middleware'
 require_relative 'controller/variables'
-require_relative 'controller/action'
 require_relative 'controller/base'
 
 require_relative 'controller/rewrite'
 require_relative 'controller/respond'
+require_relative 'controller/actions'
 
 require 'concurrent/map'
 
@@ -63,6 +63,8 @@ module Utopia
 			else
 				@controller_cache = nil
 			end
+			
+			@base = Controller::Base
 		end
 		
 		attr :app
@@ -92,7 +94,7 @@ module Utopia
 			# puts "load_controller_file(#{path.inspect}) => #{controller_path}"
 			
 			if File.exist?(controller_path)
-				klass = Class.new(Base)
+				klass = Class.new(@base)
 				
 				# base_path is expected to be a string representing a filesystem path:
 				klass.const_set(:BASE_PATH, base_path.freeze)

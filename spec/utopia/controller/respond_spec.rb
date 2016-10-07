@@ -30,7 +30,8 @@ require 'utopia/controller'
 module Utopia::Controller::RespondSpec
 	describe Utopia::Controller do
 		class TestController < Utopia::Controller::Base
-			prepend Utopia::Controller::Respond
+			# Request goes from right to left.
+			prepend Utopia::Controller::Respond, Utopia::Controller::Actions
 			
 			respond.with("application/json") do |content|
 				JSON::dump(content)
@@ -41,7 +42,7 @@ module Utopia::Controller::RespondSpec
 			end
 			
 			on 'fetch' do |request, path|
-				success! content: {user_id: 10}
+				succeed! content: {user_id: 10}
 			end
 			
 			def self.uri_path

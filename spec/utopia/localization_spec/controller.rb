@@ -1,4 +1,6 @@
 
+prepend Actions
+
 on 'all_locales' do |request, path|
 	wrapper = Utopia::Localization[request]
 	
