@@ -61,11 +61,11 @@ module Utopia
 			end
 		end
 		
+		# Constructs a valid session for the given request. These fields must match as per the checks performed in `valid_session?`:
 		def build_initial_session(request)
-			# These fields must match as per the checks performed in `valid_session?`:
 			{
-				remote_ip: request.ip,
-				user_agent: request.user_agent,
+				request_ip: request.ip,
+				request_user_agent: request.user_agent,
 			}
 		end
 		
@@ -86,11 +86,11 @@ module Utopia
 		end
 		
 		def valid_session?(request, values)
-			if values[:remote_ip] != request.ip
+			if values[:request_ip] != request.ip
 				return false
 			end
 			
-			if values[:user_agent] != request.user_agent
+			if values[:request_user_agent] != request.user_agent
 				return false
 			end
 			
