@@ -28,12 +28,15 @@ module Utopia
 	class Session
 		RACK_SESSION = "rack.session".freeze
 		
-		def initialize(app, **options)
+		KEY_LENGTH = 32
+		
+		def initialize(app, secret:, **options)
 			@app = app
 			@cookie_name = options.delete(:cookie_name) || (RACK_SESSION + ".encrypted")
-
-			@secret = options.delete(:secret)
-
+			
+			salt = OpenSSL::Random.random_bytes(16)
+			@key = OpenSSL::PKCS5.pbkdf2_hmac_sha1(secret, salt, 1, KEY_LENGTH)
+			
 			@options = {
 				:domain => nil,
 				:path => "/",
@@ -114,7 +117,7 @@ module Utopia
 			c.encrypt
 			
 			# your pass is what is used to encrypt/decrypt
-			c.key = @secret
+			c.key = @key
 			c.iv = iv = c.random_iv
 			
 			e = c.update(Marshal.dump(hash))
@@ -129,7 +132,7 @@ module Utopia
 			c = OpenSSL::Cipher.new(CIPHER_ALGORITHM)
 			c.decrypt
 			
-			c.key = @secret
+			c.key = @key
 			c.iv = iv
 			
 			d = c.update(e)
