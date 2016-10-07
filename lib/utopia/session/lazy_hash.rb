@@ -21,7 +21,7 @@
 require_relative '../session'
 
 module Utopia
-	module Session
+	class Session
 		# A simple hash table which fetches it's values only when required.
 		class LazyHash
 			def initialize(&block)

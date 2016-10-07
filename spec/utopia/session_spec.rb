@@ -23,7 +23,6 @@ require 'rack'
 require 'rack/test'
 
 require 'utopia/session'
-require 'utopia/session/encrypted_cookie'
 
 module Utopia::SessionSpec
 	describe Utopia::Session do

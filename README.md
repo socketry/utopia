@@ -111,7 +111,7 @@ Utopia builds on top of Rack with the following middleware:
 - `Utopia::Localization`: Non-intrusive localization of resources.
 - `Utopia::Controller`: Dynamic behaviour with recursive execution.
 - `Utopia::Content`: XML-style template engine with powerful tag behaviours.
-- `Utopia::Session::EncryptedCookie`: Session storage using an encrypted cookie.
+- `Utopia::Session`: Session storage using an encrypted cookie.
 
 The implementation of Utopia is considered thread-safe and reentrant. However, this does not guarantee that the code YOU write will be so.
 
@@ -196,9 +196,9 @@ A basic template looks something like:
 
 ### Session
 
-The encrypted cookie session management uses symmetric private key encryption to store data on the client and avoid tampering.
+The session management uses symmetric private key encryption to store data on the client and avoid tampering.
 
-	use Utopia::Session::EncryptedCookie,
+	use Utopia::Session,
 		:expire_after => 3600,
 		:secret => '40 or more random characters for your secret key'
 
