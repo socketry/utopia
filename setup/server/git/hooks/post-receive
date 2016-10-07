@@ -41,7 +41,7 @@ WHOAMI = `whoami`.chomp!
 
 # We should find out if we need to use sudo or not:
 SUDO = if WHOAMI != DEPLOY_USER
-	["sudo", "-u", DEPLOY_USER]
+	['sudo', '-u', DEPLOY_USER]
 end
 
 CommandFailure = Class.new(StandardError)
@@ -72,9 +72,8 @@ Dir.chdir(GIT_WORK_TREE) do
 	
 	if File.exist? 'Rakefile'
 		sudo %W{bundle exec rake deploy}
+		
+		puts "Restarting server..."
+		sudo %W{bundle exec rake restart}
 	end
-	
-	puts "Restarting server..."
-	sudo %W{mkdir -p tmp} unless File.exist?('tmp')
-	sudo %W{touch tmp/restart.txt}
 end

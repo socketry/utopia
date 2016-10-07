@@ -4,6 +4,14 @@ task :deploy do
 	# This task is typiclly run after the site is updated but before the server is restarted.
 end
 
+desc 'Restart the application server'
+task :restart do
+	# This task is run after the deployment task above.
+	if passenger_config = `which passenger-config`.chomp!
+		sh(passenger_config, 'restart-app', File.dirname(__dir__))
+	end
+end
+
 desc 'Set up the environment for running your web application'
 task :environment do
 	require_relative '../config/environment'
