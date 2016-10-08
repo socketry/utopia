@@ -1,6 +1,4 @@
 
-prepend Actions
-
 on 'flat' do
 	succeed! content: "flat"
 end

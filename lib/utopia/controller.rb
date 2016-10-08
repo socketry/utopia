@@ -64,7 +64,7 @@ module Utopia
 				@controller_cache = nil
 			end
 			
-			@base = Controller::Base
+			@base = Controller::Base.dup.prepend(Controller::Actions)
 		end
 		
 		attr :app
