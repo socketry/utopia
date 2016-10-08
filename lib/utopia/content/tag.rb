@@ -98,7 +98,7 @@ module Utopia
 					write_open_html(buffer, true)
 				else
 					write_open_html(buffer)
-					buffer << content
+					buffer << content if content
 					write_close_html(buffer)
 				end
 			end
