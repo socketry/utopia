@@ -80,9 +80,8 @@ module Utopia::ContentSpec
 			node = content.lookup_node(path)
 			expect(node).to be_kind_of Utopia::Content::Node
 		
-			output = StringIO.new
-			node.process!({}, output, {})
-			expect(output.string).to be == '<h1>Hello World</h1>'
+			status, headers, body = node.process!({}, {})
+			expect(body.join).to be == '<h1>Hello World</h1>'
 		end
 		
 		it "should fetch template and use cache" do

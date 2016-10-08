@@ -123,6 +123,8 @@ module Utopia
 			end
 		end
 		
+		HTTP_HOST = 'HTTP_HOST'.freeze
+		
 		def host_preferred_locales(env)
 			http_host = env[Rack::HTTP_HOST]
 			

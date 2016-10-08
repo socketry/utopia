@@ -18,42 +18,42 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'utopia/extensions/date'
-require 'utopia/extensions/rack'
+module Utopia
+	class Content
+		# Compatibility with older versions of rack:
+		EXPIRES = 'Expires'.freeze
+		CACHE_CONTROL = 'Cache-Control'.freeze
+		CONTENT_TYPE = 'Content-Type'.freeze
+		
+		class Response
+			def initialize
+				@status = 200
+				@headers = {}
+			end
+			
+			attr :status
+			attr :headers
+			
+			# Specifies that the content shouldn't be cached. Overrides `cache!` if already called.
+			def do_not_cache!
+				@headers[CACHE_CONTROL] = "no-cache, must-revalidate"
+				@headers[EXPIRES] = Time.now.httpdate
+			end
 
-module Utopia::RackSpec
-	describe Rack::Response do
-		it "should specify not to cache content" do
-			response = Rack::Response.new
+			# Specify that the content should be cached.
+			def cache!(duration = 3600, access: "public")
+				unless @headers[CACHE_CONTROL] =~ /no-cache/
+					@headers[CACHE_CONTROL] = "#{access}, max-age=#{duration}"
+					@headers[EXPIRES] = (Time.now + duration).httpdate
+				end
+			end
+
+			# Specify the content type of the response data.
+			def content_type= value
+				@headers[CONTENT_TYPE] = value
+			end
 			
-			response.cache!(1000)
-			response.do_not_cache!
-			
-			expect(response['Cache-Control']).to be == "no-cache, must-revalidate"
-			
-			expires_header = Time.parse(response['Expires'])
-			expect(expires_header).to be <= Time.now
-		end
-		
-		it "should specify to cache content" do
-			response = Rack::Response.new
-			
-			duration = 120
-			expires = Time.now + 100 # At least this far into the future
-			response.cache!(duration)
-			
-			expect(response['Cache-Control']).to be == "public, max-age=120"
-			
-			expires_header = Time.parse(response['Expires'])
-			expect(expires_header).to be >= expires
-		end
-		
-		it "should set content type" do
-			response = Rack::Response.new
-			
-			response.content_type! "text/html"
-			
-			expect(response['Content-Type']).to be == "text/html"
+			alias content_type! content_type=
 		end
 	end
 end

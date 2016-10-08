@@ -18,39 +18,35 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'rack'
+require 'utopia/content/response'
 
-module Rack
-	# Compatibility with older versions of rack:
-	EXPIRES = 'Expires'.freeze unless defined? EXPIRES
-	HTTP_HOST = 'HTTP_HOST'.freeze unless defined? HTTP_HOST
-	
-	class Response
-		# Specifies that the content shouldn't be cached. Overrides `cache!` if already called.
-		def do_not_cache!
-			headers[CACHE_CONTROL] = "no-cache, must-revalidate"
-			headers[EXPIRES] = Time.now.httpdate
-		end
-
-		# Specify that the content should be cached.
-		def cache!(duration = 3600, access: "public")
-			unless headers[CACHE_CONTROL] =~ /no-cache/
-				headers[CACHE_CONTROL] = "#{access}, max-age=#{duration}"
-				headers[EXPIRES] = (Time.now + duration).httpdate
-			end
-		end
-
-		# Specify the content type of the response data.
-		def content_type!(value)
-			self.content_type = value
+module Utopia::Content::ResponseSpec
+	describe Utopia::Content::Response do
+		it "should specify not to cache content" do
+			subject.cache!(1000)
+			subject.do_not_cache!
+			
+			expect(subject.headers['Cache-Control']).to be == "no-cache, must-revalidate"
+			
+			expires_header = Time.parse(subject.headers['Expires'])
+			expect(expires_header).to be <= Time.now
 		end
 		
-		def content_type= value
-			headers[CONTENT_TYPE] = value
+		it "should specify to cache content" do
+			duration = 120
+			expires = Time.now + 100 # At least this far into the future
+			subject.cache!(duration)
+			
+			expect(subject.headers['Cache-Control']).to be == "public, max-age=120"
+			
+			expires_header = Time.parse(subject.headers['Expires'])
+			expect(expires_header).to be >= expires
 		end
 		
-		def content_type
-			headers[CONTENT_TYPE]
+		it "should set content type" do
+			subject.content_type! "text/html"
+			
+			expect(subject.headers['Content-Type']).to be == "text/html"
 		end
 	end
 end

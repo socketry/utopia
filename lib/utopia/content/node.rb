@@ -118,10 +118,12 @@ module Utopia
 				transaction.parse_markup(markup)
 			end
 
-			def process!(request, response, attributes = {})
-				transaction = Transaction.new(request, response)
+			def process!(request, attributes = {})
+				transaction = Transaction.new(request)
+				
 				output = transaction.render_node(self, attributes)
-				response.write(output)
+				
+				return [200, transaction.headers, [output]]
 			end
 		end
 		
@@ -152,7 +154,7 @@ module Utopia
 			end
 			
 			def response
-				transaction.response
+				transaction
 			end
 			
 			def attributes

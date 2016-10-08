@@ -20,6 +20,8 @@
 
 require_relative 'links'
 
+require_relative 'response'
+
 module Utopia
 	class Content
 		# This error is thrown if a tag doesn't match up when parsing the 
@@ -37,16 +39,20 @@ module Utopia
 		CONTENT_TAG_NAME = "content".freeze
 		
 		# A single request through content middleware. We use a struct to hide instance varibles since we instance_exec within this context.
-		class Transaction
-			def initialize(request, response, attributes = {})
+		class Transaction < Response
+			def initialize(request, attributes = {})
 				@request = request
-				@response = response
 				
 				@attributes = attributes
 				
 				@begin_tags = []
 				@end_tags = []
+				
+				super()
 			end
+			
+			attr :status
+			attr :headers
 			
 			# A helper method for accessing controller variables from view:
 			def controller
@@ -63,9 +69,6 @@ module Utopia
 
 			# The Rack::Request for this transaction.
 			attr :request
-
-			# The mutable Rack::Response for this transaction.
-			attr :response
 
 			# Per-transaction global attributes.
 			attr :attributes

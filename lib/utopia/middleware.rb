@@ -23,8 +23,6 @@ require 'logger'
 require_relative 'http'
 require_relative 'path'
 
-require_relative 'extensions/rack'
-
 module Utopia
 	PAGES_PATH = 'pages'.freeze
 	

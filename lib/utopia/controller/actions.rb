@@ -126,8 +126,6 @@ module Utopia
 				
 				def dispatch(controller, request, path)
 					if @actions
-						name = path.first
-						
 						@actions.apply(path.components) do |action|
 							controller.instance_exec(request, path, &action.callback)
 						end || controller.otherwise(request, path)
