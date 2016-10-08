@@ -54,7 +54,7 @@ module Utopia
 			request.env[VARIABLES_KEY]
 		end
 		
-		def initialize(app, root: nil, cache_controllers: false)
+		def initialize(app, root: nil, cache_controllers: false, base: nil)
 			@app = app
 			@root = root || Utopia::default_root
 			
@@ -64,13 +64,18 @@ module Utopia
 				@controller_cache = nil
 			end
 			
-			@base = Controller::Base.dup.prepend(Controller::Actions)
+			warn "Controller middleware is automatically prepending Actions! Will be deprecated in 2.x" if $VERBOSE and base.nil?
+			
+			@base = base || Controller::Base.dup.prepend(Controller::Actions)
 		end
 		
 		attr :app
 		
 		def freeze
 			@root.freeze
+			
+			# Should we freeze the base class?
+			# @base.freeze
 			
 			super
 		end

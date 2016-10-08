@@ -33,6 +33,7 @@ use Utopia::Localization,
 
 use Utopia::Controller,
 	cache_controllers: (RACK_ENV == :production),
+	base: Utopia::Controller::Base
 
 use Utopia::Static
 
