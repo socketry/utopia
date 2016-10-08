@@ -107,11 +107,14 @@ module Utopia
 			end
 
 			def call(transaction, state)
+				# Load the template:
 				template = @controller.fetch_template(@file_path)
 				
+				# Evaluate the template/code:
 				context = Context.new(transaction, state)
 				markup = template.to_buffer(context)
 				
+				# Render the resulting markup into the transaction:
 				transaction.parse_markup(markup)
 			end
 
