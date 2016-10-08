@@ -33,7 +33,7 @@ module Rack
 		end
 
 		# Specify that the content should be cached.
-		def cache!(duration = 3600, access = "public")
+		def cache!(duration = 3600, access: "public")
 			unless headers[CACHE_CONTROL] =~ /no-cache/
 				headers[CACHE_CONTROL] = "#{access}, max-age=#{duration}"
 				headers[EXPIRES] = (Time.now + duration).httpdate
