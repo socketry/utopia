@@ -1,0 +1,13 @@
+<page>
+	<heading>Editing #{self[:page_title].inspect}</heading>
+	<form action="#" method="post">
+		<fieldset>
+			<legend>Page Content</legend>
+			<textarea name="content">#{Strings::to_html self[:content]}</textarea>
+		</fieldset>
+		
+		<fieldset class="footer">
+			<input type="submit" />
+		</fieldset>
+	</form>
+</page>
