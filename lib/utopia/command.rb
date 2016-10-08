@@ -111,7 +111,11 @@ module Utopia
 					end
 					
 					Setup::Site::SYMLINKS.each do |path, target|
-						FileUtils.ln_s(target, File.join(destination_root, path), force: true)
+						destination_path = File.join(destination_root, path)
+						
+						unless File.exist? destination_path
+							FileUtils.ln_s(target, destination_path)
+						end
 					end
 					
 					Setup::Site::CONFIGURATION_FILES.each do |configuration_file|
