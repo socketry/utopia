@@ -131,7 +131,6 @@ module Utopia
 				# Get the current tag which we are completing/ending:
 				top = current
 				
-				
 				if top.tags.empty?
 					if top.node.respond_to? :tag_end
 						top.node.tag_end(self, top)
@@ -154,7 +153,7 @@ module Utopia
 
 				return nil
 			end
-
+			
 			def render_node(node, attributes = {})
 				self.begin_tags << State.new(attributes, node)
 
@@ -204,8 +203,10 @@ module Utopia
 		class Transaction::State
 			def initialize(tag, node, attributes = tag.to_hash)
 				@node = node
-
-				@buffer = StringIO.new
+				
+				# The contents of the output
+				@buffer = String.new
+				
 				@overrides = {}
 
 				@tags = []
@@ -226,7 +227,7 @@ module Utopia
 			def defer(value = nil, &block)
 				@deferred << block
 				
-				Tag.closed(DEFERRED_TAG_NAME, :id => @deferred.size - 1).to_html
+				Tag.closed(DEFERRED_TAG_NAME, :id => @deferred.size - 1).to_s
 			end
 			
 			def [](key)
@@ -248,8 +249,8 @@ module Utopia
 			end
 
 			def call(transaction)
-				@content = @buffer.string
-				@buffer = StringIO.new
+				@content = @buffer
+				@buffer = String.new
 				
 				if node.respond_to? :call
 					node.call(transaction, self)
@@ -257,11 +258,11 @@ module Utopia
 					transaction.parse_markup(@content)
 				end
 				
-				return @buffer.string
+				return @buffer
 			end
 
 			def cdata(text)
-				@buffer.write(text)
+				@buffer << text
 			end
 
 			def markup(text)
