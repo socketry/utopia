@@ -166,7 +166,7 @@ module Utopia
 			end
 			
 			# Rewrite the path before processing the request if possible.
-			def passthrough(request, path)
+			def process!(request, path)
 				if response = super
 					response = self.class.response_for(self, request, path, response)
 					

@@ -63,7 +63,6 @@ module Utopia
 			end
 			
 			# This is a path prefix matching algorithm. The pattern is an array of String, Symbol, Regexp, or nil. The components is an array of String.
-			# As long as the components match the patterns, 
 			def match(path)
 				components = path.to_a
 				

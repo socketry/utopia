@@ -59,8 +59,8 @@ module Utopia
 				end
 			end
 			
-			# This controller does nothing.
-			def passthrough(request, path)
+			# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid rack response if the controller can do so.
+			def process!(request, relative_path)
 				return nil
 			end
 
@@ -126,11 +126,6 @@ module Utopia
 				elsif content = options[:content]
 					return [content]
 				end
-			end
-			
-			# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid rack response if the controller can do so.
-			def process!(request, path)
-				passthrough(request, path)
 			end
 		end
 	end

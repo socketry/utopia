@@ -9,11 +9,11 @@ run lambda { |env|
 		
 		[200, {}, []]
 	elsif env[Rack::PATH_INFO] =~ /session-set/
-		env['rack.session'][request[:key]] = request[:value]
+		env['rack.session'][request.params['key']] = request.params['value']
 		
 		[200, {}, []]
 	elsif env[Rack::PATH_INFO] =~ /session-get/
-		[200, {}, [env['rack.session'][request[:key]]]]
+		[200, {}, [env['rack.session'][request.params['key']]]]
 	else
 		[404, {}, []]
 	end

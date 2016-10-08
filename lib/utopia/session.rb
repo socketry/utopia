@@ -27,7 +27,7 @@ module Utopia
 	# Stores all session data client side using a private symmetric encrpytion key.
 	class Session
 		RACK_SESSION = "rack.session".freeze
-		
+		CIPHER_ALGORITHM = "aes-256-cbc"
 		KEY_LENGTH = 32
 		
 		def initialize(app, secret:, **options)
@@ -109,8 +109,6 @@ module Utopia
 			
 			Rack::Utils.set_cookie_header!(headers, @cookie_name, cookie.merge(@options))
 		end
-		
-		CIPHER_ALGORITHM = "aes-256-cbc"
 		
 		def encrypt(hash)
 			c = OpenSSL::Cipher.new(CIPHER_ALGORITHM)

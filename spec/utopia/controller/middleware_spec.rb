@@ -43,8 +43,22 @@ module Utopia::Controller::MiddlewareSpec
 			expect(last_response.body).to be == 'flat'
 		end
 		
-		it "should successfully call the recursive controller method" do
-			get "/controller/recursive/flat"
+		it "should invoke controller method from the top level" do
+			get "/controller/hello-world"
+			
+			expect(last_response.status).to be == 200
+			expect(last_response.body).to be == 'Hello World'
+		end
+
+		it "should invoke the controller method with a nested path" do
+			get "/controller/nested/hello-world"
+			
+			expect(last_response.status).to be == 200
+			expect(last_response.body).to be == 'Hello World'
+		end
+		
+		it "shouldn't call the nested controller method" do
+			get "/controller/nested/flat"
 			
 			expect(last_response.status).to be == 404
 		end

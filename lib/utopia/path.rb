@@ -133,6 +133,11 @@ module Utopia
 			end
 		end
 		
+		# This constructor takes a string and generates a relative path as efficiently as possible. This is a direct entry point for all controller invocations so it's designed to suit the requirements of that function.
+		def self.from_string(string)
+			self.new(unescape(string).split(SEPARATOR, -1))
+		end
+		
 		def self.create(path)
 			case path
 			when Path
@@ -176,6 +181,10 @@ module Utopia
 			else
 				return self.class.new([''] + @components)
 			end
+		end
+
+		def to_relative!
+			@components.shift if relative?
 		end
 
 		def to_str

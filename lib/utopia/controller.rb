@@ -121,13 +121,20 @@ module Utopia
 		
 		# Invoke the controller layer for a given request. The request path may be rewritten.
 		def invoke_controllers(request)
-			relative_path = Path[request.path_info]
+			request_path = Path.from_string(request.path_info)
+			
+			# The request path must be absolute. We could handle this internally but it is probably better for this to be an error:
+			raise ArgumentError.new("Invalid request path #{request_path}") unless request_path.absolute?
+			
+			# The controller path contains the current complete path being evaluated:
 			controller_path = Path.new
+			
+			# Controller instance variables which eventually get processed by the view:
 			variables = request.env[VARIABLES_KEY]
 			
-			while relative_path.components.any?
+			while request_path.components.any?
 				# We copy one path component from the relative path to the controller path at a time. The controller, when invoked, can modify the relative path (by assigning to relative_path.components). This allows for controller-relative rewrites, but only the remaining path postfix can be modified.
-				controller_path.components << relative_path.components.shift
+				controller_path.components << request_path.components.shift
 				
 				if controller = lookup_controller(controller_path)
 					# Don't modify the original controller:
@@ -136,13 +143,13 @@ module Utopia
 					# Append the controller to the set of controller variables, updates the controller with all current instance variables.
 					variables << controller
 					
-					if result = controller.process!(request, relative_path)
+					if result = controller.process!(request, request_path)
 						return result
 					end
 				end
 			end
 			
-			# The controllers may have rewriten the path so we update the path info:
+			# Controllers can directly modify relative_path, which is copied into controller_path. The controllers may have rewriten the path so we update the path info:
 			request.env[Rack::PATH_INFO] = controller_path.to_s
 			
 			# No controller gave a useful result:

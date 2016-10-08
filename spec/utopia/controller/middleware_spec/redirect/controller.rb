@@ -1,7 +1,7 @@
 
 prepend Actions
 
-before do |request, path|
+on '**' do |request, path|
 	# puts "**: #{URI_PATH.inspect}"
 	
 	if path.include? 'foo'
