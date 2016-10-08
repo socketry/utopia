@@ -56,7 +56,6 @@ module Utopia
 					destination_root = parent.root
 					
 					FileUtils.mkdir_p File.join(destination_root, "public")
-					FileUtils.mkdir_p File.join(destination_root, "tmp")
 					
 					Dir.chdir(destination_root) do
 						# Shared allows multiple users to access the site with the same group:
@@ -65,6 +64,7 @@ module Utopia
 						system("git", "config", "core.worktree", destination_root)
 						
 						system("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git'))
+						system("cp", "-r", File.join(Setup::Server::ROOT, 'config'), File.join(destination_root))
 					end
 					
 					hostname = `hostname`.chomp
