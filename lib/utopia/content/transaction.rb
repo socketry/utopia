@@ -38,8 +38,6 @@ module Utopia
 		
 		# A single request through content middleware. We use a struct to hide instance varibles since we instance_exec within this context.
 		class Transaction
-			# extend Gem::Deprecate
-			
 			def initialize(request, response, attributes = {})
 				@request = request
 				@response = response
