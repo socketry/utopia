@@ -56,52 +56,49 @@ module Utopia
 			def [](key)
 				@attributes[key]
 			end
-
-			def to_html(content = nil, buffer = StringIO.new)
-				write_full_html(buffer, content)
-				
-				return buffer.string
-			end
 			
 			def to_hash
 				@attributes
 			end
 			
 			def to_s(content = nil)
-				buffer = StringIO.new
+				buffer = String.new
+				
 				write_full_html(buffer, content)
-				return buffer.string
+				
+				return buffer
 			end
 			
+			alias to_html to_s
+			
 			def write_open_html(buffer, terminate = false)
-				buffer ||= StringIO.new 
-				buffer.write "<#{name}"
+				buffer << "<#{name}"
 
 				@attributes.each do |key, value|
 					if value
-						buffer.write " #{key}=\"#{value}\""
+						buffer << " #{key}=\"#{value}\""
 					else
-						buffer.write " #{key}"
+						buffer << " #{key}"
 					end
 				end
 				
 				if terminate
-					buffer.write "/>"
+					buffer << "/>"
 				else
-					buffer.write ">"
+					buffer << ">"
 				end
 			end
 			
 			def write_close_html(buffer)
-				buffer.write "</#{name}>"
+				buffer << "</#{name}>"
 			end
 			
 			def write_full_html(buffer, content = nil)
-				if @closed && content == nil
+				if @closed and content.nil?
 					write_open_html(buffer, true)
 				else
 					write_open_html(buffer)
-					buffer.write(content)
+					buffer << content
 					write_close_html(buffer)
 				end
 			end
