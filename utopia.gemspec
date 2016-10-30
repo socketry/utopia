@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
 	
 	spec.add_dependency 'rack', '~> 2.0'
 	
-	spec.add_dependency 'http-accept', '~> 1.5'
+	spec.add_dependency 'http-accept', '~> 1.6'
 	
 	spec.add_dependency 'mail', '~> 2.6'
 	

@@ -68,6 +68,7 @@ module Utopia
 			
 			# Locales here are represented as an array of strings, e.g. ['en', 'ja', 'cn', 'de'].
 			unless @default_locales = options[:default_locales] 
+				# We append nil, i.e. no localization.
 				@default_locales = @all_locales.names + [nil]
 			end
 			
