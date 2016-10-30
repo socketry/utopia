@@ -8,7 +8,7 @@ desc 'Restart the application server'
 task :restart do
 	# This task is run after the deployment task above.
 	if passenger_config = `which passenger-config`.chomp!
-		sh(passenger_config, 'restart-app', File.dirname(__dir__))
+		sh(passenger_config, 'restart-app', '--ignore-passenger-not-running', File.dirname(__dir__))
 	end
 end
 

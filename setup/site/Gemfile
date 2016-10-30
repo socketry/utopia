@@ -16,3 +16,8 @@ group :development do
 	gem "pry"
 	gem "rack-test"
 end
+
+group :production do
+	# Used for passenger-config to restart server after deployment:
+	gem "passenger"
+end
