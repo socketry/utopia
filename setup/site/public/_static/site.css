@@ -2,11 +2,13 @@
 html {
 	font-family: "PT Sans", Verdana, Helvetica, Arial, sans-serif;
 }
+
 @media (min-width: 48em) {
 	html {
 		font-size: 16px;
 	}
 }
+
 @media (min-width: 58em) {
 	html {
 		font-size: 20px;
@@ -20,7 +22,7 @@ body {
 	background-color: #fafafa;
 }
 
-#header {
+body > header {
 	margin: 1em 0 1em 0;
 	
 	background-color: white;
@@ -30,7 +32,7 @@ body {
 	box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
-#header img {
+body > header img {
 	display: block;
 	margin: auto;
 	height: 4em;
@@ -45,7 +47,6 @@ p strong {
 }
 
 h1, h2, h3, h4, h5, h6 {
-	color: #333;
 	margin: 2em 1em 1em 1em;
 	color: #4E8DD9;
 }
@@ -101,21 +102,40 @@ section.features {
 
 section.features > div {
 	box-sizing: border-box;
-	background: #e0ddd5;
 	
-	width: 40%;
+	flex-basis: 20rem;
+	flex-grow: 1;
 	
 	color: #171e42;
 	margin: 1rem;
 	padding: 1rem;
+	
+	padding-left: 3rem;
+	
+	position: relative;
+}
+
+section.features > div i {
+	position: absolute;
+	left: 0rem;
+	
+	font-size: 1.5rem;
+	text-align: center;
+	
+	width: 3rem;
+	color: #fafafa;
+	text-shadow: 0px 0px 1px #000;
 }
 
 section.features p {
 	margin: 0;
+	maring-bottom: 1rem;
+	font-size: 80%;
 }
 
-section.header {
-	font-weight: bold;
+section.features h2 {
+	margin: 0;
+	font-size: 1.1rem;
 	padding: 0;
 }
 
