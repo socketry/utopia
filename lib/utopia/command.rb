@@ -35,7 +35,6 @@ module Utopia
 				CONFIGURATION_FILES = ['config.ru', 'config/environment.rb', 'Gemfile', 'Rakefile', 'tasks/utopia.rake']
 				
 				DIRECTORIES = ["config", "lib", "pages", "public", "tasks"]
-				SYMLINKS = {"public/_static" => "../pages/_static"}
 				
 				# Removed during upgrade process
 				OLD_DIRECTORIES = ["access_log", "cache", "tmp"]
@@ -110,14 +109,6 @@ module Utopia
 						end
 					end
 					
-					Setup::Site::SYMLINKS.each do |path, target|
-						destination_path = File.join(destination_root, path)
-						
-						unless File.exist? destination_path
-							FileUtils.ln_s(target, destination_path)
-						end
-					end
-					
 					Setup::Site::CONFIGURATION_FILES.each do |configuration_file|
 						destination_path = File.join(destination_root, configuration_file)
 						
@@ -164,6 +155,16 @@ module Utopia
 			class Update < Samovar::Command
 				self.description = "Upgrade an existing site to use the latest configuration files from the template."
 				
+				def move_static!
+					if File.lstat("public/_static").symlink?
+						FileUtils.rm_f "public/_static"
+					end
+					
+					if File.directory?("pages/_static") and !File.exist?("public/_static")
+						system("git", "mv", "pages/_static", "public/_static")
+					end
+				end
+				
 				def invoke(parent)
 					destination_root = parent.root
 					branch_name = "utopia-upgrade-#{Utopia::VERSION}"
@@ -184,10 +185,6 @@ module Utopia
 						FileUtils.rm_rf(path)
 					end
 					
-					Setup::Site::SYMLINKS.each do |path, target|
-						FileUtils.ln_s(target, File.join(destination_root, path), force: true)
-					end
-					
 					Setup::Site::CONFIGURATION_FILES.each do |configuration_file|
 						source_path = File.join(Setup::Site::ROOT, configuration_file)
 						destination_path = File.join(destination_root, configuration_file)
@@ -205,7 +202,9 @@ module Utopia
 							system("git", "add", "-u")
 							
 							# Stage any new files that we have explicitly added:
-							system("git", "add", *Setup::Site::CONFIGURATION_FILES, *Setup::Site::SYMLINKS.keys)
+							system("git", "add", *Setup::Site::CONFIGURATION_FILES)
+							
+							move_static!
 							
 							# Commit all changes:
 							system("git", "commit", "-m", "Upgrade to utopia #{Utopia::VERSION}.")
