@@ -46,7 +46,16 @@ module Utopia::SessionSpec
 			expect(last_response.header).to be_include 'Set-Cookie'
 			
 			get "/session-get?key=foo"
+			expect(last_request.cookies).to include('rack.session.encrypted')
 			expect(last_response.body).to be == "bar"
+		end
+		
+		it "should ignore session if cookie value is invalid" do
+			set_cookie 'rack.session.encrypted=junk'
+			
+			get "/session-get?key=foo"
+			
+			expect(last_response.body).to be == ""
 		end
 	end
 	
