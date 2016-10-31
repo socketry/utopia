@@ -137,6 +137,8 @@ module Utopia
 			d << c.final
 			
 			return Marshal.load(d)
+		rescue
+			return nil
 		end
 	end
 end
