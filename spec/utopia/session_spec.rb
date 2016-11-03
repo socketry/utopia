@@ -57,6 +57,25 @@ module Utopia::SessionSpec
 			
 			expect(last_response.body).to be == ""
 		end
+		
+		it "shouldn't update the session if there are no changes" do
+			get "/session-set?key=foo&value=bar"
+			expect(last_response.header).to be_include 'Set-Cookie'
+			
+			get "/session-set?key=foo&value=bar"
+			expect(last_response.header).to_not be_include 'Set-Cookie'
+		end
+		
+		it "should update the session if time has passed" do
+			get "/session-set?key=foo&value=bar"
+			expect(last_response.header).to be_include 'Set-Cookie'
+			
+			# Sleep more than update_timeout
+			sleep 2
+			
+			get "/session-set?key=foo&value=bar"
+			expect(last_response.header).to be_include 'Set-Cookie'
+		end
 	end
 	
 	describe Utopia::Session do
@@ -94,7 +113,7 @@ module Utopia::SessionSpec
 	end
 	
 	describe Utopia::Session::LazyHash do
-		it "should load hash when required" do
+		it "should load hash only when required" do
 			loaded = false
 			
 			hash = Utopia::Session::LazyHash.new do
@@ -109,14 +128,51 @@ module Utopia::SessionSpec
 			expect(loaded).to be true
 		end
 		
+		it "should need to be reloaded if changed" do
+			hash = Utopia::Session::LazyHash.new do
+				{a: 10}
+			end
+			
+			expect(hash.needs_update?).to be false
+			
+			hash[:a] = 10
+			
+			expect(hash.needs_update?).to be false
+			
+			hash[:a] = 20
+			
+			expect(hash.needs_update?).to be true
+		end
+		
+		it "should need to be reloaded if old" do
+			hash = Utopia::Session::LazyHash.new do
+				{updated_at: Time.now - 3700}
+			end
+			
+			expect(hash.needs_update?(3600)).to be false
+			
+			expect(hash).to include(:updated_at)
+			
+			# If the timeout is 2 hours, it shouldn't require any update:
+			expect(hash.needs_update?(3600*2)).to be false
+			
+			# However if the timeout is 1 hour ago, it WILL require an update:
+			expect(hash.needs_update?(3600)).to be true
+		end
+		
 		it "should delete the specified item" do
 			hash = Utopia::Session::LazyHash.new do
 				{a: 10, b: 20}
 			end
 			
-			expect(hash.include?(:a)).to be true
+			expect(hash).to include(:a, :b)
+			
 			expect(hash.delete(:a)).to be 10
-			expect(hash.include?(:a)).to be false
+			
+			expect(hash).to include(:b)
+			expect(hash).to_not include(:a)
+			
+			expect(hash.needs_update?).to be true
 		end
 	end
 end

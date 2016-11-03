@@ -65,6 +65,23 @@ module Utopia
 			def load!
 				@values ||= @loader.call
 			end
+			
+			def loaded?
+				!@values.nil?
+			end
+			
+			def needs_update?(timeout = nil)
+				# If data has changed, we need update:
+				return true if @changed
+				
+				# We want to be careful here and not call load! which isn't cheap operation.
+				if timeout and @values and updated_at = @values[:updated_at]
+					# If the last update was too long ago, we need update:
+					return true if updated_at < (Time.now - timeout)
+				end
+				
+				return false
+			end
 		end
 	end
 end

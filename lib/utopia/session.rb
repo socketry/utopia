@@ -28,20 +28,51 @@ module Utopia
 	class Session
 		RACK_SESSION = "rack.session".freeze
 		CIPHER_ALGORITHM = "aes-256-cbc"
-		KEY_LENGTH = 32
 		
-		def initialize(app, secret:, **options)
+		# The session will expire if no requests were made within 24 hours:
+		DEFAULT_EXPIRES_AFTER = 3600*24
+		
+		# At least, the session will be updated every 1 hour:
+		DEFAULT_UPDATE_TIMEOUT = 3600
+		
+		def initialize(app, session_name: nil, secret:, expires_after: nil, update_timeout: nil, **options)
 			@app = app
-			@cookie_name = options.delete(:cookie_name) || (RACK_SESSION + ".encrypted")
 			
-			salt = OpenSSL::Random.random_bytes(16)
-			@key = OpenSSL::PKCS5.pbkdf2_hmac_sha1(secret, salt, 1, KEY_LENGTH)
+			@session_name = session_name || RACK_SESSION
+			@cookie_name = @session_name + ".encrypted"
 			
-			@options = {
-				:domain => nil,
-				:path => "/",
-				:expires_after => nil
+			# This generates a 32-byte key suitable for aes.
+			@key = Digest::SHA2.digest(secret)
+			
+			@expires_after = expires_after || DEFAULT_EXPIRES_AFTER
+			@update_timeout = update_timeout || DEFAULT_UPDATE_TIMEOUT
+			
+			@cookie_defaults = {
+				domain: nil,
+				path: "/",
+				# The Secure attribute is meant to keep cookie communication limited to encrypted transmission, directing browsers to use cookies only via secure/encrypted connections. However, if a web server sets a cookie with a secure attribute from a non-secure connection, the cookie can still be intercepted when it is sent to the user by man-in-the-middle attacks. Therefore, for maximum security, cookies with the Secure attribute should only be set over a secure connection.
+				secure: false,
+				# The HttpOnly attribute directs browsers not to expose cookies through channels other than HTTP (and HTTPS) requests. This means that the cookie cannot be accessed via client-side scripting languages (notably JavaScript), and therefore cannot be stolen easily via cross-site scripting (a pervasive attack technique).
+				http_only: true,
 			}.merge(options)
+		end
+		
+		attr :cookie_name
+		attr :key
+		
+		attr :expires_after
+		attr :update_timeout
+		
+		attr :cookie_defaults
+		
+		def freeze
+			@cookie_name.freeze
+			@key.freeze
+			@expires_after.freeze
+			@update_timeout.freeze
+			@cookie_defaults.freeze
+			
+			super
 		end
 
 		def call(env)
@@ -49,9 +80,7 @@ module Utopia
 
 			status, headers, body = @app.call(env)
 
-			if session_hash.changed?
-				commit(session_hash.values, headers)
-			end
+			update_session(env, session_hash, headers)
 
 			return [status, headers, body]
 		end
@@ -64,11 +93,25 @@ module Utopia
 			end
 		end
 		
+		def update_session(env, session_hash, headers)
+			if session_hash.needs_update?(@update_timeout)
+				values = session_hash.values
+				
+				values[:updated_at] = Time.now
+				
+				data = encrypt(session_hash.values)
+				
+				commit(data, headers)
+			end
+		end
+		
 		# Constructs a valid session for the given request. These fields must match as per the checks performed in `valid_session?`:
 		def build_initial_session(request)
 			{
 				request_ip: request.ip,
 				request_user_agent: request.user_agent,
+				created_at: Time.now,
+				updated_at: Time.now,
 			}
 		end
 		
@@ -100,14 +143,19 @@ module Utopia
 			return true
 		end
 		
-		def commit(values, headers)
-			data = encrypt(values)
+		def expires
+			if @expires_after
+				return Time.now + @expires_after
+			end
+		end
+		
+		def commit(value, headers)
+			cookie = {
+				value: value,
+				expires: expires
+			}.merge(@cookie_defaults)
 			
-			cookie = {:value => data}
-			
-			cookie[:expires] = Time.now + @options[:expires_after] unless @options[:expires_after].nil?
-			
-			Rack::Utils.set_cookie_header!(headers, @cookie_name, cookie.merge(@options))
+			Rack::Utils.set_cookie_header!(headers, @cookie_name, cookie)
 		end
 		
 		def encrypt(hash)
