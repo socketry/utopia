@@ -20,8 +20,10 @@
 
 module Utopia
 	class Bootstrap
-		def initialize(config_root)
+		def initialize(config_root, external_encoding: Encoding::UTF_8)
 			@config_root = config_root
+			
+			@external_encoding = external_encoding
 		end
 		
 		def setup
@@ -38,10 +40,13 @@ module Utopia
 			File.expand_path('environment.yaml', @config_root)
 		end
 		
+		# If you don't specify these, it's possible to have issues when encodings mismatch on the server.
 		def setup_encoding
-			# If you don't specify these, it's possible to have issues when encodings mismatch on the server.
-			Encoding.default_external = Encoding::UTF_8
-			Encoding.default_internal = Encoding::UTF_8
+			# TODO: Deprecate and remove this setup - it should be the responsibility of the server to set this correctly.
+			if @external_encoding and Encoding.default_external != @external_encoding
+				warn "Updating Encoding.default_external from #{Encoding.default_external} to #{@external_encoding}"
+				Encoding.default_external = @external_encoding
+			end
 		end
 		
 		def setup_environment

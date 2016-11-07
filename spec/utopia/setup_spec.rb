@@ -56,7 +56,12 @@ RSpec.describe "utopia executable" do
 			result = sh(utopia, "--in", dir, "site", "create")
 			expect(result).to be == 0
 			
-			expect(Dir.entries(dir)).to include(".bowerrc", ".git", "Gemfile", "Gemfile.lock", "README.md", "Rakefile", "config.ru", "lib", "pages", "public", "tmp")
+			expect(Dir.entries(dir)).to include(".bowerrc", ".git", "Gemfile", "Gemfile.lock", "README.md", "Rakefile", "config.ru", "lib", "pages", "public", "tmp", "spec")
+			
+			Dir.chdir(dir) do
+				result = sh("rake", "test")
+				expect(result).to be == 0
+			end
 		end
 	end
 	
