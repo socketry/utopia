@@ -1,5 +1,5 @@
 
-require_relative 'website'
+require_relative 'website_context'
 
 RSpec.describe "my website" do
 	include_context "website"
