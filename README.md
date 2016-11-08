@@ -258,6 +258,20 @@ The session management uses symmetric private key encryption to store data on th
 
 All session data is stored on the client, but it's encrypted with a salt and the secret key. It would be hard for the client to decrypt the data without the secret.
 
+### Testing
+
+Utopia websites include a default set of tests, and associated `rake test` tasks. These specs can test against the actual running website. By default, `simplecov` is included for coverage testing.
+
+	$ rake coverage test
+
+	my website
+		should have an accessible front page
+
+	Finished in 0.44849 seconds (files took 0.15547 seconds to load)
+	1 example, 0 failures
+
+	Coverage report generated for RSpec. 5 / 5 LOC (100.0%) covered.
+
 ## Contributing
 
 1. Fork it
