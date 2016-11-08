@@ -253,7 +253,7 @@ This template would typically be designed with supporting `_page.xnode` and `_he
 The session management uses symmetric private key encryption to store data on the client and avoid tampering.
 
 	use Utopia::Session,
-		:expire_after => 3600,
+		:expires_after => 3600,
 		:secret => '40 or more random characters for your secret key'
 
 All session data is stored on the client, but it's encrypted with a salt and the secret key. It would be hard for the client to decrypt the data without the secret.
