@@ -1,4 +1,6 @@
 
+prepend Actions
+
 class TharSheBlows < StandardError
 end
 

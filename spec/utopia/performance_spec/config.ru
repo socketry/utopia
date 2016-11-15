@@ -21,6 +21,7 @@ use Utopia::Redirection::Errors,
 
 use Utopia::Controller,
 	root: File.expand_path('pages', __dir__),
+	base: Utopia::Controller::Base,
 	cache_controllers: true
 
 use Utopia::Static,

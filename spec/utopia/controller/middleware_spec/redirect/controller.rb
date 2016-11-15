@@ -1,4 +1,6 @@
 
+prepend Actions
+
 on '**' do |request, path|
 	# puts "**: #{URI_PATH.inspect}"
 	

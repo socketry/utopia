@@ -1,5 +1,5 @@
 
-prepend Respond
+prepend Respond, Actions
 respond.with_json
 
 on 'fetch' do

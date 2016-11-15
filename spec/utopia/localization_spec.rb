@@ -27,8 +27,8 @@ require 'utopia/content'
 require 'utopia/controller'
 require 'utopia/localization'
 
-module Utopia::StaticSpec
-	describe Utopia::Static do
+module Utopia::LocalizationSpec
+	describe Utopia::Localization do
 		include Rack::Test::Methods
 		
 		let(:app) {Rack::Builder.parse_file(File.expand_path('../localization_spec.ru', __FILE__)).first}
