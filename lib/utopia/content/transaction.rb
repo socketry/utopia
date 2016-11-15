@@ -230,7 +230,7 @@ module Utopia
 			def defer(value = nil, &block)
 				@deferred << block
 				
-				Tag.closed(DEFERRED_TAG_NAME, :id => @deferred.size - 1).to_s
+				Tag.closed(DEFERRED_TAG_NAME, :id => @deferred.size - 1)
 			end
 			
 			def [](key)
@@ -273,18 +273,17 @@ module Utopia
 			end
 
 			def tag_complete(tag)
-				tag.write_full_html(@buffer)
+				tag.write(@buffer)
 			end
 
 			def tag_begin(tag)
 				@tags << tag
-				tag.write_open_html(@buffer)
+				tag.write_opening_tag(@buffer)
 			end
 
 			def tag_end(tag)
 				raise UnbalancedTagError(tag) unless @tags.pop.name == tag.name
-
-				tag.write_close_html(@buffer)
+				tag.write_closing_tag(@buffer)
 			end
 		end
 	end

@@ -18,63 +18,42 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'trenni/markup'
+
 module Utopia
 	class Content
 		# This represents an individual SGML tag, e.g. <a>, </a> or <a />, with attributes. Attribute values must be escaped.
-		class Tag
-			def == other
-				if Tag === other
-					[@name, @attributes, @closed] == [other.name, other.attributes, other.closed]
-				end
+		Tag = Struct.new(:name, :closed, :attributes) do
+			include Trenni::Markup
+			
+			def self.closed(name, **attributes)
+				self.new(name, true, **attributes)
 			end
 			
-			def self.closed(name, attributes = {})
-				tag = Tag.new(name, attributes)
-				tag.closed = true
-				
-				return tag
+			def initialize(name, closed = false, **attributes)
+				super(name, closed, attributes)
 			end
 			
-			def initialize(name, attributes = {})
-				@name = name
-				@attributes = attributes
-				@closed = false
-			end
-
-			def freeze
-				@name.freeze
-				@attributes.freeze
-				@closed.freeze
-				
-				super
-			end
-
-			attr_accessor :name
-			attr_accessor :attributes
-			attr_accessor :closed
-
-			def [](key)
-				@attributes[key]
+			def [] key
+				attributes[key]
 			end
 			
-			def to_hash
-				@attributes
-			end
+			alias to_hash attributes
 			
 			def to_s(content = nil)
 				buffer = String.new
 				
-				write_full_html(buffer, content)
+				write(buffer, content)
 				
 				return buffer
 			end
 			
-			alias to_html to_s
+			alias to_str to_s
 			
-			def write_open_html(buffer, terminate = false)
+			def write_opening_tag(buffer, self_closing = false)
 				buffer << "<#{name}"
 
-				@attributes.each do |key, value|
+				attributes.each do |key, value|
 					if value
 						buffer << " #{key}=\"#{value}\""
 					else
@@ -82,24 +61,24 @@ module Utopia
 					end
 				end
 				
-				if terminate
+				if self_closing
 					buffer << "/>"
 				else
 					buffer << ">"
 				end
 			end
 			
-			def write_close_html(buffer)
+			def write_closing_tag(buffer)
 				buffer << "</#{name}>"
 			end
 			
-			def write_full_html(buffer, content = nil)
-				if @closed and content.nil?
-					write_open_html(buffer, true)
+			def write(buffer, content = nil)
+				if closed and content.nil?
+					write_opening_tag(buffer, true)
 				else
-					write_open_html(buffer)
+					write_opening_tag(buffer)
 					buffer << content if content
-					write_close_html(buffer)
+					write_closing_tag(buffer)
 				end
 			end
 		end

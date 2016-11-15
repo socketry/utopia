@@ -60,10 +60,10 @@ module Utopia
 		def fetch_template(path)
 			if @template_cache
 				@template_cache.fetch_or_store(path.to_s) do
-					Trenni::Template.load_file(path)
+					Trenni::MarkupTemplate.load_file(path)
 				end
 			else
-				Trenni::Template.load_file(path)
+				Trenni::MarkupTemplate.load_file(path)
 			end
 		end
 		

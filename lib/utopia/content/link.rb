@@ -21,6 +21,8 @@
 require 'yaml'
 require 'trenni/builder'
 
+require 'trenni/strings'
+
 require_relative '../path'
 require_relative '../locale'
 
@@ -86,7 +88,7 @@ module Utopia
 				@info.fetch(:title, @title)
 			end
 
-			def to_href(**options)
+			def to_anchor(**options)
 				Trenni::Builder.fragment(options[:builder]) do |builder|
 					if href?
 						relative_href(options[:base])
@@ -101,6 +103,8 @@ module Utopia
 					end
 				end
 			end
+			
+			alias to_href to_anchor
 			
 			def to_s
 				"\#<#{self.class}(#{self.kind}) title=#{title.inspect} href=#{href.inspect}>"
