@@ -78,7 +78,7 @@ module Utopia
 		# We cache 301 redirects for 24 hours.
 		DEFAULT_MAX_AGE = 3600*24
 		
-		class Redirection
+		class ClientRedirect
 			def initialize(app, status: 307, max_age: DEFAULT_MAX_AGE)
 				@app = app
 				@status = status
@@ -123,7 +123,7 @@ module Utopia
 			end
 		end
 		
-		class DirectoryIndex < Redirection
+		class DirectoryIndex < ClientRedirect
 			def initialize(app, index: 'index')
 				@app = app
 				@index = index
@@ -138,7 +138,7 @@ module Utopia
 			end
 		end
 		
-		class Rewrite < Redirection
+		class Rewrite < ClientRedirect
 			def initialize(app, patterns, status: 301)
 				@patterns = patterns
 				
@@ -152,7 +152,7 @@ module Utopia
 			end
 		end
 		
-		class Moved < Redirection
+		class Moved < ClientRedirect
 			def initialize(app, pattern, prefix, status: 301, flatten: false)
 				@app = app
 				
