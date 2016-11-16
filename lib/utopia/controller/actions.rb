@@ -133,6 +133,7 @@ module Utopia
 				end
 			end
 			
+			# TODO: Test this functionality and confirm working. Document.
 			def otherwise(request, path)
 			end
 			

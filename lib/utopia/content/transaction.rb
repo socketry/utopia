@@ -265,6 +265,7 @@ module Utopia
 			end
 
 			def cdata(text)
+				# TODO: This text may contain HTML entities. Does that matter?
 				@buffer << text
 			end
 

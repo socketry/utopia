@@ -143,6 +143,7 @@ module Utopia
 			end
 
 			def attribute(name, value)
+				# TODO: Value here may contain HTML entities, e.g. &amp;. Does that matter?
 				@stack.last[0].attributes[name.to_sym] = value
 			end
 
