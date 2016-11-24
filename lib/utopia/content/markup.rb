@@ -18,7 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'trenni/parser'
+require 'trenni/parsers'
+require 'trenni/entities'
 require 'trenni/strings'
 
 require_relative 'tag'
@@ -48,107 +49,122 @@ module Utopia
 			end
 		end
 		
-		class Markup
-			def self.parse!(markup, delegate)
-				# This is for compatibility with the existing API which passes in a string:
-				markup = Trenni::Buffer.new(markup) if markup.is_a? String
-				
-				self.new(markup, delegate).parse!
-			end
-
-			class UnbalancedTagError < StandardError
-				def initialize(scanner, start_position, current_tag, closing_tag)
-					@scanner = scanner
-					@start_position = start_position
-					@current_tag = current_tag
-					@closing_tag = closing_tag
+		class MarkupParser
+			class ParsedTag < Tag
+				def initialize(name, offset)
+					@offset = offset
 					
-					@starting_line = Trenni::Location.new(@scanner.string, @start_position)
-					@ending_line = Trenni::Location.new(@scanner.string, @scanner.pos)
+					super(name, SymbolicHash.new)
+				end
+				
+				attr :offset
+			end
+			
+			class UnbalancedTagError < StandardError
+				def initialize(buffer, opening_tag, closing_tag = nil)
+					@buffer = buffer
+					@opening_tag = current_tag
+					@closing_tag = closing_tag
 				end
 
-				attr :scanner
-				attr :start_position
+				attr :buffer
 				attr :current_tag
 				attr :closing_tag
-
+				
+				def start_location
+					Trenni::Location.new(@buffer.read, current_tag.offset)
+				end
+				
+				def end_location
+					if closing_tag and closing_tag.respond_to? :offset
+						Trenni::Location.new(@buffer.read, closing_tag.offset)
+					end
+				end
+				
 				def to_s
-					"Unbalanced Tag Error. Line #{@starting_line}: #{@current_tag} has been closed by #{@closing_tag} on line #{@ending_line}!"
+					if @closing_tag
+						"#{start_location}: #{@opening_tag} was not closed!"
+					else
+						"#{start_location}: #{@opening_tag} was closed by #{@closing_tag}!"
+					end
 				end
 			end
-
-			def initialize(buffer, delegate)
+			
+			def self.parse(buffer, delegate, entities = Trenni::Entities::HTML5)
+				# This is for compatibility with the existing API which passes in a string:
+				buffer = Trenni::Buffer(buffer)
+				
+				self.new(buffer, delegate).parse!
+			end
+			
+			def initialize(buffer, delegate, entities = Trenni::Entities::HTML5)
 				@buffer = buffer
 				@delegate = delegate
+				@entities = entities
+				
+				@current = nil
 				@stack = []
 			end
-
+			
 			def parse!
-				Trenni::Parser.new(@buffer, self).parse!
+				Trenni::Parsers.parse_markup(@buffer, self, @entities)
 				
-				unless @stack.empty?
-					current_tag, current_position = @stack.pop
+				if tag = @stack.pop
+					raise UnbalancedTagError.new(@buffer, tag)
+				end
+			end
+
+			def open_tag_begin(name, offset)
+				@current = Tag.new(name, offset)
+			end
+
+			def attribute(key, value)
+				@current.attributes[key] = value
+			end
+
+			def open_tag_end(self_closing)
+				if self_closing
+					@current.closed = true
 					
-					raise UnbalancedTagError.new(@scanner, current_position, current_tag.name, 'EOF')
-				end
-			end
-
-			def begin_parse(scanner)
-				@scanner = scanner
-			end
-			
-			def doctype(attributes)
-				@delegate.cdata("<!DOCTYPE #{attributes}>")
-			end
-
-			def text(text)
-				@delegate.cdata(text)
-			end
-
-			def cdata(text)
-				@delegate.cdata("<![CDATA[#{text}]]>")
-			end
-
-			def comment(text)
-				@delegate.cdata("<!--#{text}-->")
-			end
-
-			def begin_tag(tag_name, begin_tag_type)
-				if begin_tag_type == :opened
-					@stack << [Tag.new(tag_name, SymbolicHash.new), @scanner.pos]
+					@delegate.tag_complete(@current)
 				else
-					current_tag, current_position = @stack.pop
-			
-					if tag_name != current_tag.name
-						raise UnbalancedTagError.new(@scanner, current_position, current_tag.name, tag_name)
-					end
-			
-					@delegate.tag_end(current_tag)
+					@current.closed = false
+					
+					@stack << @current
+					@delegate.tag_begin(@current)
 				end
+				
+				@current = nil
 			end
 
-			def finish_tag(begin_tag_type, end_tag_type)
-				if begin_tag_type == :opened # <...
-					if end_tag_type == :closed # <.../>
-						cur, pos = @stack.pop
-						cur.closed = true
-
-						@delegate.tag_complete(cur)
-					elsif end_tag_type == :opened # <...>
-						cur, pos = @stack.last
-
-						@delegate.tag_begin(cur)
-					end
+			def close_tag(name, offset)
+				tag = @stack.pop
+				
+				if tag.name != name
+					raise UnbalancedTagError.new(@buffer, tag, ParsedTag.new(name, offset))
 				end
+				
+				@delegate.tag_end(tag)
+			end
+			
+			def doctype(string)
+				@delegate.write(string)
 			end
 
-			def attribute(name, value)
-				# TODO: Value here may contain HTML entities, e.g. &amp;. Does that matter?
-				@stack.last[0].attributes[name.to_sym] = value
+			def comment(string)
+				@delegate.write(string)
 			end
 
-			def instruction(content)
-				cdata("<?#{content}?>")
+			def instruction(string)
+				@delegate.write(string)
+			end
+
+			def cdata(string)
+				@delegate.write(string)
+			end
+
+			def text(string)
+				@delegate.text(string)
 			end
 		end
 	end

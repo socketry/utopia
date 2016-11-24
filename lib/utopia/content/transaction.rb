@@ -29,7 +29,7 @@ module Utopia
 			def initialize(tag)
 				@tag = tag
 				
-				super("Unbalanced tag #{tag.name}")
+				super "Unbalanced tag #{tag.name}"
 			end
 			
 			attr :tag
@@ -51,9 +51,6 @@ module Utopia
 				super()
 			end
 			
-			attr :status
-			attr :headers
-			
 			# A helper method for accessing controller variables from view:
 			def controller
 				@controller ||= Utopia::Controller[request]
@@ -64,7 +61,7 @@ module Utopia
 			end
 
 			def parse_markup(markup)
-				Markup.parse!(markup, self)
+				MarkupParser.parse(markup, self)
 			end
 
 			# The Rack::Request for this transaction.
@@ -94,7 +91,7 @@ module Utopia
 
 			def tag_complete(tag, node = nil)
 				if tag.name == CONTENT_TAG_NAME
-					current.markup(content)
+					current.write(content)
 				else
 					node ||= lookup(tag)
 
@@ -125,9 +122,13 @@ module Utopia
 
 				return nil
 			end
+			
+			def write(string)
+				current.write(string)
+			end
 
-			def cdata(text)
-				current.cdata(text)
+			def text(string)
+				current.text(string)
 			end
 
 			def tag_end(tag = nil)
@@ -146,7 +147,7 @@ module Utopia
 					self.end_tags.pop
 
 					if current
-						current.markup(buffer)
+						current.write(buffer)
 					end
 
 					return buffer
@@ -207,14 +208,13 @@ module Utopia
 			def initialize(tag, node, attributes = tag.to_hash)
 				@node = node
 				
-				# The contents of the output
 				@buffer = String.new
 				
 				@overrides = {}
-
+				
 				@tags = []
 				@attributes = attributes
-
+				
 				@content = nil
 				@deferred = []
 			end
@@ -264,13 +264,12 @@ module Utopia
 				return @buffer
 			end
 
-			def cdata(text)
-				# TODO: This text may contain HTML entities. Does that matter?
-				@buffer << text
+			def write(string)
+				@buffer << string
 			end
 
-			def markup(text)
-				cdata(text)
+			def text(string)
+				@buffer << Trenni::MarkupString(string)
 			end
 
 			def tag_complete(tag)

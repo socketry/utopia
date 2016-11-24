@@ -35,7 +35,7 @@ module Utopia::Content::MarkupSpec
 		end
 	end
 	
-	describe Utopia::Content::Markup do
+	describe Utopia::Content::MarkupParser do
 		it "should format open tags correctly" do
 			foo_tag = Utopia::Content::Tag.new("foo", bar: nil, baz: 'bob')
 			
@@ -49,7 +49,7 @@ module Utopia::Content::MarkupSpec
 			delegate = TestDelegate.new
 			
 			buffer = Trenni::Buffer.new(string)
-			Utopia::Content::Markup.new(buffer, delegate).parse!
+			Utopia::Content::MarkupParser.new(buffer, delegate).parse!
 			
 			return delegate
 		end
@@ -75,9 +75,9 @@ module Utopia::Content::MarkupSpec
 			foo_tag = Utopia::Content::Tag.new("foo")
 			expected_events = [
 				[:tag_begin, foo_tag],
-				[:cdata, "Bob &amp; Barley"],
-				[:cdata, "<!-- Comment -->"],
-				[:cdata, "<![CDATA[Hello & World]]>"],
+				[:text, "Bob & Barley"],
+				[:write, "<!-- Comment -->"],
+				[:write, "<![CDATA[Hello & World]]>"],
 				[:tag_end, foo_tag],
 			]
 			
@@ -85,11 +85,11 @@ module Utopia::Content::MarkupSpec
 		end
 		
 		it "should fail with incorrect closing tag" do
-			expect{parse %Q{<p>Foobar</dl>}}.to raise_exception(Utopia::Content::Markup::UnbalancedTagError)
+			expect{parse %Q{<p>Foobar</dl>}}.to raise_exception(Utopia::Content::MarkupParser::UnbalancedTagError)
 		end
 		
 		it "should fail with unclosed tag" do
-			expect{parse %Q{<p>Foobar}}.to raise_exception(Utopia::Content::Markup::UnbalancedTagError)
+			expect{parse %Q{<p>Foobar}}.to raise_exception(Utopia::Content::MarkupParser::UnbalancedTagError)
 		end
 	end
 end
