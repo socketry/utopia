@@ -99,6 +99,7 @@ module Utopia
 			
 			def initialize(buffer, delegate, entities = Trenni::Entities::HTML5)
 				@buffer = buffer
+				
 				@delegate = delegate
 				@entities = entities
 				

@@ -48,6 +48,10 @@ module Utopia
 				@begin_tags = []
 				@end_tags = []
 				
+				# TODO: Provide way to set encoding and content type.
+				#@encoding = Encoding::UTF_8
+				#self.content_type = "text/html; charset=#{@encoding.name}"
+				
 				super()
 			end
 			
@@ -208,7 +212,7 @@ module Utopia
 			def initialize(tag, node, attributes = tag.to_hash)
 				@node = node
 				
-				@buffer = String.new
+				@buffer = String.new.force_encoding(Encoding::UTF_8)
 				
 				@overrides = {}
 				
@@ -253,7 +257,7 @@ module Utopia
 
 			def call(transaction)
 				@content = @buffer
-				@buffer = String.new
+				@buffer = String.new.force_encoding(Encoding::UTF_8)
 				
 				if node.respond_to? :call
 					node.call(transaction, self)

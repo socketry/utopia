@@ -41,7 +41,7 @@ module Utopia
 			alias to_hash attributes
 			
 			def to_s(content = nil)
-				buffer = String.new
+				buffer = String.new.force_encoding(name.encoding)
 				
 				write(buffer, content)
 				
