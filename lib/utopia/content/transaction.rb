@@ -84,7 +84,8 @@ module Utopia
 			attr :end_tags
 
 			def tag(name, attributes = {}, &block)
-				tag = Tag.new(name, attributes)
+				# If we provide a block which can give inner data, we are not self-closing.
+				tag = Tag.new(name, !block_given?, attributes)
 
 				node = tag_begin(tag)
 
@@ -130,6 +131,8 @@ module Utopia
 			def write(string)
 				current.write(string)
 			end
+			
+			alias cdata write
 
 			def text(string)
 				current.text(string)
