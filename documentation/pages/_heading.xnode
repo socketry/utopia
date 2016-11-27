@@ -1,0 +1,2 @@
+<?r transaction.attributes[:title] ||= content ?>
+<h1><content/></h1>

@@ -1,7 +1,9 @@
 <page>
-	<heading>#{self[:page_title]}</heading>
+	<?r 
+		transaction.attributes[:title] ||= @page_title
+	?>
 	
-	#{Kramdown::Document.new(self[:content]).to_html}
+	#{MarkupString.raw Kramdown::Document.new(self[:content]).to_html}
 	
 	<footer>
 		Last Modified: #{File.mtime(self[:page_file]) rescue "N/A"} &mdash;

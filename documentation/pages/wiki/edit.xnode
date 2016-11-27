@@ -5,7 +5,7 @@
 	<form action="#" method="post">
 		<fieldset>
 			<legend>Page Content</legend>
-			<textarea name="content">#{Strings::to_html self[:content]}</textarea>
+			<textarea name="content">#{self[:content]}</textarea>
 		</fieldset>
 		
 		<fieldset class="footer">
