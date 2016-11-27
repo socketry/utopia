@@ -193,7 +193,7 @@ module Utopia
 				@begin_tags.last
 			end
 
-			# The content of the node 
+			# The content of the node
 			def content
 				@end_tags.last.content
 			end
@@ -212,7 +212,7 @@ module Utopia
 			def initialize(tag, node, attributes = tag.to_hash)
 				@node = node
 				
-				@buffer = String.new.force_encoding(Encoding::UTF_8)
+				@buffer = Trenni::MarkupString.new.force_encoding(Encoding::UTF_8)
 				
 				@overrides = {}
 				
@@ -257,7 +257,7 @@ module Utopia
 
 			def call(transaction)
 				@content = @buffer
-				@buffer = String.new.force_encoding(Encoding::UTF_8)
+				@buffer = Trenni::MarkupString.new.force_encoding(Encoding::UTF_8)
 				
 				if node.respond_to? :call
 					node.call(transaction, self)
