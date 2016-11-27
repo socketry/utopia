@@ -27,11 +27,11 @@ module Utopia
 			include Trenni::Markup
 			
 			def self.closed(name, **attributes)
-				self.new(name, true, **attributes)
+				self.new(name, true, attributes)
 			end
 			
-			def initialize(name, closed = false, **attributes)
-				super(name, closed, attributes)
+			def self.opened(name, **attributes)
+				self.new(name, false, attributes)
 			end
 			
 			def [] key
@@ -49,6 +49,10 @@ module Utopia
 			end
 			
 			alias to_str to_s
+			
+			def self_closed?
+				closed
+			end
 			
 			def write_opening_tag(buffer, self_closing = false)
 				buffer << "<#{name}"

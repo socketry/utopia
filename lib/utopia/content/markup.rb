@@ -54,7 +54,7 @@ module Utopia
 				def initialize(name, offset)
 					@offset = offset
 					
-					super(name, SymbolicHash.new)
+					super(name, false, SymbolicHash.new)
 				end
 				
 				attr :offset
