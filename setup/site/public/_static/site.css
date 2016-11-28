@@ -1,15 +1,16 @@
 
 html {
 	font-family: "PT Sans", Verdana, Helvetica, Arial, sans-serif;
+	font-size: 16px;
 }
 
-@media (min-width: 48em) {
+@media (min-width: 40em) {
 	html {
-		font-size: 16px;
+		font-size: 18px;
 	}
 }
 
-@media (min-width: 58em) {
+@media (min-width: 80em) {
 	html {
 		font-size: 20px;
 	}
@@ -23,7 +24,7 @@ body {
 }
 
 body > header {
-	margin: 1em 0 1em 0;
+	margin: 1rem 0 1rem 0;
 	
 	background-color: white;
 	
@@ -35,7 +36,7 @@ body > header {
 body > header img {
 	display: block;
 	margin: auto;
-	height: 4em;
+	height: 4rem;
 }
 
 p {
@@ -47,7 +48,7 @@ p strong {
 }
 
 h1, h2, h3, h4, h5, h6 {
-	margin: 2em 1em 1em 1em;
+	margin: 2rem 1rem 1rem 1rem;
 	color: #4E8DD9;
 }
 
@@ -64,7 +65,7 @@ a:hover {
 }
 
 p, ul, ol, dl, h3 {
-	margin: 2em;
+	margin: 2rem;
 }
 
 pre {
@@ -81,7 +82,7 @@ h3 {
 }
 
 ul {
-	margin-bottom: 1em;
+	margin-bottom: 1rem;
 }
 
 h2, h3, h4, h5, h6 {
@@ -99,6 +100,8 @@ body.front h1 {
 footer {
 	text-align: right;
 	margin: 2rem;
+	font-size: 0.65rem;
+	color: #aaa;
 }
 
 section.features {
