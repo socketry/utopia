@@ -6,7 +6,7 @@ before_install:
   - git config --global user.name "Samuel Williams"
 rvm:
   - 2.2.4
-  - 2.3.0
+  - 2.3.2
   - ruby-head
   - rbx-3.65
 env: COVERAGE=true BENCHMARK=true
