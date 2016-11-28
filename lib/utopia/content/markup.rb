@@ -116,7 +116,7 @@ module Utopia
 			end
 
 			def open_tag_begin(name, offset)
-				@current = Tag.new(name, offset)
+				@current = ParsedTag.new(name, offset)
 			end
 
 			def attribute(key, value)
