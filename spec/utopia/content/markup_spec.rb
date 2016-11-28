@@ -37,7 +37,7 @@ module Utopia::Content::MarkupSpec
 	
 	describe Utopia::Content::MarkupParser do
 		it "should format open tags correctly" do
-			foo_tag = Utopia::Content::Tag.new("foo", bar: nil, baz: 'bob')
+			foo_tag = Utopia::Content::Tag.opened("foo", bar: nil, baz: 'bob')
 			
 			expect(foo_tag[:bar]).to be nil
 			expect(foo_tag[:baz]).to be == 'bob'
@@ -58,7 +58,7 @@ module Utopia::Content::MarkupSpec
 			
 			delegate = parse %Q{<foo></foo>}
 			
-			foo_tag = Utopia::Content::Tag.new("foo")
+			foo_tag = Utopia::Content::Tag.opened("foo")
 			expected_events = [
 				[:tag_begin, foo_tag],
 				[:tag_end, foo_tag],
@@ -72,7 +72,7 @@ module Utopia::Content::MarkupSpec
 		it "should parse and escape text" do
 			delegate = parse %Q{<foo>Bob &amp; Barley<!-- Comment --><![CDATA[Hello & World]]></foo>}
 			
-			foo_tag = Utopia::Content::Tag.new("foo")
+			foo_tag = Utopia::Content::Tag.opened("foo")
 			expected_events = [
 				[:tag_begin, foo_tag],
 				[:text, "Bob & Barley"],

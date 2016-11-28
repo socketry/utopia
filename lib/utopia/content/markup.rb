@@ -50,14 +50,18 @@ module Utopia
 		end
 		
 		class MarkupParser
-			class ParsedTag < Tag
+			class ParsedTag
 				def initialize(name, offset)
 					@offset = offset
-					
-					super(name, false, SymbolicHash.new)
+					@tag = Tag.new(name, false, SymbolicHash.new)
 				end
 				
+				attr :tag
 				attr :offset
+				
+				def to_s
+					@tag.to_s
+				end
 			end
 			
 			class UnbalancedTagError < StandardError
@@ -120,26 +124,24 @@ module Utopia
 			end
 
 			def attribute(key, value)
-				@current.attributes[key] = value
+				@current.tag.attributes[key] = value
 			end
 
 			def open_tag_end(self_closing)
 				if self_closing
-					@current.closed = true
-					
-					@delegate.tag_complete(@current)
+					@current.tag.closed = true
+					@delegate.tag_complete(@current.tag)
 				else
-					@current.closed = false
-					
 					@stack << @current
-					@delegate.tag_begin(@current)
+					@delegate.tag_begin(@current.tag)
 				end
 				
 				@current = nil
 			end
 
 			def close_tag(name, offset)
-				tag = @stack.pop
+				@current = @stack.pop
+				tag = @current.tag
 				
 				if tag.name != name
 					raise UnbalancedTagError.new(@buffer, tag, ParsedTag.new(name, offset))
