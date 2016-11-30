@@ -61,6 +61,7 @@ module Utopia
 				def apply(path, index = -1, &block)
 					# ** is greedy, it always matches if possible and matches all remaining input.
 					if match_all = self[WILDCARD_GREEDY] and match_all.callback?
+						# It's possible in this callback that path is modified.
 						matched = true; yield(match_all)
 					end
 					
@@ -124,17 +125,21 @@ module Utopia
 					actions.define(Path.split(first) + path, options, &block)
 				end
 				
+				def otherwise(&block)
+					@otherwise = block
+				end
+				
 				def dispatch(controller, request, path)
 					if @actions
-						@actions.apply(path.components) do |action|
+						matched = @actions.apply(path.components) do |action|
 							controller.instance_exec(request, path, &action.callback)
-						end || controller.otherwise(request, path)
+						end
+					end
+					
+					if @otherwise and !matched
+						controller.instance_exec(request, path, &@otherwise)
 					end
 				end
-			end
-			
-			# TODO: Test this functionality and confirm working. Document.
-			def otherwise(request, path)
 			end
 			
 			# Given a request, call associated actions if at least one exists.

@@ -205,10 +205,6 @@ The controller layer can do more complex operations by prepending modules into i
 		@user = User.find_by_id(@id)
 	end
 
-	before do |request, path|
-		# Always executed, before any controller specific actions are performed.
-	end
-
 	on 'edit' do |request, path|
 		if request.post?
 			@user.update_attributes(request[:user])
@@ -217,10 +213,7 @@ The controller layer can do more complex operations by prepending modules into i
 	
 	otherwise do |request, path|
 		# Executed if no specific named actions were executed.
-	end
-	
-	after do |request, path|
-		# Always executed, after all other controller actions are performed.
+		succeed!
 	end
 
 ### Content
