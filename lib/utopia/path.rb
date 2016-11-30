@@ -82,6 +82,10 @@ module Utopia
 			super
 		end
 		
+		def empty?
+			@components.empty?
+		end
+		
 		def self.root
 			self.new([''])
 		end

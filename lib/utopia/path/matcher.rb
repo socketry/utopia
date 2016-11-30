@@ -70,18 +70,21 @@ module Utopia
 				
 				named_parts = {}
 				
-				@patterns.each_with_index do |(key, matcher), index|
+				@patterns.each_with_index do |(key, pattern), index|
 					component = components[index]
 					
-					if matcher.is_a? Class
-						return nil unless value = coerce(matcher, component)
+					if pattern.is_a? Class
+						return nil unless value = coerce(pattern, component)
 						
 						named_parts[key] = value
-					elsif matcher
-						return nil unless matcher === component
-						
-						named_parts[key] = component
+					elsif pattern
+						if result = pattern.match(component)
+							named_parts[key] = result
+						else
+							return nil
+						end
 					else
+						# Ignore this part:
 						named_parts[key] = component
 					end
 				end

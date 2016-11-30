@@ -52,12 +52,12 @@ module Utopia::Path::MatcherSpec
 		
 		it "should match regexps" do
 			path = Utopia::Path['users/20/edit']
-			matcher = Utopia::Path::Matcher[users: 'users', id: Integer, action: String]
+			matcher = Utopia::Path::Matcher[users: /users/, id: Integer, action: String]
 			
 			match_data = matcher.match(path)
 			expect(match_data).to_not be_falsey
 			
-			expect(match_data[:users]).to be == 'users'
+			expect(match_data[:users].to_s).to be == 'users'
 			expect(match_data[:id]).to be == 20
 			expect(match_data[:action]).to be == 'edit'
 		end

@@ -35,23 +35,6 @@ module Utopia
 			end
 			
 			class Rule
-				def initialize(arguments, block)
-					@arguments = arguments
-					@block = block
-					
-					self.freeze
-				end
-				
-				def freeze
-					@arguments.freeze
-					@block.freeze
-					
-					super
-				end
-				
-				attr :arguments
-				attr :block
-				
 				def apply_match_to_context(match_data, context)
 					match_data.names.each do |name|
 						context.instance_variable_set("@#{name}", match_data[name])
@@ -60,14 +43,14 @@ module Utopia
 			end
 			
 			class ExtractPrefixRule < Rule
-				def initialize(arguments, block)
-					@matcher = Path::Matcher.new(arguments)
-					
-					super
+				def initialize(patterns, block)
+					@matcher = Path::Matcher.new(patterns)
+					@block = block
 				end
 				
 				def freeze
 					@matcher.freeze
+					@block.freeze
 					
 					super
 				end
@@ -94,8 +77,8 @@ module Utopia
 				
 				attr :rules
 				
-				def extract_prefix(**arguments, &block)
-					@rules << ExtractPrefixRule.new(arguments, block)
+				def extract_prefix(**patterns, &block)
+					@rules << ExtractPrefixRule.new(patterns, block)
 				end
 				
 				def apply(context, request, path)

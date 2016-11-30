@@ -113,6 +113,13 @@ module Utopia
 			end
 			
 			module ClassMethods
+				def self.extended(klass)
+					klass.instance_eval do
+						@actions = nil
+						@otherwise = nil
+					end
+				end
+				
 				def actions
 					@actions ||= Action.new
 				end
