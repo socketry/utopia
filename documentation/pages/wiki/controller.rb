@@ -23,8 +23,6 @@ def read_contents
 end
 
 on '**/edit' do |request, path|
-	puts "Editing..."
-	
 	if request.post?
 		FileUtils.mkdir_p File.dirname(@page_file)
 		File.write(@page_file, request.params['content'])
