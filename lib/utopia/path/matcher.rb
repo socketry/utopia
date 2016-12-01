@@ -52,14 +52,16 @@ module Utopia
 			
 			def coerce(klass, value)
 				if klass == Integer
-					Integer(value) rescue nil
+					Integer(value)
 				elsif klass == Float
-					Float(value) rescue nil
+					Float(value)
 				elsif klass == String
 					value.to_s
 				else
 					klass.new(value)
 				end
+			rescue
+				return nil
 			end
 			
 			# This is a path prefix matching algorithm. The pattern is an array of String, Symbol, Regexp, or nil. The components is an array of String.
