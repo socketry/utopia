@@ -3,7 +3,7 @@
 	
 	#{partial 'navigation', path: attributes[:full_path].dirname}
 	
-	#{MarkupString.raw Kramdown::Document.new(self[:content]).to_html}
+	#{MarkupString.raw Kramdown::Document.new(self[:content], syntax_highlighter: nil).to_html}
 	
 	<footer>
 		Last Modified: #{File.mtime(self[:page_file]) rescue "N/A"} &mdash;

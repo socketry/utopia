@@ -1,4 +1,5 @@
 {
-  "directory" : "public/_static/components"
+  "directory": "lib/components",
+  "public": "public/_components"
 }
 
