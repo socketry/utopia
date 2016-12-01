@@ -47,14 +47,14 @@ A simple CRUD controller might look like:
 Path matching works from right to left, and '**' is a greedy operator. Controllers are invoked with a path relative to the controller's `URI_PATH`, so all lookups are relative to the controller.
 
 <dl>
-	<dt>"*"</dt>
+	<dt><code>"*"</code></dt>
 	<dd>Match a single path element</dd>
-	<dt>"**"<dt>
+	<dt><code>"**"</code></dt>
 	<dd>Match all remaining path elements</dd>
-	<dt>String</dt>
+	<dt><code>String</code></dt>
 	<dd>Match a named path component</dd>
-	<dt>Symbol</dt>
-	<dd>Equivalent to ["**", symbol.to_s]</dd>
+	<dt><code>Symbol</code></dt>
+	<dd>Equivalent to <code>["**", symbol.to_s]</code></dd>
 </dl>
 
 ## Otherwise Matching

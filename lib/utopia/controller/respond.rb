@@ -165,7 +165,7 @@ module Utopia
 				end
 			end
 			
-			# Rewrite the path before processing the request if possible.
+			# Invokes super. If a response is generated, format it based on the Accept: header.
 			def process!(request, path)
 				if response = super
 					response = self.class.response_for(self, request, path, response)

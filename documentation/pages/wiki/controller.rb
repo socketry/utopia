@@ -26,7 +26,12 @@ end
 on '**/edit' do |request, path|
 	if request.post?
 		FileUtils.mkdir_p File.dirname(@page_file)
-		File.write(@page_file, request.params['content'])
+		
+		# Get the content and normalize newlines:
+		content = request.params['content'].gsub /\r\n?/, "\n"
+		File.write(@page_file, content)
+		
+		# Redirect relative to controller.
 		goto! @page_path
 	else
 		@content = read_contents

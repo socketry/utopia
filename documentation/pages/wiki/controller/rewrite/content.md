@@ -6,7 +6,7 @@ The `Controller::Rewrite` layer can match and rewrite requests before they proce
 
 In your `controller.rb`:
 
-	prepend Actions, Rewrite
+	prepend Rewrite, Actions
 	
 	rewrite.extract_prefix permalink: /(?<id>\d+)-(?<title>.*)/ do |request, path, match|
 		# The rewrite matched, but there was no valid post, so we fail:
@@ -44,7 +44,7 @@ Keep in mind, that URLs like `/123-pictures-of-my-cat/edit` will work as expecte
 
 Similar to the above, if we were solely interested in IDs, we could do the following:
 
-	prepend Actions, Rewrite
+	prepend Rewrite, Actions
 	
 	rewrite.extract_prefix post_id: Integer do |request, path, match|
 		# The rewrite matched, but there was no valid post, so we fail:

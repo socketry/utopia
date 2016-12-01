@@ -149,9 +149,8 @@ module Utopia
 				end
 			end
 			
-			# Given a request, call associated actions if at least one exists.
+			# Invoke all matching actions. If no actions match, will call otherwise. If no action gives a response, the request is passed to super.
 			def process!(request, path)
-				# puts "Actions\#process!(..., #{path.inspect})"
 				catch_response do
 					self.class.dispatch(self, request, path)
 				end || super
