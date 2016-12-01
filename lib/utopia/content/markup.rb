@@ -60,23 +60,23 @@ module Utopia
 				attr :offset
 				
 				def to_s
-					@tag.to_s
+					"<#{@tag.name}#{@tag.attributes.empty? ? '' : ' ...'}>"
 				end
 			end
 			
 			class UnbalancedTagError < StandardError
 				def initialize(buffer, opening_tag, closing_tag = nil)
 					@buffer = buffer
-					@opening_tag = current_tag
+					@opening_tag = opening_tag
 					@closing_tag = closing_tag
 				end
 
 				attr :buffer
-				attr :current_tag
+				attr :opening_tag
 				attr :closing_tag
 				
 				def start_location
-					Trenni::Location.new(@buffer.read, current_tag.offset)
+					Trenni::Location.new(@buffer.read, opening_tag.offset)
 				end
 				
 				def end_location
@@ -144,7 +144,7 @@ module Utopia
 				tag = @current.tag
 				
 				if tag.name != name
-					raise UnbalancedTagError.new(@buffer, tag, ParsedTag.new(name, offset))
+					raise UnbalancedTagError.new(@buffer, @current, ParsedTag.new(name, offset))
 				end
 				
 				@delegate.tag_end(tag)
