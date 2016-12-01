@@ -1,4 +1,4 @@
-# Welcome to Utopia
+# Utopia Documentation Wiki
 
 This wiki includes documentation and examples showing how to use Utopia.
 
@@ -8,4 +8,6 @@ This wiki includes documentation and examples showing how to use Utopia.
 
 ## Advanced Topics
 
+- [Controller Actions](controller/actions/)
+- [Controller Rewrite](controller/rewrite/)
 - [Rewriting URLs](rewriting-urls/)

@@ -1,7 +1,7 @@
 <page>
-	<?r 
-		transaction.attributes[:title] ||= @page_title
-	?>
+	<?r transaction.attributes[:title] ||= @page_title ?>
+	
+	#{partial 'navigation', path: attributes[:full_path].dirname}
 	
 	#{MarkupString.raw Kramdown::Document.new(self[:content]).to_html}
 	

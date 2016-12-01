@@ -8,6 +8,11 @@
 			<textarea name="content">#{self[:content]}</textarea>
 		</fieldset>
 		
+		<fieldset>
+			<legend>Page Metadata</legend>
+			<textarea name="content">#{self[:metadata]}</textarea>
+		</fieldset>
+		
 		<fieldset class="footer">
 			<input type="submit" />
 		</fieldset>

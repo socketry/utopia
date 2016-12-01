@@ -104,6 +104,13 @@ footer {
 	color: #aaa;
 }
 
+nav {
+	position: absolute;
+	margin: 2.5rem;
+	font-size: 0.8rem;
+	color: #aaa;
+}
+
 section.features {
 	display: flex;
 	flex-wrap: wrap;

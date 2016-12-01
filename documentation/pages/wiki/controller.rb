@@ -2,6 +2,7 @@
 prepend Actions
 
 on '**' do |request, path|
+	@full_path = URI_PATH + path
 	@page_path = path.components[0..-2]
 	
 	@page_file = File.join(BASE_PATH, @page_path, "content.md")
