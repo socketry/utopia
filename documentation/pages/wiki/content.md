@@ -10,4 +10,3 @@ This wiki includes documentation and examples showing how to use Utopia.
 
 - [Controller Actions](controller/actions/)
 - [Controller Rewrite](controller/rewrite/)
-- [Rewriting URLs](rewriting-urls/)
