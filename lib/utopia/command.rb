@@ -32,7 +32,7 @@ module Utopia
 			BASE = File.expand_path("../../setup", __dir__)
 			
 			module Site
-				CONFIGURATION_FILES = ['config.ru', 'config/environment.rb', 'Gemfile', 'Rakefile', 'tasks/utopia.rake']
+				CONFIGURATION_FILES = ['.bowerrc', 'config.ru', 'config/environment.rb', 'Gemfile', 'Rakefile', 'tasks/utopia.rake', 'tasks/bower.rake', 'tasks/test.rake']
 				
 				DIRECTORIES = ["config", "lib", "pages", "public", "tasks"]
 				

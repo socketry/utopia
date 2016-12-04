@@ -29,7 +29,7 @@ use Utopia::Redirection::Errors,
 use Utopia::Localization,
 	:default_locale => 'en',
 	:locales => ['en', 'de', 'ja', 'zh'],
-	:nonlocalized => ['/_static/', '/_cache/']
+	:nonlocalized => ['/_static/', '/_cache/', '/_components/']
 
 use Utopia::Controller,
 	cache_controllers: (RACK_ENV == :production),
