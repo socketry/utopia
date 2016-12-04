@@ -14,6 +14,17 @@
 		
 		<link rel="icon" type="image/png" href="/_static/icon.png" />
 		<link rel="stylesheet" href="/_static/site.css" type="text/css" media="screen" />
+		
+		<script src="/_components/jquery/jquery.min.js"></script>
+		<script src="/_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
 	</head>
 
 	<body class="#{attributes[:class]}">

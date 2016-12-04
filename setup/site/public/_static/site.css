@@ -4,15 +4,27 @@ html {
 	font-size: 16px;
 }
 
+pre {
+	tab-size: 2;
+}
+
 @media (min-width: 40em) {
 	html {
 		font-size: 18px;
+	}
+	
+	pre {
+		tab-size: 4;
 	}
 }
 
 @media (min-width: 80em) {
 	html {
 		font-size: 20px;
+	}
+	
+	pre {
+		tab-size: 4;
 	}
 }
 
@@ -69,7 +81,10 @@ p, ul, ol, dl, h3 {
 }
 
 pre {
-	padding: 1rem 3rem;
+	overflow: auto;
+	
+	padding: 1rem 2rem;
+	font-size: 0.8rem;
 	
 	border-top: 1px solid #ccc;
 	border-bottom: 1px solid #ccc;

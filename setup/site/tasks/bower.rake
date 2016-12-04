@@ -12,6 +12,7 @@ namespace :bower do
 		
 		@bower_package_root = root + bowerrc['directory']
 		@bower_install_root = root + bowerrc['public']
+		@bower_install_method = (bowerrc['install'] || :copy).to_sym
 	end
 	
 	desc 'Update the bower packages and link into the public directory.'
@@ -36,7 +37,12 @@ namespace :bower do
 				link_path = Utopia::Path.shortest_path(package_path, install_path)
 			end
 			
-			FileUtils::Verbose.ln_s link_path, install_path
+			if @bower_install_method == :symlink
+				# This is useful for some
+				FileUtils::Verbose.ln_s link_path, install_path
+			else
+				FileUtils::Verbose.cp_r File.expand_path(link_path, install_path), install_path
+			end
 		end
 	end
 end
