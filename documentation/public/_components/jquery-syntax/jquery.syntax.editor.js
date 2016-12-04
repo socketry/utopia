@@ -45,7 +45,7 @@ Syntax.Editor.prototype.getLines = function() {
 	
 	offsets.push(startChild);
 	
-	Syntax.log("getLines", offsets, lines, children);
+	console.log("getLines", offsets, lines, children);
 	
 	return {lines: lines, offsets: offsets};
 }

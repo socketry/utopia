@@ -1,4 +1,4 @@
-// brush: "ruby" aliases: []
+// brush: "swift" aliases: []
 
 //	This file is part of the "jQuery.Syntax" project, and is distributed under the MIT License.
 //	Copyright (c) 2016 Samuel G. D. Williams. <http://www.oriontransfer.co.nz>

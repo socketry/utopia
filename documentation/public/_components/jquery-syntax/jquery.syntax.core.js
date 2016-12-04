@@ -100,7 +100,7 @@ Syntax.extractMatches = function() {
 			}
 			
 			if (rule.debug) {
-				Syntax.log("extractMatches", rule, index, match[index], match);
+				console.log("extractMatches", rule, index, match[index], match);
 			}
 			
 			if (match[index].length > 0) {
@@ -256,7 +256,7 @@ Syntax.Match.prototype.reduce = function (append, process) {
 		var child = this.children[i], end = child.offset;
 		
 		if (child.offset < this.offset) {
-			Syntax.log("Syntax Warning: Offset of child", child, "is before offset of parent", this);
+			console.log("Syntax Warning: Offset of child", child, "is before offset of parent", this);
 		}
 		
 		var text = this.value.substr(start - this.offset, end - start);
@@ -272,7 +272,7 @@ Syntax.Match.prototype.reduce = function (append, process) {
 	} else if (start < this.endOffset) {
 		append(this.value.substr(start - this.offset, this.endOffset - start), container);
 	} else if (start > this.endOffset) {
-		Syntax.log("Syntax Warning: Start position " + start + " exceeds end of value " + this.endOffset);
+		console.log("Syntax Warning: Start position " + start + " exceeds end of value " + this.endOffset);
 	}
 	
 	if (process) {
@@ -438,7 +438,7 @@ Syntax.Match.prototype._insertWhole = function(match) {
 // This function also ensures that matches won't be broken up unless absolutely necessary.
 Syntax.Match.prototype.insertAtEnd = function(match) {
 	if (!this.contains(match)) {
-		Syntax.log("Syntax Error: Child is not contained in parent node!");
+		console.log("Syntax Error: Child is not contained in parent node!");
 		return null;
 	}
 	
@@ -687,7 +687,7 @@ Syntax.Match.prototype.bisectAtOffsets = function(splits) {
 	}
 	
 	if (children.length) {
-		Syntax.log("Syntax Error: Children nodes not consumed", children.length, " remaining!");
+		console.log("Syntax Error: Children nodes not consumed", children.length, " remaining!");
 	}
 	
 	return parts;
@@ -860,7 +860,7 @@ Syntax.Brush.prototype.push = function () {
 		if (rule.pattern && rule.pattern.global || typeof(rule.pattern) == 'undefined') {
 			this.rules.push(jQuery.extend({owner: this}, rule));
 		} else {
-			Syntax.log("Syntax Error: Malformed rule: ", rule);
+			console.log("Syntax Error: Malformed rule: ", rule);
 		}
 	}
 };
@@ -874,7 +874,7 @@ Syntax.Brush.prototype.getMatchesForRule = function (text, rule) {
 	}
 	
 	if (rule.debug) {
-		Syntax.log("Syntax matches:", rule, text, matches);
+		console.log("Syntax matches:", rule, text, matches);
 	}
 	
 	return matches;

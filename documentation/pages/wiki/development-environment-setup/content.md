@@ -2,7 +2,9 @@
 
 Utopia is built on Ruby and Rack. Therefore, Ruby (suggested 2.0+) should be installed and working. Then, simply run:
 
-	$ gem install utopia
+```bash
+$ gem install utopia
+```
 
 To install all required dependencies.
 

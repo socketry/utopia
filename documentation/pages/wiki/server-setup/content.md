@@ -11,18 +11,20 @@ There have been issues with the official packages and thus these packages were d
 
 Create a configuration file for your site, e.g. `/etc/nginx/sites/www.example.com`:
 
-	server {
-		listen 80;
-		server_name www.example.com;
-		root /srv/http/www.example.com/public;
-		passenger_enabled on;
-	}
+```nginx
+server {
+	listen 80;
+	server_name www.example.com;
+	root /srv/http/www.example.com/public;
+	passenger_enabled on;
+}
 
-	server {
-		listen 80;
-		server_name example.com;
-		rewrite ^ http://www.example.com$uri permanent;
-	}
+server {
+	listen 80;
+	server_name example.com;
+	rewrite ^ http://www.example.com$uri permanent;
+}
+```
 
 ## Deployment via Git
 
@@ -30,11 +32,15 @@ The preferred method of deployment to a production server is via git. The `utopi
 
 To setup a server for deployment:
 
-	$ mkdir /srv/http/www.example.com
-	$ cd /srv/http/www.example.com
-	$ sudo -u http utopia server create
+```bash
+$ mkdir /srv/http/www.example.com
+$ cd /srv/http/www.example.com
+$ sudo -u http utopia server create
+```
 
 On your development machine, you should setup the git remote:
 
-	$ git remote add production ssh://remote/srv/http/www.example.com
-	$ git push --set-upstream production master
+```bash
+$ git remote add production ssh://remote/srv/http/www.example.com
+$ git push --set-upstream production master
+```
