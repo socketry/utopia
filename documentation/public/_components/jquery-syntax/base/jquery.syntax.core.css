@@ -16,6 +16,9 @@ pre code.syntax-theme-base {
 .syntax-theme-base {
   font-family: Menlo, Monaco, Consolas, monospace;
   line-height: 1.15em; }
+  .syntax-theme-base a {
+    text-decoration: none;
+    color: inherit; }
   .syntax-theme-base .function {
     color: #33f; }
   .syntax-theme-base .keyword, .syntax-theme-base .access {

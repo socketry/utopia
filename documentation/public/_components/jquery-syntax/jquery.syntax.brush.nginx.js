@@ -9,7 +9,7 @@ Syntax.register('nginx', function(brush) {
 		pattern: /((\w+).*?);/g,
 		matches: Syntax.extractMatches(
 			{klass: 'directive', allow: '*'},
-			{klass: 'function'}
+			{klass: 'function', process: Syntax.lib.webLinkProcess("http://nginx.org/r/")}
 		)
 	});
 	

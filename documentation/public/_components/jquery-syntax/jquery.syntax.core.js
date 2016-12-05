@@ -969,7 +969,7 @@ Syntax.Brush.prototype.process = function(text, matches, options) {
 	var lines = top.splitLines();
 	
 	var html = document.createElement('code');
-	html.className = 'syntax';
+	html.className = 'syntax highlighted';
 	
 	for (var i = 0; i < lines.length; i += 1) {
 		var line = lines[i].reduce(null, function (container, match) {
