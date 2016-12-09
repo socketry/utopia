@@ -19,5 +19,5 @@
 # THE SOFTWARE.
 
 module Utopia
-	VERSION = "1.9.3"
+	VERSION = "1.9.4"
 end

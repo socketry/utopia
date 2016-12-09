@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 require 'openssl'
+require 'securerandom'
 require 'digest/sha2'
 
 require_relative 'session/lazy_hash'
@@ -35,11 +36,16 @@ module Utopia
 		# At least, the session will be updated every 1 hour:
 		DEFAULT_UPDATE_TIMEOUT = 3600
 		
-		def initialize(app, session_name: nil, secret:, expires_after: nil, update_timeout: nil, **options)
+		def initialize(app, session_name: nil, secret: nil, expires_after: nil, update_timeout: nil, **options)
 			@app = app
 			
 			@session_name = session_name || RACK_SESSION
 			@cookie_name = @session_name + ".encrypted"
+			
+			if secret.nil?
+				secret = SecureRandom.hex(32)
+				warn "#{self.class} secret is nil, generating transient secret key!"
+			end
 			
 			# This generates a 32-byte key suitable for aes.
 			@key = Digest::SHA2.digest(secret)
