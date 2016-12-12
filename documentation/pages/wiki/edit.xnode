@@ -1,6 +1,13 @@
 <page>
 	<?r response.do_not_cache! ?>
 	
+	<style type="text/css">
+		
+		form textarea {
+			
+		}
+	</style>
+	
 	<heading>Editing #{self[:page_title].inspect}</heading>
 	<form action="#" method="post">
 		<fieldset>

@@ -9,4 +9,9 @@ RSpec::Core::RakeTask.new(:spec) do |task|
 	end
 end
 
+task :documentation do
+	sh('bundle install')
+	sh('cd documentation && rake')
+end
+
 task :default => :spec

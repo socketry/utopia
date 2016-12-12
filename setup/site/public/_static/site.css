@@ -64,6 +64,14 @@ h1, h2, h3, h4, h5, h6 {
 	color: #4E8DD9;
 }
 
+h1 {
+	margin-bottom: 4rem;
+}
+
+h2 {
+	margin-top: 6rem;
+}
+
 img {
 	border: none;
 }
