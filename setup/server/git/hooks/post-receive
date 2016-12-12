@@ -71,9 +71,6 @@ Dir.chdir(GIT_WORK_TREE) do
 	end
 	
 	if File.exist? 'Rakefile'
-		sudo %W{bundle exec rake deploy}
-		
-		puts "Restarting server..."
-		sudo %W{bundle exec rake restart}
+		sudo %W{bundle exec rake deploy restart}
 	end
 end

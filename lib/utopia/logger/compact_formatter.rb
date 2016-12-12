@@ -1,4 +1,4 @@
-# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2016, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,6 +18,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'logger'
+require 'rainbow'
+
 module Utopia
-	VERSION = "1.9.5"
+	module Logger
+		class CompactFormatter
+			def initialize
+				@start = Time.now
+			end
+			
+			def time_offset_string
+				offset = Time.now - @start
+				
+				"T+#{offset.round(1).to_s.ljust(5)}"
+			end
+			
+			def call(severity, datetime, progname, message)
+				if progname
+					"#{Rainbow(time_offset_string).bright.blue} #{Rainbow(progname).bright}: #{message}\n"
+				else
+					"#{Rainbow(time_offset_string).bright.blue} #{message}\n"
+				end
+			end
+		end
+	end
 end

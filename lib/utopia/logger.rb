@@ -1,4 +1,4 @@
-# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2016, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,6 +18,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require_relative 'logger/compact_formatter'
+
 module Utopia
-	VERSION = "1.9.5"
+	module Logger
+		def self.new(output: STDERR, level: ::Logger::WARN)
+			log = ::Logger.new(output)
+			log.level = level
+			log.formatter = Utopia::Logger::CompactFormatter.new
+			
+			return log
+		end
+	end
 end
