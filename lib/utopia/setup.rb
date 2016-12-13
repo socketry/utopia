@@ -56,8 +56,10 @@ module Utopia
 				# Load the YAML environment file:
 				environment = YAML.load_file(environment_path)
 				
-				# Update the process environment:
-				ENV.update(environment)
+				# We update ENV but only when it's not already set to something:
+				ENV.update(environment) do |name, old_value, new_value|
+					old_value
+				end
 			end
 		end
 		

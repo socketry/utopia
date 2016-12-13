@@ -1,1 +1,1 @@
-RACK_ENV: production
+RACK_ENV=production

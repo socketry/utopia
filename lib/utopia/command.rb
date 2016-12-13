@@ -23,6 +23,8 @@ require_relative 'version'
 require 'fileutils'
 require 'find'
 
+require 'yaml/store'
+
 require 'samovar'
 
 module Utopia
@@ -44,6 +46,18 @@ module Utopia
 			
 			module Server
 				ROOT = File.join(BASE, 'server')
+				
+				def self.environment(root)
+					# Setup config/environment.yaml according to specified options:
+					environment_path = File.join(root, 'config/environment.yaml')
+					FileUtils.mkpath File.dirname(environment_path)
+					
+					store = YAML::Store.new(environment_path)
+					
+					store.transaction do
+						yield store
+					end
+				end
 			end
 		end
 		
@@ -61,21 +75,66 @@ module Utopia
 						system("git", "init", "--shared")
 						system("git", "config", "receive.denyCurrentBranch", "ignore")
 						system("git", "config", "core.worktree", destination_root)
-						
-						system("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git'))
-						system("cp", "-r", File.join(Setup::Server::ROOT, 'config'), File.join(destination_root))
 					end
 					
+					# Copy git hooks:
+					system("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git'))
+					
+					# Print out helpful git remote add message:
 					hostname = `hostname`.chomp
 					puts "Now add the git remote to your local repository:\n\tgit remote add production ssh://#{hostname}#{destination_root}"
 					puts "Then push to it:\n\tgit push --set-upstream production master"
 				end
 			end
 			
+			class Update < Samovar::Command
+				self.description = "Update the git hooks in an existing server repository."
+				
+				def invoke(parent)
+					destination_root = parent.root
+					
+					Dir.chdir(destination_root) do
+						system("git", "config", "receive.denyCurrentBranch", "ignore")
+						system("git", "config", "core.worktree", destination_root)
+					end
+					
+					# Copy git hooks:
+					system("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git'))
+				end
+			end
+			
+			class Environment < Samovar::Command
+				self.description = "Update environment variables in config/environment.yaml"
+				
+				many :variables, "A list of environment KEY=VALUE pairs to set."
+				
+				def invoke(parent)
+					return if variables.empty?
+					
+					destination_root = parent.root
+					
+					Setup::Server.environment(destination_root) do |store|
+						variables.each do |variable|
+							key, value = variable.split('=', 2)
+							
+							if value
+								puts "ENV[#{key.inspect}] will default to #{value.inspect} unless otherwise specified."
+								store[key] = value
+							else
+								puts "ENV[#{key.inspect}] will be unset unless otherwise specified."
+								store.delete(key)
+							end
+						end
+					end
+				end
+			end
+			
 			self.description = "Manage server deployments."
 			
 			nested '<command>',
-				'create' => Create
+				'create' => Create,
+				'update' => Update,
+				'environment' => Environment
 			
 			def invoke(parent)
 				@command.invoke(parent)

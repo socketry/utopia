@@ -21,6 +21,20 @@ $ git remote add production ssh://remote/srv/http/www.example.com
 $ git push --set-upstream production master
 ```
 
+### Default Environment
+
+Utopia will load `config/environment.yaml` and update `ENV` before executing any code. You can set default environment values using the `utopia` command:
+
+```bash
+$ sudo -u http utopia server environment RACK_ENV=production DATABASE_ENV=production_cluster_primary
+ENV["RACK_ENV"] will default to "production" unless otherwise specified.
+ENV["DATABASE_ENV"] will default to "production_cluster_primary" unless otherwise specified.
+```
+
+To set a value, write `KEY=VALUE`. To unset a key, write `KEY`.
+
+When you run `rake` tasks or spawn a server, the values in `config/environment.yaml` will be the defaults. You can override them by manually specifying them, e.g. `DATABASE_ENV=development rake db:info`.
+
 ## Platform
 
 The best deployment platform for Utopia is Linux. Specifically, [Arch Linux](https://www.archlinux.org/) with the following packages:
