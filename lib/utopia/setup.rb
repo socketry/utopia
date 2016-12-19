@@ -58,7 +58,7 @@ module Utopia
 				
 				# We update ENV but only when it's not already set to something:
 				ENV.update(environment) do |name, old_value, new_value|
-					old_value
+					old_value || new_value
 				end
 			end
 		end
@@ -75,6 +75,6 @@ module Utopia
 			config_root = File.dirname(caller[0])
 		end
 		
-		Bootstrap.new(config_root).setup
+		Bootstrap.new(config_root, **options).tap(&:setup)
 	end
 end
