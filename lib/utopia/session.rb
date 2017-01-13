@@ -42,9 +42,9 @@ module Utopia
 			@session_name = session_name || RACK_SESSION
 			@cookie_name = @session_name + ".encrypted"
 			
-			if secret.nil?
+			if secret.nil? or secret.empty?
 				secret = SecureRandom.hex(32)
-				warn "#{self.class} secret is nil, generating transient secret key!"
+				warn "#{self.class} secret is #{secret.inspect}, generating transient secret key!"
 			end
 			
 			# This generates a 32-byte key suitable for aes.
