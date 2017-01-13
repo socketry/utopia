@@ -26,6 +26,7 @@ require 'find'
 require 'yaml/store'
 
 require 'samovar'
+require 'securerandom'
 
 module Utopia
 	module Command
@@ -58,6 +59,15 @@ module Utopia
 						yield store
 					end
 				end
+				
+				# Set some useful defaults for the environment:
+				def self.update_default_environment(root)
+					# Set up some useful defaults for server environment:
+					environment(root) do |store|
+						store['RACK_ENV'] ||= 'production'
+						store['UTOPIA_SESSION_SECRET'] ||= SecureRandom.hex(40)
+					end
+				end
 			end
 		end
 		
@@ -80,6 +90,8 @@ module Utopia
 					# Copy git hooks:
 					system("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git'))
 					
+					Setup::Server.update_default_environment(destination_root)
+					
 					# Print out helpful git remote add message:
 					hostname = `hostname`.chomp
 					puts "Now add the git remote to your local repository:\n\tgit remote add production ssh://#{hostname}#{destination_root}"
@@ -100,6 +112,7 @@ module Utopia
 					
 					# Copy git hooks:
 					system("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git'))
+					Setup::Server.update_default_environment(destination_root)
 				end
 			end
 			

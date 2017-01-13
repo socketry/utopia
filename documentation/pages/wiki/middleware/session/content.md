@@ -25,3 +25,5 @@ In development, the secret would be reset every time the server is restarted. To
 ```bash
 $ utopia server environment UTOPIA_SESSION_SECRET=$(head /dev/urandom | shasum | base64 | head -c 40)
 ```
+
+This is done by default when using `utopia server create` and `utopia server update`.

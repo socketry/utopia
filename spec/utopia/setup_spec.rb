@@ -73,6 +73,9 @@ RSpec.describe "utopia executable" do
 			expect(result).to be == 0
 			
 			expect(Dir.entries(dir)).to include(".git")
+			
+			environment = YAML.load_path(File.join(dir, 'config/environment.yaml'))
+			expect(environment).to include('RACK_ENV', 'UTOPIA_SESSION_SECRET')
 		end
 	end
 	
