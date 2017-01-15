@@ -158,6 +158,9 @@ module Utopia
 			
 			# Returns available languages based on the order languages:
 			return @all_locales & languages
+		rescue HTTP::Accept::ParseError
+			# If we fail to parse the browser Accept-Language header, we ignore it (silently).
+			return []
 		end
 		
 		def nonlocalized?(env)
