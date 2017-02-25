@@ -59,10 +59,6 @@ end
 
 puts "Deploying to #{GIT_WORK_TREE} as #{DEPLOY_USER}:#{DEPLOY_GROUP}..."
 Dir.chdir(GIT_WORK_TREE) do
-	# Pass on our rights to the files we just uploaded to the deployment user/group:
-	sh %W{chmod -Rf ug+rwX .} rescue nil
-	sh %W{chown -Rf #{DEPLOY_USER}:#{DEPLOY_GROUP} .} rescue nil
-	
 	sudo %W{git checkout -f}
 	sudo %W{git submodule update -i}
 	
