@@ -53,11 +53,6 @@ def sh(command)
 	end
 end
 
-def sh_stdout(*args)
-	puts args.join(' ')
-	return %x[#{args.join(' ')}]
-end
-
 def sudo(command)
 	sh([*SUDO, *command])
 end
