@@ -19,6 +19,8 @@
 # THE SOFTWARE.
 
 require 'fileutils'
+require 'tmpdir'
+require 'yaml'
 
 RSpec.describe "utopia executable" do
 	let(:utopia) {File.expand_path("../../bin/utopia", __dir__)}
@@ -35,12 +37,24 @@ RSpec.describe "utopia executable" do
 		
 		# This allows the utopia command to load the correct library:
 		ENV['RUBYLIB'] = File.expand_path("../../lib", __dir__)
+		ENV['DEPLOY_USER'] = 'http'
+		ENV['DEPLOY_GROUP'] = 'http'
 	end
 	
-	def sh(*args)
+	def sh_status(*args)
 		puts args.join(' ')
 		system(*args)
 		return $?
+	end
+	
+	def sh_stdout(*args)
+		puts args.join(' ')
+		output = %x[#{args.join ' '}]
+		return output
+	end
+	
+	def git_config(name)
+		return sh_stdout('git', 'config', name).chomp
 	end
 	
 	def install_packages(dir)
@@ -53,13 +67,13 @@ RSpec.describe "utopia executable" do
 		Dir.mktmpdir('test-site') do |dir|
 			install_packages(dir)
 			
-			result = sh(utopia, "--in", dir, "site", "create")
+			result = sh_status(utopia, "--in", dir, "site", "create")
 			expect(result).to be == 0
 			
 			expect(Dir.entries(dir)).to include(".bowerrc", ".git", "Gemfile", "Gemfile.lock", "README.md", "Rakefile", "config.ru", "lib", "pages", "public", "tmp", "spec")
 			
 			Dir.chdir(dir) do
-				result = sh("rake", "test")
+				result = sh_status("rake", "test")
 				expect(result).to be == 0
 			end
 		end
@@ -69,10 +83,17 @@ RSpec.describe "utopia executable" do
 		Dir.mktmpdir('test-server') do |dir|
 			install_packages(dir)
 			
-			result = sh(utopia, "--in", dir, "server", "create")
+			result = sh_status(utopia, "--in", dir, "server", "create")
 			expect(result).to be == 0
 			
 			expect(Dir.entries(dir)).to include(".git")
+			
+			# make sure git is set up properly
+			Dir.chdir(dir) do
+				expect(git_config 'core.sharedRepository').to be == '1'
+				expect(git_config 'receive.denyCurrentBranch').to be == 'ignore'
+				expect(git_config 'core.worktree').to be == dir
+			end
 			
 			environment = YAML.load_file(File.join(dir, 'config/environment.yaml'))
 			expect(environment).to include('RACK_ENV', 'UTOPIA_SESSION_SECRET')
@@ -87,18 +108,22 @@ RSpec.describe "utopia executable" do
 			
 			server_path = File.join(dir, 'server')
 			
-			result = sh(utopia, "--in", site_path, "site", "create")
+			result = sh_status(utopia, "--in", site_path, "site", "create")
 			expect(result).to be == 0
 			
-			result = sh(utopia, "--in", server_path, "server", "create")
+			result = sh_status(utopia, "--in", server_path, "server", "create")
 			expect(result).to be == 0
 			
 			Dir.chdir(site_path) do
-				result = sh("git", "push", "--set-upstream", server_path, "master")
+				result = sh_status("git", "push", "--set-upstream", server_path, "master")
 				expect(result).to be == 0
 			end
 			
-			expect(Dir.entries(server_path)).to include(".bowerrc", ".git", "Gemfile", "README.md", "Rakefile", "config.ru", "lib", "pages", "public", "tmp")
+			files = %W[.bowerrc .git Gemfile Gemfile.lock README.md Rakefile config.ru lib pages public tmp]
+			
+			expect(Dir.entries(server_path)).to include(*files)
+			
+			expect(File.executable? File.join(server_path, 'config.ru')).to be == true
 		end
 	end
 end
