@@ -19,44 +19,15 @@
 # THE SOFTWARE.
 
 module Utopia
-	class Content
-		# Compatibility with older versions of rack:
-		EXPIRES = 'Expires'.freeze
-		CACHE_CONTROL = 'Cache-Control'.freeze
-		CONTENT_TYPE = 'Content-Type'.freeze
-		
-		class Response
-			def initialize
-				@status = 200
-				@headers = {}
-				
-				# The default content type:
-				self.content_type = "text/html; charset=utf-8"
+	module Tags
+		class Library
+			def initialize(tags)
+				@tags = tags
 			end
 			
-			attr :status
-			attr :headers
-			
-			# Specifies that the content shouldn't be cached. Overrides `cache!` if already called.
-			def do_not_cache!
-				@headers[CACHE_CONTROL] = "no-cache, must-revalidate"
-				@headers[EXPIRES] = Time.now.httpdate
+			def call(name, parent_path)
+				return @tags[name]
 			end
-
-			# Specify that the content could be cached.
-			def cache!(duration = 3600, access: "public")
-				unless @headers[CACHE_CONTROL] =~ /no-cache/
-					@headers[CACHE_CONTROL] = "#{access}, max-age=#{duration}"
-					@headers[EXPIRES] = (Time.now + duration).httpdate
-				end
-			end
-
-			# Specify the content type of the response data.
-			def content_type= value
-				@headers[CONTENT_TYPE] = value
-			end
-			
-			alias content_type! content_type=
 		end
 	end
 end

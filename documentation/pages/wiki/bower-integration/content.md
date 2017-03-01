@@ -22,4 +22,4 @@ Then add the appropriate `<script>` tags to `pages/_page.xnode`:
 
 This task copies only the contents of the dist directory. This ensures that you only get files intended for distribution. If the bower package doesn't have a `dist` directory, the entire contents is copied.
 
-<listing rel="site" src="tasks/bower.rake" brush="ruby" />
+<fragment:listing rel="site" src="tasks/bower.rake" brush="ruby" />

@@ -48,10 +48,6 @@ module Utopia
 				@begin_tags = []
 				@end_tags = []
 				
-				# TODO: Provide way to set encoding and content type.
-				#@encoding = Encoding::UTF_8
-				#self.content_type = "text/html; charset=#{@encoding.name}"
-				
 				super()
 			end
 			

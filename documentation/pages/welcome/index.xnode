@@ -1,5 +1,5 @@
-<page class="front">
-	<heading>Welcome to Utopia...</heading>
+<fragment:page class="front">
+	<fragment:heading>Welcome to Utopia...</fragment:heading>
 	
 	<section class="features">
 		<div>
@@ -38,4 +38,4 @@
 		
 		<p>For up-to-date documentation, please browse the included <a href="/wiki/">wiki</a>. Feel free to improve it and submit a PR :)</p>
 	</section>
-</page>
+</fragment:page>

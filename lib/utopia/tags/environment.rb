@@ -32,7 +32,7 @@ module Utopia
 			def call(transaction, state)
 				only = state[:only].split(",").collect(&:to_sym) rescue []
 
-				if defined?(@environment) and only.include?(@environment)
+				if only.include?(@environment)
 					transaction.parse_markup(state.content)
 				end
 			end

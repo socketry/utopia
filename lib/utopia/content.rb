@@ -23,6 +23,7 @@ require_relative 'localization'
 
 require_relative 'content/node'
 require_relative 'content/markup'
+require_relative 'tags/library'
 
 require 'trenni/template'
 
@@ -43,7 +44,12 @@ module Utopia
 				@template_cache = nil
 			end
 			
-			@tags = options.fetch(:tags, {})
+			@namespaces = options.fetch(:namespaces, {})
+			@namespaces['fragment'] ||= self.method(:content_tag)
+			
+			if tags = options.fetch(:tags)
+				@namespaces[nil] = Tags::Library.new(tags)
+			end
 			
 			self.freeze
 		end
@@ -54,9 +60,9 @@ module Utopia
 			
 			super
 		end
-
+		
 		attr :root
-
+		
 		def fetch_template(path)
 			if @template_cache
 				@template_cache.fetch_or_store(path.to_s) do
@@ -67,50 +73,13 @@ module Utopia
 			end
 		end
 		
-		# This function looks up a named tag in a given path. It's a hotspot and needs improvement.
-		private def fetch_tag(name, parent_path)
-			if String === name && name.index('/')
-				name = Path.create(name)
+		# Look up a named tag such as `<entry />` or `<fragment:page>...`
+		def lookup_tag(qualified_name, parent_path)
+			name, namespace = qualified_name.split(':', 2).reverse
+			
+			if library = @namespaces[namespace]
+				library.call(name, parent_path)
 			end
-			
-			if Path === name
-				name = parent_path + name
-				name_path = name.components.dup
-				name_path[-1] += XNODE_EXTENSION
-			else
-				name_path = name + XNODE_EXTENSION
-			end
-			
-			components = parent_path.components.dup
-			
-			while components.any?
-				tag_path = File.join(root, components, name_path)
-
-				if File.exist? tag_path
-					return Node.new(self, Path[components] + name, parent_path + name, tag_path)
-				end
-
-				if String === name_path
-					tag_path = File.join(root, components, '_' + name_path)
-
-					if File.exist? tag_path
-						return Node.new(self, Path[components] + name, parent_path + name, tag_path)
-					end
-				end
-				
-				components.pop
-			end
-			
-			return nil
-		end
-		
-		# Look up a named tag such as <entry />
-		def lookup_tag(name, parent_path)
-			if @tags.key? name
-				return @tags[name]
-			end
-			
-			return fetch_tag(name, parent_path)
 		end
 		
 		# The request_path is an absolute uri path, e.g. /foo/bar. If an xnode file exists on disk for this exact path, it is instantiated, otherwise nil.
@@ -154,6 +123,44 @@ module Utopia
 			end
 			
 			return @app.call(env)
+		end
+		
+		private
+		
+		def content_tag(name, parent_path)
+			if String === name && name.index('/')
+				name = Path.create(name)
+			end
+			
+			if Path === name
+				name = parent_path + name
+				name_path = name.components.dup
+				name_path[-1] += XNODE_EXTENSION
+			else
+				name_path = name + XNODE_EXTENSION
+			end
+			
+			components = parent_path.components.dup
+			
+			while components.any?
+				tag_path = File.join(@root, components, name_path)
+
+				if File.exist? tag_path
+					return Node.new(self, Path[components] + name, parent_path + name, tag_path)
+				end
+
+				if String === name_path
+					tag_path = File.join(@root, components, '_' + name_path)
+
+					if File.exist? tag_path
+						return Node.new(self, Path[components] + name, parent_path + name, tag_path)
+					end
+				end
+				
+				components.pop
+			end
+			
+			return nil
 		end
 	end
 end

@@ -1,14 +1,7 @@
-<page>
+<fragment:page>
 	<?r response.do_not_cache! ?>
 	
-	<style type="text/css">
-		
-		form textarea {
-			
-		}
-	</style>
-	
-	<heading>Editing #{self[:page_title].inspect}</heading>
+	<fragment:heading>Editing #{self[:page_title].inspect}</fragment:heading>
 	<form action="#" method="post">
 		<fieldset>
 			<legend>Page Content</legend>
@@ -19,4 +12,4 @@
 			<input type="submit" />
 		</fieldset>
 	</form>
-</page>
+</fragment:page>
