@@ -64,9 +64,7 @@ module Utopia
 				@controller_cache = nil
 			end
 			
-			warn "Controller middleware is automatically prepending Actions! Will be deprecated in 2.x" if $VERBOSE and base.nil?
-			
-			@base = base || Controller::Base.dup.prepend(Controller::Actions)
+			@base = base || Controller::Base
 		end
 		
 		attr :app
