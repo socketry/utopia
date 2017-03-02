@@ -1,7 +1,8 @@
-<page>
-	<?r response.content_type = 'text/html' ?>
+<html>
+	<head><title>Error</title></head>
+	<body>
+		<h1>File Not Found</h1>
 	
-	<heading>File Not Found</heading>
-	
-	<p>The file you requested is unfortunately not available at this time!</p>
-</page>
+		<p>The file you requested is unfortunately not available at this time!</p>
+	</body>
+</html>

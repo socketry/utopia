@@ -1,5 +1,5 @@
-<page class="front">
-	<heading>Welcome to Utopia</heading>
+<fragment:page class="front">
+	<fragment:heading>Welcome to Utopia</fragment:heading>
 	
 	<p><strong>Utopia is designed to simplify web development.</strong> Utopia is a fully featured stack for both content-heavy sites and dynamic web applications.</p>
 	
@@ -14,4 +14,4 @@
 	<h2>Standards Based Localization</h2>
 	
 	<p>Automatically sniff the user's desired language and provide content in the correct language.</p>
-</page>
+</fragment:page>

@@ -167,7 +167,7 @@ module Utopia
 				return tag_end
 			end
 
-			# Takes an instance of Tag
+			# Takes an instance of Tag and returns a node if one can be found. This method is invoked for every tag and therefore it should be efficient.
 			def lookup(tag)
 				result = tag
 				node = nil
@@ -271,8 +271,9 @@ module Utopia
 				@buffer << string
 			end
 
+			# This method is invoked for every interpolation, and thus needs to be fast.
 			def text(string)
-				@buffer << Trenni::MarkupString(string)
+				@buffer << Trenni::Markup.escape(string)
 			end
 
 			def tag_complete(tag)
