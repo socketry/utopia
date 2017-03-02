@@ -53,8 +53,17 @@ RSpec.describe "utopia executable" do
 		return output
 	end
 	
-	def git_config(name)
-		return sh_stdout('git', 'config', name).chomp
+	def git_config(name, value=nil)
+		unless value.nil?
+			return sh_status('git', 'config', name, value)
+		else
+			return sh_stdout('git', 'config', name).chomp
+		end
+	end
+	
+	def group_rw(path)
+		gaccess = File.stat(path).mode.to_s(8)[-2]
+		return gaccess == '6' || gaccess == '7'
 	end
 	
 	def install_packages(dir)
@@ -100,6 +109,31 @@ RSpec.describe "utopia executable" do
 		end
 	end
 	
+	it "should not trash the sample server during update" do
+		Dir.mktmpdir('test-server') do |dir|
+			install_packages(dir)
+			
+			result = sh_status(utopia, "--in", dir, "server", "create")
+			expect(result).to be == 0
+			
+			Dir.chdir(dir) do
+				# make the repository look a bit like like it's an old one
+				git_config 'core.sharedRepository', 'false'
+				sh_status 'chmod', '-Rf', 'g-x', '.git'
+				sh_status 'rm', '-f', '.git/hooks/post-receive'
+			end
+			
+			result = sh_status(utopia, "--in", dir, "server", "update")
+			expect(result).to be == 0
+			
+			# check a couple of files to make sure they have group read and write access
+			# after the update
+			Dir.glob(File.join(dir, '.git/**/*')).each do |path|
+				expect(group_rw path).to be == true
+			end
+		end
+	end
+	
 	it "can generate sample site, server and push to the server" do
 		Dir.mktmpdir('test') do |dir|
 			site_path = File.join(dir, 'site')
@@ -124,6 +158,8 @@ RSpec.describe "utopia executable" do
 			expect(Dir.entries(server_path)).to include(*files)
 			
 			expect(File.executable? File.join(server_path, 'config.ru')).to be == true
+			
+			puts File.stat(File.join(dir, 'server', '.git')).mode
 		end
 	end
 end
