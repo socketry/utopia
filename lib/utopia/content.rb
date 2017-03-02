@@ -47,7 +47,7 @@ module Utopia
 			@namespaces = options.fetch(:namespaces, {})
 			@namespaces['fragment'] ||= self.method(:content_tag)
 			
-			if tags = options.fetch(:tags)
+			if tags = options[:tags]
 				@namespaces[nil] = Tags::Library.new(tags)
 			end
 			

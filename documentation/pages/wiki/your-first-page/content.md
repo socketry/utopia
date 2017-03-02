@@ -9,7 +9,7 @@ $ utopia site create
 $ rake server
 ```
 
-You will now have a basic template site running on http://localhost:9292.
+You will now have a basic template site running on <a href="http://localhost:9292">http://localhost:9292</a>.
 
 ## Welcome Page
 

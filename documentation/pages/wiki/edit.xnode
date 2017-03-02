@@ -1,15 +1,10 @@
-<fragment:page>
-	<?r response.do_not_cache! ?>
-	
-	<fragment:heading>Editing #{self[:page_title].inspect}</fragment:heading>
+<fragment:editor>
 	<form action="#" method="post">
-		<fieldset>
-			<legend>Page Content</legend>
-			<textarea name="content">#{self[:content]}</textarea>
-		</fieldset>
-		
-		<fieldset class="footer">
+		<div class="header">
+			<div>Editing #{attributes[:page_title].inspect}</div>
 			<input type="submit" />
-		</fieldset>
+		</div>
+		
+		<textarea name="content">#{self[:content]}</textarea>
 	</form>
-</fragment:page>
+</fragment:editor>

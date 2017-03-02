@@ -19,7 +19,7 @@ use Rack::Sendfile
 use Utopia::ContentLength
 
 use Utopia::Redirection::Rewrite,
-	'/' => '/welcome/index'
+	'/' => '/wiki/index'
 
 use Utopia::Redirection::DirectoryIndex
 
