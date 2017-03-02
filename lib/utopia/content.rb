@@ -56,7 +56,9 @@ module Utopia
 
 		def freeze
 			@root.freeze
-			@tags.freeze
+			
+			@namespaces.values.each(&:freeze)
+			@namespaces.freeze
 			
 			super
 		end
