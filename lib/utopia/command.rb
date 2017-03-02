@@ -89,6 +89,7 @@ module Utopia
 					
 					# Copy git hooks:
 					system("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git'))
+					system("chmod", "-Rf", "g+w", File.join(destination_root, '.git/hooks'))
 					
 					Setup::Server.update_default_environment(destination_root)
 					
@@ -107,11 +108,14 @@ module Utopia
 					
 					Dir.chdir(destination_root) do
 						system("git", "config", "receive.denyCurrentBranch", "ignore")
+						system("git", "config", "core.sharedRepository", "group")
 						system("git", "config", "core.worktree", destination_root)
 					end
 					
 					# Copy git hooks:
 					system("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git'))
+					# finally set everything in the .git directory to be group writable
+					system("chmod", "-Rf", "g+w", File.join(destination_root, '.git'))
 					Setup::Server.update_default_environment(destination_root)
 				end
 			end
