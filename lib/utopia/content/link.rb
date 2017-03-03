@@ -91,9 +91,13 @@ module Utopia
 			def to_anchor(**options)
 				Trenni::Builder.fragment(options[:builder]) do |builder|
 					if href?
-						relative_href(options[:base])
+						a_attributes = {
+							:class => options.fetch(:class, 'link'),
+							:href => relative_href(options[:base]),
+							:target => options.fetch(:target, @info[:target])
+						}
 						
-						builder.inline('a', class: options.fetch(:class, 'link'), href: relative_href(options[:base])) do
+						builder.inline('a', a_attributes) do
 							builder.text(options[:content] || title)
 						end
 					else
