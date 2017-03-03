@@ -29,6 +29,7 @@ module Utopia
 			def initialize
 				@status = 200
 				@headers = {}
+				@body = []
 				
 				# The default content type:
 				self.content_type = "text/html; charset=utf-8"
@@ -36,6 +37,19 @@ module Utopia
 			
 			attr :status
 			attr :headers
+			attr :body
+			
+			def content
+				@body.join
+			end
+			
+			def lookup(tag)
+				return nil
+			end
+			
+			def to_a
+				[@status, @headers, @body]
+			end
 			
 			# Specifies that the content shouldn't be cached. Overrides `cache!` if already called.
 			def do_not_cache!

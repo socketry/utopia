@@ -40,6 +40,14 @@ module Utopia
 		
 		# A single request through content middleware. We use a struct to hide instance varibles since we instance_exec within this context.
 		class Transaction < Response
+			def self.render(node, request, attributes)
+				transaction = self.new(request, attributes)
+				
+				transaction.body << transaction.render_node(node, attributes)
+				
+				return transaction
+			end
+			
 			def initialize(request, attributes = {})
 				@request = request
 				
@@ -110,7 +118,7 @@ module Utopia
 
 				if node
 					state = State.new(tag, node)
-					self.begin_tags << state
+					@begin_tags << state
 
 					if node.respond_to? :tag_begin
 						node.tag_begin(self, state)
@@ -143,11 +151,11 @@ module Utopia
 						top.node.tag_end(self, top)
 					end
 
-					self.end_tags << top
+					@end_tags << top
 					buffer = top.call(self)
 
-					self.begin_tags.pop
-					self.end_tags.pop
+					@begin_tags.pop
+					@end_tags.pop
 
 					if current
 						current.write(buffer)
@@ -162,28 +170,27 @@ module Utopia
 			end
 			
 			def render_node(node, attributes = {})
-				self.begin_tags << State.new(attributes, node)
+				@begin_tags << State.new(attributes, node)
 
 				return tag_end
 			end
 
-			# Takes an instance of Tag and returns a node if one can be found. This method is invoked for every tag and therefore it should be efficient.
+			# Maps a tag to a node instance by performing a series of lookups. This function is called for each tag and thus heavily affects performance.
 			def lookup(tag)
 				result = tag
-				node = nil
-
-				self.begin_tags.reverse_each do |state|
+				
+				# This loop works from inner to outer tags, and updates the tag we are currently searching for based on any overrides:
+				@begin_tags.reverse_each do |state|
 					result = state.lookup(result)
 					
-					node ||= state.node if state.node.respond_to? :lookup
-
 					return result if result.is_a?(Node)
 				end
-
-				self.end_tags.reverse_each do |state|
+				
+				# This loop looks up a tag by asking the most embedded node to look it up based on tag name. This almost always only evaluates the top state:
+				@end_tags.reverse_each do |state|
 					return state.node.lookup(result) if state.node.respond_to? :lookup
 				end
-
+				
 				return nil
 			end
 			
@@ -209,17 +216,17 @@ module Utopia
 		# The state of a single tag being rendered within a Transaction instance.
 		class Transaction::State
 			def initialize(tag, node, attributes = tag.to_hash)
+				@tag = tag
 				@node = node
-				
-				@buffer = Trenni::MarkupString.new.force_encoding(Encoding::UTF_8)
-				
-				@overrides = {}
-				
-				@tags = []
 				@attributes = attributes
 				
+				@buffer = Trenni::MarkupString.new.force_encoding(Encoding::UTF_8)
 				@content = nil
+				
+				@overrides = {}
 				@deferred = []
+				
+				@tags = []
 			end
 
 			attr :attributes
@@ -271,7 +278,6 @@ module Utopia
 				@buffer << string
 			end
 
-			# This method is invoked for every interpolation, and thus needs to be fast.
 			def text(string)
 				@buffer << Trenni::Markup.escape(string)
 			end

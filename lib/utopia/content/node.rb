@@ -20,6 +20,7 @@
 
 require_relative 'markup'
 require_relative 'links'
+
 require_relative 'transaction'
 
 require 'pathname'
@@ -119,11 +120,7 @@ module Utopia
 			end
 
 			def process!(request, attributes = {})
-				transaction = Transaction.new(request)
-				
-				output = transaction.render_node(self, attributes)
-				
-				return [200, transaction.headers, [output]]
+				Transaction.render(self, request, attributes).to_a
 			end
 		end
 		
