@@ -21,7 +21,7 @@
 require_relative 'markup'
 require_relative 'links'
 
-require_relative 'transaction'
+require_relative 'document'
 
 require 'pathname'
 
@@ -107,31 +107,31 @@ module Utopia
 				return Links.index(@controller.root, siblings_path, options)
 			end
 
-			def call(transaction, state)
+			def call(document, state)
 				# Load the template:
 				template = @controller.fetch_template(@file_path)
 				
 				# Evaluate the template/code:
-				context = Context.new(transaction, state)
+				context = Context.new(document, state)
 				markup = template.to_buffer(context)
 				
-				# Render the resulting markup into the transaction:
-				transaction.parse_markup(markup)
+				# Render the resulting markup into the document:
+				document.parse_markup(markup)
 			end
 
 			def process!(request, attributes = {})
-				Transaction.render(self, request, attributes).to_a
+				Document.render(self, request, attributes).to_a
 			end
 		end
 		
 		# This is a special context in which a limited set of well defined methods are exposed in the content view.
-		Node::Context = Struct.new(:transaction, :state) do
+		Node::Context = Struct.new(:document, :state) do
 			def partial(*args, &block)
 				if block_given?
 					state.defer(&block)
 				else
-					state.defer do |transaction|
-						transaction.tag(*args)
+					state.defer do |document|
+						document.tag(*args)
 					end
 				end
 			end
@@ -139,19 +139,19 @@ module Utopia
 			alias deferred_tag partial
 			
 			def controller
-				transaction.controller
+				document.controller
 			end
 			
 			def localization
-				transaction.localization
+				document.localization
 			end
 			
 			def request
-				transaction.request
+				document.request
 			end
 			
 			def response
-				transaction
+				document
 			end
 			
 			def attributes
@@ -159,21 +159,21 @@ module Utopia
 			end
 			
 			def [] key
-				state.attributes.fetch(key) {transaction.attributes[key]}
+				state.attributes.fetch(key) {document.attributes[key]}
 			end
 			
 			alias current state
 			
 			def content
-				transaction.content
+				document.content
 			end
 
 			def parent
-				transaction.parent
+				document.parent
 			end
 
 			def first
-				transaction.first
+				document.first
 			end
 			
 			def links(*arguments, &block)

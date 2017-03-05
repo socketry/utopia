@@ -39,13 +39,13 @@ module Utopia
 		CONTENT_TAG_NAME = "content".freeze
 		
 		# A single request through content middleware. We use a struct to hide instance varibles since we instance_exec within this context.
-		class Transaction < Response
+		class Document < Response
 			def self.render(node, request, attributes)
-				transaction = self.new(request, attributes)
+				document = self.new(request, attributes)
 				
-				transaction.body << transaction.render_node(node, attributes)
+				document.body << document.render_node(node, attributes)
 				
-				return transaction
+				return document
 			end
 			
 			def initialize(request, attributes = {})
@@ -72,10 +72,10 @@ module Utopia
 				MarkupParser.parse(markup, self)
 			end
 
-			# The Rack::Request for this transaction.
+			# The Rack::Request for this document.
 			attr :request
 
-			# Per-transaction global attributes.
+			# Per-document global attributes.
 			attr :attributes
 
 			# Begin tags represents a list from outer to inner most tag.
@@ -213,8 +213,8 @@ module Utopia
 			end
 		end
 		
-		# The state of a single tag being rendered within a Transaction instance.
-		class Transaction::State
+		# The state of a single tag being rendered within a document instance.
+		class Document::State
 			def initialize(tag, node, attributes = tag.to_hash)
 				@tag = tag
 				@node = node
@@ -261,14 +261,14 @@ module Utopia
 				end
 			end
 
-			def call(transaction)
+			def call(document)
 				@content = @buffer
 				@buffer = Trenni::MarkupString.new.force_encoding(Encoding::UTF_8)
 				
 				if node.respond_to? :call
-					node.call(transaction, self)
+					node.call(document, self)
 				else
-					transaction.parse_markup(@content)
+					document.parse_markup(@content)
 				end
 				
 				return @buffer

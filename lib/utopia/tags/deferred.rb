@@ -21,12 +21,12 @@
 module Utopia
 	module Tags
 		class Deferred
-			def self.call(transaction, state)
+			def self.call(document, state)
 				id = state[:id].to_i
 				
-				procedure = transaction.parent.deferred[id]
+				procedure = document.parent.deferred[id]
 				
-				procedure.call(transaction, state)
+				procedure.call(document, state)
 			end
 		end
 	end

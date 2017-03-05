@@ -21,12 +21,12 @@
 module Utopia
 	module Tags
 		class Override
-			def self.tag_begin(transaction, state)
+			def self.tag_begin(document, state)
 				state.overrides[state[:name]] = state[:with]
 			end
 			
-			def self.call(transaction, state)
-				transaction.parse_markup(state.content)
+			def self.call(document, state)
+				document.parse_markup(state.content)
 			end
 		end
 	end

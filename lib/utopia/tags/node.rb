@@ -21,12 +21,12 @@
 module Utopia
 	module Tags
 		class Node
-			def self.call(transaction, state)
+			def self.call(document, state)
 				path = Path[state[:path]]
 				
-				node = transaction.lookup_node(path)
+				node = document.lookup_node(path)
 				
-				transaction.render_node(node)
+				document.render_node(node)
 			end
 		end
 	end

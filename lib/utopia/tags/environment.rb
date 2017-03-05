@@ -29,11 +29,11 @@ module Utopia
 				@environment = environment
 			end
 			
-			def call(transaction, state)
+			def call(document, state)
 				only = state[:only].split(",").collect(&:to_sym) rescue []
 
 				if only.include?(@environment)
-					transaction.parse_markup(state.content)
+					document.parse_markup(state.content)
 				end
 			end
 		end
