@@ -87,7 +87,7 @@ module Utopia
 			end
 
 			# Request relative redirect. Respond with a redirect to the given target.
-			def redirect! (target, status = 302)
+			def redirect!(target, status = 302)
 				status = HTTP::Status.new(status, 300...400)
 				location = target.to_s
 				
