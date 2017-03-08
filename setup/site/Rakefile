@@ -1,5 +1,5 @@
 
 # Load all rake tasks:
-import(*Dir.glob('tasks/*.rake'))
+import(*Dir.glob('tasks/**/*.rake'))
 
 task :default => :server
