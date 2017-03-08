@@ -8,9 +8,10 @@ Reading these pages in order will give you an overview of the design of Utopia, 
 
 - [Development Environment Setup](development-environment-setup/)
 - [Server Setup](server-setup/)
-- [Your first page](your-first-page/)
+- [Your First Page](your-first-page/)
 - [Installing JavaScript Libraries](bower-integration/)
 - [Website Tests](testing/)
+- [Updating Your Site](updating-utopia/)
 
 ## Middleware
 
