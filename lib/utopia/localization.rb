@@ -59,28 +59,32 @@ module Utopia
 		LOCALIZATION_KEY = 'utopia.localization'.freeze
 		CURRENT_LOCALE_KEY = 'utopia.localization.current_locale'.freeze
 		
-		DEFAULT_LOCALE = 'en'
-		
-		def initialize(app, **options)
+		# @param locales [Array<String>] An array of all supported locales.
+		# @param default_locale [String] The default locale if none is provided.
+		# @param default_locales [String] The locales to try in order if none is provided.
+		# @param hosts [Hash<Pattern, String>] Specify a mapping of the HTTP_HOST header to a given locale.
+		# @param ignore [Array<Pattern>] A list of patterns matched against PATH_INFO which will not be localized.
+		def initialize(app, locales:, default_locale: nil, default_locales: nil, hosts: {}, ignore: [], **options)
 			@app = app
 			
-			@all_locales = HTTP::Accept::Languages::Locales.new(options[:locales])
+			@all_locales = HTTP::Accept::Languages::Locales.new(locales)
 			
-			# Locales here are represented as an array of strings, e.g. ['en', 'ja', 'cn', 'de'].
-			unless @default_locales = options[:default_locales] 
+			# Locales here are represented as an array of strings, e.g. ['en', 'ja', 'cn', 'de'] and are used in order if no locale is specified by the user.
+			unless @default_locales = default_locales
 				# We append nil, i.e. no localization.
 				@default_locales = @all_locales.names + [nil]
 			end
 			
-			if @default_locale = options[:default_locale]
-				@default_locales.unshift(default_locale)
-			else
-				@default_locale = @default_locales.first
+			@default_locale = default_locale || @default_locales.first
+			
+			unless @default_locales.include? @default_locale
+				@default_locales.unshift(@default_locale)
 			end
 			
-			@hosts = options[:hosts] || {}
+			# Select a localization based on a request host name:
+			@hosts = hosts
 			
-			@nonlocalized = options.fetch(:nonlocalized, [])
+			@ignore = ignore || options[:nonlocalized]
 			
 			self.freeze
 		end
@@ -90,7 +94,7 @@ module Utopia
 			@default_locales.freeze
 			@default_locale.freeze
 			@hosts.freeze
-			@nonlocalized.freeze
+			@ignore.freeze
 			
 			super
 		end
@@ -104,7 +108,7 @@ module Utopia
 			# Keep track of what locales have been tried:
 			locales = Set.new
 			
-			host_preferred_locales(env).each do |locale|
+			host_preferred_locales(env) do |locale|
 				yield env.merge(CURRENT_LOCALE_KEY => locale) if locales.add? locale
 			end
 			
@@ -124,16 +128,13 @@ module Utopia
 			end
 		end
 		
-		HTTP_HOST = 'HTTP_HOST'.freeze
-		
 		def host_preferred_locales(env)
 			http_host = env[Rack::HTTP_HOST]
 			
-			# Get a list of all hosts which match the incoming htt_host:
-			matching_hosts = @hosts.select{|host_pattern, locale| http_host =~ host_pattern}
-			
-			# Extract all the valid locales:
-			matching_hosts.flat_map{|host_pattern, locale| locale}
+			# Yield all hosts which match the incoming http_host:
+			@hosts.each do |pattern, locale|
+				yield locale if http_host[pattern]
+			end
 		end
 		
 		def request_preferred_locale(env)
@@ -163,10 +164,18 @@ module Utopia
 			return []
 		end
 		
-		def nonlocalized?(env)
-			path_info = env[Rack::PATH_INFO]
+		SAFE_METHODS = ['GET', 'HEAD']
+		
+		def localized?(env)
+			# Only SAFE_METHODS can be localized:
+			request_method = env[Rack::REQUEST_METHOD]
+			return false unless SAFE_METHODS.include?(request_method)
 			
-			@nonlocalized.any? { |pattern| path_info[pattern] != nil }
+			# Ignore requests which match the ignored paths:
+			path_info = env[Rack::PATH_INFO]
+			return false if @ignore.any? { |pattern| path_info[pattern] != nil }
+			
+			return true
 		end
 		
 		# Set the Vary: header on the response to indicate that this response should include the header in the cache key.
@@ -190,8 +199,8 @@ module Utopia
 		end
 		
 		def call(env)
-			# Pass the request through with no localization if it is a nonlocalized path:
-			return @app.call(env) if nonlocalized?(env)
+			# Pass the request through if it shouldn't be localized:
+			return @app.call(env) unless localized?(env)
 			
 			env[LOCALIZATION_KEY] = self
 			
