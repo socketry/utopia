@@ -35,9 +35,6 @@ module Utopia
 			attr :tag
 		end
 		
-		DEFERRED_TAG_NAME = "deferred".freeze
-		CONTENT_TAG_NAME = "content".freeze
-		
 		# A single request through content middleware. We use a struct to hide instance varibles since we instance_exec within this context.
 		class Document < Response
 			def self.render(node, request, attributes)
@@ -99,17 +96,13 @@ module Utopia
 			end
 
 			def tag_complete(tag, node = nil)
-				if tag.name == CONTENT_TAG_NAME
-					current.write(content)
-				else
-					node ||= lookup(tag)
+				node ||= lookup(tag)
 
-					if node
-						tag_begin(tag, node)
-						tag_end(tag)
-					else
-						current.tag_complete(tag)
-					end
+				if node
+					tag_begin(tag, node)
+					tag_end(tag)
+				else
+					current.tag_complete(tag)
 				end
 			end
 

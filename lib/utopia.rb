@@ -27,8 +27,3 @@ require_relative 'utopia/exceptions'
 require_relative 'utopia/redirection'
 require_relative 'utopia/static'
 require_relative 'utopia/content_length'
-
-require_relative 'utopia/tags/deferred'
-require_relative 'utopia/tags/environment'
-require_relative 'utopia/tags/node'
-require_relative 'utopia/tags/override'

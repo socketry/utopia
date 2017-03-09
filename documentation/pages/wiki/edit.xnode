@@ -1,4 +1,4 @@
-<fragment:editor>
+<content:editor>
 	<form action="#" method="post">
 		<div class="header">
 			<div>Editing #{attributes[:page_title].inspect}</div>
@@ -7,4 +7,4 @@
 		
 		<textarea name="content">#{self[:content]}</textarea>
 	</form>
-</fragment:editor>
+</content:editor>

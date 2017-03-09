@@ -1,1 +1,1 @@
-#{partial 'fragment:show-value', value: 10}
+#{partial 'content:show-value', value: 10}

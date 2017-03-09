@@ -19,14 +19,43 @@
 # THE SOFTWARE.
 
 module Utopia
-	module Tags
-		class Override
-			def self.tag_begin(document, state)
-				state.overrides[state[:name]] = state[:with]
+	class Content
+		module Tags
+			class DeferredTag
+				def self.call(document, state)
+					id = state[:id].to_i
+					
+					procedure = document.parent.deferred[id]
+					
+					procedure.call(document, state)
+				end
 			end
 			
-			def self.call(document, state)
-				document.parse_markup(state.content)
+			class NodeTag
+				def self.call(document, state)
+					path = Path[state[:path]]
+					
+					node = document.lookup_node(path)
+					
+					document.render_node(node)
+				end
+			end
+			
+			class ContentTag
+				def self.call(document, state)
+					# We are invoking this node within a parent who has content, and we want to generate output equal to that.
+					document.write(document.parent.content)
+				end
+			end
+			
+			NAMED = {
+				'deferred' => DeferredTag,
+				'node' => NodeTag,
+				'content' => ContentTag
+			}
+			
+			def self.call(name, parent_path)
+				NAMED[name]
 			end
 		end
 	end

@@ -23,38 +23,49 @@ require_relative 'localization'
 
 require_relative 'content/node'
 require_relative 'content/markup'
-require_relative 'tags/library'
+require_relative 'content/tags'
 
 require 'trenni/template'
 
 require 'concurrent/map'
 
 module Utopia
+	# A middleware which serves dynamically generated content.
 	class Content
 		INDEX = 'index'.freeze
 		
-		def initialize(app, **options)
+		CORE_NAMESPACE = 'utopia'.freeze
+		DEFERRED_TAG_NAME = 'utopia:deferred'.freeze
+		CONTENT_TAG_NAME = 'utopia:content'.freeze
+		
+		def initialize(app, root: nil, namespaces: {}, cache_templates: false, tags: nil)
 			@app = app
 			
-			@root = File.expand_path(options[:root] || Utopia::default_root)
+			@root = File.expand_path(root || Utopia::default_root)
 			
-			if options[:cache_templates]
+			if cache_templates
 				@template_cache = Concurrent::Map.new
 			else
 				@template_cache = nil
 			end
 			
-			@namespaces = options.fetch(:namespaces, {})
-			@namespaces['fragment'] ||= self.method(:content_tag)
+			@namespaces = namespaces
 			
-			if tags = options[:tags]
+			# Default content namespace for dynamic path based lookup:
+			@namespaces['content'] ||= self.method(:content_tag)
+			
+			# The core namespace for utopia specific functionality:
+			@namespaces[CORE_NAMESPACE] ||= Tags
+			
+			if tags
+				warn "Usage of raw tags (#{tags.keys.inspect}) is inefficient." if $VERBOSE
 				@namespaces[nil] = Tags::Library.new(tags)
 			end
-			
-			self.freeze
 		end
 
 		def freeze
+			@app.freeze
+			
 			@root.freeze
 			
 			@namespaces.values.each(&:freeze)
@@ -75,7 +86,7 @@ module Utopia
 			end
 		end
 		
-		# Look up a named tag such as `<entry />` or `<fragment:page>...`
+		# Look up a named tag such as `<entry />` or `<content:page>...`
 		def lookup_tag(qualified_name, parent_path)
 			name, namespace = qualified_name.split(':', 2).reverse
 			

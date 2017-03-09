@@ -1,5 +1,5 @@
-<fragment:page>
-	<fragment:heading>File Not Found</fragment:heading>
+<content:page>
+	<content:heading>File Not Found</content:heading>
 	
 	<p>The file you requested is unfortunately not available at this time!</p>
-</fragment:page>
+</content:page>

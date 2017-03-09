@@ -20,7 +20,7 @@ use Utopia::Redirection::Rewrite,
 	'/' => '/welcome/index'
 ```
 
-This page includes a basic overview of Utopia. Most of it's standard HTML, except for the outer `<page>` tag. Utopia uses the name `page` to lookup the file-system hierarchy. First, it looks for `/welcome/_page.xnode`, and then it looks for `/_page.xnode` which it finds. This page template includes a tag `<content/>` which is replaced with the inner body of the `<page>` tag. This recursive lookup is the heart of Utopia.
+This page includes a basic overview of Utopia. Most of it's standard HTML, except for the outer `<content:page>` tag. Utopia uses the name `page` to lookup the file-system hierarchy. First, it looks for `/welcome/_page.xnode`, and then it looks for `/_page.xnode` which it finds. This page template includes a tag `<utopia:content/>` which is replaced with the inner body of the `<content:page>` tag. This recursive lookup is the heart of Utopia.
 
 ## Links
 

@@ -35,11 +35,11 @@ end
 In your `post.xnode`, as an example:
 
 ```trenni
-<page>
-	<heading>Post #{attributes[:permalink][:id]} about #{attributes[:permalink][:title]}</heading>
+<content:page>
+	<content:heading>Post #{attributes[:permalink][:id]} about #{attributes[:permalink][:title]}</content:heading>
 	
 	<p>#{attributes[:post].content}</p>
-</page>
+</content:page>
 ```
 
 Keep in mind, that URLs like `/123-pictures-of-my-cat/edit` will work as expected, and hit the `edit` action of the controller.

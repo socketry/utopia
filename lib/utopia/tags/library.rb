@@ -26,7 +26,7 @@ module Utopia
 			end
 			
 			def call(name, parent_path)
-				return @tags[name]
+				return @tags[name].call(name, parent_path)
 			end
 		end
 	end

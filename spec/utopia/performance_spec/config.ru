@@ -30,11 +30,6 @@ use Utopia::Static,
 # Serve dynamic content
 use Utopia::Content,
 	root: File.expand_path('pages', __dir__),
-	cache_templates: true,
-	tags: {
-		'deferred' => Utopia::Tags::Deferred,
-		'override' => Utopia::Tags::Override,
-		'node' => Utopia::Tags::Node,
-	}
+	cache_templates: true
 
 run lambda { |env| [404, {}, []] }

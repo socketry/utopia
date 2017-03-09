@@ -1,5 +1,5 @@
-<fragment:page>
-	<fragment:heading>Exception</fragment:heading>
+<content:page>
+	<content:heading>Exception</content:heading>
 	
 	<p>It seems like something didn't quite work out as expected!</p>
-</fragment:page>
+</content:page>
