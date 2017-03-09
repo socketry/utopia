@@ -17,7 +17,7 @@ use Utopia::Redirection::Errors,
 # use Utopia::Localization,
 # 	:default_locale => 'en',
 # 	:locales => ['en', 'de', 'ja', 'zh'],
-# 	:nonlocalized => ['/_static/', '/_cache/']
+# 	:ignore => ['/_static/', '/_cache/']
 
 use Utopia::Controller,
 	root: File.expand_path('pages', __dir__),
