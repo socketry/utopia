@@ -8,6 +8,8 @@ gem "utopia", "~> $UTOPIA_VERSION"
 gem "rake"
 gem "bundler"
 
+gem "rack-freeze", "~> 1.1"
+
 group :development do
 	# For `rake server`:
 	gem "puma"

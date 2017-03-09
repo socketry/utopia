@@ -10,6 +10,7 @@ group :development do
 	gem 'kramdown'
 	
 	gem 'json'
+	gem 'msgpack'
 end
 
 group :test do
@@ -17,6 +18,8 @@ group :test do
 	gem 'ruby-prof'
 	
 	gem 'rack-test'
+	gem 'rack-freeze', '~> 1.1'
+	
 	gem 'simplecov'
 	gem 'coveralls', require: false
 end
