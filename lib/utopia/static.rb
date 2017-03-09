@@ -231,10 +231,12 @@ module Utopia
 
 			@cache_control = (options[:cache_control] || DEFAULT_CACHE_CONTROL)
 			
-			self.freeze
+			@extensions = MimeTypeLoader.extensions_for(types)
 		end
 
 		def freeze
+			@app.freeze
+			
 			@root.freeze
 			@extensions.freeze
 			@cache_control.freeze

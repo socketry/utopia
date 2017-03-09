@@ -85,11 +85,11 @@ module Utopia
 			@hosts = hosts
 			
 			@ignore = ignore || options[:nonlocalized]
-			
-			self.freeze
 		end
 		
 		def freeze
+			@app.freeze
+			
 			@all_locales.freeze
 			@default_locales.freeze
 			@default_locale.freeze

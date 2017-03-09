@@ -2,6 +2,11 @@
 
 require_relative 'config/environment'
 
+warmup do |app|
+	# Freeze all the middleware so that mutation bugs are detected.
+	app.freeze
+end
+
 if RACK_ENV == :production
 	# Handle exceptions in production with a error page and send an email notification:
 	use Utopia::Exceptions::Handler

@@ -29,6 +29,8 @@ module Utopia
 			end
 			
 			def freeze
+				@app.freeze
+				
 				@location.freeze
 				
 				super

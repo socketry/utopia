@@ -70,10 +70,10 @@ module Utopia
 		attr :app
 		
 		def freeze
-			@root.freeze
+			@app.freeze
 			
-			# Should we freeze the base class?
-			# @base.freeze
+			@root.freeze
+			@base.freeze
 			
 			super
 		end

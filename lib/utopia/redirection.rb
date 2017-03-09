@@ -44,6 +44,8 @@ module Utopia
 			end
 			
 			def freeze
+				@app.freeze
+				
 				@codes.freeze
 				
 				super
@@ -86,6 +88,8 @@ module Utopia
 			end
 			
 			def freeze
+				@app.freeze
+				
 				@status.freeze
 				@max_age.freeze
 				

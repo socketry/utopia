@@ -72,6 +72,8 @@ module Utopia
 		attr :cookie_defaults
 		
 		def freeze
+			@app.freeze
+			
 			@cookie_name.freeze
 			@key.freeze
 			@expires_after.freeze
