@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 module Utopia
+	# Used for setting up a Utopia web application, typically via `config/environment.rb`
 	class Bootstrap
 		def initialize(config_root, external_encoding: Encoding::UTF_8)
 			@config_root = config_root
@@ -44,7 +45,7 @@ module Utopia
 		def setup_encoding
 			# TODO: Deprecate and remove this setup - it should be the responsibility of the server to set this correctly.
 			if @external_encoding and Encoding.default_external != @external_encoding
-				warn "Updating Encoding.default_external from #{Encoding.default_external} to #{@external_encoding}"
+				warn "Updating Encoding.default_external from #{Encoding.default_external} to #{@external_encoding}" if $VERBOSE
 				Encoding.default_external = @external_encoding
 			end
 		end

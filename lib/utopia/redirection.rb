@@ -36,11 +36,10 @@ module Utopia
 		end
 		
 		class Errors
-			# Maps an error code to a given string
+			# @param codes [Hash<Integer,String>] The redirection path for a given error code.
 			def initialize(app, codes = {})
-				@codes = codes
-				
 				@app = app
+				@codes = codes
 			end
 			
 			def freeze
@@ -68,12 +67,6 @@ module Utopia
 				else
 					return response
 				end
-			end
-		end
-		
-		class FileNotFound < Errors
-			def initialize(uri = '/errors/file-not-found')
-				super(404 => uri)
 			end
 		end
 		

@@ -25,7 +25,7 @@ require 'digest/sha2'
 require_relative 'session/lazy_hash'
 
 module Utopia
-	# Stores all session data client side using a private symmetric encrpytion key.
+	# A middleware which provides a secure client-side session storage using a private symmetric encrpytion key.
 	class Session
 		RACK_SESSION = "rack.session".freeze
 		CIPHER_ALGORITHM = "aes-256-cbc"
@@ -36,22 +36,26 @@ module Utopia
 		# At least, the session will be updated every 1 hour:
 		DEFAULT_UPDATE_TIMEOUT = 3600
 		
-		def initialize(app, session_name: nil, secret: nil, expires_after: nil, update_timeout: nil, **options)
+		# @param session_name [String] The name of the session cookie.
+		# @param secret [Array] The secret text used to generate a symetric encryption key for the coookie data.
+		# @param expires_after [String] The cache-control header to set for static content.
+		# @param options [Hash<Symbol,Object>] Additional defaults used for generating the cookie by `Rack::Utils.set_cookie_header!`.
+		def initialize(app, session_name: RACK_SESSION, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, **options)
 			@app = app
 			
-			@session_name = session_name || RACK_SESSION
+			@session_name = session_name
 			@cookie_name = @session_name + ".encrypted"
 			
 			if secret.nil? or secret.empty?
 				secret = SecureRandom.hex(32)
-				warn "#{self.class} secret is #{secret.inspect}, generating transient secret key!"
+				warn "#{self.class} secret is #{secret.inspect}, generating transient secret key!" if $VERBOSE
 			end
 			
 			# This generates a 32-byte key suitable for aes.
 			@key = Digest::SHA2.digest(secret)
 			
-			@expires_after = expires_after || DEFAULT_EXPIRES_AFTER
-			@update_timeout = update_timeout || DEFAULT_UPDATE_TIMEOUT
+			@expires_after = expires_after
+			@update_timeout = update_timeout
 			
 			@cookie_defaults = {
 				domain: nil,

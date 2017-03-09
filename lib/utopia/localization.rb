@@ -21,7 +21,7 @@
 require_relative 'middleware'
 
 module Utopia
-	# If you request a URL which has localized content, a localized redirect would be returned based on the content requested.
+	# A middleware which attempts to find localized content.
 	class Localization
 		# A wrapper to provide easy access to locale related data in the request.
 		class Wrapper

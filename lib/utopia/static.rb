@@ -27,7 +27,7 @@ require 'digest/sha1'
 require 'mime/types'
 
 module Utopia
-	# Serve static files from the specified root directory.
+	# A middleware which serves static files from the specified root directory.
 	class Static
 		# Default mime-types which are common for files served over HTTP:
 		MIME_TYPES = {
@@ -219,19 +219,16 @@ module Utopia
 
 		DEFAULT_CACHE_CONTROL = 'public, max-age=3600'.freeze
 
-		# Initialize the middleware with the provided options.
-		# @option options [String] :root The root directory to serve files from.
-		# @option options [Array] :types The mime-types (and file extensions) to recognize/serve.
-		# @option options [String] :cache_control The cache-control header to set.
-		def initialize(app, **options)
+		# @param root [String] The root directory to serve files from.
+		# @param types [Array] The mime-types (and file extensions) to recognize/serve.
+		# @param cache_control [String] The cache-control header to set for static content.
+		def initialize(app, root: Utopia::default_root, types: MIME_TYPES[:default], cache_control: DEFAULT_CACHE_CONTROL)
 			@app = app
-			@root = (options[:root] || Utopia::default_root).freeze
-
-			@extensions = MimeTypeLoader.extensions_for(options[:types] || MIME_TYPES[:default])
-
-			@cache_control = (options[:cache_control] || DEFAULT_CACHE_CONTROL)
+			@root = root
 			
 			@extensions = MimeTypeLoader.extensions_for(types)
+			
+			@cache_control = cache_control
 		end
 
 		def freeze
