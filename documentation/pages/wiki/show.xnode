@@ -1,6 +1,4 @@
 <content:page>
-	<?r document.attributes[:title] ||= @page_title ?>
-	
 	#{partial 'navigation', path: attributes[:full_path].dirname}
 	
 	#{MarkupString.raw Kramdown::Document.new(self[:content], input: 'GFM', syntax_highlighter: nil).to_html}

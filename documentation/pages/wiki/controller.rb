@@ -8,9 +8,9 @@ on '**' do |request, path|
 	@page_file = File.join(BASE_PATH, @page_path, "content.md")
 	
 	if last_path_component = @page_path.last
-		@page_title = Trenni::Strings::to_title(last_path_component)
+		@title = Trenni::Strings::to_title(last_path_component)
 	else
-		@page_title = "Wiki"
+		@title = "Wiki"
 	end
 end
 
@@ -18,7 +18,7 @@ def read_contents
 	if File.exist? @page_file
 		File.read(@page_file)
 	else
-		"\# #{@page_title}\n\n" +
+		"\# #{@title}\n\n" +
 		"This page is empty."
 	end
 end
