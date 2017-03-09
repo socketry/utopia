@@ -32,17 +32,36 @@ module Utopia
 				:enable_starttls_auto => false
 			}]
 			
-			def initialize(app, config = {})
+			DEFAULT_FROM = (ENV['USER'] || 'rack') + "@localhost"
+			DEFAULT_SUBJECT = '%{exception} [PID %{pid} : %{cwd}]'
+			
+			# @param to [String] The address to email error reports to.
+			# @param from [String] The from address for error reports.
+			# @param subject [String] The subject template which can access attributes defined by `#attributes_for`.
+			# @param delivery_method [Object] The delivery method as required by the mail gem.
+			# @param dump_environment [Boolean] Attach `env` as `environment.yaml` to the error report.
+			def initialize(app, to: "postmaster", from: DEFAULT_FROM, subject: DEFAULT_SUBJECT, delivery_method: LOCAL_SMTP, dump_environment: false)
 				@app = app
 				
-				@to = config[:to] || "postmaster"
-				@from = config.fetch(:from) {(ENV['USER'] || 'rack') + "@localhost"}
-				@subject = config[:subject] || '%{exception} [PID %{pid} : %{cwd}]'
-				@delivery_method = config.fetch(:delivery_method, LOCAL_SMTP)
-				
-				@dump_environment = config.fetch(:dump_environment, false)
+				@to = to
+				@from = from
+				@subject = subject
+				@delivery_method = delivery_method
+				@dump_environment = dump_environment
 			end
-
+			
+			def freeze
+				@app.freeze
+				
+				@to.freeze
+				@from.freeze
+				@subject.freeze
+				@delivery_method.freeze
+				@dump_environment.freeze
+				
+				super
+			end
+			
 			def call(env)
 				begin
 					return @app.call(env)
@@ -100,17 +119,19 @@ module Utopia
 				return io.string
 			end
 			
-			def generate_mail(exception, env)
-				attributes = {
+			def attributes_for(exception, env)
+				{
 					exception: exception.class.name,
 					pid: $$,
 					cwd: Dir.getwd,
 				}
-				
+			end
+			
+			def generate_mail(exception, env)
 				mail = Mail.new(
 					:from => @from,
 					:to => @to,
-					:subject => @subject % attributes
+					:subject => @subject % attributes_for(exception, env)
 				)
 				
 				mail.text_part = Mail::Part.new
