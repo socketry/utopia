@@ -22,7 +22,7 @@
 		</header>
 
 		<div id="page">
-			<content />
+			<utopia:content/>
 		</div>
 	</body>
 </html>

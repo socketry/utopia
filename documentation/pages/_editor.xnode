@@ -59,6 +59,6 @@
 	</head>
 
 	<body class="editor">
-		<content />
+		<utopia:content/>
 	</body>
 </html>
