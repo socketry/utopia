@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
 	EOF
 	spec.summary       = %q{Utopia is a framework for building dynamic content-driven websites.}
 	spec.homepage      = 'https://github.com/ioquatix/utopia'
-
+	
 	spec.files         = `git ls-files`.split($/)
 	spec.executables   = spec.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
 	spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
@@ -29,6 +29,7 @@ Gem::Specification.new do |spec|
 	spec.add_dependency 'rainbow', '~> 2.1.0'
 	
 	spec.add_dependency 'rack', '~> 2.0'
+	spec.add_dependency 'rack-freeze', '~> 1.0'
 	
 	spec.add_dependency 'http-accept', '~> 1.6'
 	

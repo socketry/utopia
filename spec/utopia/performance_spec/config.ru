@@ -3,7 +3,13 @@
 require 'utopia'
 require 'json'
 
-# use Rack::ContentLength
+require 'rack/freeze'
+
+warmup do |app|
+	# Freeze all the middleware so that mutation bugs are detected.
+	app.freeze
+end
+
 use Utopia::ContentLength
 
 use Utopia::Redirection::Rewrite,
