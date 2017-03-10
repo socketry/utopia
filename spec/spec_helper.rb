@@ -1,5 +1,3 @@
-require "bundler/setup"
-require "rack/freeze"
 
 if ENV['COVERAGE']
 	begin
@@ -17,6 +15,9 @@ if ENV['COVERAGE']
 		warn "Could not load simplecov: #{$!}"
 	end
 end
+
+require "bundler/setup"
+require "utopia"
 
 RSpec.configure do |config|
 	# Enable flags like --only-failures and --next-failure
