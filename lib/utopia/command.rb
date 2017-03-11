@@ -289,7 +289,7 @@ module Utopia
 							system("git", "checkout", "master")
 							
 							# and merge:
-							system("git", "merge", "--squash", "--no-commit", "--no-ff", branch_name)
+							system("git", "merge", "--squash", "--no-commit", branch_name)
 						end
 					rescue RuntimeError
 						$stderr.puts "** Detected error with upgrade, reverting changes. Some new files may still exist in tree. **"
