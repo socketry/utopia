@@ -76,7 +76,7 @@ module Utopia
 		attr :cookie_defaults
 		
 		def freeze
-			@app.freeze
+			return self if frozen?
 			
 			@cookie_name.freeze
 			@key.freeze

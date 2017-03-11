@@ -88,7 +88,7 @@ module Utopia
 		end
 		
 		def freeze
-			@app.freeze
+			return self if frozen?
 			
 			@all_locales.freeze
 			@default_locales.freeze

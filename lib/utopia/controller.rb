@@ -70,7 +70,7 @@ module Utopia
 		attr :app
 		
 		def freeze
-			@app.freeze
+			return self if frozen?
 			
 			@root.freeze
 			@base.freeze

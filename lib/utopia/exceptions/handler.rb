@@ -30,7 +30,7 @@ module Utopia
 			end
 			
 			def freeze
-				@app.freeze
+				return self if frozen?
 				
 				@location.freeze
 				

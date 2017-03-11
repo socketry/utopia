@@ -43,7 +43,7 @@ module Utopia
 			end
 			
 			def freeze
-				@app.freeze
+				return self if frozen?
 				
 				@codes.freeze
 				
@@ -81,7 +81,7 @@ module Utopia
 			end
 			
 			def freeze
-				@app.freeze
+				return self if frozen?
 				
 				@status.freeze
 				@max_age.freeze

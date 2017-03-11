@@ -67,10 +67,9 @@ module Utopia
 		end
 
 		def freeze
-			@app.freeze
+			return self if frozen?
 			
 			@root.freeze
-			
 			@namespaces.values.each(&:freeze)
 			@namespaces.freeze
 			
