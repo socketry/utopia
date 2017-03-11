@@ -296,7 +296,7 @@ module Utopia
 						
 						system("git", "checkout", "master")
 					ensure
-						system("git", "branch", "-d", branch_name)
+						system("git", "branch", "-D", branch_name)
 					end
 				end
 			end
