@@ -80,18 +80,7 @@ module Utopia
 					
 					FileUtils.mkdir_p File.join(destination_root, "public")
 					
-					Dir.chdir(destination_root) do
-						# Shared allows multiple users to access the site with the same group:
-						system("git", "init", "--shared")
-						system("git", "config", "receive.denyCurrentBranch", "ignore")
-						system("git", "config", "core.worktree", destination_root)
-					end
-					
-					# Copy git hooks:
-					system("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git'))
-					system("chmod", "-Rf", "g+w", File.join(destination_root, '.git/hooks'))
-					
-					Setup::Server.update_default_environment(destination_root)
+					Update.new.invoke(parent)
 					
 					# Print out helpful git remote add message:
 					hostname = `hostname`.chomp
@@ -107,16 +96,26 @@ module Utopia
 					destination_root = parent.root
 					
 					Dir.chdir(destination_root) do
-						system("git", "config", "receive.denyCurrentBranch", "ignore")
-						system("git", "config", "core.sharedRepository", "group")
-						system("git", "config", "core.worktree", destination_root)
+						# It's okay to call this on an existing repo, it will only update config as required to enable --shared.
+						# --shared allows multiple users to access the site with the same group.
+						system("git", "init", "--shared") or fail "could not initialize repository"
+						
+						system("git", "config", "receive.denyCurrentBranch", "ignore") or fail "could not set configuration"
+						system("git", "config", "core.worktree", destination_root) or fail "could not set configuration"
+						
+						# In theory, to convert from non-shared to shared:
+						# chgrp -R <group-name> .                   # Change files and directories' group
+						# chmod -R g+w .                            # Change permissions
+						# chmod g-w .git/objects/pack/*             # Git pack files should be immutable
+						# chmod g+s `find . -type d`                # New files get group id of directory
 					end
 					
-					# Copy git hooks:
-					system("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git'))
-					# finally set everything in the .git directory to be group writable
-					system("chmod", "-Rf", "g+w", File.join(destination_root, '.git'))
 					Setup::Server.update_default_environment(destination_root)
+					
+					# Copy git hooks:
+					system("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git')) or fail "could not copy git hooks"
+					# finally set everything in the .git directory to be group writable
+					system("chmod", "-Rf", "g+w", File.join(destination_root, '.git')) or fail "could not update permissions of .git directory"
 				end
 			end
 			
@@ -198,16 +197,16 @@ module Utopia
 						
 						if `which bundle`.strip != ''
 							puts "Generating initial package list with bundle..."
-							system("bundle", "install", "--binstubs")
+							system("bundle", "install", "--binstubs") or fail "could not install bundled gems"
 						end
 						
 						if `which git`.strip == ""
 							$stderr.puts "Now is a good time to learn about git: http://git-scm.com/"
 						elsif !File.exist?('.git')
 							puts "Setting up git repository..."
-							system("git", "init")
-							system("git", "add", ".")
-							system("git", "commit", "-q", "-m", "Initial Utopia v#{Utopia::VERSION} site.")
+							system("git", "init") or fail "could not create git repository"
+							system("git", "add", ".") or fail "could not add all files"
+							system("git", "commit", "-q", "-m", "Initial Utopia v#{Utopia::VERSION} site.") or fail "could not commit files"
 						end
 					end
 					
@@ -248,7 +247,7 @@ module Utopia
 					$stderr.puts "Upgrading #{destination_root}..."
 					
 					Dir.chdir(destination_root) do
-						system('git', 'checkout', '-b', branch_name)
+						system('git', 'checkout', '-b', branch_name) or fail "could not change branch"
 					end
 					
 					Setup::Site::DIRECTORIES.each do |directory|
@@ -275,21 +274,21 @@ module Utopia
 					begin
 						Dir.chdir(destination_root) do
 							# Stage any files that have been changed or removed:
-							system("git", "add", "-u")
+							system("git", "add", "-u") or fail "could not add files"
 							
 							# Stage any new files that we have explicitly added:
-							system("git", "add", *Setup::Site::CONFIGURATION_FILES)
+							system("git", "add", *Setup::Site::CONFIGURATION_FILES) or fail "could not add files"
 							
 							move_static!
 							
 							# Commit all changes:
-							system("git", "commit", "-m", "Upgrade to utopia #{Utopia::VERSION}.")
+							system("git", "commit", "-m", "Upgrade to utopia #{Utopia::VERSION}.") or fail "could not commit changes"
 							
 							# Checkout master..
-							system("git", "checkout", "master")
+							system("git", "checkout", "master") or fail "could not checkout master"
 							
 							# and merge:
-							system("git", "merge", "--squash", "--no-commit", branch_name)
+							system("git", "merge", "--squash", "--no-commit", branch_name) or fail "could not merge changes"
 						end
 					rescue RuntimeError
 						$stderr.puts "** Detected error with upgrade, reverting changes. Some new files may still exist in tree. **"
