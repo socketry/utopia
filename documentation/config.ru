@@ -15,13 +15,13 @@ if RACK_ENV == :production
 	use Utopia::Exceptions::Mailer
 else
 	# We want to propate exceptions up when running tests:
-	use Rack::Freeze[Rack::ShowExceptions] unless RACK_ENV == :test
+	use Rack::ShowExceptions unless RACK_ENV == :test
 	
 	# Serve the public directory in a similar way to the web server:
 	use Utopia::Static, root: 'public'
 end
 
-use Rack::Freeze[Rack::Sendfile]
+use Rack::Sendfile
 
 use Utopia::ContentLength
 

@@ -1,6 +1,6 @@
 # Utopia Documentation Wiki
 
-This wiki includes documentation and examples showing how to use Utopia.
+This wiki includes documentation and examples showing how to use Utopia. You can also browse the [code documentation](/code/index.html) for more detail.
 
 ## Introduction Guide
 

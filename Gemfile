@@ -7,6 +7,8 @@ group :development do
 	gem 'pry'
 	gem 'pry-coolline'
 	
+	gem 'yard'
+	
 	gem 'kramdown'
 	
 	gem 'json'
