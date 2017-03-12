@@ -30,26 +30,33 @@ require 'securerandom'
 
 module Utopia
 	module Command
+		# The command for client/server setup.
 		module Setup
 			# This path must point to utopia/setup in the gem source.
 			BASE = File.expand_path("../../setup", __dir__)
 			
+			# Helpers for setting up a local site.
 			module Site
+				# Configuration files which should be installed/updated:
 				CONFIGURATION_FILES = ['.bowerrc', 'config.ru', 'config/environment.rb', 'Gemfile', 'Rakefile', 'tasks/utopia.rake', 'tasks/bower.rake', 'tasks/test.rake']
 				
+				# Directories that should exist:
 				DIRECTORIES = ["config", "lib", "pages", "public", "tasks"]
 				
-				# Removed during upgrade process
+				# Directories that should be removed during upgrade process:
 				OLD_DIRECTORIES = ["access_log", "cache", "tmp"]
 				
+				# The root directory of the template site:
 				ROOT = File.join(BASE, 'site')
 			end
 			
+			# Helpers for setting up the server deployment.
 			module Server
+				# The root directory of the template server deployment:
 				ROOT = File.join(BASE, 'server')
 				
+				# Setup `config/environment.yaml` according to specified options.
 				def self.environment(root)
-					# Setup config/environment.yaml according to specified options:
 					environment_path = File.join(root, 'config/environment.yaml')
 					FileUtils.mkpath File.dirname(environment_path)
 					
@@ -60,9 +67,8 @@ module Utopia
 					end
 				end
 				
-				# Set some useful defaults for the environment:
+				# Set some useful defaults for the environment.
 				def self.update_default_environment(root)
-					# Set up some useful defaults for server environment:
 					environment(root) do |store|
 						store['RACK_ENV'] ||= 'production'
 						store['UTOPIA_SESSION_SECRET'] ||= SecureRandom.hex(40)
@@ -71,7 +77,9 @@ module Utopia
 			end
 		end
 		
+		# Server setup commands.
 		class Server < Samovar::Command
+			# Create a server.
 			class Create < Samovar::Command
 				self.description = "Create a remote Utopia website suitable for deployment using git."
 				
@@ -89,6 +97,7 @@ module Utopia
 				end
 			end
 			
+			# Update a server.
 			class Update < Samovar::Command
 				self.description = "Update the git hooks in an existing server repository."
 				
@@ -119,6 +128,7 @@ module Utopia
 				end
 			end
 			
+			# Set environment variables within the server deployment.
 			class Environment < Samovar::Command
 				self.description = "Update environment variables in config/environment.yaml"
 				
@@ -156,8 +166,10 @@ module Utopia
 				@command.invoke(parent)
 			end
 		end
-
+		
+		# Local site setup commands.
 		class Site < Samovar::Command
+			# Create a local site.
 			class Create < Samovar::Command
 				self.description = "Create a new local Utopia website using the default template."
 				# self.example = "utopia --in www.example.com site create"
@@ -227,9 +239,11 @@ module Utopia
 				end
 			end
 			
+			# Update a local site.
 			class Update < Samovar::Command
 				self.description = "Upgrade an existing site to use the latest configuration files from the template."
 				
+				# Move legacy `pages/_static` to `public/_static`.
 				def move_static!
 					if File.lstat("public/_static").symlink?
 						FileUtils.rm_f "public/_static"
@@ -311,6 +325,7 @@ module Utopia
 			end
 		end
 		
+		# The top level utopia command.
 		class Top < Samovar::Command
 			self.description = "A website development and deployment framework."
 			
@@ -324,6 +339,7 @@ module Utopia
 				'site' => Site,
 				'server' => Server
 			
+			# The root directory for the site.
 			def root
 				File.expand_path(@options.fetch(:root, ''), Dir.getwd)
 			end

@@ -23,7 +23,7 @@ require 'mail'
 
 module Utopia
 	module Exceptions
-		# Catches all exceptions raised from the app it wraps and sends a useful email with the exception, stacktrace, and contents of the environment.
+		# A middleware which catches all exceptions raised from the app it wraps and sends a useful email with the exception, stacktrace, and contents of the environment.
 		class Mailer
 			# A basic local non-authenticated SMTP server.
 			LOCAL_SMTP = [:smtp, {

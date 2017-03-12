@@ -25,6 +25,7 @@ module Utopia
 		CACHE_CONTROL = 'Cache-Control'.freeze
 		CONTENT_TYPE = 'Content-Type'.freeze
 		
+		# A basic content response, including useful defaults for typical HTML5 content.
 		class Response
 			def initialize
 				@status = 200

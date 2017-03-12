@@ -21,6 +21,7 @@
 require_relative 'logger/compact_formatter'
 
 module Utopia
+	# Manages an instance of Logger with useful defaults. Used in rake `tasks/log.rake`.
 	module Logger
 		def self.new(output: STDERR, level: ::Logger::WARN)
 			log = ::Logger.new(output)

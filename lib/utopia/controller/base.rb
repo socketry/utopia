@@ -22,6 +22,7 @@ require_relative '../http'
 
 module Utopia
 	class Controller
+		# The base implementation of a controller class.
 		class Base
 			# A string which is the full path to the directory which contains the controller.
 			def self.base_path

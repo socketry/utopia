@@ -19,12 +19,18 @@
 # THE SOFTWARE.
 
 module Utopia
+	# A shared module for defining Tags and related functionality.
 	module Tags
+		# A library of tags which can be installed as a namespace into {Utopia::Content}.
 		class Library
+			# @param tags [Hash<String,Proc>] A map of tag names to callable objects.
 			def initialize(tags)
 				@tags = tags
 			end
 			
+			# @param name [String] The name of the tag.
+			# @param parent_path [String] The path that the tag is being evaluated within.
+			# @todo change parent_path to node?
 			def call(name, parent_path)
 				return @tags[name].call(name, parent_path)
 			end

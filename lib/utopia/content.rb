@@ -30,7 +30,7 @@ require 'trenni/template'
 require 'concurrent/map'
 
 module Utopia
-	# A middleware which serves dynamically generated content.
+	# A middleware which serves dynamically generated content based on markup files.
 	class Content
 		INDEX = 'index'.freeze
 		

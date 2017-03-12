@@ -20,7 +20,7 @@
 
 module Utopia
 	module Exceptions
-		# Catches exceptions and performs an internal redirect.
+		# A middleware which catches exceptions and performs an internal redirect.
 		class Handler
 			# @param location [String] Peform an internal redirect to this location when an exception is raised.
 			def initialize(app, location = '/errors/exception')

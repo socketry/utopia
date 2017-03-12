@@ -22,11 +22,17 @@ require_relative '../http'
 
 module Utopia
 	class Controller
+		# A controller layer which invokes functinality based on the request path.
+		# @example
+		# 	on '*' do |request, path|
+		# 		succeed! content: 'Hello World'
+		# 	end
 		module Actions
 			def self.prepended(base)
 				base.extend(ClassMethods)
 			end
 			
+			# A nested action lookup hash table.
 			class Action < Hash
 				def initialize(options = {}, &block)
 					@options = options
@@ -53,7 +59,10 @@ module Utopia
 					super and @callback == other.callback and @options == other.options
 				end
 				
+				# Matches 0 or more path components.
 				WILDCARD_GREEDY = '**'.freeze
+				
+				# Matches any 1 path component.
 				WILDCARD = '*'.freeze
 				
 				# Given a path, iterate over all actions that match. Actions match from most specific to most general.
@@ -112,6 +121,7 @@ module Utopia
 				end
 			end
 			
+			# Exposed to the controller class.
 			module ClassMethods
 				def self.extended(klass)
 					klass.instance_eval do

@@ -70,6 +70,7 @@ module Utopia
 		end
 	end
 	
+	# The main entry point for `config/environment.rb` for setting up the site.
 	def self.setup(config_root = nil, **options)
 		# We extract the directory of the caller to get the path to $root/config
 		if config_root.nil?

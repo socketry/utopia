@@ -23,6 +23,7 @@ require_relative 'middleware'
 module Utopia
 	# A middleware which assists with redirecting from one path to another.
 	module Redirection
+		# An error handler fails to redirect to a valid page.
 		class RequestFailure < StandardError
 			def initialize(resource_path, resource_status, error_path, error_status)
 				@resource_path = resource_path
@@ -35,6 +36,7 @@ module Utopia
 			end
 		end
 		
+		# A middleware which performs internal redirects based on error status codes.
 		class Errors
 			# @param codes [Hash<Integer,String>] The redirection path for a given error code.
 			def initialize(app, codes = {})
@@ -73,6 +75,7 @@ module Utopia
 		# We cache 301 redirects for 24 hours.
 		DEFAULT_MAX_AGE = 3600*24
 		
+		# A basic client-side redirect.
 		class ClientRedirect
 			def initialize(app, status: 307, max_age: DEFAULT_MAX_AGE)
 				@app = app
@@ -120,6 +123,7 @@ module Utopia
 			end
 		end
 		
+		# Redirect urls that end with a `/`, e.g. directories.
 		class DirectoryIndex < ClientRedirect
 			def initialize(app, index: 'index')
 				@app = app
@@ -135,6 +139,7 @@ module Utopia
 			end
 		end
 		
+		# Rewrite requests that match the given pattern to a single destination.
 		class Rewrite < ClientRedirect
 			def initialize(app, patterns, status: 301)
 				@patterns = patterns
@@ -149,6 +154,7 @@ module Utopia
 			end
 		end
 		
+		# Rewrite requests that match the given pattern to a new prefix.
 		class Moved < ClientRedirect
 			def initialize(app, pattern, prefix, status: 301, flatten: false)
 				@app = app

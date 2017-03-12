@@ -20,15 +20,16 @@
 
 module Utopia
 	module Tags
+		# A conditional tag which only exposes it's content in certain environments.
 		class Environment
-			def self.for(environment)
-				self.new(environment)
-			end
-			
+			# @param environment [Symbol] The name of the environment.
 			def initialize(environment)
 				@environment = environment
 			end
 			
+			alias for new
+			
+			# @todo improve implementation
 			def call(document, state)
 				only = state[:only].split(",").collect(&:to_sym) rescue []
 

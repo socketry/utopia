@@ -34,6 +34,7 @@ module Utopia
 				base.extend(ClassMethods)
 			end
 			
+			# A abstract rule which can match against a request path.
 			class Rule
 				def apply_match_to_context(match_data, context)
 					match_data.names.each do |name|
@@ -42,6 +43,7 @@ module Utopia
 				end
 			end
 			
+			# A rule which extracts a prefix pattern from the request path.
 			class ExtractPrefixRule < Rule
 				def initialize(patterns, block)
 					@matcher = Path::Matcher.new(patterns)
@@ -70,6 +72,7 @@ module Utopia
 				end
 			end
 			
+			# Rewrite a request path based on a set of defined rules.
 			class Rewriter
 				def initialize
 					@rules = []
@@ -94,6 +97,7 @@ module Utopia
 				end
 			end
 			
+			# Exposed to the controller class.
 			module ClassMethods
 				def rewrite
 					@rewriter ||= Rewriter.new

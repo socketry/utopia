@@ -65,6 +65,7 @@ module Utopia
 		end
 	end
 	
+	# Represents a path as an array of path components. Useful for efficient URL manipulation.
 	class Path
 		include Comparable
 		

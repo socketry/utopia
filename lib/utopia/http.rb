@@ -23,7 +23,9 @@ require 'rack'
 require 'http/accept'
 
 module Utopia
+	# HTTP protocol implementation.
 	module HTTP
+		# Pull in {::HTTP::Accept} for parsing.
 		Accept = ::HTTP::Accept
 		
 		# A list of commonly used HTTP status codes.

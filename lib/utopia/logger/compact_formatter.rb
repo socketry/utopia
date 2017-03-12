@@ -23,6 +23,7 @@ require 'rainbow'
 
 module Utopia
 	module Logger
+		# Provides a concise log output format.
 		class CompactFormatter
 			def initialize
 				@start = Time.now

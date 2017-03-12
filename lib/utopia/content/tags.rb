@@ -20,7 +20,10 @@
 
 module Utopia
 	class Content
+		# Tags which provide intrinsic behaviour within the content middleware.
 		module Tags
+			# Invokes a deferred tag from the current state. Works together with {Document::State#defer}.
+			# @param id [String] The id of the deferred to invoke.
 			class DeferredTag
 				def self.call(document, state)
 					id = state[:id].to_i
@@ -31,6 +34,8 @@ module Utopia
 				end
 			end
 			
+			# Invokes a node and renders a single node to the output stream.
+			# @param path [String] The path of the node to invoke.
 			class NodeTag
 				def self.call(document, state)
 					path = Path[state[:path]]
@@ -41,6 +46,7 @@ module Utopia
 				end
 			end
 			
+			# Renders the content of the parent node into the output of the document.
 			class ContentTag
 				def self.call(document, state)
 					# We are invoking this node within a parent who has content, and we want to generate output equal to that.
@@ -48,6 +54,7 @@ module Utopia
 				end
 			end
 			
+			# Tags which can be looked up by name.
 			NAMED = {
 				'deferred' => DeferredTag,
 				'node' => NodeTag,

@@ -28,6 +28,7 @@ require_relative '../locale'
 
 module Utopia
 	class Content
+		# Represents a link to some content with associated metadata.
 		class Link
 			def initialize(kind, path, info = nil)
 				path = Path.create(path)

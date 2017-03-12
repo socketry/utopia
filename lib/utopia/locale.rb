@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 module Utopia
+	# A structured representation of locale based on RFC3066.
 	Locale = Struct.new(:language, :country, :variant) do
 		def to_s
 			to_a.compact.join('-')
