@@ -18,8 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'utopia/extensions/array'
-require 'utopia/extensions/date'
+require 'utopia/extensions/array_split'
+require 'utopia/extensions/date_comparisons'
 
 module Utopia::ExtensionsSpec
 	describe Array do

@@ -18,31 +18,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-# These amendments allow for Date <=> DateTime <=> Time, and so on.
-# Use only if required. This implementation works for Ruby 1.9.2.
-
-require 'date'
-
-class Time
-	alias_method :old_compare, :<=>
-	
-	def <=>(other)
-		if Date === other or DateTime === other
-			self.to_datetime <=> other
-		else
-			old_compare(other)
+module Utopia
+	module Extensions
+		module ArraySplit
+			def split_at(*args, &block)
+				if middle = index(*args, &block)
+					[self[0...middle], self[middle], self[middle+1..-1]]
+				else
+					[[], nil, []]
+				end
+			end
 		end
-	end
-end
 
-class Date
-	alias_method :old_compare, :<=>
-	
-	def <=>(other)
-		if Time === other
-			self.to_datetime <=> other.to_datetime
-		else
-			old_compare(other)
-		end
+		::Array.prepend(ArraySplit)
 	end
 end
