@@ -122,62 +122,62 @@ module Utopia
 			def process!(request, attributes = {})
 				Document.render(self, request, attributes).to_a
 			end
-		end
 		
-		# This is a special context in which a limited set of well defined methods are exposed in the content view.
-		Node::Context = Struct.new(:document, :state) do
-			def partial(*args, &block)
-				if block_given?
-					state.defer(&block)
-				else
-					state.defer do |document|
-						document.tag(*args)
+			# This is a special context in which a limited set of well defined methods are exposed in the content view.
+			Context = Struct.new(:document, :state) do
+				def partial(*args, &block)
+					if block_given?
+						state.defer(&block)
+					else
+						state.defer do |document|
+							document.tag(*args)
+						end
 					end
 				end
-			end
-			
-			alias deferred_tag partial
-			
-			def controller
-				document.controller
-			end
-			
-			def localization
-				document.localization
-			end
-			
-			def request
-				document.request
-			end
-			
-			def response
-				document
-			end
-			
-			def attributes
-				state.attributes
-			end
-			
-			def [] key
-				state.attributes.fetch(key) {document.attributes[key]}
-			end
-			
-			alias current state
-			
-			def content
-				document.content
-			end
+				
+				alias deferred_tag partial
+				
+				def controller
+					document.controller
+				end
+				
+				def localization
+					document.localization
+				end
+				
+				def request
+					document.request
+				end
+				
+				def response
+					document
+				end
+				
+				def attributes
+					state.attributes
+				end
+				
+				def [] key
+					state.attributes.fetch(key) {document.attributes[key]}
+				end
+				
+				alias current state
+				
+				def content
+					document.content
+				end
 
-			def parent
-				document.parent
-			end
+				def parent
+					document.parent
+				end
 
-			def first
-				document.first
-			end
-			
-			def links(*arguments, &block)
-				state.node.links(*arguments, &block)
+				def first
+					document.first
+				end
+				
+				def links(*arguments, &block)
+					state.node.links(*arguments, &block)
+				end
 			end
 		end
 	end
