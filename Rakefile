@@ -5,7 +5,7 @@ RSpec::Core::RakeTask.new(:spec)
 
 task :documentation do
 	sh('yard', '-o', "documentation/public/code")
-	sh('bundle install')
+	sh('bundle', 'install', '--quiet')
 	sh('cd documentation && rake')
 end
 
