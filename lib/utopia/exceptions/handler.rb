@@ -77,7 +77,9 @@ module Utopia
 				end
 			end
 			
-			private def write_exception_to_stream(stream, env, exception, include_backtrace = false)
+			private
+			
+			def write_exception_to_stream(stream, env, exception, include_backtrace = false)
 				buffer = []
 				
 				buffer << "While requesting resource #{env[Rack::PATH_INFO].inspect}, a fatal error occurred:"
