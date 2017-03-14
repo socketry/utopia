@@ -61,7 +61,7 @@ module Utopia
 				'content' => ContentTag
 			}
 			
-			def self.call(name, parent_path)
+			def self.call(name, node)
 				NAMED[name]
 			end
 		end

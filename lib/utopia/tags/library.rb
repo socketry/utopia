@@ -29,10 +29,9 @@ module Utopia
 			end
 			
 			# @param name [String] The name of the tag.
-			# @param parent_path [String] The path that the tag is being evaluated within.
-			# @todo change parent_path to node?
-			def call(name, parent_path)
-				return @tags[name].call(name, parent_path)
+			# @param node [Utopia::Content::Node] The node that caused this tag to be evaluated.
+			def call(name, node)
+				return @tags[name].call(name, node)
 			end
 		end
 	end

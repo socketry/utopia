@@ -89,11 +89,11 @@ module Utopia
 		end
 		
 		# Look up a named tag such as `<entry />` or `<content:page>...`
-		def lookup_tag(qualified_name, parent_path)
+		def lookup_tag(qualified_name, node)
 			name, namespace = qualified_name.split(':', 2).reverse
 			
 			if library = @namespaces[namespace]
-				library.call(name, parent_path)
+				library.call(name, node)
 			end
 		end
 		
@@ -142,7 +142,14 @@ module Utopia
 		
 		private
 		
-		def content_tag(name, parent_path)
+		def content_tag(name, node)
+			parent_path = node.parent_path
+			
+			# If the current node is called 'foo', we can't lookup 'foo' in the current directory or we will have infinite recursion.
+			if name == node.name
+				parent_path = parent_path.dirname
+			end
+			
 			if String === name && name.index('/')
 				name = Path.create(name)
 			end
