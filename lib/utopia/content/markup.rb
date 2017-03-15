@@ -21,11 +21,12 @@
 require 'trenni/parsers'
 require 'trenni/entities'
 require 'trenni/strings'
-
-require_relative 'tag'
+require 'trenni/tag'
 
 module Utopia
 	class Content
+		Tag = Trenni::Tag
+		
 		# A hash which forces all keys to be symbols and fails with KeyError when strings are used.
 		class SymbolicHash < Hash
 			def [] key

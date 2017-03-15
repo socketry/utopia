@@ -19,8 +19,8 @@
 # THE SOFTWARE.
 
 require_relative 'links'
-
 require_relative 'response'
+require_relative 'markup'
 
 module Utopia
 	class Content
@@ -170,18 +170,18 @@ module Utopia
 
 			# Maps a tag to a node instance by performing a series of lookups. This function is called for each tag and thus heavily affects performance.
 			def lookup(tag)
-				result = tag
-				
-				# This loop works from inner to outer tags, and updates the tag we are currently searching for based on any overrides:
-				@begin_tags.reverse_each do |state|
-					result = state.lookup(result)
-					
-					return result if result.is_a?(Node)
-				end
+				# result = tag
+				# 
+				# # This loop works from inner to outer tags, and updates the tag we are currently searching for based on any overrides:
+				# @begin_tags.reverse_each do |state|
+				# 	result = state.lookup(result)
+				# 	
+				# 	return result if result.is_a?(Node)
+				# end
 				
 				# This loop looks up a tag by asking the most embedded node to look it up based on tag name. This almost always only evaluates the top state:
 				@end_tags.reverse_each do |state|
-					return state.node.lookup(result) if state.node.respond_to? :lookup
+					return state.node.lookup(tag) if state.node.respond_to? :lookup
 				end
 				
 				return nil
