@@ -19,22 +19,18 @@
 # THE SOFTWARE.
 
 module Utopia
-	module Tags
-		# A conditional tag which only exposes it's content in certain environments.
-		class Environment
-			# @param environment [Symbol] The name of the environment.
-			def initialize(environment)
-				@environment = environment
-			end
-			
-			alias for new
-			
-			# @todo improve implementation
-			def call(document, state)
-				only = state[:only].split(",").collect(&:to_sym) rescue []
-
-				if only.include?(@environment)
-					document.parse_markup(state.content)
+	class Content
+		# Tags which provide intrinsic behaviour within the content middleware.
+		module Tags
+			# Invokes a deferred tag from the current state. Works together with {Document::State#defer}.
+			# @param id [String] The id of the deferred to invoke.
+			module DeferredTag
+				def self.call(document, state)
+					id = state[:id].to_i
+					
+					procedure = document.parent.deferred[id]
+					
+					procedure.call(document, state)
 				end
 			end
 		end

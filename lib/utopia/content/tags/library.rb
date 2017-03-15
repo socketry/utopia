@@ -18,24 +18,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'tags/deferred_tag'
-require_relative 'tags/node_tag'
-require_relative 'tags/content_tag'
-require_relative 'tags/environment_tag'
-
 module Utopia
 	class Content
 		# Tags which provide intrinsic behaviour within the content middleware.
 		module Tags
-			# Tags which can be looked up by name.
-			NAMED = {
-				'deferred' => DeferredTag,
-				'node' => NodeTag,
-				'content' => ContentTag
-			}
-			
-			def self.call(name, node)
-				NAMED[name]
+			# A library of tags which can be installed as a namespace into {Utopia::Content}.
+			class Library
+				# @param tags [Hash<String,Proc>] A map of tag names to callable objects.
+				def initialize(tags)
+					@tags = tags
+				end
+				
+				# @param name [String] The name of the tag.
+				# @param node [Utopia::Content::Node] The node that caused this tag to be evaluated.
+				def call(name, node)
+					return @tags[name].call(name, node)
+				end
 			end
 		end
 	end

@@ -18,24 +18,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'tags/deferred_tag'
-require_relative 'tags/node_tag'
-require_relative 'tags/content_tag'
-require_relative 'tags/environment_tag'
-
 module Utopia
-	class Content
-		# Tags which provide intrinsic behaviour within the content middleware.
-		module Tags
-			# Tags which can be looked up by name.
-			NAMED = {
-				'deferred' => DeferredTag,
-				'node' => NodeTag,
-				'content' => ContentTag
-			}
+	module Tags
+		# A conditional tag which only exposes it's content in certain environments.
+		class EnvironmentTag
+			# @param environment [Symbol] The name of the environment.
+			def initialize(environment)
+				@environment = environment
+			end
 			
-			def self.call(name, node)
-				NAMED[name]
+			# @todo improve implementation
+			def call(document, state)
+				only = state[:only].split(",").collect(&:to_sym) rescue []
+
+				if only.include?(@environment)
+					document.parse_markup(state.content)
+				end
 			end
 		end
 	end

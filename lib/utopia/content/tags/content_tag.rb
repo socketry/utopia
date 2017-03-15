@@ -19,19 +19,15 @@
 # THE SOFTWARE.
 
 module Utopia
-	# A shared module for defining Tags and related functionality.
-	module Tags
-		# A library of tags which can be installed as a namespace into {Utopia::Content}.
-		class Library
-			# @param tags [Hash<String,Proc>] A map of tag names to callable objects.
-			def initialize(tags)
-				@tags = tags
-			end
-			
-			# @param name [String] The name of the tag.
-			# @param node [Utopia::Content::Node] The node that caused this tag to be evaluated.
-			def call(name, node)
-				return @tags[name].call(name, node)
+	class Content
+		# Tags which provide intrinsic behaviour within the content middleware.
+		module Tags
+			# Renders the content of the parent node into the output of the document.
+			module ContentTag
+				def self.call(document, state)
+					# We are invoking this node within a parent who has content, and we want to generate output equal to that.
+					document.write(document.parent.content)
+				end
 			end
 		end
 	end

@@ -18,24 +18,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'tags/deferred_tag'
-require_relative 'tags/node_tag'
-require_relative 'tags/content_tag'
-require_relative 'tags/environment_tag'
-
 module Utopia
 	class Content
 		# Tags which provide intrinsic behaviour within the content middleware.
 		module Tags
-			# Tags which can be looked up by name.
-			NAMED = {
-				'deferred' => DeferredTag,
-				'node' => NodeTag,
-				'content' => ContentTag
-			}
-			
-			def self.call(name, node)
-				NAMED[name]
+			# Invokes a node and renders a single node to the output stream.
+			# @param path [String] The path of the node to invoke.
+			module NodeTag
+				def self.call(document, state)
+					path = Path[state[:path]]
+					
+					node = document.lookup_node(path)
+					
+					document.render_node(node)
+				end
 			end
 		end
 	end
