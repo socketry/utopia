@@ -47,7 +47,7 @@ RSpec.describe "Utopia Performance" do
 				yield 1000
 			end
 			
-			result.eliminate_methods!([/^((?!Utopia).)*$/])
+			result.eliminate_methods!([/^((?!Utopia|Trenni).)*$/])
 			printer = RubyProf::FlatPrinter.new(result)
 			printer.print($stderr, min_percent: 1.0)
 			

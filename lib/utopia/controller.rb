@@ -54,9 +54,12 @@ module Utopia
 			request.env[VARIABLES_KEY]
 		end
 		
-		def initialize(app, root: nil, cache_controllers: false, base: nil)
+		# @param root [String] The content root where controllers will be loaded from.
+		# @param cache_controllers [Boolean] Whether to enable thread-safe controller cache.
+		# @param namespaces [Class] The base class for controllers.
+		def initialize(app, root: Utopia::default_root, cache_controllers: false, base: nil)
 			@app = app
-			@root = root || Utopia::default_root
+			@root = root
 			
 			if cache_controllers
 				@controller_cache = Concurrent::Map.new

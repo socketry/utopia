@@ -24,6 +24,7 @@ module Utopia
 		EXPIRES = 'Expires'.freeze
 		CACHE_CONTROL = 'Cache-Control'.freeze
 		CONTENT_TYPE = 'Content-Type'.freeze
+		NO_CACHE = 'no-cache'.freeze
 		
 		# A basic content response, including useful defaults for typical HTML5 content.
 		class Response
@@ -57,10 +58,10 @@ module Utopia
 				@headers[CACHE_CONTROL] = "no-cache, must-revalidate"
 				@headers[EXPIRES] = Time.now.httpdate
 			end
-
+			
 			# Specify that the content could be cached.
 			def cache!(duration = 3600, access: "public")
-				unless @headers[CACHE_CONTROL] =~ /no-cache/
+				unless @headers[CACHE_CONTROL]&.include?(NO_CACHE)
 					@headers[CACHE_CONTROL] = "#{access}, max-age=#{duration}"
 					@headers[EXPIRES] = (Time.now + duration).httpdate
 				end

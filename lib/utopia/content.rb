@@ -41,10 +41,9 @@ module Utopia
 		# @param root [String] The content root where pages will be generated from.
 		# @param namespaces [Hash<String,Library>] Tag namespaces for dynamic tag lookup.
 		# @param cache_templates [Boolean] Whether to enable thread-safe template cache.
-		def initialize(app, root: nil, namespaces: {}, cache_templates: false, tags: nil)
+		def initialize(app, root: Utopia::default_root, namespaces: {}, cache_templates: false, tags: nil)
 			@app = app
-			
-			@root = File.expand_path(root || Utopia::default_root)
+			@root = root
 			
 			if cache_templates
 				@template_cache = Concurrent::Map.new

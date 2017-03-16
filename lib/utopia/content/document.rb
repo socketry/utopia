@@ -96,7 +96,7 @@ module Utopia
 			end
 
 			def tag_complete(tag, node = nil)
-				node ||= lookup(tag)
+				node ||= lookup_tag(tag)
 
 				if node
 					tag_begin(tag, node)
@@ -107,15 +107,13 @@ module Utopia
 			end
 
 			def tag_begin(tag, node = nil)
-				node ||= lookup(tag)
+				node ||= lookup_tag(tag)
 
 				if node
 					state = State.new(tag, node)
 					@begin_tags << state
 
-					if node.respond_to? :tag_begin
-						node.tag_begin(self, state)
-					end
+					node.tag_begin(self, state) if node.respond_to?(:tag_begin)
 
 					return node
 				end
@@ -140,9 +138,8 @@ module Utopia
 				top = current
 				
 				if top.tags.empty?
-					if top.node.respond_to? :tag_end
-						top.node.tag_end(self, top)
-					end
+					node = top.node
+					node.tag_end(self, top) if node.respond_to?(:tag_end)
 
 					@end_tags << top
 					buffer = top.call(self)
@@ -163,13 +160,14 @@ module Utopia
 			end
 			
 			def render_node(node, attributes = {})
-				@begin_tags << State.new(attributes, node)
+				@begin_tags << State.new(nil, node, attributes)
 
 				return tag_end
 			end
 
-			# Maps a tag to a node instance by performing a series of lookups. This function is called for each tag and thus heavily affects performance.
-			def lookup(tag)
+			# Maps a tag to a node instance by asking the current node to lookup the tag name. This function is called for each tag and thus heavily affects performance.
+			# @return [Node] The node for the given tag.
+			def lookup_tag(tag)
 				# result = tag
 				# 
 				# # This loop works from inner to outer tags, and updates the tag we are currently searching for based on any overrides:
@@ -181,7 +179,7 @@ module Utopia
 				
 				# This loop looks up a tag by asking the most embedded node to look it up based on tag name. This almost always only evaluates the top state:
 				@end_tags.reverse_each do |state|
-					return state.node.lookup(tag) if state.node.respond_to? :lookup
+					return state.node.lookup_tag(tag) if state.node.respond_to?(:lookup_tag)
 				end
 				
 				return nil
@@ -216,14 +214,12 @@ module Utopia
 				@buffer = Trenni::MarkupString.new.force_encoding(Encoding::UTF_8)
 				@content = nil
 				
-				@overrides = {}
 				@deferred = []
 				
 				@tags = []
 			end
 
 			attr :attributes
-			attr :overrides
 			attr :content
 			attr :node
 			attr :tags
@@ -238,20 +234,6 @@ module Utopia
 			
 			def [](key)
 				@attributes[key]
-			end
-
-			def lookup(tag)
-				if override = @overrides[tag.name]
-					if override.respond_to? :call
-						return override.call(tag)
-					elsif String === override
-						return Tag.new(override, tag.attributes)
-					else
-						return override
-					end
-				else
-					return tag
-				end
 			end
 
 			def call(document)

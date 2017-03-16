@@ -66,10 +66,6 @@ module Utopia
 				end
 			end
 
-			def lookup(tag)
-				return @controller.lookup_tag(tag.name, self)
-			end
-
 			def parent_path
 				uri_path.dirname
 			end
@@ -104,7 +100,14 @@ module Utopia
 			def sibling_links(**options)
 				return Links.index(@controller.root, siblings_path, options)
 			end
-
+			
+			# Lookup the given tag which is being rendered within the given node. Invoked by {Document}.
+			# @return [Node] The node which will be used to render the tag.
+			def lookup_tag(tag)
+				return @controller.lookup_tag(tag.name, self)
+			end
+			
+			# Invoked when the node is being rendered by {Document}.
 			def call(document, state)
 				# Load the template:
 				template = @controller.fetch_template(@file_path)
@@ -116,7 +119,7 @@ module Utopia
 				# Render the resulting markup into the document:
 				document.parse_markup(markup)
 			end
-
+			
 			def process!(request, attributes = {})
 				Document.render(self, request, attributes).to_a
 			end

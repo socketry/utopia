@@ -68,7 +68,7 @@ module Utopia
 				end
 			end
 			
-			# The name of a closign tag fails to match up with the corresponding opening tag.
+			# The name of a closing tag fails to match up with the corresponding opening tag.
 			class UnbalancedTagError < StandardError
 				def initialize(buffer, opening_tag, closing_tag = nil)
 					@buffer = buffer
