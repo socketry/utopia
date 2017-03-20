@@ -34,7 +34,7 @@ module Utopia
 				'content' => ContentTag
 			}
 			
-			# @returns [Node] The node which should be used to render the named tag.
+			# @return [Node] The node which should be used to render the named tag.
 			def self.call(name, node)
 				NAMED[name]
 			end

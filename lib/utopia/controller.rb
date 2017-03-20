@@ -56,7 +56,7 @@ module Utopia
 		
 		# @param root [String] The content root where controllers will be loaded from.
 		# @param cache_controllers [Boolean] Whether to enable thread-safe controller cache.
-		# @param namespaces [Class] The base class for controllers.
+		# @param base [Class] The base class for controllers.
 		def initialize(app, root: Utopia::default_root, cache_controllers: false, base: nil)
 			@app = app
 			@root = root
