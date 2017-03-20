@@ -39,8 +39,7 @@ use Utopia::Session,
 	:secret => ENV['UTOPIA_SESSION_SECRET']
 
 use Utopia::Controller,
-	cache_controllers: (RACK_ENV == :production),
-	base: Utopia::Controller::Base
+	cache_controllers: (RACK_ENV == :production)
 
 use Utopia::Static
 

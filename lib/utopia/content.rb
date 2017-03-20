@@ -51,6 +51,8 @@ module Utopia
 				@template_cache = nil
 			end
 			
+			@node_cache = Concurrent::Map.new
+			
 			@namespaces = namespaces
 			
 			# Default content namespace for dynamic path based lookup:
@@ -60,7 +62,7 @@ module Utopia
 			@namespaces[CORE_NAMESPACE] ||= Tags
 			
 			if tags
-				warn "Usage of raw tags (#{tags.keys.inspect}) is inefficient." if $VERBOSE
+				warn "Usage of raw tags (#{tags.keys.inspect}) is inefficient."
 				@namespaces[nil] = Tags::Library.new(tags)
 			end
 		end
@@ -141,14 +143,7 @@ module Utopia
 		
 		private
 		
-		def content_tag(name, node)
-			parent_path = node.parent_path
-			
-			# If the current node is called 'foo', we can't lookup 'foo' in the current directory or we will have infinite recursion.
-			if name == node.name
-				parent_path = parent_path.dirname
-			end
-			
+		def lookup_content(name, parent_path)
 			if String === name && name.index('/')
 				name = Path.create(name)
 			end
@@ -182,6 +177,21 @@ module Utopia
 			end
 			
 			return nil
+		end
+		
+		def content_tag(name, node)
+			parent_path = node.parent_path
+			
+			# If the current node is called 'foo', we can't lookup 'foo' in the current directory or we will have infinite recursion.
+			if name == node.name
+				parent_path = parent_path.dirname
+			end
+			
+			cache_key = parent_path + name
+			
+			@node_cache.fetch_or_store(cache_key) do
+				lookup_content(name, parent_path)
+			end
 		end
 	end
 end

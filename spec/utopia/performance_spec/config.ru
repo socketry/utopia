@@ -5,11 +5,6 @@ require 'json'
 
 require 'rack/freeze'
 
-warmup do |app|
-	# Freeze all the middleware so that mutation bugs are detected.
-	app.freeze
-end
-
 use Utopia::ContentLength
 
 use Utopia::Redirection::Rewrite,
@@ -27,7 +22,6 @@ use Utopia::Redirection::Errors,
 
 use Utopia::Controller,
 	root: File.expand_path('pages', __dir__),
-	base: Utopia::Controller::Base,
 	cache_controllers: true
 
 use Utopia::Static,

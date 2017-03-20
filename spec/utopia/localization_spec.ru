@@ -6,8 +6,7 @@ use Utopia::Localization,
 	hosts: {/foobar\.com$/ => 'en', /foobar\.co\.jp$/ => 'ja', /foobar\.de$/ => 'de'}
 
 use Utopia::Controller,
-	root: localization_spec_root,
-	base: Utopia::Controller::Base
+	root: localization_spec_root
 
 use Utopia::Static,
 	root: localization_spec_root

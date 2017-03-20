@@ -38,11 +38,7 @@ module Utopia
 		# A single request through content middleware. We use a struct to hide instance varibles since we instance_exec within this context.
 		class Document < Response
 			def self.render(node, request, attributes)
-				document = self.new(request, attributes)
-				
-				document.body << document.render_node(node, attributes)
-				
-				return document
+				self.new(request, attributes).render!(node, attributes)
 			end
 			
 			def initialize(request, attributes = {})
@@ -50,10 +46,16 @@ module Utopia
 				
 				@attributes = attributes
 				
-				@begin_tags = []
+				@current = nil
 				@end_tags = []
 				
 				super()
+			end
+			
+			def render!(node, attributes)
+				@body << render_node(node, attributes)
+				
+				return self
 			end
 			
 			# A helper method for accessing controller variables from view:
@@ -75,10 +77,10 @@ module Utopia
 			# Per-document global attributes.
 			attr :attributes
 
-			# Begin tags represents a list from outer to inner most tag.
-			# At any point in parsing markup, begin_tags is a list of the inner most tag,
-			# then the next outer tag, etc. This list is used for doing dependent lookups.
-			attr :begin_tags
+			# The current state, represents a list from outer to inner most tag by traversing {State#parent}.
+			# At any point in parsing markup, this is a list of the inner most tag,
+			# then the next outer tag, etc.
+			attr :current
 
 			# End tags represents a list of execution order. This is the order that end tags
 			# have appeared when evaluating nodes.
@@ -102,7 +104,7 @@ module Utopia
 					tag_begin(tag, node)
 					tag_end(tag)
 				else
-					current.tag_complete(tag)
+					@current.tag_complete(tag)
 				end
 			end
 
@@ -110,58 +112,58 @@ module Utopia
 				node ||= lookup_tag(tag)
 
 				if node
-					state = State.new(tag, node)
-					@begin_tags << state
+					@current = State.new(@current, tag, node)
 
 					node.tag_begin(self, state) if node.respond_to?(:tag_begin)
 
 					return node
 				end
 
-				current.tag_begin(tag)
+				@current.tag_begin(tag)
 
 				return nil
 			end
 			
 			def write(string)
-				current.write(string)
+				@current.write(string)
 			end
 			
 			alias cdata write
 
 			def text(string)
-				current.text(string)
+				@current.text(string)
 			end
 
 			def tag_end(tag = nil)
-				# Get the current tag which we are completing/ending:
-				top = current
-				
-				if top.tags.empty?
-					node = top.node
-					node.tag_end(self, top) if node.respond_to?(:tag_end)
+				# Determine if the current state contains tags that need to be completed, or if the state itself is finished.
+				if @current.empty?
+					if node = @current.node
+						node.tag_end(self, @current) if node.respond_to?(:tag_end)
+					end
 
-					@end_tags << top
-					buffer = top.call(self)
+					@end_tags << @current
+					buffer = @current.call(self)
 
-					@begin_tags.pop
+					@current = @current.parent
 					@end_tags.pop
 
-					if current
-						current.write(buffer)
-					end
+					@current.write(buffer) if @current
 
 					return buffer
 				else
-					current.tag_end(tag)
+					@current.tag_end(tag)
 				end
 
 				return nil
 			end
-			
-			def render_node(node, attributes = {})
-				@begin_tags << State.new(nil, node, attributes)
 
+			def render_node(node, attributes = {})
+				@current = State.new(@current, nil, node, attributes)
+				
+				# We keep track of the first thing rendered by this document.
+				@first ||= @current
+				
+				# This returns the content of rendering the tag:
 				return tag_end
 			end
 
@@ -185,11 +187,6 @@ module Utopia
 				return nil
 			end
 			
-			# The current tag being processed/rendered. Prefer to access state directly.
-			def current
-				@begin_tags.last
-			end
-
 			# The content of the node
 			def content
 				@end_tags.last.content
@@ -200,13 +197,14 @@ module Utopia
 			end
 
 			def first
-				@begin_tags.first
+				nil
 			end
 		end
 		
 		# The state of a single tag being rendered within a document instance.
 		class Document::State
-			def initialize(tag, node, attributes = tag.to_hash)
+			def initialize(parent, tag, node, attributes = tag.to_hash)
+				@parent = parent
 				@tag = tag
 				@node = node
 				@attributes = attributes
@@ -219,9 +217,12 @@ module Utopia
 				@tags = []
 			end
 
+			attr :parent
 			attr :attributes
 			attr :content
 			attr :node
+			
+			# A list of all tags in order of rendering them, which have not been finished yet.
 			attr :tags
 
 			attr :deferred
@@ -259,6 +260,11 @@ module Utopia
 
 			def tag_complete(tag)
 				tag.write(@buffer)
+			end
+			
+			# Whether this state has any nested tags.
+			def empty?
+				@tags.empty?
 			end
 
 			def tag_begin(tag)
