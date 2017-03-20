@@ -10,7 +10,7 @@ A basic template `create.xnode` looks something like:
 
 ```trenni
 <content:page>
-	<content:heading>Create User<content:/heading>
+	<content:heading>Create User</content:heading>
 	<form action="#">
 		<input name="name" />
 		<input type="submit" />
