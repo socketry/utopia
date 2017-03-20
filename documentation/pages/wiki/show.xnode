@@ -1,5 +1,5 @@
 <content:page>
-	#{partial 'navigation', path: attributes[:full_path].dirname}
+	#{partial 'content:navigation', path: attributes[:full_path].dirname}
 	
 	#{MarkupString.raw Kramdown::Document.new(self[:content], input: 'GFM', syntax_highlighter: nil).to_html}
 	
