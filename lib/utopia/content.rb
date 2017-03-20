@@ -91,7 +91,7 @@ module Utopia
 		
 		# Look up a named tag such as `<entry />` or `<content:page>...`
 		def lookup_tag(qualified_name, node)
-			name, namespace = qualified_name.split(':', 2).reverse
+			namespace, name = Trenni::Tag.split(qualified_name)
 			
 			if library = @namespaces[namespace]
 				library.call(name, node)
