@@ -255,7 +255,7 @@ module Utopia
 			end
 
 			def text(string)
-				@buffer << Trenni::Markup.escape(string)
+				Trenni::Markup.append(@buffer, string)
 			end
 
 			def tag_complete(tag)
