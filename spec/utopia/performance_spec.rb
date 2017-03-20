@@ -30,10 +30,6 @@ RSpec.describe "Utopia Performance" do
 	if defined? Benchmark
 		def benchmark(name = nil)
 			Benchmark.ips do |benchmark|
-				# Collect more data for benchmark:
-				benchmark.time = 20
-				benchmark.warmup = 10
-				
 				benchmark.report(name) do |i|
 					yield i
 				end
@@ -44,10 +40,10 @@ RSpec.describe "Utopia Performance" do
 	elsif defined? RubyProf
 		def benchmark(name)
 			result = RubyProf.profile do
-				yield 1000
+				yield 2000
 			end
 			
-			result.eliminate_methods!([/^((?!Utopia|Trenni).)*$/])
+			#result.eliminate_methods!([/^((?!Utopia|Trenni).)*$/])
 			printer = RubyProf::FlatPrinter.new(result)
 			printer.print($stderr, min_percent: 1.0)
 			
