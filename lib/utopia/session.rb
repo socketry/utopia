@@ -27,6 +27,8 @@ require_relative 'session/lazy_hash'
 module Utopia
 	# A middleware which provides a secure client-side session storage using a private symmetric encrpytion key.
 	class Session
+		SECRET_KEY = 'UTOPIA_SESSION_SECRET'.freeze
+		
 		RACK_SESSION = "rack.session".freeze
 		CIPHER_ALGORITHM = "aes-256-cbc"
 		

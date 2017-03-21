@@ -1,7 +1,7 @@
 require "bundler/gem_tasks"
 require "rspec/core/rake_task"
 
-RSpec::Core::RakeTask.new(:spec)
+RSpec::Core::RakeTask.new(:test)
 
 task :documentation do
 	sh('yard', '-o', "documentation/public/code")
@@ -11,8 +11,8 @@ task :documentation do
 	
 	Dir.chdir('documentation') do
 		sh('bundle', 'install', '--quiet')
-		sh('bundle', 'exec', 'rake', 'server')
+		sh('bundle', 'exec', 'rake')
 	end
 end
 
-task :default => :spec
+task :default => :documentation
