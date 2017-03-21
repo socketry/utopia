@@ -13,6 +13,8 @@ desc 'Start the development environment which includes web server and tests.'
 task :development => :environment do
 	# This generates a consistent session secret if one was not already provided:
 	if ENV['UTOPIA_SESSION_SECRET'].nil?
+		require 'securerandom'
+		
 		warn 'Generating transient session key for development...'
 		ENV['UTOPIA_SESSION_SECRET'] = SecureRandom.hex(32)
 	end
