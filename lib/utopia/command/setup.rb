@@ -36,13 +36,13 @@ module Utopia
 			# Helpers for setting up a local site.
 			module Site
 				# Configuration files which should be installed/updated:
-				CONFIGURATION_FILES = ['.bowerrc', '.gitignore', 'config.ru', 'config/environment.rb', 'Gemfile', 'Guardfile', 'Rakefile', 'tasks/utopia.rake', 'tasks/bower.rake', 'tasks/test.rake']
+				CONFIGURATION_FILES = ['.bowerrc', '.gitignore', 'config.ru', 'config/environment.rb', 'Gemfile', 'Guardfile', 'Rakefile', 'tasks/bower.rake', 'tasks/deploy.rake', 'tasks/development.rake', 'tasks/environment.rake', 'tasks/log.rake']
 				
 				# Directories that should exist:
 				DIRECTORIES = ["config", "lib", "pages", "public", "tasks"]
 				
 				# Directories that should be removed during upgrade process:
-				OLD_DIRECTORIES = ["access_log", "cache", "tmp"]
+				OLD_PATHS = ["access_log", "cache", "tmp", 'tasks/test.rake', 'tasks/utopia.rake']
 				
 				# The root directory of the template site:
 				ROOT = File.join(BASE, 'site')

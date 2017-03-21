@@ -123,8 +123,8 @@ module Utopia
 						FileUtils.mkdir_p(File.join(destination_root, directory))
 					end
 					
-					Setup::Site::OLD_DIRECTORIES.each do |directory|
-						path = File.join(destination_root, directory)
+					Setup::Site::OLD_PATHS.each do |path|
+						path = File.join(destination_root, path)
 						$stderr.puts "\tRemoving #{path}..."
 						FileUtils.rm_rf(path)
 					end
