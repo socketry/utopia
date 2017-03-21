@@ -57,7 +57,7 @@ module Utopia
 			tag('environment') do |document, state|
 				environment = RACK_ENV.to_s
 				
-				if state[:only].split(',').include(environment)
+				if state[:only].split(',').include?(environment)
 					document.parse_markup(state.content)
 				end
 			end
