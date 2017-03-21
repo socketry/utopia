@@ -34,13 +34,14 @@ module Utopia
 	class Content
 		INDEX = 'index'.freeze
 		
-		CORE_NAMESPACE = 'utopia'.freeze
+		CONTENT_NAMESPACE = 'content'.freeze
+		UTOPIA_NAMESPACE = 'utopia'.freeze
 		DEFERRED_TAG_NAME = 'utopia:deferred'.freeze
 		CONTENT_TAG_NAME = 'utopia:content'.freeze
 		
 		# @param root [String] The content root where pages will be generated from.
 		# @param namespaces [Hash<String,Library>] Tag namespaces for dynamic tag lookup.
-		def initialize(app, root: Utopia::default_root, namespaces: {}, tags: nil)
+		def initialize(app, root: Utopia::default_root, namespaces: {})
 			@app = app
 			@root = root
 			
@@ -50,15 +51,10 @@ module Utopia
 			@namespaces = namespaces
 			
 			# Default content namespace for dynamic path based lookup:
-			@namespaces['content'] ||= self.method(:content_tag)
+			@namespaces[CONTENT_NAMESPACE] ||= self.method(:content_tag)
 			
 			# The core namespace for utopia specific functionality:
-			@namespaces[CORE_NAMESPACE] ||= Tags
-			
-			if tags
-				warn "Usage of raw tags (#{tags.keys.inspect}) is inefficient."
-				@namespaces[nil] = Tags::Library.new(tags)
-			end
+			@namespaces[UTOPIA_NAMESPACE] ||= Tags
 		end
 
 		def freeze

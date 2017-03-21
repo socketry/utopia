@@ -20,18 +20,21 @@
 
 module Utopia
 	class Content
-		# Tags which provide intrinsic behaviour within the content middleware.
-		module Tags
-			# Invokes a deferred tag from the current state. Works together with {Document::State#defer}.
-			# @param id [String] The id of the deferred to invoke.
-			module DeferredTag
-				def self.call(document, state)
-					id = state[:id].to_i
-					
-					procedure = document.parent.deferred[id]
-					
-					procedure.call(document, state)
+		# A namespace which contains tags which can be rendered within a {Document}.
+		module Namespace
+			def self.extended(other)
+				other.class_exec do
+					@named = {}
 				end
+			end
+			
+			def tag(name, klass = nil, &block)
+				@named[name] = klass || block
+			end
+			
+			# @return [Node] The node which should be used to render the named tag.
+			def call(name, node)
+				@named[name]
 			end
 		end
 	end
