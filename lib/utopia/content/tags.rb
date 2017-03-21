@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require_relative 'tags/library'
 require_relative 'tags/deferred_tag'
 require_relative 'tags/node_tag'
 require_relative 'tags/content_tag'
