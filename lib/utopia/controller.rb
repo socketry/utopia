@@ -55,19 +55,14 @@ module Utopia
 		end
 		
 		# @param root [String] The content root where controllers will be loaded from.
-		# @param cache_controllers [Boolean] Whether to enable thread-safe controller cache.
 		# @param base [Class] The base class for controllers.
-		def initialize(app, root: Utopia::default_root, cache_controllers: false, base: nil)
+		def initialize(app, root: Utopia::default_root, base: Controller::Base)
 			@app = app
 			@root = root
 			
-			if cache_controllers
-				@controller_cache = Concurrent::Map.new
-			else
-				@controller_cache = nil
-			end
+			@controller_cache = Concurrent::Map.new
 			
-			@base = base || Controller::Base
+			@base = base
 		end
 		
 		attr :app
@@ -83,11 +78,7 @@ module Utopia
 		
 		# Fetch the controller for the given relative path. May be cached.
 		def lookup_controller(path)
-			if @controller_cache
-				@controller_cache.fetch_or_store(path.to_s) do
-					load_controller_file(path)
-				end
-			else
+			@controller_cache.fetch_or_store(path.to_s) do
 				load_controller_file(path)
 			end
 		end

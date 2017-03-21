@@ -73,7 +73,7 @@ module Utopia::ContentSpec
 	
 	describe Utopia::Content do
 		let(:root) {File.expand_path('content_spec', __dir__)}
-		let(:content) {Utopia::Content.new(lambda{}, root: root, cache_templates: true)}
+		let(:content) {Utopia::Content.new(lambda{}, root: root)}
 		
 		it "should parse file and expand variables" do
 			path = Utopia::Path.create('/index')

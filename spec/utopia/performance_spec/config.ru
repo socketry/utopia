@@ -21,15 +21,13 @@ use Utopia::Redirection::Errors,
 # 	:ignore => ['/_static/', '/_cache/']
 
 use Utopia::Controller,
-	root: File.expand_path('pages', __dir__),
-	cache_controllers: true
+	root: File.expand_path('pages', __dir__)
 
 use Utopia::Static,
 	root: File.expand_path('pages', __dir__)
 
 # Serve dynamic content
 use Utopia::Content,
-	root: File.expand_path('pages', __dir__),
-	cache_templates: true
+	root: File.expand_path('pages', __dir__)
 
 run lambda { |env| [404, {}, []] }

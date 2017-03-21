@@ -1,6 +1,5 @@
 
 use Utopia::Controller,
-	root: File.expand_path('middleware_spec', __dir__),
-	cache_controllers: true
+	root: File.expand_path('middleware_spec', __dir__)
 
 run lambda {|env| [404, {}, []]}
