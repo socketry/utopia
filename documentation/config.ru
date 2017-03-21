@@ -33,13 +33,11 @@ use Utopia::Localization,
 	:locales => ['en', 'de', 'ja', 'zh'],
 	:ignore => ['/_static/', '/_cache/']
 
-use Utopia::Controller,
-	cache_controllers: (RACK_ENV == :production)
+use Utopia::Controller
 
 use Utopia::Static
 
 # Serve dynamic content
-use Utopia::Content,
-	cache_templates: (RACK_ENV == :production)
+use Utopia::Content
 
 run lambda { |env| [404, {}, []] }

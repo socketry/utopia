@@ -5,6 +5,6 @@
 	
 	<footer>
 		Last Modified: #{File.mtime(self[:page_file]) rescue "N/A"} &mdash;
-		<a href="edit">Edit</a>
+		<a href="edit">Edit Page</a>
 	</footer>
 </content:page>
