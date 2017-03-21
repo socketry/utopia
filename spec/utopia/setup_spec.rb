@@ -79,7 +79,7 @@ RSpec.describe "utopia executable" do
 			result = sh_status(utopia, "--in", dir, "site", "create")
 			expect(result).to be == 0
 			
-			expect(Dir.entries(dir)).to include(".bowerrc", ".git", "Gemfile", "Gemfile.lock", "README.md", "Rakefile", "config.ru", "lib", "pages", "public", "tmp", "spec")
+			expect(Dir.entries(dir)).to include(".bowerrc", ".git", "Gemfile", "Gemfile.lock", "README.md", "Rakefile", "config.ru", "lib", "pages", "public", "spec")
 			
 			Dir.chdir(dir) do
 				result = sh_status("rake", "test")
@@ -153,7 +153,7 @@ RSpec.describe "utopia executable" do
 				expect(result).to be == 0
 			end
 			
-			files = %W[.bowerrc .git Gemfile Gemfile.lock README.md Rakefile config.ru lib pages public tmp]
+			files = %W[.bowerrc .git Gemfile Gemfile.lock README.md Rakefile config.ru lib pages public]
 			
 			expect(Dir.entries(server_path)).to include(*files)
 			
