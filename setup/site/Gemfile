@@ -13,6 +13,7 @@ gem "rack-freeze", "~> 1.2"
 group :development do
 	# For `rake server`:
 	gem "puma"
+	gem "guard-puma"
 	
 	# For `rake console`:
 	gem "pry"

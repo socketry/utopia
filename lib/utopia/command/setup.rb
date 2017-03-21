@@ -36,7 +36,7 @@ module Utopia
 			# Helpers for setting up a local site.
 			module Site
 				# Configuration files which should be installed/updated:
-				CONFIGURATION_FILES = ['.bowerrc', 'config.ru', 'config/environment.rb', 'Gemfile', 'Rakefile', 'tasks/utopia.rake', 'tasks/bower.rake', 'tasks/test.rake']
+				CONFIGURATION_FILES = ['.bowerrc', 'config.ru', 'config/environment.rb', 'Gemfile', 'Guardfile', 'Rakefile', 'tasks/utopia.rake', 'tasks/bower.rake', 'tasks/test.rake']
 				
 				# Directories that should exist:
 				DIRECTORIES = ["config", "lib", "pages", "public", "tasks"]

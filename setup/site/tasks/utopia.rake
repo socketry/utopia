@@ -17,13 +17,13 @@ task :environment do
 	require_relative '../config/environment'
 	
 	# We ensure this is part of the shell environment so if other commands are invoked they will work correctly.
-	ENV['RACK_ENV'] = RACK_ENV.to_s
+	ENV['RACK_ENV'] = RACK_ENV.to_s if defined?(RACK_ENV)
+	ENV['DATABASE_ENV'] = DATABASE_ENV.to_s if defined?(DATABASE_ENV)
 end
 
 desc 'Run a server for testing your web application'
 task :server => :environment do
-	port = ENV.fetch('SERVER_PORT', 9292).to_s
-	exec('puma', '-v', '-p', port)
+	exec('guard', '-g', 'development')
 end
 
 desc 'Start an interactive console for your web application'
