@@ -27,9 +27,9 @@
 	</head>
 
 	<body class="#{attributes[:class]}">
-		<header>
+		<content:header>
 			<img src="/_static/utopia.svg" />
-		</header>
+		</content:header>
 
 		<div id="page">
 			<utopia:content/>
