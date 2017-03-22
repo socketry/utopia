@@ -19,6 +19,8 @@ group :test do
 	gem 'benchmark-ips'
 	gem 'ruby-prof'
 	
+	gem 'guard-puma'
+	
 	gem 'rack-test'
 	gem 'rack-freeze', '~> 1.2'
 	
