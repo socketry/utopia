@@ -91,15 +91,17 @@ module Utopia
 			# have appeared when evaluating nodes.
 			attr :end_tags
 
-			def tag(name, attributes = {}, &block)
+			def tag(name, attributes = {})
 				# If we provide a block which can give inner data, we are not self-closing.
 				tag = Tag.new(name, !block_given?, attributes)
 
-				node = tag_begin(tag)
-
-				yield node if block_given?
-
-				tag_end(tag)
+				if block_given?
+					node = tag_begin(tag)
+					yield node
+					tag_end(tag)
+				else
+					tag_complete(tag, node)
+				end
 			end
 
 			def tag_complete(tag, node = nil)
@@ -123,6 +125,8 @@ module Utopia
 
 					return node
 				end
+
+				# raise ArgumentError.new("tag_begin: #{tag} is tag.self_closed?") if tag.self_closed?
 
 				@current.tag_begin(tag)
 
@@ -156,6 +160,7 @@ module Utopia
 
 					return buffer
 				else
+					# raise ArgumentError.new("tag_begin: #{tag} is tag.self_closed?") if tag.self_closed?
 					@current.tag_end(tag)
 				end
 
@@ -269,6 +274,8 @@ module Utopia
 			end
 
 			def tag_begin(tag)
+				# raise ArgumentError.new("tag_begin: #{tag} is tag.self_closed?") if tag.self_closed?
+				
 				@tags << tag
 				tag.write_opening_tag(@buffer)
 			end
