@@ -61,7 +61,7 @@ module Utopia
 			
 			# Specify that the content could be cached.
 			def cache!(duration = 3600, access: "public")
-				unless @headers[CACHE_CONTROL]&.include?(NO_CACHE)
+				unless cache_control = @headers[CACHE_CONTROL] and cache_control.include?(NO_CACHE)
 					@headers[CACHE_CONTROL] = "#{access}, max-age=#{duration}"
 					@headers[EXPIRES] = (Time.now + duration).httpdate
 				end
