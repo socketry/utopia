@@ -36,4 +36,10 @@ module Utopia
 	def self.default_root(subdirectory = PAGES_PATH, pwd = Dir.pwd)
 		File.expand_path(subdirectory, pwd)
 	end
+	
+	# The same as {default_root} but returns an instance of {Path}.
+	# @return [Path] The path as requested.
+	def self.default_path(*args)
+		Path[default_root(*args)]
+	end
 end
