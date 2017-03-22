@@ -46,3 +46,10 @@ end
 ## Server Update
 
 The utopia server git hooks are updated occasionally to improve the deployment process or to handle changes in the underlying process.
+
+You can run the update process on the server to bring the git hooks up to the latest version.
+
+```bash
+$ cd /srv/http/website
+$ utopia server update
+```

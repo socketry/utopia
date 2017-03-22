@@ -19,10 +19,7 @@ Reading these pages in order will give you an overview of the design of Utopia, 
 - [Redirection](middleware/redirection/) — Redirect URL patterns and status codes.
 - [Localization](middleware/localization/) — Non-intrusive localization of resources.
 - [Controller](middleware/controller/) — Flexible nested controllers with efficient behaviour. 
+  - [Controller Actions](middleware/controller/actions/) — Invoke named actions.
+  - [Controller Rewrite](middleware/controller/rewrite/) — Pattern match requests.
 - [Content](middleware/content/) — XML-style template engine with dynamic markup.
 - [Session](middleware/session/) — Session storage using encrypted client-side cookies.
-
-## Controller Layers
-
-- [Controller Actions](controller/actions/)
-- [Controller Rewrite](controller/rewrite/)

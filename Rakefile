@@ -6,8 +6,7 @@ RSpec::Core::RakeTask.new(:test)
 task :documentation do
 	sh('yard', '-o', "documentation/public/code")
 	
-	ENV.delete 'BUNDLE_BIN_PATH'
-	ENV.delete 'BUNDLE_GEMFILE'
+	ENV.delete_if {|key| key =~ /BUNDLE/}
 	
 	Dir.chdir('documentation') do
 		sh('bundle', 'install', '--quiet')

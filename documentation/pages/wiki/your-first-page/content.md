@@ -16,6 +16,8 @@ You will now have a basic template site running on <a href="http://localhost:929
 Utopia includes a redirection middleware to redirect all root-level requests to a given URI. The default being `/welcome/index`:
 
 ```ruby
+# in config.ru
+
 use Utopia::Redirection::Rewrite,
 	'/' => '/welcome/index'
 ```

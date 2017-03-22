@@ -88,6 +88,10 @@ p, ul, ol, dl, h3 {
 	margin: 2rem;
 }
 
+li > ul, li > ol {
+	margin: 0;
+}
+
 pre {
 	overflow: auto;
 	
