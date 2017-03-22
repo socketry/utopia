@@ -1,4 +1,4 @@
-# Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2017, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,35 +18,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-module Utopia
-	class Content
-		# A namespace which contains tags which can be rendered within a {Document}.
-		module Namespace
-			def self.extended(other)
-				other.class_exec do
-					@named = {}
-				end
-			end
+require 'utopia/content/namespace'
+
+RSpec.describe Utopia::Content::Namespace do
+	let(:tags) do
+		Module.new.tap do |mod|
+			mod.extend(Utopia::Content::Namespace)
 			
-			attr :named
-			
-			def freeze
-				return self if frozen?
-				
-				@named.freeze
-				@named.values.each(&:freeze)
-				
-				super
-			end
-			
-			def tag(name, klass = nil, &block)
-				@named[name] = klass || block
-			end
-			
-			# @return [Node] The node which should be used to render the named tag.
-			def call(name, node)
-				@named[name]
+			mod.tag('foo') do |document, state|
 			end
 		end
+	end
+	
+	it "should freeze tags" do
+		tags.freeze
+		
+		expect(tags).to be_frozen
+		expect(tags.named).to be_frozen
+	end
+	
+	it "should have named tag" do
+		expect(tags.call('foo', nil)).to_not be_nil
 	end
 end
