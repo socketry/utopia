@@ -31,13 +31,17 @@ RSpec.describe "utopia executable" do
 		# We need to build a package to test deployment:
 		system("rake", "build") or abort("Could not build package for setup spec!")
 		
-		# Delete any bundler stuff.
-		ENV.delete_if {|key| key =~ /BUNDLE|RUBY/}
-		
-		# This allows the utopia command to load the correct library:
-		ENV['RUBYLIB'] = File.expand_path("../../lib", __dir__)
 		ENV['DEPLOY_USER'] = 'http'
 		ENV['DEPLOY_GROUP'] = 'http'
+	end
+	
+	around(:each) do |example|
+		Bundler.with_clean_env do
+			# This allows the utopia command to load the correct library:
+			ENV['RUBYLIB'] = File.expand_path("../../lib", __dir__)
+			
+			example.run
+		end
 	end
 	
 	def sh_status(*args)

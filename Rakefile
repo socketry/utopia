@@ -6,11 +6,11 @@ RSpec::Core::RakeTask.new(:test)
 task :documentation do
 	sh('yard', '-o', "documentation/public/code")
 	
-	ENV.delete_if {|key| key =~ /BUNDLE|RUBY/}
-	
-	Dir.chdir('documentation') do
-		sh('bundle', 'install', '--quiet')
-		sh('bundle', 'exec', 'rake')
+	Bundler.with_clean_env do	
+		Dir.chdir('documentation') do
+			sh('bundle', 'install', '--quiet')
+			sh('bundle', 'exec', 'rake')
+		end
 	end
 end
 
