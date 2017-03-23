@@ -31,9 +31,8 @@ RSpec.describe "utopia executable" do
 		# We need to build a package to test deployment:
 		system("rake", "build") or abort("Could not build package for setup spec!")
 		
-		ENV.delete 'BUNDLE_BIN_PATH'
-		ENV.delete 'BUNDLE_GEMFILE'
-		ENV.delete 'RUBYOPT'
+		# Delete any bundler stuff.
+		ENV.delete_if {|key| key =~ /BUNDLE|RUBY/}
 		
 		# This allows the utopia command to load the correct library:
 		ENV['RUBYLIB'] = File.expand_path("../../lib", __dir__)
