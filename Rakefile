@@ -14,4 +14,4 @@ task :documentation do
 	end
 end
 
-task :default => :documentation
+task :default => :test
