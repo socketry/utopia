@@ -45,7 +45,7 @@ There is an excellent documentation wiki included with the source code. Simply c
 
 Released under the MIT license.
 
-Copyright, 2015, by [Samuel G. D. Williams](http://www.codeotaku.com/samuel-williams).
+Copyright, 2017, by [Samuel G. D. Williams](http://www.codeotaku.com/samuel-williams).
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
