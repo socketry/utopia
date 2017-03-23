@@ -44,4 +44,15 @@ RSpec.describe Utopia::Content::Document do
 		
 		expect(result).to be == '<div><img src="cats.jpg"/></div>'
 	end
+	
+	it "should fail if tags are unbalanced" do
+		node = proc do |document, state|
+			div = Utopia::Content::Tag.opened('div')
+			span = Utopia::Content::Tag.opened('span')
+			subject.tag_begin(div)
+			subject.tag_end(span)
+		end
+		
+		expect{subject.render_node(node)}.to raise_error Utopia::Content::UnbalancedTagError, /tag span/
+	end
 end

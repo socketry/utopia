@@ -53,6 +53,14 @@ module Utopia
 				super()
 			end
 			
+			def [] key
+				@attributes[key]
+			end
+			
+			def []= key, value
+				@attributes[key] = value
+			end
+			
 			def render!(node, attributes)
 				@body << render_node(node, attributes)
 				
@@ -197,6 +205,12 @@ module Utopia
 				return nil
 			end
 			
+			# Lookup a node with the given path relative to the current node.
+			# @return [Node] The node if could be found.
+			def lookup_node(path)
+				@current.node.lookup_node(path)
+			end
+			
 			# The content of the node
 			def content
 				@end_tags.last.content
@@ -281,7 +295,7 @@ module Utopia
 			end
 
 			def tag_end(tag)
-				raise UnbalancedTagError(tag) unless @tags.pop.name == tag.name
+				raise UnbalancedTagError.new(tag) unless @tags.pop.name == tag.name
 				tag.write_closing_tag(@buffer)
 			end
 		end

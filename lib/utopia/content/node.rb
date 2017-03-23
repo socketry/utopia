@@ -50,7 +50,7 @@ module Utopia
 			end
 
 			def lookup_node(path)
-				@controller.lookup_node(path)
+				@controller.lookup_node(@uri_path + Path[path])
 			end
 
 			def local_path(path = '.', base = nil)
