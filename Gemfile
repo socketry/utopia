@@ -17,7 +17,7 @@ end
 
 group :test do
 	gem 'benchmark-ips'
-	gem 'ruby-prof'
+	gem 'ruby-prof', platforms: :mri
 	
 	gem 'guard-puma'
 	
