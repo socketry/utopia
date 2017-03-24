@@ -54,7 +54,8 @@ module Utopia
 				
 				# Named:
 				if name = options[:name]
-					ordered.select!{|link| link.name[name]}
+					# We use pattern === name, which matches either the whole string, or matches a regexp.
+					ordered.select!{|link| name === link.name}
 				end
 				
 				if locale = options[:locale]
@@ -155,7 +156,7 @@ module Utopia
 			end
 			
 			def indices(path, &block)
-				Dir.entries(path).reject{|filename| !filename.match(INDEX_XNODE_FILTER)}
+				Dir.entries(path).select{|filename| filename.match(INDEX_XNODE_FILTER)}
 			end
 			
 			def load_indices(name, path, metadata)
