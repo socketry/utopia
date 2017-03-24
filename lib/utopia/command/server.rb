@@ -69,6 +69,7 @@ module Utopia
 					# Copy git hooks:
 					system("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git')) or fail "could not copy git hooks"
 					# finally set everything in the .git directory to be group writable
+					# This failed for me and I had to do sudo chown http:http .git -R first.
 					system("chmod", "-Rf", "g+w", File.join(destination_root, '.git')) or fail "could not update permissions of .git directory"
 				end
 			end
