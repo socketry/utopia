@@ -5,8 +5,7 @@ The localization middleware uses the `Accept-Language` header to guess the prefe
 ```ruby
 use Utopia::Localization,
 	:default_locale => 'en',
-	:locales => ['en', 'de', 'ja', 'zh'],
-	:nonlocalized => ['/_static/', '/_cache/']
+	:locales => ['en', 'de', 'ja', 'zh']
 ```
 
 Somewhere further down the chain, you can localize a resource:

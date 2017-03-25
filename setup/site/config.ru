@@ -30,8 +30,7 @@ use Utopia::Redirection::Errors,
 
 use Utopia::Localization,
 	:default_locale => 'en',
-	:locales => ['en', 'de', 'ja', 'zh'],
-	:ignore => ['/_static/', '/_cache/', '/_components/']
+	:locales => ['en', 'de', 'ja', 'zh']
 
 require 'utopia/session'
 use Utopia::Session,
