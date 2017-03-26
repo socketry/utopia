@@ -54,6 +54,7 @@ There is an excellent documentation wiki included with the source code. Simply c
 - [Trenni](https://github.com/ioquatix/trenni)
 - [Trenni::Formatters](https://github.com/ioquatix/trenni-formatters)
 - [Utopia::Gallery](https://github.com/ioquatix/utopia-gallery)
+- [Rack::Freeze](https://github.com/ioquatix/rack-freeze)
 - [HTTP::Accept](https://github.com/ioquatix/http-accept)
 - [Samovar](https://github.com/ioquatix/samovar)
 
