@@ -16,6 +16,14 @@ Eventually one day I started using Ruby on Rails. There are aspects of the Rails
 
 So, Utopia exists because it suits my way of thinking about web applications, and it's conceptual core has been refined for over a decade. It provides a considered amount of both flexibility, and opinionated behavior.
 
+### Is it production ready?
+
+Yes. We've used Utopia since about 2010 in production.
+
+### Is it fast?
+
+Yes. [Trenni](https://github.com/ioquatix/trenni) includes native [Ragel](http://www.colm.net/open-source/ragel/) parsers, and Utopia uses [Concurrent::Map](https://github.com/ruby-concurrency/concurrent-ruby) for multi-thread safe caches. On my laptop, Utopia can process 3000 requests/s rendering content on a single thread.
+
 ## Installation
 
 Install utopia:
@@ -40,6 +48,14 @@ There is an excellent documentation wiki included with the source code. Simply c
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## See Also
+
+- [Trenni](https://github.com/ioquatix/trenni)
+- [Trenni::Formatters](https://github.com/ioquatix/trenni-formatters)
+- [Utopia::Gallery](https://github.com/ioquatix/utopia-gallery)
+- [HTTP::Accept](https://github.com/ioquatix/http-accept)
+- [Samovar](https://github.com/ioquatix/samovar)
 
 ## License
 
