@@ -57,6 +57,8 @@ There is an excellent documentation wiki included with the source code. Simply c
 - [Rack::Freeze](https://github.com/ioquatix/rack-freeze) — Multi-thread safety in Rack.
 - [HTTP::Accept](https://github.com/ioquatix/http-accept) — RFC compliant header parser.
 - [Samovar](https://github.com/ioquatix/samovar) — Command line parser used by Utopia.
+- [Mapping](https://github.com/ioquatix/mapping) — Provide structured conversions for web interfaces.
+- [Rack::Test::Body](https://github.com/ioquatix/rack-test-body) — Provide convenient helpers for testing web interfaces.
 
 ## License
 
