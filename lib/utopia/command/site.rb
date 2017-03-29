@@ -100,11 +100,20 @@ module Utopia
 				
 				# Move legacy `pages/_static` to `public/_static`.
 				def move_static!
-					if File.lstat("public/_static").symlink?
-						FileUtils.rm_f "public/_static"
+					# If public/_static doens't exist, we are done.
+					return unless File.exist? 'pages/_static'
+					
+					if File.exist? 'public/_static'
+						if File.lstat("public/_static").symlink?
+							FileUtils.rm_f "public/_static"
+						else
+							warn "Can't move pages/_static to public/_static, destination already exists."
+							return
+						end
 					end
 					
-					if File.directory?("pages/_static") and !File.exist?("public/_static")
+					# One more sanity check:
+					if File.directory? 'pages/_static'
 						system("git", "mv", "pages/_static", "public/")
 					end
 				end
