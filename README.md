@@ -60,6 +60,10 @@ There is an excellent documentation wiki included with the source code. Simply c
 - [Mapping](https://github.com/ioquatix/mapping) — Provide structured conversions for web interfaces.
 - [Rack::Test::Body](https://github.com/ioquatix/rack-test-body) — Provide convenient helpers for testing web interfaces.
 
+### Applications
+
+- [Financier](https://github.com/ioquatix/financier) — A small business management platform.
+
 ## License
 
 Released under the MIT license.
