@@ -4,6 +4,7 @@ group :development do
 		watch('Gemfile.lock')
 		watch('config.ru')
 		watch(%r{^config|lib|pages/.*})
+		notification :off
 	end
 end
 
@@ -13,5 +14,6 @@ group :test do
 		watch(%r{^lib/(.+)\.rb$}) { |m| 'spec/lib/#{m[1]}_spec.rb' }
 		watch('spec/spec_helper.rb') { 'spec' }
 		watch(%r{^pages/.*}) { 'spec/website_spec.rb' }
+		notification :off
 	end
 end
