@@ -4,6 +4,7 @@ group :development do
 		watch('Gemfile.lock')
 		watch('config.ru')
 		watch(%r{^config|lib|pages/.*})
+		notification :off
 	end
 	
 	# Open the documentation website when the command is run, once puma has started:
