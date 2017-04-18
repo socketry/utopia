@@ -24,7 +24,7 @@ require_relative 'markup'
 
 module Utopia
 	class Content
-		# This error is thrown if a tag doesn't match up when parsing the 
+		# This error is raised if a tag doesn't match up when parsing.
 		class UnbalancedTagError < StandardError
 			def initialize(tag)
 				@tag = tag
