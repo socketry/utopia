@@ -20,6 +20,7 @@ group :test do
 		# Run relevent specs if files in `lib/` or `pages/` are changed:
 		watch(%r{^lib/(.+)\.rb$}) {|match| "spec/lib/#{match[1]}_spec.rb" }
 		watch(%r{^pages/(.+)\.(rb|xnode)$}) {|match| "spec/pages/#{match[1]}_spec.rb"}
+		watch(%r{^pages/(.+)controller\.rb$}) {|match| Dir.glob("spec/pages/#{match[1]}*_spec.rb")}
 		
 		# If any files in pages changes, ensure the website still works:
 		watch(%r{^pages/.*}) {'spec/website_spec.rb'}
