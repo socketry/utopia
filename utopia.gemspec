@@ -14,6 +14,7 @@ Gem::Specification.new do |spec|
 	EOF
 	spec.summary       = %q{Utopia is a framework for building dynamic content-driven websites.}
 	spec.homepage      = 'https://github.com/ioquatix/utopia'
+	spec.license       = "MIT"
 	
 	spec.files         = `git ls-files`.split($/)
 	spec.executables   = spec.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
