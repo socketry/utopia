@@ -22,6 +22,8 @@ require 'fileutils'
 require 'tmpdir'
 require 'yaml'
 
+require 'open3'
+
 RSpec.describe "utopia executable" do
 	let(:utopia) {File.expand_path("../../bin/utopia", __dir__)}
 	let(:gemspec) {Gem::Specification.load File.expand_path("../../utopia.gemspec", __dir__)}
@@ -37,6 +39,9 @@ RSpec.describe "utopia executable" do
 	
 	around(:each) do |example|
 		Bundler.with_clean_env do
+			# If we don't delete this, when running on travis, it will try submit the coverage report.
+			ENV.delete('COVERAGE')
+			
 			# This allows the utopia command to load the correct library:
 			ENV['RUBYLIB'] = File.expand_path("../../lib", __dir__)
 			
@@ -45,14 +50,11 @@ RSpec.describe "utopia executable" do
 	end
 	
 	def sh_status(*args)
-		puts args.join(' ')
-		system(*args)
-		return $?
+		system(*args) ? 0 : false
 	end
 	
 	def sh_stdout(*args)
-		puts args.join(' ')
-		output = %x[#{args.join ' '}]
+		output, status = Open3.capture2(*args)
 		return output
 	end
 	
