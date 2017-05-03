@@ -6,6 +6,8 @@ before_install:
   # For testing purposes:
   - git config --global user.email "samuel@oriontransfer.net"
   - git config --global user.name "Samuel Williams"
+  # https://github.com/rubygems/rubygems/issues/1448
+  - gem update --system
 rvm:
   - 2.2
   - 2.3
