@@ -138,5 +138,25 @@ module Utopia::Controller::RespondSpec
 			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
 			expect(last_response.body).to be == '{}'
 		end
+		
+		it "should give record as JSON" do
+			header 'Accept', 'application/json'
+			
+			get '/rewrite/2/show'
+			
+			expect(last_response.status).to be == 200
+			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.body).to be == '{"id":2,"foo":"bar"}'
+		end
+		
+		it "should give error as JSON" do
+			header 'Accept', 'application/json'
+			
+			get '/rewrite/1/show'
+			
+			expect(last_response.status).to be == 404
+			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.body).to be == '{"message":"Could not find record"}'
+		end
 	end
 end
