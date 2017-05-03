@@ -52,10 +52,16 @@ module Utopia
 				super
 			end
 			
+			CONTENT_TYPE = 'Content-Type'.freeze
+			
+			def unhandled_error?(response)
+				response[0] >= 400 && !response[1].include?(CONTENT_TYPE)
+			end
+			
 			def call(env)
 				response = @app.call(env)
 				
-				if response[0] >= 400 and location = @codes[response[0]]
+				if unhandled_error?(response) && location = @codes[response[0]]
 					error_request = env.merge(Rack::PATH_INFO => location, Rack::REQUEST_METHOD => Rack::GET)
 					error_response = @app.call(error_request)
 
