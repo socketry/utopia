@@ -3,7 +3,7 @@ source "https://rubygems.org"
 
 gem "utopia", "~> $UTOPIA_VERSION"
 # gem "utopia-gallery"
-# gem "utopia-google-analytics"
+# gem "utopia-analytics"
 
 gem "rake"
 gem "bundler"
