@@ -54,6 +54,7 @@ There is an excellent documentation wiki included with the source code. Simply c
 - [Trenni](https://github.com/ioquatix/trenni) — Template and markup parsers, markup generation.
 - [Trenni::Formatters](https://github.com/ioquatix/trenni-formatters) — Helpers for HTML generation including views and forms.
 - [Utopia::Gallery](https://github.com/ioquatix/utopia-gallery) — A fast photo gallery based on [libvips](https://github.com/jcupitt/libvips).
+- [Utopia::Analytics](https://github.com/ioquatix/utopia-analytics) — Simple integration with Google Analytics.
 - [Rack::Freeze](https://github.com/ioquatix/rack-freeze) — Multi-thread safety in Rack.
 - [HTTP::Accept](https://github.com/ioquatix/http-accept) — RFC compliant header parser.
 - [Samovar](https://github.com/ioquatix/samovar) — Command line parser used by Utopia.
