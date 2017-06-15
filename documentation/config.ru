@@ -18,8 +18,6 @@ end
 
 use Rack::Sendfile
 
-use Utopia::ContentLength
-
 use Utopia::Redirection::Rewrite,
 	'/' => '/wiki/index'
 
