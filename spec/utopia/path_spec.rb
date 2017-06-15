@@ -22,131 +22,142 @@
 
 require 'utopia/path'
 
-module Utopia::PathSpec
-	describe Utopia::Path do
-		it "should be root path" do
-			root = Utopia::Path["/"]
-			
-			expect(root.components).to be == ['', '']
-			expect(root.to_local_path).to be == '/'
+RSpec.describe Utopia::Path do
+	context "coder" do
+		subject {"foo/bar/baz"}
+		let(:instance) {described_class.load(subject)}
+		
+		it "loads a string" do
+			expect(instance).to be_a described_class
 		end
 		
-		it "should concatenate absolute paths" do
-			root = Utopia::Path["/"]
-			
-			expect(root).to be_absolute
-			expect(root + Utopia::Path["foo/bar"]).to be == Utopia::Path["/foo/bar"]
+		it "dump generates the original string" do
+			expect(described_class.dump(instance)).to be == subject
 		end
+	end
+	
+	it "should be root path" do
+		root = Utopia::Path["/"]
 		
-		it "should compute all descendant paths" do
-			root = Utopia::Path["/foo/bar"]
-			
-			descendants = root.descend.to_a
-			
-			expect(descendants[0].components).to be == [""]
-			expect(descendants[1].components).to be == ["", "foo"]
-			expect(descendants[2].components).to be == ["", "foo", "bar"]
-			
-			ascendants = root.ascend.to_a
-			
-			expect(descendants.reverse).to be == ascendants
-		end
+		expect(root.components).to be == ['', '']
+		expect(root.to_local_path).to be == '/'
+	end
+	
+	it "should concatenate absolute paths" do
+		root = Utopia::Path["/"]
 		
-		it "should be able to remove relative path entries" do
-			path = Utopia::Path["/foo/bar/../baz/."]
-			expect(path.simplify.components).to be == ['', 'foo', 'baz']
-			
-			path = Utopia::Path["/foo/bar/../baz/./"]
-			expect(path.simplify.components).to be == ['', 'foo', 'baz', '']
-		end
+		expect(root).to be_absolute
+		expect(root + Utopia::Path["foo/bar"]).to be == Utopia::Path["/foo/bar"]
+	end
+	
+	it "should compute all descendant paths" do
+		root = Utopia::Path["/foo/bar"]
 		
-		it "should remove the extension from the basename" do
-			path = Utopia::Path["dir/foo.html"]
-			
-			basename = path.basename("html")
-			
-			expect(basename.name).to be == 'foo'
-			expect(basename.extension).to be == 'html'
-		end
+		descendants = root.descend.to_a
 		
-		it "should be able to convert into a directory" do
-			path = Utopia::Path["foo/bar"]
-			
-			expect(path).to_not be_directory
-			
-			expect(path.to_directory).to be_directory
-			
-			dir_path = path.to_directory
-			expect(dir_path.to_directory).to be == dir_path
-		end
+		expect(descendants[0].components).to be == [""]
+		expect(descendants[1].components).to be == ["", "foo"]
+		expect(descendants[2].components).to be == ["", "foo", "bar"]
 		
-		it "should start with the given path" do
-			path = Utopia::Path["/a/b/c/d/e"]
-			
-			expect(path.start_with?(path.dirname)).to be true
-		end
+		ascendants = root.ascend.to_a
 		
-		it "should split at the specified point" do
-			path = Utopia::Path["/a/b/c/d/e"]
-			
-			expect(path.split('c')).to be == [Utopia::Path['/a/b'], Utopia::Path['d/e']]
-		end
+		expect(descendants.reverse).to be == ascendants
+	end
+	
+	it "should be able to remove relative path entries" do
+		path = Utopia::Path["/foo/bar/../baz/."]
+		expect(path.simplify.components).to be == ['', 'foo', 'baz']
 		
-		it "shouldn't be able to modify frozen paths" do
-			path = Utopia::Path["dir/foo.html"]
-			
-			path.freeze
-			
-			expect(path.frozen?).to be true
-			
-			expect{path[0] = 'bob'}.to raise_exception(RuntimeError)
-		end
+		path = Utopia::Path["/foo/bar/../baz/./"]
+		expect(path.simplify.components).to be == ['', 'foo', 'baz', '']
+	end
+	
+	it "should remove the extension from the basename" do
+		path = Utopia::Path["dir/foo.html"]
 		
-		it "should give the correct locale" do
-			path = Utopia::Path["foo.en"]
-			
-			expect(path.basename.locale).to be == 'en'
-		end
+		basename = path.basename("html")
 		
-		it "should give no locale" do
-			path = Utopia::Path["foo"]
-			
-			expect(path.basename.locale).to be == nil
-		end
+		expect(basename.name).to be == 'foo'
+		expect(basename.extension).to be == 'html'
+	end
+	
+	it "should be able to convert into a directory" do
+		path = Utopia::Path["foo/bar"]
 		
-		it "should expand relative paths" do
-			root = Utopia::Path['/root']
-			path = Utopia::Path["dir/foo.html"]
-			
-			expect(path.expand(root)).to be == (root + path)
-		end
+		expect(path).to_not be_directory
 		
-		it "shouldn't expand absolute paths" do
-			root = Utopia::Path['/root']
-			
-			expect(root.expand(root)).to be == root
-		end
+		expect(path.to_directory).to be_directory
 		
-		it "should give the shortest path for outer paths" do
-			input = Utopia::Path.create("/a/b/c/index")
-			output = Utopia::Path.create("/a/b/c/d/e/")
-			
-			short = input.shortest_path(output)
-			
-			expect(short.components).to be == ["..", "..", "index"]
-			
-			expect((output + short).simplify).to be == input
-		end
+		dir_path = path.to_directory
+		expect(dir_path.to_directory).to be == dir_path
+	end
+	
+	it "should start with the given path" do
+		path = Utopia::Path["/a/b/c/d/e"]
 		
-		it "should give the shortest path for inner paths" do
-			input = Utopia::Path.create("/a/b/c/index")
-			output = Utopia::Path.create("/a/")
-			
-			short = input.shortest_path(output)
-			
-			expect(short.components).to be == ["b", "c", "index"]
-			
-			expect((output + short).simplify).to be == input
-		end
+		expect(path.start_with?(path.dirname)).to be true
+	end
+	
+	it "should split at the specified point" do
+		path = Utopia::Path["/a/b/c/d/e"]
+		
+		expect(path.split('c')).to be == [Utopia::Path['/a/b'], Utopia::Path['d/e']]
+	end
+	
+	it "shouldn't be able to modify frozen paths" do
+		path = Utopia::Path["dir/foo.html"]
+		
+		path.freeze
+		
+		expect(path.frozen?).to be true
+		
+		expect{path[0] = 'bob'}.to raise_exception(RuntimeError)
+	end
+	
+	it "should give the correct locale" do
+		path = Utopia::Path["foo.en"]
+		
+		expect(path.basename.locale).to be == 'en'
+	end
+	
+	it "should give no locale" do
+		path = Utopia::Path["foo"]
+		
+		expect(path.basename.locale).to be == nil
+	end
+	
+	it "should expand relative paths" do
+		root = Utopia::Path['/root']
+		path = Utopia::Path["dir/foo.html"]
+		
+		expect(path.expand(root)).to be == (root + path)
+	end
+	
+	it "shouldn't expand absolute paths" do
+		root = Utopia::Path['/root']
+		
+		expect(root.expand(root)).to be == root
+	end
+	
+	it "should give the shortest path for outer paths" do
+		input = Utopia::Path.create("/a/b/c/index")
+		output = Utopia::Path.create("/a/b/c/d/e/")
+		
+		short = input.shortest_path(output)
+		
+		expect(short.components).to be == ["..", "..", "index"]
+		
+		expect((output + short).simplify).to be == input
+	end
+	
+	it "should give the shortest path for inner paths" do
+		input = Utopia::Path.create("/a/b/c/index")
+		output = Utopia::Path.create("/a/")
+		
+		short = input.shortest_path(output)
+		
+		expect(short.components).to be == ["b", "c", "index"]
+		
+		expect((output + short).simplify).to be == input
 	end
 end

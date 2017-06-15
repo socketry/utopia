@@ -143,6 +143,14 @@ module Utopia
 			self.new(unescape(string).split(SEPARATOR, -1))
 		end
 		
+		def self.load(value)
+			from_string(value) if value
+		end
+		
+		def self.dump(instance)
+			instance.to_s if instance
+		end
+		
 		def self.create(path)
 			case path
 			when Path
@@ -200,9 +208,7 @@ module Utopia
 			end
 		end
 
-		def to_s
-			to_str
-		end
+		alias to_s to_str
 		
 		def to_a
 			@components
