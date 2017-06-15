@@ -22,4 +22,4 @@
 
 require 'utopia/command'
 
-Utopia::Command::Top.parse(ARGV).invoke
+Utopia::Command.parse(ARGV).invoke

@@ -25,6 +25,10 @@ require_relative 'command/server'
 
 module Utopia
 	module Command
+		def self.parse(*args)
+			Top.parse(*args)
+		end
+		
 		# The top level utopia command.
 		class Top < Samovar::Command
 			self.description = "A website development and deployment framework."
