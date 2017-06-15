@@ -58,7 +58,7 @@ module Utopia
 
 			def href
 				@href ||= @info.fetch(:uri) do
-					(@path.dirname + @path.basename.parts[0]).to_s if @path
+					(@path.dirname + @path.basename).to_s if @path
 				end
 			end
 

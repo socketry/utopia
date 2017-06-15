@@ -72,15 +72,6 @@ RSpec.describe Utopia::Path do
 		expect(path.simplify.components).to be == ['', 'foo', 'baz', '']
 	end
 	
-	it "should remove the extension from the basename" do
-		path = Utopia::Path["dir/foo.html"]
-		
-		basename = path.basename("html")
-		
-		expect(basename.name).to be == 'foo'
-		expect(basename.extension).to be == 'html'
-	end
-	
 	it "should be able to convert into a directory" do
 		path = Utopia::Path["foo/bar"]
 		
@@ -112,18 +103,6 @@ RSpec.describe Utopia::Path do
 		expect(path.frozen?).to be true
 		
 		expect{path[0] = 'bob'}.to raise_exception(RuntimeError)
-	end
-	
-	it "should give the correct locale" do
-		path = Utopia::Path["foo.en"]
-		
-		expect(path.basename.locale).to be == 'en'
-	end
-	
-	it "should give no locale" do
-		path = Utopia::Path["foo"]
-		
-		expect(path.basename.locale).to be == nil
 	end
 	
 	it "should expand relative paths" do

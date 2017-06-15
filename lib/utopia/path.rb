@@ -19,52 +19,6 @@
 # THE SOFTWARE.
 
 module Utopia
-	class Basename
-		# A basename represents a file name with an optional extension. You can specify a specific extension to identify or specify true to select any extension after the last trailing dot.
-		def initialize(name, extension = false)
-			if extension
-				if extension == true
-					offset = name.rindex('.')
-				else
-					offset = name.rindex(extension) - 1
-				end
-				
-				@name = name[0...offset]
-				@extension = name[offset+1..-1]
-			else
-				@name = name
-				@extension = nil
-			end
-		end
-		
-		def rename(name)
-			copy = self.dup
-			
-			copy.send(:instance_variable_set, :@name, name)
-			
-			return copy
-		end
-		
-		attr :name
-		attr :extension
-		
-		def parts
-			@parts ||= @name.split('.')
-		end
-		
-		def locale
-			parts.last if parts.size > 1
-		end
-		
-		def to_str
-			"#{name}#{extension}"
-		end
-		
-		def to_s
-			to_str
-		end
-	end
-	
 	# Represents a path as an array of path components. Useful for efficient URL manipulation.
 	class Path
 		include Comparable
@@ -163,7 +117,11 @@ module Utopia
 				return self.new([path])
 			end
 		end
-
+		
+		def replace(other_path)
+			@components = other_path.components.dup
+		end
+		
 		def include?(*args)
 			@components.include?(*args)
 		end
@@ -273,8 +231,8 @@ module Utopia
 			return self.class.new(result)
 		end
 
-		def basename(*args)
-			Basename.new(@components.last, *args)
+		def basename
+			@components.last
 		end
 		
 		def dirname(count = 1)

@@ -104,11 +104,11 @@ module Utopia
 			
 			# Check if the request is to a non-specific index. This only works for requests with a given name:
 			basename = path.basename
-			directory_path = File.join(@root, path.dirname.components, basename.name)
+			directory_path = File.join(@root, path.dirname.components, basename)
 
-			# If the request for /foo/bar{extensions} is actually a directory, rewrite it to /foo/bar/index{extensions}:
+			# If the request for /foo/bar is actually a directory, rewrite it to /foo/bar/index:
 			if File.directory? directory_path
-				index_path = [basename.name, basename.rename(INDEX)]
+				index_path = [basename, INDEX]
 				
 				return [307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []]
 			end
