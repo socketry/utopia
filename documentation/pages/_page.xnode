@@ -9,8 +9,6 @@
 			<title>Utopia</title>
 		<?r end ?>
 		
-		<base href="#{first.node.uri_path}"/>
-		
 		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous" />
 		
 		<link rel="icon" type="image/png" href="/_static/icon.png" />
