@@ -12,8 +12,7 @@ gem "rack-freeze", "~> 1.2"
 
 group :development do
 	# For `rake server`:
-	gem "puma"
-	gem "guard-puma", require: false
+	gem "guard-falcon", require: false
 	gem 'guard-rspec', require: false
 	
 	# For `rake console`:
