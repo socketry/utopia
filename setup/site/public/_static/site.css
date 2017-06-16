@@ -51,7 +51,7 @@ body > header img {
 	height: 4rem;
 }
 
-p {
+p, ul, ol {
 	color: #555;
 }
 
@@ -86,6 +86,10 @@ a:hover {
 
 p, ul, ol, dl, h3 {
 	margin: 2rem;
+}
+
+li {
+	margin: 0.2rem;
 }
 
 li > ul, li > ol {
