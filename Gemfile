@@ -26,4 +26,6 @@ group :test do
 	
 	gem 'simplecov'
 	gem 'coveralls', require: false
+
+  gem 'rubocop', '~> 0.49.1'
 end
