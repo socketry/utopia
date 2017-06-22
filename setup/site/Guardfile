@@ -1,6 +1,6 @@
 
 group :development do
-	guard :falcon, bind: "tcp://localhost:8080" do
+	guard :falcon, port: 9292 do
 		watch('Gemfile.lock')
 		watch('config.ru')
 		watch(%r{^config|lib|pages/.*})
