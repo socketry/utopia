@@ -117,11 +117,11 @@ module Utopia
 				return self.new([path])
 			end
 		end
-		
+
 		def replace(other_path)
 			@components = other_path.components.dup
 		end
-		
+
 		def include?(*args)
 			@components.include?(*args)
 		end
@@ -232,7 +232,15 @@ module Utopia
 		end
 
 		def basename
-			@components.last
+			basename, _ = @components.last.split('.', 2)
+			
+			return basename || ''
+		end
+		
+		def extension
+			_, extension = @components.last.split('.', 2)
+			
+			return extension
 		end
 		
 		def dirname(count = 1)
@@ -342,10 +350,6 @@ module Utopia
 			else
 				@components[-1]
 			end
-		end
-		
-		def extension
-			basename(true).extension
 		end
 		
 		private
