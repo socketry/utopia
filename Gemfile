@@ -19,7 +19,7 @@ group :test do
 	gem 'benchmark-ips'
 	gem 'ruby-prof', platforms: :mri
 	
-	gem 'guard-puma'
+	gem 'guard-falcon'
 	
 	gem 'rack-test'
 	gem 'rack-freeze', '~> 1.2'
