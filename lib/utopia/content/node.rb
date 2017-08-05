@@ -67,7 +67,7 @@ module Utopia
 			end
 
 			def parent_path
-				uri_path.dirname
+				@uri_path.dirname
 			end
 
 			def links(path = '.', **options, &block)
@@ -82,15 +82,13 @@ module Utopia
 			end
 
 			def related_links
-				name = @uri_path.last.split('.', 2).first
+				name = @uri_path.basename
 				
-				return Links.index(@controller.root, uri_path.dirname, :name => name, :indices => true)
+				return Links.index(@controller.root, @uri_path.dirname, :name => @uri_path.basename, :indices => true)
 			end
 
 			def siblings_path
-				name = @uri_path.last.split('.', 2).first
-				
-				if name == INDEX
+				if @uri_path.basename == INDEX
 					@uri_path.dirname(2)
 				else
 					@uri_path.dirname
