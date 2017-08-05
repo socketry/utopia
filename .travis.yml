@@ -8,6 +8,7 @@ before_install:
   - git config --global user.name "Samuel Williams"
   # https://github.com/rubygems/rubygems/issues/1448
   - gem update --system
+  - gem install bundler
 rvm:
   - 2.2
   - 2.3
