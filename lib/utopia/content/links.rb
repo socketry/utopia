@@ -187,7 +187,7 @@ module Utopia
 				
 				if indices_count == 0
 					# Specify a nil uri if no index could be found for the directory:
-					yield Link.new(:directory, top + [name, ""], {:uri => nil}.merge(directory_metadata))
+					yield Link.new(:directory, top + [name], {:uri => nil}.merge(directory_metadata))
 				end
 			end
 			

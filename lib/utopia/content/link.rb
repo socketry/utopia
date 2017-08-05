@@ -43,7 +43,7 @@ module Utopia
 				when :directory
 					# raise ArgumentError unless path.last.start_with? INDEX
 					
-					@name = path.dirname.last
+					@name = path.dirname.last || ''
 					@locale = path.last.split('.', 2)[1]
 					@path = path
 				when :virtual
