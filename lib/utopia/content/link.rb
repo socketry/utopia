@@ -41,10 +41,13 @@ module Utopia
 					@name, @locale = path.last.split('.', 2)
 					@path = path
 				when :directory
-					# raise ArgumentError unless path.last.start_with? INDEX
+					@name = path.basename
 					
-					@name = path.dirname.last || ''
-					@locale = path.last.split('.', 2)[1]
+					if @name == INDEX
+						@name = path.dirname.basename
+					end
+					
+					@locale = path.extension
 					@path = path
 				when :virtual
 					@name, @locale = path.to_s.split('.', 2)
