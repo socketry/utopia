@@ -25,13 +25,15 @@ namespace :static do
 			server.run
 		end
 		
-		output_path = SITE_ROOT + 'static'
+		output_path = ENV.fetch('OUTPUT_PATH') {SITE_ROOT + 'static'}
 		
 		# Delete any existing stuff:
 		FileUtils.rm_rf(output_path)
 		
 		# Copy all public assets:
-		FileUtils.cp_r(SITE_ROOT + 'public/.', output_path)
+		Dir.glob(SITE_ROOT + 'public/*').each do |path|
+			FileUtils.cp_r(path, output_path)
+		end
 		
 		# Generate HTML pages:
 		system("wget", "--mirror", "--recursive", "--continue", "--convert-links", "--adjust-extension", "--no-host-directories", "--directory-prefix", output_path.to_s, "http://localhost:#{SERVER_PORT}")
