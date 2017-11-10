@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<?r response.content_type = "text/html; charset=utf-8" ?>
 		<?r response.cache! ?>
 		
 		<?r if title = self[:title] ?>
@@ -11,6 +10,7 @@
 		<?r end ?>
 		
 		<base href="#{first.node.uri_path}"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
 		
 		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous" />
 		
