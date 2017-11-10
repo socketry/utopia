@@ -13,6 +13,8 @@ group :development do
 	
 	gem 'json'
 	gem 'msgpack'
+	
+	gem "rackula"
 end
 
 group :test do

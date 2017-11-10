@@ -14,4 +14,11 @@ task :documentation do
 	end
 end
 
+task :update_docs do
+	require 'rackula/command'
+	Dir.chdir("documentation") do
+		Rackula::Command::Top["generate", "--force", "--output-path", "../docs"].invoke
+	end
+end
+
 task :default => :test

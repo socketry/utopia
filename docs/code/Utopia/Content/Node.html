@@ -741,6 +741,8 @@
       <pre class="lines">
 
 
+109
+110
 111
 112
 113
@@ -749,12 +751,10 @@
 116
 117
 118
-119
-120
-121</pre>
+119</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/node.rb', line 111</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/node.rb', line 109</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='id identifier rubyid_document'>document</span><span class='comma'>,</span> <span class='id identifier rubyid_state'>state</span><span class='rparen'>)</span>
 	<span class='comment'># Load the template:
@@ -966,12 +966,12 @@
       <pre class="lines">
 
 
-106
-107
-108</pre>
+104
+105
+106</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/node.rb', line 106</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/node.rb', line 104</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_lookup_tag'>lookup_tag</span><span class='lparen'>(</span><span class='id identifier rubyid_tag'>tag</span><span class='rparen'>)</span>
 	<span class='kw'>return</span> <span class='ivar'>@controller</span><span class='period'>.</span><span class='id identifier rubyid_lookup_tag'>lookup_tag</span><span class='lparen'>(</span><span class='id identifier rubyid_tag'>tag</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='kw'>self</span><span class='rparen'>)</span>
@@ -1034,7 +1034,7 @@
       <pre class="code"><span class="info file"># File 'lib/utopia/content/node.rb', line 69</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_parent_path'>parent_path</span>
-	<span class='id identifier rubyid_uri_path'>uri_path</span><span class='period'>.</span><span class='id identifier rubyid_dirname'>dirname</span>
+	<span class='ivar'>@uri_path</span><span class='period'>.</span><span class='id identifier rubyid_dirname'>dirname</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -1056,12 +1056,12 @@
       <pre class="lines">
 
 
-123
-124
-125</pre>
+121
+122
+123</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/node.rb', line 123</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/node.rb', line 121</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_process!'>process!</span><span class='lparen'>(</span><span class='id identifier rubyid_request'>request</span><span class='comma'>,</span> <span class='id identifier rubyid_attributes'>attributes</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span>
 	<span class='const'><span class='object_link'><a href="Document.html" title="Utopia::Content::Document (class)">Document</a></span></span><span class='period'>.</span><span class='id identifier rubyid_render'><span class='object_link'><a href="Document.html#render-class_method" title="Utopia::Content::Document.render (method)">render</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_request'>request</span><span class='comma'>,</span> <span class='id identifier rubyid_attributes'>attributes</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span>
@@ -1096,9 +1096,9 @@
       <pre class="code"><span class="info file"># File 'lib/utopia/content/node.rb', line 84</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_related_links'>related_links</span>
-	<span class='id identifier rubyid_name'>name</span> <span class='op'>=</span> <span class='ivar'>@uri_path</span><span class='period'>.</span><span class='id identifier rubyid_last'>last</span><span class='period'>.</span><span class='id identifier rubyid_split'>split</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>.</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_first'>first</span>
+	<span class='id identifier rubyid_name'>name</span> <span class='op'>=</span> <span class='ivar'>@uri_path</span><span class='period'>.</span><span class='id identifier rubyid_basename'>basename</span>
 	
-	<span class='kw'>return</span> <span class='const'><span class='object_link'><a href="Links.html" title="Utopia::Content::Links (class)">Links</a></span></span><span class='period'>.</span><span class='id identifier rubyid_index'><span class='object_link'><a href="Links.html#index-class_method" title="Utopia::Content::Links.index (method)">index</a></span></span><span class='lparen'>(</span><span class='ivar'>@controller</span><span class='period'>.</span><span class='id identifier rubyid_root'><span class='object_link'><a href="../../top-level-namespace.html" title="Top Level Namespace (root)">root</a></span></span><span class='comma'>,</span> <span class='id identifier rubyid_uri_path'>uri_path</span><span class='period'>.</span><span class='id identifier rubyid_dirname'>dirname</span><span class='comma'>,</span> <span class='symbol'>:name</span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='symbol'>:indices</span> <span class='op'>=&gt;</span> <span class='kw'>true</span><span class='rparen'>)</span>
+	<span class='kw'>return</span> <span class='const'><span class='object_link'><a href="Links.html" title="Utopia::Content::Links (class)">Links</a></span></span><span class='period'>.</span><span class='id identifier rubyid_index'><span class='object_link'><a href="Links.html#index-class_method" title="Utopia::Content::Links.index (method)">index</a></span></span><span class='lparen'>(</span><span class='ivar'>@controller</span><span class='period'>.</span><span class='id identifier rubyid_root'><span class='object_link'><a href="../../top-level-namespace.html" title="Top Level Namespace (root)">root</a></span></span><span class='comma'>,</span> <span class='ivar'>@uri_path</span><span class='period'>.</span><span class='id identifier rubyid_dirname'>dirname</span><span class='comma'>,</span> <span class='symbol'>:name</span> <span class='op'>=&gt;</span> <span class='ivar'>@uri_path</span><span class='period'>.</span><span class='id identifier rubyid_basename'>basename</span><span class='comma'>,</span> <span class='symbol'>:indices</span> <span class='op'>=&gt;</span> <span class='kw'>true</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -1120,12 +1120,12 @@
       <pre class="lines">
 
 
-100
-101
-102</pre>
+98
+99
+100</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/node.rb', line 100</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/node.rb', line 98</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_sibling_links'>sibling_links</span><span class='lparen'>(</span><span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
 	<span class='kw'>return</span> <span class='const'><span class='object_link'><a href="Links.html" title="Utopia::Content::Links (class)">Links</a></span></span><span class='period'>.</span><span class='id identifier rubyid_index'><span class='object_link'><a href="Links.html#index-class_method" title="Utopia::Content::Links.index (method)">index</a></span></span><span class='lparen'>(</span><span class='ivar'>@controller</span><span class='period'>.</span><span class='id identifier rubyid_root'><span class='object_link'><a href="../../top-level-namespace.html" title="Top Level Namespace (root)">root</a></span></span><span class='comma'>,</span> <span class='id identifier rubyid_siblings_path'>siblings_path</span><span class='comma'>,</span> <span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
@@ -1156,17 +1156,13 @@
 93
 94
 95
-96
-97
-98</pre>
+96</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/utopia/content/node.rb', line 90</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_siblings_path'>siblings_path</span>
-	<span class='id identifier rubyid_name'>name</span> <span class='op'>=</span> <span class='ivar'>@uri_path</span><span class='period'>.</span><span class='id identifier rubyid_last'>last</span><span class='period'>.</span><span class='id identifier rubyid_split'>split</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>.</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_first'>first</span>
-	
-	<span class='kw'>if</span> <span class='id identifier rubyid_name'>name</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="../Content.html#INDEX-constant" title="Utopia::Content::INDEX (constant)">INDEX</a></span></span>
+	<span class='kw'>if</span> <span class='ivar'>@uri_path</span><span class='period'>.</span><span class='id identifier rubyid_basename'>basename</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="../Content.html#INDEX-constant" title="Utopia::Content::INDEX (constant)">INDEX</a></span></span>
 		<span class='ivar'>@uri_path</span><span class='period'>.</span><span class='id identifier rubyid_dirname'>dirname</span><span class='lparen'>(</span><span class='int'>2</span><span class='rparen'>)</span>
 	<span class='kw'>else</span>
 		<span class='ivar'>@uri_path</span><span class='period'>.</span><span class='id identifier rubyid_dirname'>dirname</span>
@@ -1182,7 +1178,7 @@
 </div>
 
       <div id="footer">
-  Generated on Fri Jun 16 13:26:41 2017 by
+  Generated on Wed Nov  8 11:57:50 2017 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.9 (ruby-2.4.0).
 </div>

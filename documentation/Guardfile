@@ -6,16 +6,4 @@ group :development do
 		watch(%r{^config|lib|pages/.*})
 		notification :off
 	end
-	
-	# # Open the documentation website when the command is run, once puma has started:
-	# require 'launchy'
-	# $first_time = true
-	# 
-	# url_path = 'run/url.txt'
-	# watch(url_path) do
-	# 	if $first_time
-	# 		$first_time = false
-	# 		Launchy.open(File.read(url_path))
-	# 	end
-	# end
 end
