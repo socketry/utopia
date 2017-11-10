@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Editing Localization</title>
+		
+		<link rel="icon" type="image/png" href="../../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../../_components/jquery/jquery.min.js"></script>
+		
+		<style type="text/css">
+			.editor form {
+				position: absolute;
+				
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				
+				width: 100%;
+				height: 100%;
+			}
+			
+			.editor .header {
+				flex-grow: 0;
+				width: 100%;
+				
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				
+				box-shadow: 0px 1px 0.5rem rgba(0, 0, 0, 0.5);
+				z-index: 10;
+			}
+			
+			.editor .header * {
+				margin: 0.5rem;
+			}
+			
+			.editor textarea {
+				flex-grow: 1;
+				width: 100%;
+
+				resize: none;
+				outline: none;
+				
+				box-sizing: border-box;
+				margin: 0; padding: 0.5rem;
+				
+				border: none;
+				background: none;
+			}
+		</style>
+	</head>
+
+	<body class="editor">
+		
+	<form action="edit.html#" method="post">
+		<div class="header">
+			<div>Editing &quot;Localization&quot;</div>
+			<input type="submit"/>
+		</div>
+		
+		<textarea name="content"># Localization
+
+The localization middleware uses the `Accept-Language` header to guess the preferred locale out of the given options. If a request path maps to a resource, that resource is returned. Otherwise, a localized request is made.
+
+```ruby
+use Utopia::Localization,
+	:default_locale =&gt; 'en',
+	:locales =&gt; ['en', 'de', 'ja', 'zh']
+```
+
+Somewhere further down the chain, you can localize a resource:
+
+```ruby
+localization = Utopia::Localization[request]
+show_welcome(localization.current_locale)
+```
+</textarea>
+	</form>
+
+	</body>
+</html>

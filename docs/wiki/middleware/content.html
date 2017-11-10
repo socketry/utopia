@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Content - Utopia</title>
+		
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous"/>
+		
+		<link rel="icon" type="image/png" href="../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../_components/jquery/jquery.min.js"></script>
+		<script src="../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body class="">
+		<header>
+			<img src="../../_static/utopia.svg"/>
+		</header>
+
+		<div id="page">
+			
+	<nav>
+	 › <a href="../../wiki.html">Wiki</a> › <span>Middleware</span> › <a href="content.html">Content</a></nav>
+
+	
+	<h1 id="content">Content</h1>
+<p>A tag based content generation system which integrates nicely with HTML5. Supports structures which separate generic page templates from dynamically generated content in an easy and consistent way.</p>
+
+<pre><code class="language-ruby">use Utopia::Content,
+	cache_templates: (RACK_ENV == :production)
+</code></pre>
+
+<p>A basic template <code>create.xnode</code> looks something like:</p>
+
+<pre><code class="language-trenni">&lt;content:page&gt;
+	&lt;content:heading&gt;Create User&lt;/content:heading&gt;
+	&lt;form action=&quot;#&quot;&gt;
+		&lt;input name=&quot;name&quot; /&gt;
+		&lt;input type=&quot;submit&quot; /&gt;
+	&lt;/form&gt;
+&lt;/content:page&gt;
+</code></pre>
+
+<p>This template would typically be designed with supporting <code>_page.xnode</code> and <code>_heading.xnode</code> in the same directory or, more typically, somewhere further up the directory hierarchy.</p>
+
+	
+	<footer>
+		Last Modified: 2017-03-21 11:39:13 +1300 —
+		<a href="content/edit.html">Edit Page</a>
+	</footer>
+
+		</div>
+	</body>
+</html>

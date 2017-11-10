@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Localization - Utopia</title>
+		
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous"/>
+		
+		<link rel="icon" type="image/png" href="../../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../../_components/jquery/jquery.min.js"></script>
+		<script src="../../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body class="">
+		<header>
+			<img src="../../../_static/utopia.svg"/>
+		</header>
+
+		<div id="page">
+			
+	<nav>
+	 › <a href="../../../wiki.html">Wiki</a> › <span>Middleware</span> › <a href="../localization.html">Localization</a></nav>
+
+	
+	<h1 id="localization">Localization</h1>
+
+<p>The localization middleware uses the <code>Accept-Language</code> header to guess the preferred locale out of the given options. If a request path maps to a resource, that resource is returned. Otherwise, a localized request is made.</p>
+
+<pre><code class="language-ruby">use Utopia::Localization,
+	:default_locale =&gt; 'en',
+	:locales =&gt; ['en', 'de', 'ja', 'zh']
+</code></pre>
+
+<p>Somewhere further down the chain, you can localize a resource:</p>
+
+<pre><code class="language-ruby">localization = Utopia::Localization[request]
+show_welcome(localization.current_locale)
+</code></pre>
+
+	
+	<footer>
+		Last Modified: 2017-04-18 16:24:04 +1200 —
+		<a href="edit.html">Edit Page</a>
+	</footer>
+
+		</div>
+	</body>
+</html>

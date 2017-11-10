@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Wiki - Utopia</title>
+		
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous"/>
+		
+		<link rel="icon" type="image/png" href="_static/icon.png"/>
+		<link rel="stylesheet" href="_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="_components/jquery/jquery.min.js"></script>
+		<script src="_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body class="">
+		<header>
+			<img src="_static/utopia.svg"/>
+		</header>
+
+		<div id="page">
+			
+	<nav>
+	 › <a href="wiki.html">Wiki</a></nav>
+
+	
+	<h1 id="utopia-documentation-wiki">Utopia Documentation Wiki</h1>
+
+<p>This wiki includes documentation and examples showing how to use Utopia. You can also browse the <a href="code/index.html">code documentation</a> for more detail. Feel free to <a href="wiki/edit.html">edit</a> any part of this documentation and submit a PR.</p>
+
+<h2 id="introduction-guide">Introduction Guide</h2>
+
+<p>Reading these pages in order will give you an overview of the design of Utopia, how to set it up for local development and how to deploy it.</p>
+
+<ul>
+  <li><a href="wiki/development-environment-setup/index.html">Development Environment Setup</a></li>
+  <li><a href="wiki/server-setup/index.html">Server Setup</a></li>
+  <li><a href="wiki/your-first-page/index.html">Your First Page</a></li>
+  <li><a href="wiki/bower-integration/index.html">Installing JavaScript Libraries</a></li>
+  <li><a href="wiki/testing/index.html">Website Tests</a></li>
+  <li><a href="wiki/updating-utopia/index.html">Updating Your Site</a></li>
+</ul>
+
+<h2 id="middleware">Middleware</h2>
+
+<p>The following are Rack Middleware which provide the core of Utopia.</p>
+
+<ul>
+  <li><a href="wiki/middleware/static/index.html">Static</a> — Serve static files efficiently.</li>
+  <li><a href="wiki/middleware/redirection/index.html">Redirection</a> — Redirect URL patterns and status codes.</li>
+  <li><a href="wiki/middleware/localization/index.html">Localization</a> — Non-intrusive localization of resources.</li>
+  <li><a href="wiki/middleware/controller/index.html">Controller</a> — Flexible nested controllers with efficient behaviour.
+    <ul>
+      <li><a href="wiki/middleware/controller/actions/index.html">Controller Actions</a> — Invoke named actions.</li>
+      <li><a href="wiki/middleware/controller/rewrite/index.html">Controller Rewrite</a> — Pattern match requests.</li>
+    </ul>
+  </li>
+  <li><a href="wiki/middleware/content/index.html">Content</a> — XML-style template engine with dynamic markup.</li>
+  <li><a href="wiki/middleware/session/index.html">Session</a> — Session storage using encrypted client-side cookies.</li>
+</ul>
+
+<h2 id="examples">Examples</h2>
+
+<p>Here are some open-source sites built on Utopia.</p>
+
+<ul>
+  <li><a href="http://www.codeotaku.com">www.codeotaku.com</a> (<a href="https://github.com/ioquatix/www.codeotaku.com">source</a>) — Personal website, blog.</li>
+  <li>Financier (<a href="https://github.com/ioquatix/financier">source</a>) — Small business management platform, invoicing.</li>
+</ul>
+
+	
+	<footer>
+		Last Modified: 2017-04-18 16:24:04 +1200 —
+		<a href="wiki/edit.html">Edit Page</a>
+	</footer>
+
+		</div>
+	</body>
+</html>

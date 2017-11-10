@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Testing - Utopia</title>
+		
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous"/>
+		
+		<link rel="icon" type="image/png" href="../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../_components/jquery/jquery.min.js"></script>
+		<script src="../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body class="">
+		<header>
+			<img src="../../_static/utopia.svg"/>
+		</header>
+
+		<div id="page">
+			
+	<nav>
+	 › <a href="../../wiki.html">Wiki</a> › <a href="../testing.html">Testing</a></nav>
+
+	
+	<h1 id="testing">Testing</h1>
+
+<p>Utopia websites include a default set of tests, and associated <code>rake test</code> tasks. These specs can test against the actual running website. By default, <code>simplecov</code> is included for coverage testing.</p>
+
+<pre><code class="language-bash">$ rake coverage test
+
+my website
+	should have an accessible front page
+
+Finished in 0.44849 seconds (files took 0.15547 seconds to load)
+1 example, 0 failures
+
+Coverage report generated for RSpec. 5 / 5 LOC (100.0%) covered.
+</code></pre>
+
+	
+	<footer>
+		Last Modified: 2016-12-13 12:41:41 +1300 —
+		<a href="edit.html">Edit Page</a>
+	</footer>
+
+		</div>
+	</body>
+</html>

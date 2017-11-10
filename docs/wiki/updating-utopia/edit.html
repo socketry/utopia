@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Editing Updating Utopia</title>
+		
+		<link rel="icon" type="image/png" href="../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../_components/jquery/jquery.min.js"></script>
+		
+		<style type="text/css">
+			.editor form {
+				position: absolute;
+				
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				
+				width: 100%;
+				height: 100%;
+			}
+			
+			.editor .header {
+				flex-grow: 0;
+				width: 100%;
+				
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				
+				box-shadow: 0px 1px 0.5rem rgba(0, 0, 0, 0.5);
+				z-index: 10;
+			}
+			
+			.editor .header * {
+				margin: 0.5rem;
+			}
+			
+			.editor textarea {
+				flex-grow: 1;
+				width: 100%;
+
+				resize: none;
+				outline: none;
+				
+				box-sizing: border-box;
+				margin: 0; padding: 0.5rem;
+				
+				border: none;
+				background: none;
+			}
+		</style>
+	</head>
+
+	<body class="editor">
+		
+	<form action="edit.html#" method="post">
+		<div class="header">
+			<div>Editing &quot;Updating Utopia&quot;</div>
+			<input type="submit"/>
+		</div>
+		
+		<textarea name="content"># Updating Utopia
+
+Utopia provides a model for both local development (`utopia site create`) and deployment (`utopia server create`). In addition, Utopia provides a basic upgrade path for existing sites when things within the framework change. These are not always automatic, so below are some recipes for how to update your site.
+
+## Site Update
+
+Utopia as a framework introduces changes and versions change according to semantic versioning. 
+
+### Controller Update 1.9.x to 2.x
+
+The controller layer no longer automatically prepends the `Actions` layer. The following program does a best effort attempt to update existing controllers:
+
+```ruby
+#!/usr/bin/env ruby
+
+paths = Dir.glob(&quot;**/controller.rb&quot;)
+
+paths.each do |path|
+	lines = File.readlines(path)
+	
+	prepend_line_index = lines.first(5).find_index{|line| line =~ /prepend/}
+	
+	unless prepend_line_index
+		puts &quot;Updating #{path}..&quot;
+		File.open(path, &quot;w&quot;) do |file|
+			file.puts &quot;\nprepend Actions&quot;
+			file.write lines.join
+		end
+	else
+		prepend_line = lines[prepend_line_index]
+		
+		unless prepend_line =~ /Actions/
+			if lines.any?{|line| line =~ /on/}
+				lines[prepend_line_index] = &quot;#{prepend_line.chomp}, Actions\n&quot;
+				
+				puts &quot;Updating #{path}..&quot;
+				File.open(path, &quot;w&quot;) do |file|
+					file.write lines.join
+				end
+			end
+		end
+	end
+end
+```
+
+### View Update 1.9.x to 2.x
+
+Dynamic tags in 2.x require namespaces. This affects all `.xnode` files, in particular the following 3 cases:
+
+1. Rewrite `&lt;(/?)(NAME)(\W)` to `&lt;$1content:$2$3` where NAME is a tag which would expand using a `_NAME.xnode` file.
+2. Rewrite `&lt;content/&gt;` to `&lt;utopia:content/&gt;`. This affects `&lt;node&gt;`, `&lt;deferred&gt;`, `&lt;environment&gt;` tags.
+3. Rewrite `partial 'NAME'` to be `partial 'content:NAME'`.
+
+## Server Update
+
+The utopia server git hooks are updated occasionally to improve the deployment process or to handle changes in the underlying process.
+
+You can run the update process on the server to bring the git hooks up to the latest version.
+
+```bash
+$ cd /srv/http/website
+$ utopia server update
+```
+</textarea>
+	</form>
+
+	</body>
+</html>

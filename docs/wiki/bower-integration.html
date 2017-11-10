@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Bower Integration - Utopia</title>
+		
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous"/>
+		
+		<link rel="icon" type="image/png" href="../_static/icon.png"/>
+		<link rel="stylesheet" href="../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../_components/jquery/jquery.min.js"></script>
+		<script src="../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body class="">
+		<header>
+			<img src="../_static/utopia.svg"/>
+		</header>
+
+		<div id="page">
+			
+	<nav>
+	 › <a href="../wiki.html">Wiki</a> › <a href="bower-integration.html">Bower Integration</a></nav>
+
+	
+	<h1 id="bower-integration">Bower Integration</h1>
+
+<p>Utopia integrates with Bower and provides a rake task to improve deployment of <code>dist</code> code.</p>
+
+<p>By default, utopia includes a <code>.bowerrc</code> file which installs modules into <code>lib/components</code>. This code can then be copied into <code>public/_components</code> using <code>rake bower:update</code>.</p>
+
+<h2 id="installing-jquery">Installing jQuery</h2>
+
+<p>Firstly install jquery using bower:</p>
+
+<pre><code>$ bower install jquery
+</code></pre>
+
+<p>Copy the distribution scripts to <code>public/_components</code>:</p>
+
+<pre><code>$ rake bower:update
+</code></pre>
+
+<p>Then add the appropriate <code>&lt;script&gt;</code> tags to <code>pages/_page.xnode</code>:</p>
+
+<pre><code>&lt;script src=&quot;/_components/jquery/jquery.min.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+</code></pre>
+
+<h2 id="what-does-rake-bowerupdate-do">What does <code>rake bower:update</code> do?</h2>
+
+<p>This task copies only the contents of the dist directory. This ensures that you only get files intended for distribution. If the bower package doesn’t have a <code>dist</code> directory, the entire contents is copied.</p>
+
+<fragment:listing rel="site" src="tasks/bower.rake" brush="ruby"/>
+
+
+	
+	<footer>
+		Last Modified: 2017-03-07 10:48:08 +1300 —
+		<a href="bower-integration/edit.html">Edit Page</a>
+	</footer>
+
+		</div>
+	</body>
+</html>

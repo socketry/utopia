@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Updating Utopia - Utopia</title>
+		
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous"/>
+		
+		<link rel="icon" type="image/png" href="../_static/icon.png"/>
+		<link rel="stylesheet" href="../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../_components/jquery/jquery.min.js"></script>
+		<script src="../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body class="">
+		<header>
+			<img src="../_static/utopia.svg"/>
+		</header>
+
+		<div id="page">
+			
+	<nav>
+	 › <a href="../wiki.html">Wiki</a> › <a href="updating-utopia.html">Updating Utopia</a></nav>
+
+	
+	<h1 id="updating-utopia">Updating Utopia</h1>
+
+<p>Utopia provides a model for both local development (<code>utopia site create</code>) and deployment (<code>utopia server create</code>). In addition, Utopia provides a basic upgrade path for existing sites when things within the framework change. These are not always automatic, so below are some recipes for how to update your site.</p>
+
+<h2 id="site-update">Site Update</h2>
+
+<p>Utopia as a framework introduces changes and versions change according to semantic versioning.</p>
+
+<h3 id="controller-update-19x-to-2x">Controller Update 1.9.x to 2.x</h3>
+
+<p>The controller layer no longer automatically prepends the <code>Actions</code> layer. The following program does a best effort attempt to update existing controllers:</p>
+
+<pre><code class="language-ruby">#!/usr/bin/env ruby
+
+paths = Dir.glob("**/controller.rb")
+
+paths.each do |path|
+	lines = File.readlines(path)
+	
+	prepend_line_index = lines.first(5).find_index{|line| line =~ /prepend/}
+	
+	unless prepend_line_index
+		puts "Updating #{path}.."
+		File.open(path, "w") do |file|
+			file.puts "\nprepend Actions"
+			file.write lines.join
+		end
+	else
+		prepend_line = lines[prepend_line_index]
+		
+		unless prepend_line =~ /Actions/
+			if lines.any?{|line| line =~ /on/}
+				lines[prepend_line_index] = "#{prepend_line.chomp}, Actions\n"
+				
+				puts "Updating #{path}.."
+				File.open(path, "w") do |file|
+					file.write lines.join
+				end
+			end
+		end
+	end
+end
+</code></pre>
+
+<h3 id="view-update-19x-to-2x">View Update 1.9.x to 2.x</h3>
+
+<p>Dynamic tags in 2.x require namespaces. This affects all <code>.xnode</code> files, in particular the following 3 cases:</p>
+
+<ol>
+  <li>Rewrite <code>&lt;(/?)(NAME)(\W)</code> to <code>&lt;$1content:$2$3</code> where NAME is a tag which would expand using a <code>_NAME.xnode</code> file.</li>
+  <li>Rewrite <code>&lt;content/&gt;</code> to <code>&lt;utopia:content/&gt;</code>. This affects <code>&lt;node&gt;</code>, <code>&lt;deferred&gt;</code>, <code>&lt;environment&gt;</code> tags.</li>
+  <li>Rewrite <code>partial 'NAME'</code> to be <code>partial 'content:NAME'</code>.</li>
+</ol>
+
+<h2 id="server-update">Server Update</h2>
+
+<p>The utopia server git hooks are updated occasionally to improve the deployment process or to handle changes in the underlying process.</p>
+
+<p>You can run the update process on the server to bring the git hooks up to the latest version.</p>
+
+<pre><code class="language-bash">$ cd /srv/http/website
+$ utopia server update
+</code></pre>
+
+	
+	<footer>
+		Last Modified: 2017-06-16 13:26:48 +1200 —
+		<a href="updating-utopia/edit.html">Edit Page</a>
+	</footer>
+
+		</div>
+	</body>
+</html>

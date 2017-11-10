@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Rewrite - Utopia</title>
+		
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous"/>
+		
+		<link rel="icon" type="image/png" href="../../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../../_components/jquery/jquery.min.js"></script>
+		<script src="../../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body class="">
+		<header>
+			<img src="../../../_static/utopia.svg"/>
+		</header>
+
+		<div id="page">
+			
+	<nav>
+	 › <a href="../../../wiki.html">Wiki</a> › <span>Middleware</span> › <a href="../controller.html">Controller</a> › <a href="rewrite.html">Rewrite</a></nav>
+
+	
+	<h1 id="controllerrewrite">Controller::Rewrite</h1>
+
+<p>The <code class="language-ruby">Controller::Rewrite</code> layer can match and rewrite requests before they processed. This allows you to handle URLs like <code>/post/15/view</code> or <code>/blog/123-pictures-of-my-cat</code> easily. The basic rewrite operation is to extract some part of the path and optionally executes a block. That means that the path is modified before being passed on to the next layer in the controller, and controller instance variables may be set.</p>
+
+<h2 id="regular-expressions">Regular Expressions</h2>
+
+<p>In your <code>controller.rb</code>:</p>
+
+<pre><code class="language-ruby">prepend Rewrite, Actions
+
+rewrite.extract_prefix permalink: /(?&lt;id&gt;\d+)-(?&lt;title&gt;.*)/ do |request, path, match|
+	# The rewrite matched, but there was no valid post, so we fail:
+	fail! unless @post = Post.find(@permalink[:id])
+	
+	# If the path matched, but there was no suffix, we make it default to the post action:
+	if match.post_match.empty?
+		match.post_match.components &lt;&lt; &quot;post&quot;
+	end
+end
+
+on 'post' do
+	# You can do further processing here.
+	fail! unless @post.published?
+	
+	@comments = @post.comments.first(5)
+end
+
+on 'edit' do
+	# You can do further processing here.
+	fail! unless @current_user&amp;.editor?
+end
+</code></pre>
+
+<p>In your <code>post.xnode</code>, as an example:</p>
+
+<pre><code class="language-trenni">&lt;content:page&gt;
+	&lt;content:heading&gt;Post #{attributes[:permalink][:id]} about #{attributes[:permalink][:title]}&lt;/content:heading&gt;
+	
+	&lt;p&gt;#{attributes[:post].content}&lt;/p&gt;
+&lt;/content:page&gt;
+</code></pre>
+
+<p>Keep in mind, that URLs like <code>/123-pictures-of-my-cat/edit</code> will work as expected, and hit the <code>edit</code> action of the controller.</p>
+
+<h2 id="restful-resources">Restful Resources</h2>
+
+<p>Similar to the above, if we were solely interested in IDs, we could do the following:</p>
+
+<pre><code class="language-ruby">prepend Rewrite, Actions
+
+rewrite.extract_prefix post_id: Integer do |request, path, match|
+	# The rewrite matched, but there was no valid post, so we fail:
+	fail! unless @post = Post.find(@post_id)
+	
+	# If the path matched, but there was no suffix, we make it default to the post action:
+	if match.post_match.empty?
+		match.post_match.components &lt;&lt; &quot;post&quot;
+	end
+end
+</code></pre>
+
+<p>This will only match complete integers. Assuming this code is in <code>/blog/controller.rb</code>, it would match something like <code>/blog/123/view</code> and assign <code class="language-ruby">Integer("123")</code> to <code class="language-ruby">@post_id</code>.</p>
+
+<h3 id="matching-other-things">Matching.. other things</h3>
+
+<p>It’s possible to match using <code class="language-ruby">Integer</code>, <code class="language-ruby">Float</code>, <code class="language-ruby">String</code>, and you can provide your own class which will be instantiated. If it doesn’t match, raise an exception and the rewrite rule will fail.</p>
+
+	
+	<footer>
+		Last Modified: 2017-04-18 16:24:04 +1200 —
+		<a href="rewrite/edit.html">Edit Page</a>
+	</footer>
+
+		</div>
+	</body>
+</html>

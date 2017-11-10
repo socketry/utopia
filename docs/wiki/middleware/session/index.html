@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Session - Utopia</title>
+		
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous"/>
+		
+		<link rel="icon" type="image/png" href="../../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../../_components/jquery/jquery.min.js"></script>
+		<script src="../../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body class="">
+		<header>
+			<img src="../../../_static/utopia.svg"/>
+		</header>
+
+		<div id="page">
+			
+	<nav>
+	 › <a href="../../../wiki.html">Wiki</a> › <span>Middleware</span> › <a href="../session.html">Session</a></nav>
+
+	
+	<h1 id="session">Session</h1>
+
+<p>The session management uses symmetric private key encryption to store data on the client and avoid tampering.</p>
+
+<pre><code class="language-ruby">use Utopia::Session,
+	:expires_after =&gt; 3600,
+	:secret =&gt; '40 or more random characters for your secret key'
+</code></pre>
+
+<p>All session data is stored on the client, but it’s encrypted with a salt and the secret key. It would be hard for the client to decrypt the data without the secret.</p>
+
+<h2 id="using-environmentyaml">Using <code>environment.yaml</code></h2>
+
+<p>The session secret should not be shared or ideally, not stored in source code. This can be easily achieved using an environment variable, stored in <code>environment.yaml</code> on the production server:</p>
+
+<pre><code class="language-ruby">use Utopia::Session,
+	:expires_after =&gt; 3600,
+	:secret =&gt; ENV['UTOPIA_SESSION_SECRET']
+</code></pre>
+
+<p>In development, the secret would be reset every time the server is restarted. To set a fixed secret on production, run the following:</p>
+
+<pre><code class="language-bash">$ utopia server environment UTOPIA_SESSION_SECRET=$(head /dev/urandom | shasum | base64 | head -c 40)
+</code></pre>
+
+<p>This is done by default when using <code>utopia server create</code> and <code>utopia server update</code>.</p>
+
+	
+	<footer>
+		Last Modified: 2017-02-13 16:30:17 +1300 —
+		<a href="edit.html">Edit Page</a>
+	</footer>
+
+		</div>
+	</body>
+</html>

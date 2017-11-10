@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Static - Utopia</title>
+		
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous"/>
+		
+		<link rel="icon" type="image/png" href="../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../_components/jquery/jquery.min.js"></script>
+		<script src="../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body class="">
+		<header>
+			<img src="../../_static/utopia.svg"/>
+		</header>
+
+		<div id="page">
+			
+	<nav>
+	 › <a href="../../wiki.html">Wiki</a> › <span>Middleware</span> › <a href="static.html">Static</a></nav>
+
+	
+	<h1 id="static">Static</h1>
+
+<p>This middleware serves static files using the <code>mime-types</code> library. By default, it works with <code>Rack::Sendfile</code> and supports <code>ETag</code> based caching. Normally, you’d prefer to put static files into <code>public/_static</code> but it’s also acceptable to put static content into <code>pages/</code> if it makes sense.</p>
+
+<pre><code class="language-ruby">use Utopia::Static,
+	# The root path to serve files from:
+	root: "path/to/root",
+	# The mime-types to recognize/serve:
+	types: [:default, :xiph],
+	# Cache-Control header for files:
+	cache_control: 'public, max-age=7200'
+</code></pre>
+
+	
+	<footer>
+		Last Modified: 2016-12-13 12:36:48 +1300 —
+		<a href="static/edit.html">Edit Page</a>
+	</footer>
+
+		</div>
+	</body>
+</html>
