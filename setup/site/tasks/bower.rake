@@ -3,15 +3,12 @@ namespace :bower do
 	desc 'Load the .bowerrc file and setup the environment for other tasks.'
 	task :bowerrc do
 		require 'json'
-		require 'pathname'
 		
-		root = Pathname.new(__dir__).dirname
-		
-		bowerrc_path = root + ".bowerrc"
+		bowerrc_path = SITE_ROOT + ".bowerrc"
 		bowerrc = JSON.load(File.read(bowerrc_path))
 		
-		@bower_package_root = root + bowerrc['directory']
-		@bower_install_root = root + bowerrc['public']
+		@bower_package_root = SITE_ROOT + bowerrc['directory']
+		@bower_install_root = SITE_ROOT + bowerrc['public']
 		@bower_install_method = (bowerrc['install'] || :copy).to_sym
 	end
 	

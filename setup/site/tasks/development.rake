@@ -27,7 +27,7 @@ task :console => :environment do
 	include Rack::Test::Methods
 	
 	def app
-		@app ||= Rack::Builder.parse_file(File.expand_path("../config.ru", __dir__)).first
+		@app ||= Rack::Builder.parse_file(SITE_ROOT + 'config.ru').first
 	end
 	
 	Pry.start

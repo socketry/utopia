@@ -40,7 +40,7 @@ body > header {
 	
 	background-color: white;
 	
-	background-image: url(/_static/utopia-background.svg);
+	background-image: url(utopia-background.svg);
 	
 	box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
