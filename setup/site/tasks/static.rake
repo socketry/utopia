@@ -1,13 +1,13 @@
 
 namespace :static do
-	task :environment => :environment do
-		RACK_ENV ||= 'static'
-		DATABASE_ENV ||= 'production'
+	task :static_environment do
+		RACK_ENV ||= :static
+		DATABASE_ENV ||= :production
 		SERVER_PORT ||= 9291
 	end
 
 	desc "Generate a static copy of the site."
-	task :generate => :environment do
+	task :generate => [:static_environment, :environment] do
 		require 'falcon/server'
 		require 'async/io'
 		require 'async/container'
