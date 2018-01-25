@@ -18,7 +18,7 @@ Trenni processes the view content by evaluation `#{expressions}` and `<?r statem
 
 ## Phase 2: Markup
 
-Once the template is evaluated to text, it is parsed again into an event stream which is used to generate the final output. The event stream contains things like "open tag", "attribute", "close tag", and so on, and these are fed into the `Utopia::Content` middleware which generates the actual content. Tags without namespaces are output verbatim, while tags with namespaces invoke the tag lookup machinery. This uses the tag name to invoke further behaviour, e.g. inserting more content. The most common example of this is using a `<content:page>` tag.
+Once the template is evaluated to text, it is parsed again into an event stream which is used to generate the final output. The event stream contains things like "open tag", "attribute", "close tag", and so on, and these are fed into the `Utopia::Content` middleware which generates the actual content. Tags without namespaces are output verbatim, while tags with namespaces invoke the tag lookup machinery. This uses the tag name to invoke further behaviour, e.g. inserting more content. Here is a simple example of a basic page:
 
 ```xml
 <content:page>
@@ -34,4 +34,4 @@ In order to render this, you will need two additional files, `_page.xnode` and `
 <h1><utopia:content/></h1>
 ```
 
-When the parser encounters `<content:heading>...` in the main page, it would evaluate the above template. `<utopia:content/>` is a special tag that evaluates to the content that the invoking take provided, so in this case `"Welcome to my page"`.  Thus, the final output is `<h1>Welcome to my page</h1>`.
+When the parser encounters `<content:heading>...` in the main page, it would evaluate the above template. `<utopia:content/>` is a special tag that evaluates to the content that the parent tag provided, so in this case: `"Welcome to my page"`.  Thus, the final output is `<h1>Welcome to my page</h1>`.

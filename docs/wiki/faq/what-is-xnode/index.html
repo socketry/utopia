@@ -51,7 +51,7 @@
 
 <h2 id="phase-2-markup">Phase 2: Markup</h2>
 
-<p>Once the template is evaluated to text, it is parsed again into an event stream which is used to generate the final output. The event stream contains things like “open tag”, “attribute”, “close tag”, and so on, and these are fed into the <code>Utopia::Content</code> middleware which generates the actual content. Tags without namespaces are output verbatim, while tags with namespaces invoke the tag lookup machinery. This uses the tag name to invoke further behaviour, e.g. inserting more content. The most common example of this is using a <code>&lt;content:page&gt;</code> tag.</p>
+<p>Once the template is evaluated to text, it is parsed again into an event stream which is used to generate the final output. The event stream contains things like “open tag”, “attribute”, “close tag”, and so on, and these are fed into the <code>Utopia::Content</code> middleware which generates the actual content. Tags without namespaces are output verbatim, while tags with namespaces invoke the tag lookup machinery. This uses the tag name to invoke further behaviour, e.g. inserting more content. Here is a simple example of a basic page:</p>
 
 <pre><code class="language-xml">&lt;content:page&gt;
 	&lt;content:heading&gt;Welcome to my page&lt;/content:heading&gt;
@@ -65,11 +65,11 @@
 <pre><code class="language-xml">&lt;h1&gt;&lt;utopia:content/&gt;&lt;/h1&gt;
 </code></pre>
 
-<p>When the parser encounters <code>&lt;content:heading&gt;...</code> in the main page, it would evaluate the above template. <code>&lt;utopia:content/&gt;</code> is a special tag that evaluates to the content that the invoking take provided, so in this case <code>"Welcome to my page"</code>.  Thus, the final output is <code>&lt;h1&gt;Welcome to my page&lt;/h1&gt;</code>.</p>
+<p>When the parser encounters <code>&lt;content:heading&gt;...</code> in the main page, it would evaluate the above template. <code>&lt;utopia:content/&gt;</code> is a special tag that evaluates to the content that the parent tag provided, so in this case: <code>"Welcome to my page"</code>.  Thus, the final output is <code>&lt;h1&gt;Welcome to my page&lt;/h1&gt;</code>.</p>
 
 	
 	<footer>
-		Last Modified: 2018-01-25 14:17:18 +1300 —
+		Last Modified: 2018-01-25 14:44:10 +1300 —
 	</footer>
 
 		</div>
