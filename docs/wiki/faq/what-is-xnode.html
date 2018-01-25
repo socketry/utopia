@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>What Is Xnode - Utopia</title>
+		
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous"/>
+		
+		<link rel="icon" type="image/png" href="../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../_components/jquery/jquery.min.js"></script>
+		<script src="../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body class="">
+		<header>
+			<img src="../../_static/utopia.svg"/>
+		</header>
+
+		<div id="page">
+			
+	<nav>
+	 › <a href="../../wiki.html">Wiki</a> › <span>FAQ</span> › <a href="what-is-xnode.html">What Is Xnode</a></nav>
+
+	
+	<h1 id="what-is-xnode">What Is <code>.xnode</code>?</h1>
+
+<p>Xnodes are the files on disk which are used as part of Utopia’s content/view layer. Xnode templates are designed to maximise the ratio of content to markup. They improve separation of concerns and semantic organisation because repeated markup can be reused easily.</p>
+
+<p>Here is a example of a blog post:</p>
+
+<pre><code class="language-xml">&lt;content:entry title=&quot;My day as a fish&quot;&gt;
+	&lt;p&gt;It was not very exciting&lt;/p&gt;
+&lt;/content:entry&gt;
+</code></pre>
+
+<p>The <code>Utopia::Content</code> middleware is built on top of the <a href="https://github.com/ioquatix/trenni">Trenni</a> template language which uses two-phase evaluation.</p>
+
+<h2 id="phase-1-evaluation">Phase 1: Evaluation</h2>
+
+<p>Trenni processes the view content by evaluation <code>#{expressions}</code> and <code>&lt;?r statements ?&gt;</code>. This generates an output buffer. The output buffer should contain valid markup (i.e. balanced tags, no invalid characters).</p>
+
+<h2 id="phase-2-markup">Phase 2: Markup</h2>
+
+<p>Once the template is evaluated to text, it is parsed again into an event stream which is used to generate the final output. The event stream contains things like “open tag”, “attribute”, “close tag”, and so on, and these are fed into the <code>Utopia::Content</code> middleware which generates the actual content. Tags without namespaces are output verbatim, while tags with namespaces invoke the tag lookup machinery. This uses the tag name to invoke further behaviour, e.g. inserting more content. The most common example of this is using a <code>&lt;content:page&gt;</code> tag.</p>
+
+<pre><code class="language-xml">&lt;content:page&gt;
+	&lt;content:heading&gt;Welcome to my page&lt;/content:heading&gt;
+
+	&lt;p&gt;This page is so awesome&lt;/p&gt;
+&lt;/content:page&gt;
+</code></pre>
+
+<p>In order to render this, you will need two additional files, <code>_page.xnode</code> and <code>_heading.xnode</code>. As a short example, <code>_heading.xnode</code> might look like this:</p>
+
+<pre><code class="language-xml">&lt;h1&gt;&lt;utopia:content/&gt;&lt;/h1&gt;
+</code></pre>
+
+<p>When the parser encounters <code>&lt;content:heading&gt;...</code> in the main page, it would evaluate the above template. <code>&lt;utopia:content/&gt;</code> is a special tag that evaluates to the content that the invoking take provided, so in this case <code>"Welcome to my page"</code>.  Thus, the final output is <code>&lt;h1&gt;Welcome to my page&lt;/h1&gt;</code>.</p>
+
+	
+	<footer>
+		Last Modified: 2018-01-25 14:17:18 +1300 —
+	</footer>
+
+		</div>
+	</body>
+</html>
