@@ -103,7 +103,7 @@ module Utopia
 				# This is for compatibility with the existing API which passes in a string:
 				buffer = Trenni::Buffer(buffer)
 				
-				self.new(buffer, delegate).parse!
+				self.new(buffer, delegate, entities).parse!
 			end
 			
 			def initialize(buffer, delegate, entities = Trenni::Entities::HTML5)
