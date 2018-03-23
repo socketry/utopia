@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'yaml'
+
 module Utopia
 	# Used for setting up a Utopia web application, typically via `config/environment.rb`
 	class Bootstrap
@@ -25,48 +27,60 @@ module Utopia
 			@config_root = config_root
 			
 			@external_encoding = external_encoding
+			
+			@environment = nil
+		end
+		
+		attr :config_root
+		attr :external_encoding
+		attr :environment
+		
+		def site_root
+			File.dirname(@config_root)
 		end
 		
 		def setup
-			setup_encoding
+			set_external_encoding
 			
-			setup_environment
+			load_environment('environment')
 			
-			setup_load_path
+			add_load_path('lib')
 			
 			require_relative '../utopia'
 		end
 		
-		def environment_path
-			File.expand_path('environment.yaml', @config_root)
+		def environment_path(name)
+			File.expand_path("#{name}.yaml", @config_root)
 		end
 		
 		# If you don't specify these, it's possible to have issues when encodings mismatch on the server.
-		def setup_encoding
+		def set_external_encoding(encoding = Encoding::UTF_8)
 			# TODO: Deprecate and remove this setup - it should be the responsibility of the server to set this correctly.
-			if @external_encoding and Encoding.default_external != @external_encoding
-				warn "Updating Encoding.default_external from #{Encoding.default_external} to #{@external_encoding}" if $VERBOSE
-				Encoding.default_external = @external_encoding
+			if Encoding.default_external != encoding
+				warn "Updating Encoding.default_external from #{Encoding.default_external} to #{encoding}" if $VERBOSE
+				Encoding.default_external = encoding
 			end
 		end
 		
-		def setup_environment
-			if File.exist? environment_path
-				require 'yaml'
-				
+		# Load the named configuration file from the `config_root` directory.
+		def load_environment(name)
+			path = environment_path(name)
+			
+			if File.exist?(path)
 				# Load the YAML environment file:
-				environment = YAML.load_file(environment_path)
+				@environment = YAML.load_file(environment_path)
 				
 				# We update ENV but only when it's not already set to something:
-				ENV.update(environment) do |name, old_value, new_value|
+				ENV.update(@environment) do |name, old_value, new_value|
 					old_value || new_value
 				end
 			end
 		end
 		
-		def setup_load_path
+		# Add the given path to $LOAD_PATH. If it's relative, make it absolute relative to `site_path`.
+		def add_load_path(path)
 			# Allow loading library code from lib directory:
-			$LOAD_PATH << File.expand_path('../lib', @config_root)
+			$LOAD_PATH << File.expand_path(path, site_root)
 		end
 	end
 	
