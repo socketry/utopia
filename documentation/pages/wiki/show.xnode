@@ -6,7 +6,7 @@
 	<footer>
 		Last Modified: #{File.mtime(self[:page_file]) rescue "N/A"} &mdash;
 		<?r if RACK_ENV != :static ?>
-		<a href="edit">Edit Page</a> #{RACK_ENV.inspect}
+		<a href="edit">Edit Page</a>
 		<?r end ?>
 	</footer>
 </content:page>
