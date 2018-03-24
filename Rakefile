@@ -8,7 +8,7 @@ namespace :documentation do
 		sh('yard', '-o', "documentation/public/code")
 	end
 
-	task :server do
+	task :server => :yard do
 		Bundler.with_clean_env do
 			Dir.chdir('documentation') do
 				sh('bundle', 'install', '--quiet')
