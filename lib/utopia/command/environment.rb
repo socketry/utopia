@@ -18,7 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'setup'
+require 'securerandom'
+require 'yaml/store'
 
 module Utopia
 	module Command
@@ -27,13 +28,10 @@ module Utopia
 			self.description = "Update environment variables in config/environment.yaml"
 			
 			options do
-				option '-e/--environment-name', "The environment to modify", default: 'environment'
+				option '-e/--environment-name <name>', "The environment file to modify.", default: 'environment'
 			end
 			
 			many :variables, "A list of environment KEY=VALUE pairs to set."
-			
-			# The root directory of the template server deployment:
-			ROOT = File.join(BASE, 'server')
 			
 			# Setup `config/environment.yaml` according to specified options.
 			def update_environment(root, name = @options[:environment_name])
@@ -48,8 +46,8 @@ module Utopia
 			end
 			
 			# Set some useful defaults for the environment.
-			def update_default_environment
-				environment(*args) do |store|
+			def update_default_environment(*args)
+				update_environment(*args) do |store|
 					store['RACK_ENV'] ||= 'production'
 					store['UTOPIA_SESSION_SECRET'] ||= SecureRandom.hex(40)
 					
@@ -58,11 +56,9 @@ module Utopia
 			end
 			
 			def invoke(parent)
-				return if variables.empty?
-				
 				destination_root = parent.root
 				
-				update(destination_root) do |store|
+				update_environment(destination_root) do |store|
 					variables.each do |variable|
 						key, value = variable.split('=', 2)
 						
@@ -73,6 +69,12 @@ module Utopia
 							puts "ENV[#{key.inspect}] will be unset unless otherwise specified."
 							store.delete(key)
 						end
+					end
+					
+					store.roots.each do |key|
+						value = store[key]
+						
+						puts "#{Rainbow(key).blue}: #{Rainbow(value.inspect).green}"
 					end
 				end
 			end

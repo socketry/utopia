@@ -56,9 +56,7 @@ module Utopia
 				elsif @options[:help] or @command.nil?
 					print_usage(program_name)
 				else
-					track_time do
-						@command.invoke(self)
-					end
+					@command.invoke(self)
 				end
 			end
 		end

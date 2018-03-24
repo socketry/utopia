@@ -18,29 +18,46 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'setup'
+require 'fileutils'
+require 'find'
+
+require 'samovar'
 
 module Utopia
 	module Command
+		# This path must point to utopia/setup in the gem source.
+		SETUP_ROOT = File.expand_path("../../../setup", __dir__)
+		
 		# Local site setup commands.
 		class Site < Samovar::Command
+			# Configuration files which should be installed/updated:
+			CONFIGURATION_FILES = ['.bowerrc', '.gitignore', 'config.ru', 'config/environment.rb', 'Gemfile', 'Guardfile', 'Rakefile', 'tasks/bower.rake', 'tasks/deploy.rake', 'tasks/development.rake', 'tasks/environment.rake', 'tasks/log.rake']
+			
+			# Directories that should exist:
+			DIRECTORIES = ["config", "lib", "pages", "public", "tasks"]
+			
+			# Directories that should be removed during upgrade process:
+			OLD_PATHS = ["access_log", "cache", "tmp", 'tasks/test.rake', 'tasks/utopia.rake']
+			
+			# The root directory of the template site:
+			ROOT = File.join(SETUP_ROOT, 'site')
+			
 			# Create a local site.
 			class Create < Samovar::Command
 				self.description = "Create a new local Utopia website using the default template."
-				# self.example = "utopia --in www.example.com site create"
 				
 				def invoke(parent)
 					destination_root = parent.root
 					
 					$stderr.puts "Setting up initial site in #{destination_root} for Utopia v#{Utopia::VERSION}..."
 					
-					Setup::Site::DIRECTORIES.each do |directory|
+					DIRECTORIES.each do |directory|
 						FileUtils.mkdir_p(File.join(destination_root, directory))
 					end
 					
-					Find.find(Setup::Site::ROOT) do |source_path|
+					Find.find(ROOT) do |source_path|
 						# What is this doing?
-						destination_path = File.join(destination_root, source_path[Setup::Site::ROOT.size..-1])
+						destination_path = File.join(destination_root, source_path[ROOT.size..-1])
 						
 						if File.directory?(source_path)
 							FileUtils.mkdir_p(destination_path)
@@ -51,7 +68,7 @@ module Utopia
 						end
 					end
 					
-					Setup::Site::CONFIGURATION_FILES.each do |configuration_file|
+					CONFIGURATION_FILES.each do |configuration_file|
 						destination_path = File.join(destination_root, configuration_file)
 						
 						buffer = File.read(destination_path).gsub('$UTOPIA_VERSION', Utopia::VERSION)
@@ -128,17 +145,17 @@ module Utopia
 						system('git', 'checkout', '-b', branch_name) or fail "could not change branch"
 					end
 					
-					Setup::Site::DIRECTORIES.each do |directory|
+					DIRECTORIES.each do |directory|
 						FileUtils.mkdir_p(File.join(destination_root, directory))
 					end
 					
-					Setup::Site::OLD_PATHS.each do |path|
+					OLD_PATHS.each do |path|
 						path = File.join(destination_root, path)
 						$stderr.puts "\tRemoving #{path}..."
 						FileUtils.rm_rf(path)
 					end
 					
-					Setup::Site::CONFIGURATION_FILES.each do |configuration_file|
+					CONFIGURATION_FILES.each do |configuration_file|
 						source_path = File.join(Setup::Site::ROOT, configuration_file)
 						destination_path = File.join(destination_root, configuration_file)
 						

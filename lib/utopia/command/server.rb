@@ -18,7 +18,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'setup'
+require_relative 'site'
+
+require 'fileutils'
+
+require 'samovar'
 
 module Utopia
 	module Command
@@ -46,6 +50,11 @@ module Utopia
 			class Update < Samovar::Command
 				self.description = "Update the git hooks in an existing server repository."
 				
+				def template_root
+					# The root directory of the template server deployment:
+					File.join(SETUP_ROOT, 'server')
+				end
+				
 				def invoke(parent)
 					destination_root = parent.root
 					
@@ -64,11 +73,11 @@ module Utopia
 						# chmod g+s `find . -type d`                # New files get group id of directory
 					end
 					
-					environment = Environment.new
+					environment = Environment[]
 					environment.update_default_environment(destination_root)
 					
 					# Copy git hooks:
-					system("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git')) or fail "could not copy git hooks"
+					system("cp", "-r", File.join(template_root, 'git', 'hooks'), File.join(destination_root, '.git')) or fail "could not copy git hooks"
 					# finally set everything in the .git directory to be group writable
 					# This failed for me and I had to do sudo chown http:http .git -R first.
 					system("chmod", "-Rf", "g+w", File.join(destination_root, '.git')) or fail "could not update permissions of .git directory"
