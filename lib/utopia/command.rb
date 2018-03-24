@@ -22,6 +22,7 @@ require_relative 'version'
 
 require_relative 'command/site'
 require_relative 'command/server'
+require_relative 'command/environment'
 
 module Utopia
 	module Command
@@ -41,7 +42,8 @@ module Utopia
 			
 			nested '<command>',
 				'site' => Site,
-				'server' => Server
+				'server' => Server,
+				'environment' => Environment
 			
 			# The root directory for the site.
 			def root

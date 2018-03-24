@@ -47,32 +47,6 @@ module Utopia
 				# The root directory of the template site:
 				ROOT = File.join(BASE, 'site')
 			end
-			
-			# Helpers for setting up the server deployment.
-			module Server
-				# The root directory of the template server deployment:
-				ROOT = File.join(BASE, 'server')
-				
-				# Setup `config/environment.yaml` according to specified options.
-				def self.environment(root)
-					environment_path = File.join(root, 'config/environment.yaml')
-					FileUtils.mkpath File.dirname(environment_path)
-					
-					store = YAML::Store.new(environment_path)
-					
-					store.transaction do
-						yield store
-					end
-				end
-				
-				# Set some useful defaults for the environment.
-				def self.update_default_environment(root)
-					environment(root) do |store|
-						store['RACK_ENV'] ||= 'production'
-						store['UTOPIA_SESSION_SECRET'] ||= SecureRandom.hex(40)
-					end
-				end
-			end
 		end
 	end
 end

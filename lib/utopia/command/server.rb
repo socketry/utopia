@@ -64,7 +64,8 @@ module Utopia
 						# chmod g+s `find . -type d`                # New files get group id of directory
 					end
 					
-					Setup::Server.update_default_environment(destination_root)
+					environment = Environment.new
+					environment.update_default_environment(destination_root)
 					
 					# Copy git hooks:
 					system("cp", "-r", File.join(Setup::Server::ROOT, 'git', 'hooks'), File.join(destination_root, '.git')) or fail "could not copy git hooks"
@@ -74,39 +75,11 @@ module Utopia
 				end
 			end
 			
-			# Set environment variables within the server deployment.
-			class Environment < Samovar::Command
-				self.description = "Update environment variables in config/environment.yaml"
-				
-				many :variables, "A list of environment KEY=VALUE pairs to set."
-				
-				def invoke(parent)
-					return if variables.empty?
-					
-					destination_root = parent.root
-					
-					Setup::Server.environment(destination_root) do |store|
-						variables.each do |variable|
-							key, value = variable.split('=', 2)
-							
-							if value
-								puts "ENV[#{key.inspect}] will default to #{value.inspect} unless otherwise specified."
-								store[key] = value
-							else
-								puts "ENV[#{key.inspect}] will be unset unless otherwise specified."
-								store.delete(key)
-							end
-						end
-					end
-				end
-			end
-			
 			self.description = "Manage server deployments."
 			
 			nested '<command>',
 				'create' => Create,
-				'update' => Update,
-				'environment' => Environment
+				'update' => Update
 			
 			def invoke(parent)
 				@command.invoke(parent)
