@@ -73,8 +73,13 @@ module Utopia
 						# chmod g+s `find . -type d`                # New files get group id of directory
 					end
 					
+					# Set some useful defaults for the environment.
 					environment = Environment[]
-					environment.update_default_environment(destination_root)
+					environment.update_environment(destination_root) do |store|
+						store['RACK_ENV'] ||= 'production'
+						store['DATABASE_ENV'] ||= 'production'
+						store['UTOPIA_SESSION_SECRET'] ||= SecureRandom.hex(40)
+					end
 					
 					# Copy git hooks:
 					system("cp", "-r", File.join(template_root, 'git', 'hooks'), File.join(destination_root, '.git')) or fail "could not copy git hooks"

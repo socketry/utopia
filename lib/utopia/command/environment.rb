@@ -45,16 +45,6 @@ module Utopia
 				end
 			end
 			
-			# Set some useful defaults for the environment.
-			def update_default_environment(*args)
-				update_environment(*args) do |store|
-					store['RACK_ENV'] ||= 'production'
-					store['UTOPIA_SESSION_SECRET'] ||= SecureRandom.hex(40)
-					
-					yield store if block_given?
-				end
-			end
-			
 			def invoke(parent)
 				destination_root = parent.root
 				
