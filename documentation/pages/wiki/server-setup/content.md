@@ -26,7 +26,7 @@ $ git push --set-upstream production master
 Utopia will load `config/environment.yaml` and update `ENV` before executing any code. You can set default environment values using the `utopia` command:
 
 ```bash
-$ sudo -u http utopia server environment RACK_ENV=production DATABASE_ENV=production_cluster_primary
+$ sudo -u http utopia environment RACK_ENV=production DATABASE_ENV=production_cluster_primary
 ENV["RACK_ENV"] will default to "production" unless otherwise specified.
 ENV["DATABASE_ENV"] will default to "production_cluster_primary" unless otherwise specified.
 ```
