@@ -6,7 +6,7 @@
 <title>
   Module: Utopia::Controller::Respond::Converter::ToJSON
   
-    &mdash; Documentation by YARD 0.9.9
+    &mdash; Documentation by YARD 0.9.12
   
 </title>
 
@@ -28,7 +28,7 @@
   </head>
   <body>
     <div class="nav_wrap">
-      <iframe id="nav" src="../../../../class_list.html%3F1.html"></iframe>
+      <iframe id="nav" src="../../../../class_list.html?1"></iframe>
       <div id="resizer"></div>
     </div>
 
@@ -105,7 +105,7 @@
       <dt id="HEADERS-constant" class="">HEADERS =
         
       </dt>
-      <dd><pre class="code"><span class='lbrace'>{</span><span class='const'><span class='object_link'><a href="../../../HTTP.html" title="Utopia::HTTP (module)">HTTP</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../../../HTTP.html#CONTENT_TYPE-constant" title="Utopia::HTTP::CONTENT_TYPE (constant)">CONTENT_TYPE</a></span></span> <span class='op'>=&gt;</span> <span class='const'><span class='object_link'><a href="ToJSON.html#APPLICATION_JSON-constant" title="Utopia::Controller::Respond::Converter::ToJSON::APPLICATION_JSON (constant)">APPLICATION_JSON</a></span></span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+      <dd><pre class="code"><span class='lbrace'>{</span><span class='const'><span class='object_link'><a href="../../../HTTP.html" title="Utopia::HTTP (module)">HTTP</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../../../HTTP.html#CONTENT_TYPE-constant" title="Utopia::HTTP::CONTENT_TYPE (constant)">CONTENT_TYPE</a></span></span> <span class='op'>=&gt;</span> <span class='const'><span class='object_link'><a href="#APPLICATION_JSON-constant" title="Utopia::Controller::Respond::Converter::ToJSON::APPLICATION_JSON (constant)">APPLICATION_JSON</a></span></span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
     
   </dl>
 
@@ -118,7 +118,7 @@
   
     <h2>
       Class Method Summary
-      <small><a href="ToJSON.html#" class="summary_toggle">collapse</a></small>
+      <small><a href="#" class="summary_toggle">collapse</a></small>
     </h2>
 
     <ul class="summary">
@@ -126,7 +126,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="ToJSON.html#call-class_method" title="call (class method)">.<strong>call</strong>(context, response, media_range)  &#x21d2; Object </a>
+      <a href="#call-class_method" title="call (class method)">.<strong>call</strong>(context, response, media_range)  &#x21d2; Object </a>
     
 
     
@@ -149,7 +149,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="ToJSON.html#content_type-class_method" title="content_type (class method)">.<strong>content_type</strong>  &#x21d2; Object </a>
+      <a href="#content_type-class_method" title="content_type (class method)">.<strong>content_type</strong>  &#x21d2; Object </a>
     
 
     
@@ -172,7 +172,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="ToJSON.html#serialize-class_method" title="serialize (class method)">.<strong>serialize</strong>(content, media_range)  &#x21d2; Object </a>
+      <a href="#serialize-class_method" title="serialize (class method)">.<strong>serialize</strong>(content, media_range)  &#x21d2; Object </a>
     
 
     
@@ -195,7 +195,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="ToJSON.html#split-class_method" title="split (class method)">.<strong>split</strong>(*args)  &#x21d2; Object </a>
+      <a href="#split-class_method" title="split (class method)">.<strong>split</strong>(*args)  &#x21d2; Object </a>
     
 
     
@@ -249,7 +249,7 @@
       <pre class="code"><span class="info file"># File 'lib/utopia/controller/respond.rb', line 88</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='id identifier rubyid_context'>context</span><span class='comma'>,</span> <span class='id identifier rubyid_response'>response</span><span class='comma'>,</span> <span class='id identifier rubyid_media_range'>media_range</span><span class='rparen'>)</span>
-	<span class='const'><span class='object_link'><a href="../Converter.html" title="Utopia::Controller::Respond::Converter (module)">Converter</a></span></span><span class='period'>.</span><span class='id identifier rubyid_update_response'><span class='object_link'><a href="../Converter.html#update_response-class_method" title="Utopia::Controller::Respond::Converter.update_response (method)">update_response</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_response'>response</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="ToJSON.html#HEADERS-constant" title="Utopia::Controller::Respond::Converter::ToJSON::HEADERS (constant)">HEADERS</a></span></span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_content'>content</span><span class='op'>|</span>
+	<span class='const'><span class='object_link'><a href="../Converter.html" title="Utopia::Controller::Respond::Converter (module)">Converter</a></span></span><span class='period'>.</span><span class='id identifier rubyid_update_response'><span class='object_link'><a href="../Converter.html#update_response-class_method" title="Utopia::Controller::Respond::Converter.update_response (method)">update_response</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_response'>response</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="#HEADERS-constant" title="Utopia::Controller::Respond::Converter::ToJSON::HEADERS (constant)">HEADERS</a></span></span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_content'>content</span><span class='op'>|</span>
 		<span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_serialize'>serialize</span><span class='lparen'>(</span><span class='id identifier rubyid_content'>content</span><span class='comma'>,</span> <span class='id identifier rubyid_media_range'>media_range</span><span class='rparen'>)</span>
 	<span class='kw'>end</span>
 <span class='kw'>end</span></pre>
@@ -281,7 +281,7 @@
       <pre class="code"><span class="info file"># File 'lib/utopia/controller/respond.rb', line 70</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_content_type'>content_type</span>
-	<span class='const'><span class='object_link'><a href="ToJSON.html#APPLICATION_JSON-constant" title="Utopia::Controller::Respond::Converter::ToJSON::APPLICATION_JSON (constant)">APPLICATION_JSON</a></span></span>
+	<span class='const'><span class='object_link'><a href="#APPLICATION_JSON-constant" title="Utopia::Controller::Respond::Converter::ToJSON::APPLICATION_JSON (constant)">APPLICATION_JSON</a></span></span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -365,9 +365,9 @@
 </div>
 
       <div id="footer">
-  Generated on Thu Jan 25 14:18:32 2018 by
+  Generated on Sat Mar 24 21:17:19 2018 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.9 (ruby-2.4.0).
+  0.9.12 (ruby-2.5.0).
 </div>
 
     </div>
