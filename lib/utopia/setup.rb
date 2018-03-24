@@ -22,7 +22,7 @@ require 'yaml'
 
 module Utopia
 	# Used for setting up a Utopia web application, typically via `config/environment.rb`
-	class Bootstrap
+	class Setup
 		def initialize(config_root, external_encoding: Encoding::UTF_8)
 			@config_root = config_root
 			
@@ -35,22 +35,37 @@ module Utopia
 		attr :external_encoding
 		attr :environment
 		
+		ENVIRONMENT_KEY = 'UTOPIA_ENV'.freeze
+		DEFAULT_ENVIRONMENT = 'environment'.freeze
+		
+		def explicit_environment_name
+			ENV[ENVIRONMENT_KEY]
+		end
+		
 		def site_root
 			File.dirname(@config_root)
 		end
 		
-		def setup
+		def apply
 			set_external_encoding
 			
-			load_environment('environment')
+			apply_environment
 			
 			add_load_path('lib')
 			
 			require_relative '../utopia'
 		end
 		
-		def environment_path(name)
-			File.expand_path("#{name}.yaml", @config_root)
+		def apply_environment
+			if name = explicit_environment_name
+				load_environment(name)
+			else
+				load_environment(DEFAULT_ENVIRONMENT)
+			end
+		end
+		
+		def environment_path(name, root = @config_root)
+			File.expand_path("#{name}.yaml", root)
 		end
 		
 		# If you don't specify these, it's possible to have issues when encodings mismatch on the server.
@@ -63,12 +78,12 @@ module Utopia
 		end
 		
 		# Load the named configuration file from the `config_root` directory.
-		def load_environment(name)
-			path = environment_path(name)
+		def load_environment(*args)
+			path = environment_path(*args)
 			
 			if File.exist?(path)
 				# Load the YAML environment file:
-				@environment = YAML.load_file(environment_path)
+				@environment = YAML.load_file(path)
 				
 				# We update ENV but only when it's not already set to something:
 				ENV.update(@environment) do |name, old_value, new_value|
@@ -91,6 +106,6 @@ module Utopia
 			config_root = File.dirname(caller[0])
 		end
 		
-		Bootstrap.new(config_root, **options).tap(&:setup)
+		Setup.new(config_root, **options).tap(&:apply)
 	end
 end
