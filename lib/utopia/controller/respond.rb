@@ -165,10 +165,15 @@ module Utopia
 				end
 			end
 			
-			# Invokes super. If a response is generated, format it based on the Accept: header.
+			# Invokes super. If a response is generated, format it based on the Accept: header, unless the content type was already specified.
 			def process!(request, path)
 				if response = super
-					response = self.class.response_for(self, request, path, response)
+					headers = response[1]
+					
+					# Don't try to convert the response if a content type was explicitly specified.
+					unless headers[Rack::CONTENT_TYPE]
+						response = self.class.response_for(self, request, path, response)
+					end
 					
 					response
 				end

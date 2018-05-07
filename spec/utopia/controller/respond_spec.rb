@@ -110,6 +110,16 @@ module Utopia::Controller::RespondSpec
 			expect(last_response.body).to be == '{"message":"File not found"}'
 		end
 		
+		it 'should get html response' do
+			header 'Accept', '*/*'
+			
+			get '/html/hello-world'
+			
+			expect(last_response.status).to be == 200
+			expect(last_response.headers['Content-Type']).to be == 'text/html'
+			expect(last_response.body).to be == '<p>Hello World</p>'
+		end
+		
 		it "should get version 1 response" do
 			header 'Accept', 'application/json;version=1'
 			
