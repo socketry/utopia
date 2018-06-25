@@ -32,7 +32,7 @@ module Utopia
 				:enable_starttls_auto => false
 			}]
 			
-			DEFAULT_FROM = (ENV['USER'] || 'rack').freeze
+			DEFAULT_FROM = (ENV['USER'] || 'utopia').freeze
 			DEFAULT_SUBJECT = '%{exception} [PID %{pid} : %{cwd}]'.freeze
 			
 			# @param to [String] The address to email error reports to.
