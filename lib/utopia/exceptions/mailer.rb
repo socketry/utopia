@@ -32,8 +32,8 @@ module Utopia
 				:enable_starttls_auto => false
 			}]
 			
-			DEFAULT_FROM = (ENV['USER'] || 'rack') + "@localhost"
-			DEFAULT_SUBJECT = '%{exception} [PID %{pid} : %{cwd}]'
+			DEFAULT_FROM = (ENV['USER'] || 'rack').freeze
+			DEFAULT_SUBJECT = '%{exception} [PID %{pid} : %{cwd}]'.freeze
 			
 			# @param to [String] The address to email error reports to.
 			# @param from [String] The from address for error reports.
@@ -88,6 +88,9 @@ module Utopia
 				request = Rack::Request.new(env)
 				
 				io.puts "#{request.request_method} #{request.url}"
+				
+				# TODO embed `rack.input` if it's textual?
+				# TODO dump and embed `utopia.variables`?
 				
 				io.puts
 				
