@@ -208,7 +208,9 @@ module Utopia
 			# Lookup a node with the given path relative to the current node.
 			# @return [Node] The node if could be found.
 			def lookup_node(path)
-				@current.node.lookup_node(path)
+				@end_tags.reverse_each do |state|
+					return state.node.lookup_node(path) if state.node.respond_to?(:lookup_node)
+				end
 			end
 			
 			# The content of the node
