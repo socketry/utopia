@@ -29,13 +29,14 @@ use Utopia::Redirection::Errors,
 	404 => '/errors/file-not-found'
 
 use Utopia::Localization,
-	:default_locale => 'en',
-	:locales => ['en', 'de', 'ja', 'zh']
+	default_locale: 'en',
+	locales: ['en', 'de', 'ja', 'zh']
 
 require 'utopia/session'
 use Utopia::Session,
-	:expires_after => 3600 * 24,
-	:secret => ENV['UTOPIA_SESSION_SECRET']
+	expires_after: 3600 * 24,
+	secret: ENV['UTOPIA_SESSION_SECRET'],
+	secure: true
 
 use Utopia::Controller
 
