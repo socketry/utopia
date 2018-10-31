@@ -111,7 +111,7 @@ module Utopia
 			if session_hash.needs_update?(@update_timeout)
 				values = session_hash.values
 				
-				values[:updated_at] = Time.now
+				values[:updated_at] = Time.now.utc
 				
 				data = encrypt(session_hash.values)
 				
@@ -124,8 +124,8 @@ module Utopia
 			{
 				request_ip: request.ip,
 				request_user_agent: request.user_agent,
-				created_at: Time.now,
-				updated_at: Time.now,
+				created_at: Time.now.utc,
+				updated_at: Time.now.utc,
 			}
 		end
 		
@@ -147,10 +147,14 @@ module Utopia
 		
 		def valid_session?(request, values)
 			if values[:request_ip] != request.ip
+				warn "Invalid session because #{values[:request_ip]} doesn't match #{request.ip}!"
+				
 				return false
 			end
 			
 			if values[:request_user_agent] != request.user_agent
+				warn "Invalid session because #{values[:request_user_agent]} doesn't match #{request.user_agent}!"
+				
 				return false
 			end
 			
@@ -159,7 +163,7 @@ module Utopia
 		
 		def expires
 			if @expires_after
-				return Time.now + @expires_after
+				return Time.now.utc + @expires_after
 			end
 		end
 		
