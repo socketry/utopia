@@ -122,8 +122,7 @@ module Utopia
 		# Constructs a valid session for the given request. These fields must match as per the checks performed in `valid_session?`:
 		def build_initial_session(request)
 			{
-				request_ip: request.ip,
-				request_user_agent: request.user_agent,
+				user_agent: request.user_agent,
 				created_at: Time.now.utc,
 				updated_at: Time.now.utc,
 			}
@@ -146,14 +145,8 @@ module Utopia
 		end
 		
 		def valid_session?(request, values)
-			if values[:request_ip] != request.ip
-				warn "Invalid session because #{values[:request_ip]} doesn't match #{request.ip}!"
-				
-				return false
-			end
-			
-			if values[:request_user_agent] != request.user_agent
-				warn "Invalid session because #{values[:request_user_agent]} doesn't match #{request.user_agent}!"
+			if values[:user_agent] != request.user_agent
+				warn "Invalid session because #{values[:user_agent]} doesn't match #{request.user_agent}!" if $VERBOSE
 				
 				return false
 			end

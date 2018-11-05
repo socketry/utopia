@@ -103,12 +103,12 @@ module Utopia::SessionSpec
 			expect(last_response.body).to be == ""
 		end
 		
-		it "should fail if ip address is changed" do
+		it "shouldn't fail if ip address is changed" do
 			# Change user agent:
 			header 'X-Forwarded-For', '127.0.0.10'
 			
 			get "/session-get?key=foo"
-			expect(last_response.body).to be == ""
+			expect(last_response.body).to be == "bar"
 		end
 	end
 	
