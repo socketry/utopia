@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+
 require_relative 'lib/utopia/version'
 
 Gem::Specification.new do |spec|
@@ -37,7 +37,8 @@ Gem::Specification.new do |spec|
 	
 	spec.add_dependency 'concurrent-ruby', '~> 1.0'
 	
-	spec.add_development_dependency 'bundler', '~> 1.3'
+	spec.add_development_dependency 'covered'
+	spec.add_development_dependency 'bundler'
 	spec.add_development_dependency 'rspec', '~> 3.6'
 	spec.add_development_dependency 'falcon'
 	spec.add_development_dependency 'rake'

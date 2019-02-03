@@ -1,24 +1,25 @@
 language: ruby
-sudo: false
-dist: trusty
 cache: bundler
+
 before_install:
   # For testing purposes:
   - git config --global user.email "samuel@oriontransfer.net"
   - git config --global user.name "Samuel Williams"
-  # https://github.com/rubygems/rubygems/issues/1448
-  - gem update --system
-  # I don't know why I need to install this on travis in order for tests to function.
-  - gem install bundler samovar
-rvm:
-  - 2.3
-  - 2.4
-  - 2.5
-  - 2.6
-  - jruby-head
-  - ruby-head
-env: COVERAGE=true BENCHMARK=true
+
 matrix:
+  include:
+    - rvm: 2.3
+    - rvm: 2.4
+    - rvm: 2.5
+    - rvm: 2.6
+    - rvm: 2.6
+      env: COVERAGE=BriefSummary,Coveralls
+    - rvm: ruby-head
+    - rvm: jruby-head
+    - rvm: truffleruby
   allow_failures:
     - rvm: ruby-head
     - rvm: jruby-head
+    - rvm: truffleruby
+
+env: BENCHMARK=true

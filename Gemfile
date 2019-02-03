@@ -25,7 +25,4 @@ group :test do
 	
 	gem 'rack-test'
 	gem 'rack-freeze', '~> 1.2'
-	
-	gem 'simplecov'
-	gem 'coveralls', require: false
 end
