@@ -26,6 +26,8 @@ Yes. [Trenni](https://github.com/ioquatix/trenni) includes native [Ragel](http:/
 
 ## Installation
 
+Make sure you have git, ruby, and bundler installed and set up correctly.
+
 Install utopia:
 
 	$ gem install utopia
