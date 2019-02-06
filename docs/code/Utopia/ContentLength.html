@@ -6,7 +6,7 @@
 <title>
   Class: Utopia::ContentLength
   
-    &mdash; Documentation by YARD 0.9.12
+    &mdash; Documentation by YARD 0.9.18
   
 </title>
 
@@ -263,8 +263,6 @@
       <pre class="lines">
 
 
-34
-35
 36
 37
 38
@@ -273,10 +271,12 @@
 41
 42
 43
-44</pre>
+44
+45
+46</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content_length.rb', line 34</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content_length.rb', line 36</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='id identifier rubyid_env'>env</span><span class='rparen'>)</span>
 	<span class='id identifier rubyid_response'>response</span> <span class='op'>=</span> <span class='ivar'>@app</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='id identifier rubyid_env'>env</span><span class='rparen'>)</span>
@@ -311,13 +311,17 @@
 
 30
 31
-32</pre>
+32
+33
+34</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/utopia/content_length.rb', line 30</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_content_length_of'>content_length_of</span><span class='lparen'>(</span><span class='id identifier rubyid_body'>body</span><span class='rparen'>)</span>
-	<span class='kw'>return</span> <span class='id identifier rubyid_body'>body</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:bytesize</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_reduce'>reduce</span><span class='lparen'>(</span><span class='int'>0</span><span class='comma'>,</span> <span class='symbol'>:+</span><span class='rparen'>)</span>
+	<span class='kw'>if</span> <span class='id identifier rubyid_body'>body</span><span class='period'>.</span><span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:map</span><span class='rparen'>)</span>
+		<span class='kw'>return</span> <span class='id identifier rubyid_body'>body</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:bytesize</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_reduce'>reduce</span><span class='lparen'>(</span><span class='int'>0</span><span class='comma'>,</span> <span class='symbol'>:+</span><span class='rparen'>)</span>
+	<span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -329,9 +333,9 @@
 </div>
 
       <div id="footer">
-  Generated on Sat Mar 24 21:17:21 2018 by
+  Generated on Thu Feb  7 11:01:11 2019 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.12 (ruby-2.5.0).
+  0.9.18 (ruby-2.6.1).
 </div>
 
     </div>

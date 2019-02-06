@@ -6,7 +6,7 @@
 <title>
   Class: Utopia::Content::Document::State
   
-    &mdash; Documentation by YARD 0.9.12
+    &mdash; Documentation by YARD 0.9.18
   
 </title>
 
@@ -560,8 +560,6 @@
       <pre class="lines">
 
 
-226
-227
 228
 229
 230
@@ -572,10 +570,12 @@
 235
 236
 237
-238</pre>
+238
+239
+240</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 226</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 228</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_parent'>parent</span><span class='comma'>,</span> <span class='id identifier rubyid_tag'>tag</span><span class='comma'>,</span> <span class='id identifier rubyid_node'>node</span><span class='comma'>,</span> <span class='id identifier rubyid_attributes'>attributes</span> <span class='op'>=</span> <span class='id identifier rubyid_tag'>tag</span><span class='period'>.</span><span class='id identifier rubyid_to_hash'>to_hash</span><span class='rparen'>)</span>
 	<span class='ivar'>@parent</span> <span class='op'>=</span> <span class='id identifier rubyid_parent'>parent</span>
@@ -627,12 +627,12 @@
       <pre class="lines">
 
 
-241
-242
-243</pre>
+243
+244
+245</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 241</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 243</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_attributes'>attributes</span>
   <span class='ivar'>@attributes</span>
@@ -669,12 +669,12 @@
       <pre class="lines">
 
 
-242
-243
-244</pre>
+244
+245
+246</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 242</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 244</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_content'>content</span>
   <span class='ivar'>@content</span>
@@ -711,12 +711,12 @@
       <pre class="lines">
 
 
-248
-249
-250</pre>
+250
+251
+252</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 248</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 250</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_deferred'>deferred</span>
   <span class='ivar'>@deferred</span>
@@ -753,12 +753,12 @@
       <pre class="lines">
 
 
-243
-244
-245</pre>
+245
+246
+247</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 243</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 245</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_node'>node</span>
   <span class='ivar'>@node</span>
@@ -795,12 +795,12 @@
       <pre class="lines">
 
 
-240
-241
-242</pre>
+242
+243
+244</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 240</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 242</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_parent'>parent</span>
   <span class='ivar'>@parent</span>
@@ -837,12 +837,12 @@
       <pre class="lines">
 
 
-246
-247
-248</pre>
+248
+249
+250</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 246</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 248</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_tags'>tags</span>
   <span class='ivar'>@tags</span>
@@ -874,12 +874,12 @@
       <pre class="lines">
 
 
-256
-257
-258</pre>
+258
+259
+260</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 256</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 258</span>
 
 <span class='kw'>def</span> <span class='op'>[]</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span>
 	<span class='ivar'>@attributes</span><span class='lbracket'>[</span><span class='id identifier rubyid_key'>key</span><span class='rbracket'>]</span>
@@ -904,8 +904,6 @@
       <pre class="lines">
 
 
-260
-261
 262
 263
 264
@@ -915,10 +913,12 @@
 268
 269
 270
-271</pre>
+271
+272
+273</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 260</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 262</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='id identifier rubyid_document'>document</span><span class='rparen'>)</span>
 	<span class='ivar'>@content</span> <span class='op'>=</span> <span class='ivar'>@buffer</span>
@@ -952,14 +952,14 @@
       <pre class="lines">
 
 
-250
-251
 252
 253
-254</pre>
+254
+255
+256</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 250</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 252</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_defer'>defer</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
 	<span class='ivar'>@deferred</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_block'>block</span>
@@ -1009,12 +1009,12 @@
       <pre class="lines">
 
 
-286
-287
-288</pre>
+288
+289
+290</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 286</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 288</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_empty?'>empty?</span>
 	<span class='ivar'>@tags</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span>
@@ -1039,15 +1039,15 @@
       <pre class="lines">
 
 
-290
-291
 292
 293
 294
-295</pre>
+295
+296
+297</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 290</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 292</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_tag_begin'>tag_begin</span><span class='lparen'>(</span><span class='id identifier rubyid_tag'>tag</span><span class='rparen'>)</span>
 	<span class='comment'># raise ArgumentError.new(&quot;tag_begin: #{tag} is tag.self_closed?&quot;) if tag.self_closed?
@@ -1075,12 +1075,12 @@
       <pre class="lines">
 
 
-281
-282
-283</pre>
+283
+284
+285</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 281</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 283</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_tag_complete'>tag_complete</span><span class='lparen'>(</span><span class='id identifier rubyid_tag'>tag</span><span class='rparen'>)</span>
 	<span class='id identifier rubyid_tag'>tag</span><span class='period'>.</span><span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span><span class='ivar'>@buffer</span><span class='rparen'>)</span>
@@ -1128,13 +1128,13 @@
       <pre class="lines">
 
 
-297
-298
 299
-300</pre>
+300
+301
+302</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 297</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 299</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_tag_end'>tag_end</span><span class='lparen'>(</span><span class='id identifier rubyid_tag'>tag</span><span class='rparen'>)</span>
 	<span class='id identifier rubyid_raise'>raise</span> <span class='const'><span class='object_link'><a href="../UnbalancedTagError.html" title="Utopia::Content::UnbalancedTagError (class)">UnbalancedTagError</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../UnbalancedTagError.html#initialize-instance_method" title="Utopia::Content::UnbalancedTagError#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_tag'>tag</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='ivar'>@tags</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span> <span class='op'>==</span> <span class='id identifier rubyid_tag'>tag</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span>
@@ -1160,12 +1160,12 @@
       <pre class="lines">
 
 
-277
-278
-279</pre>
+279
+280
+281</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 277</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 279</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_text'>text</span><span class='lparen'>(</span><span class='id identifier rubyid_string'>string</span><span class='rparen'>)</span>
 	<span class='const'>Trenni</span><span class='op'>::</span><span class='const'>Markup</span><span class='period'>.</span><span class='id identifier rubyid_append'>append</span><span class='lparen'>(</span><span class='ivar'>@buffer</span><span class='comma'>,</span> <span class='id identifier rubyid_string'>string</span><span class='rparen'>)</span>
@@ -1190,12 +1190,12 @@
       <pre class="lines">
 
 
-273
-274
-275</pre>
+275
+276
+277</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 273</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 275</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span><span class='id identifier rubyid_string'>string</span><span class='rparen'>)</span>
 	<span class='ivar'>@buffer</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_string'>string</span>
@@ -1210,9 +1210,9 @@
 </div>
 
       <div id="footer">
-  Generated on Sat Mar 24 21:17:21 2018 by
+  Generated on Thu Feb  7 11:01:11 2019 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.12 (ruby-2.5.0).
+  0.9.18 (ruby-2.6.1).
 </div>
 
     </div>

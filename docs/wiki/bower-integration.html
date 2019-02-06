@@ -36,7 +36,7 @@
 	
 	<h1 id="bower-integration">Bower Integration</h1>
 
-<p>Utopia integrates with Bower and provides a rake task to improve deployment of <code>dist</code> code.</p>
+<p>Utopia integrates with Bower and provides a rake task to simplify deployment packages distributed using <code>bower</code> that implement the <code>dist</code> sub-directory convention.</p>
 
 <p>By default, utopia includes a <code>.bowerrc</code> file which installs modules into <code>lib/components</code>. This code can then be copied into <code>public/_components</code> using <code>rake bower:update</code>.</p>
 
@@ -54,19 +54,53 @@
 
 <p>Then add the appropriate <code>&lt;script&gt;</code> tags to <code>pages/_page.xnode</code>:</p>
 
-<pre><code>&lt;script src=&quot;/_components/jquery/jquery.min.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+<pre><code class="language-html">&lt;script type=&quot;text/javascript&quot; src=&quot;/_components/jquery/jquery.min.js&quot;&gt;&lt;/script&gt;
 </code></pre>
 
-<h2 id="what-does-rake-bowerupdate-do">What does <code>rake bower:update</code> do?</h2>
+<h3 id="what-does-rake-bowerupdate-do">What does <code>rake bower:update</code> do?</h3>
 
 <p>This task copies only the contents of the dist directory. This ensures that you only get files intended for distribution. If the bower package doesn’t have a <code>dist</code> directory, the entire contents is copied.</p>
 
 <fragment:listing rel="site" src="tasks/bower.rake" brush="ruby"/>
 
+<h2 id="using-javascript">Using JavaScript</h2>
+
+<p>You can use JavaScript by embedding it directly into your HTML, or by creating a JavaScript source file and referencing that.</p>
+
+<h3 id="embedding-code">Embedding Code</h3>
+
+<p>In your HTML view:</p>
+
+<pre><code class="language-trenni">&lt;html&gt;
+  &lt;body&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
+      //&lt;![CDATA[
+      console.log(&quot;Hello World&quot;)
+      //]]&gt;
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<h3 id="external-script">External Script</h3>
+
+<p>In <code>script.js</code>:</p>
+
+<pre><code class="language-javascript">console.log("Hello World")
+</code></pre>
+
+<p>In your HTML view:</p>
+
+<pre><code class="language-trenni">&lt;html&gt;
+  &lt;body&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;script.js&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
 
 	
 	<footer>
-		Last Modified: 2017-05-03 14:21:19 +1200 —
+		Last Modified: 2019-02-07 10:56:41 +1300 —
 	</footer>
 
 		</div>

@@ -8,6 +8,7 @@ namespace :documentation do
 		sh('yard', '-o', "documentation/public/code")
 	end
 
+	desc "Build and run the documentation wiki."
 	task :server => :yard do
 		Bundler.with_clean_env do
 			Dir.chdir('documentation') do
@@ -17,6 +18,7 @@ namespace :documentation do
 		end
 	end
 
+	desc "Update static documentation."
 	task :static => :yard do
 		require 'rackula/command'
 		

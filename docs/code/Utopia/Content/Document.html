@@ -6,7 +6,7 @@
 <title>
   Class: Utopia::Content::Document
   
-    &mdash; Documentation by YARD 0.9.12
+    &mdash; Documentation by YARD 0.9.18
   
 </title>
 
@@ -1156,12 +1156,12 @@ regarding the node and uri used to access the resource.</p>
       <pre class="lines">
 
 
-215
-216
-217</pre>
+217
+218
+219</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 215</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 217</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_content'>content</span>
 	<span class='ivar'>@end_tags</span><span class='period'>.</span><span class='id identifier rubyid_last'>last</span><span class='period'>.</span><span class='id identifier rubyid_content'>content</span>
@@ -1285,13 +1285,17 @@ regarding the node and uri used to access the resource.</p>
 
 210
 211
-212</pre>
+212
+213
+214</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 210</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_lookup_node'>lookup_node</span><span class='lparen'>(</span><span class='id identifier rubyid_path'>path</span><span class='rparen'>)</span>
-	<span class='ivar'>@current</span><span class='period'>.</span><span class='id identifier rubyid_node'>node</span><span class='period'>.</span><span class='id identifier rubyid_lookup_node'>lookup_node</span><span class='lparen'>(</span><span class='id identifier rubyid_path'>path</span><span class='rparen'>)</span>
+	<span class='ivar'>@end_tags</span><span class='period'>.</span><span class='id identifier rubyid_reverse_each'>reverse_each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_state'>state</span><span class='op'>|</span>
+		<span class='kw'>return</span> <span class='id identifier rubyid_state'>state</span><span class='period'>.</span><span class='id identifier rubyid_node'>node</span><span class='period'>.</span><span class='id identifier rubyid_lookup_node'>lookup_node</span><span class='lparen'>(</span><span class='id identifier rubyid_path'>path</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_state'>state</span><span class='period'>.</span><span class='id identifier rubyid_node'>node</span><span class='period'>.</span><span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:lookup_node</span><span class='rparen'>)</span>
+	<span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -1398,12 +1402,12 @@ regarding the node and uri used to access the resource.</p>
       <pre class="lines">
 
 
-219
-220
-221</pre>
+221
+222
+223</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 219</span>
+      <pre class="code"><span class="info file"># File 'lib/utopia/content/document.rb', line 221</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_parent'>parent</span>
 	<span class='ivar'>@end_tags</span><span class='lbracket'>[</span><span class='op'>-</span><span class='int'>2</span><span class='rbracket'>]</span>
@@ -1808,9 +1812,9 @@ regarding the node and uri used to access the resource.</p>
 </div>
 
       <div id="footer">
-  Generated on Sat Mar 24 21:17:21 2018 by
+  Generated on Thu Feb  7 11:01:11 2019 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.12 (ruby-2.5.0).
+  0.9.18 (ruby-2.6.1).
 </div>
 
     </div>

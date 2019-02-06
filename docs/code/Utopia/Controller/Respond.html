@@ -6,7 +6,7 @@
 <title>
   Module: Utopia::Controller::Respond
   
-    &mdash; Documentation by YARD 0.9.12
+    &mdash; Documentation by YARD 0.9.18
   
 </title>
 
@@ -231,7 +231,7 @@
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Invokes super. If a response is generated, format it based on the Accept: header.</p>
+    <p>Invokes super. If a response is generated, format it based on the Accept: header, unless the content type was already specified.</p>
 
 
   </div>
@@ -251,14 +251,24 @@
 172
 173
 174
-175</pre>
+175
+176
+177
+178
+179
+180</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/utopia/controller/respond.rb', line 169</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_process!'>process!</span><span class='lparen'>(</span><span class='id identifier rubyid_request'>request</span><span class='comma'>,</span> <span class='id identifier rubyid_path'>path</span><span class='rparen'>)</span>
 	<span class='kw'>if</span> <span class='id identifier rubyid_response'>response</span> <span class='op'>=</span> <span class='kw'>super</span>
-		<span class='id identifier rubyid_response'>response</span> <span class='op'>=</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_response_for'>response_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_request'>request</span><span class='comma'>,</span> <span class='id identifier rubyid_path'>path</span><span class='comma'>,</span> <span class='id identifier rubyid_response'>response</span><span class='rparen'>)</span>
+		<span class='id identifier rubyid_headers'>headers</span> <span class='op'>=</span> <span class='id identifier rubyid_response'>response</span><span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span>
+		
+		<span class='comment'># Don&#39;t try to convert the response if a content type was explicitly specified.
+</span>		<span class='kw'>unless</span> <span class='id identifier rubyid_headers'>headers</span><span class='lbracket'>[</span><span class='const'>Rack</span><span class='op'>::</span><span class='const'>CONTENT_TYPE</span><span class='rbracket'>]</span>
+			<span class='id identifier rubyid_response'>response</span> <span class='op'>=</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_response_for'>response_for</span><span class='lparen'>(</span><span class='kw'>self</span><span class='comma'>,</span> <span class='id identifier rubyid_request'>request</span><span class='comma'>,</span> <span class='id identifier rubyid_path'>path</span><span class='comma'>,</span> <span class='id identifier rubyid_response'>response</span><span class='rparen'>)</span>
+		<span class='kw'>end</span>
 		
 		<span class='id identifier rubyid_response'>response</span>
 	<span class='kw'>end</span>
@@ -273,9 +283,9 @@
 </div>
 
       <div id="footer">
-  Generated on Sat Mar 24 21:17:19 2018 by
+  Generated on Thu Feb  7 11:01:09 2019 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.12 (ruby-2.5.0).
+  0.9.18 (ruby-2.6.1).
 </div>
 
     </div>

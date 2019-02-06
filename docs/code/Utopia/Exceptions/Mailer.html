@@ -6,7 +6,7 @@
 <title>
   Class: Utopia::Exceptions::Mailer
   
-    &mdash; Documentation by YARD 0.9.12
+    &mdash; Documentation by YARD 0.9.18
   
 </title>
 
@@ -110,11 +110,16 @@
   
 
 </div>
-  <h2>Constant Summary</h2>
-  <dl class="constants">
-    
-      <dt id="LOCAL_SMTP-constant" class="">LOCAL_SMTP =
-        <div class="docstring">
+  
+    <h2>
+      Constant Summary
+      <small><a href="#" class="constants_summary_toggle">collapse</a></small>
+    </h2>
+
+    <dl class="constants">
+      
+        <dt id="LOCAL_SMTP-constant" class="">LOCAL_SMTP =
+          <div class="docstring">
   <div class="discussion">
     <p>A basic local non-authenticated SMTP server.</p>
 
@@ -125,24 +130,25 @@
   
 
 </div>
-      </dt>
-      <dd><pre class="code"><span class='lbracket'>[</span><span class='symbol'>:smtp</span><span class='comma'>,</span> <span class='lbrace'>{</span>
+        </dt>
+        <dd><pre class="code"><span class='lbracket'>[</span><span class='symbol'>:smtp</span><span class='comma'>,</span> <span class='lbrace'>{</span>
 	<span class='symbol'>:address</span> <span class='op'>=&gt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>localhost</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span>
 	<span class='symbol'>:port</span> <span class='op'>=&gt;</span> <span class='int'>25</span><span class='comma'>,</span>
 	<span class='symbol'>:enable_starttls_auto</span> <span class='op'>=&gt;</span> <span class='kw'>false</span>
 <span class='rbrace'>}</span><span class='rbracket'>]</span></pre></dd>
-    
-      <dt id="DEFAULT_FROM-constant" class="">DEFAULT_FROM =
-        
-      </dt>
-      <dd><pre class="code"><span class='lparen'>(</span><span class='const'>ENV</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>USER</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>||</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>rack</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span> <span class='op'>+</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>@localhost</span><span class='tstring_end'>&quot;</span></span></pre></dd>
-    
-      <dt id="DEFAULT_SUBJECT-constant" class="">DEFAULT_SUBJECT =
-        
-      </dt>
-      <dd><pre class="code"><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%{exception} [PID %{pid} : %{cwd}]</span><span class='tstring_end'>&#39;</span></span></pre></dd>
-    
-  </dl>
+      
+        <dt id="DEFAULT_FROM-constant" class="">DEFAULT_FROM =
+          
+        </dt>
+        <dd><pre class="code"><span class='lparen'>(</span><span class='const'>ENV</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>USER</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>||</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>utopia</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+      
+        <dt id="DEFAULT_SUBJECT-constant" class="">DEFAULT_SUBJECT =
+          
+        </dt>
+        <dd><pre class="code"><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%{exception} [PID %{pid} : %{cwd}]</span><span class='tstring_end'>&#39;</span></span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+      
+    </dl>
+  
 
 
 
@@ -466,9 +472,9 @@
 </div>
 
       <div id="footer">
-  Generated on Sat Mar 24 21:17:21 2018 by
+  Generated on Thu Feb  7 11:01:11 2019 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.12 (ruby-2.5.0).
+  0.9.18 (ruby-2.6.1).
 </div>
 
     </div>

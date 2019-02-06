@@ -10,6 +10,7 @@ group :development do
 	gem 'yard'
 	
 	gem 'kramdown'
+	gem 'kramdown-parser-gfm'
 	
 	gem 'json'
 	gem 'msgpack'
