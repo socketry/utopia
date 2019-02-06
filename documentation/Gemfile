@@ -9,6 +9,7 @@ gem "rake"
 gem "bundler"
 
 gem "kramdown"
+gem "kramdown-parser-gfm"
 
 group :development do
 	# For `rake server`:
