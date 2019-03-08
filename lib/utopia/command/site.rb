@@ -156,7 +156,7 @@ module Utopia
 					end
 					
 					CONFIGURATION_FILES.each do |configuration_file|
-						source_path = File.join(Setup::Site::ROOT, configuration_file)
+						source_path = File.join(Site::ROOT, configuration_file)
 						destination_path = File.join(destination_root, configuration_file)
 						
 						$stderr.puts "Updating #{destination_path}..."
@@ -172,7 +172,7 @@ module Utopia
 							system("git", "add", "-u") or fail "could not add files"
 							
 							# Stage any new files that we have explicitly added:
-							system("git", "add", *Setup::Site::CONFIGURATION_FILES) or fail "could not add files"
+							system("git", "add", *Site::CONFIGURATION_FILES) or fail "could not add files"
 							
 							move_static!
 							
