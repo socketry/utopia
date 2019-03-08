@@ -2,11 +2,6 @@
 namespace :yarn do
 	desc 'Load the .bowerrc file and setup the environment for other tasks.'
 	task :environment do
-		require 'json'
-		
-		bowerrc_path = SITE_ROOT + ".bowerrc"
-		bowerrc = JSON.load(File.read(bowerrc_path))
-		
 		@yarn_package_root = SITE_ROOT + "lib/components"
 		@yarn_install_root = SITE_ROOT + "public/_components"
 	end
