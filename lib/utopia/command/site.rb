@@ -31,13 +31,13 @@ module Utopia
 		# Local site setup commands.
 		class Site < Samovar::Command
 			# Configuration files which should be installed/updated:
-			CONFIGURATION_FILES = ['.bowerrc', '.gitignore', 'config.ru', 'config/environment.rb', 'Gemfile', 'Guardfile', 'Rakefile', 'tasks/bower.rake', 'tasks/deploy.rake', 'tasks/development.rake', 'tasks/environment.rake', 'tasks/log.rake']
+			CONFIGURATION_FILES = ['.yarnrc', '.gitignore', 'config.ru', 'config/environment.rb', 'Gemfile', 'Guardfile', 'Rakefile', 'tasks/yarn.rake', 'tasks/deploy.rake', 'tasks/development.rake', 'tasks/environment.rake', 'tasks/log.rake']
 			
 			# Directories that should exist:
 			DIRECTORIES = ["config", "lib", "pages", "public", "tasks"]
 			
 			# Directories that should be removed during upgrade process:
-			OLD_PATHS = ["access_log", "cache", "tmp", 'tasks/test.rake', 'tasks/utopia.rake']
+			OLD_PATHS = ["access_log", "cache", "tmp", 'tasks/test.rake', 'tasks/utopia.rake', '.bowerrc', 'tasks/bower.rake']
 			
 			# The root directory of the template site:
 			ROOT = File.join(SETUP_ROOT, 'site')

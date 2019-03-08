@@ -10,7 +10,7 @@ Reading these pages in order will give you an overview of the design of Utopia, 
 - [Server Setup](server-setup/)
 - [Your First Page](your-first-page/)
   - [What is `.xnode`?](faq/what-is-xnode/)
-- [Installing JavaScript Libraries](bower-integration/)
+- [Installing JavaScript Libraries](javascript/)
 - [Website Tests](testing/)
 - [Updating Your Site](updating-utopia/)
 

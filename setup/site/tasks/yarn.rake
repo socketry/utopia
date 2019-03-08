@@ -1,27 +1,24 @@
 
-namespace :bower do
+namespace :yarn do
 	desc 'Load the .bowerrc file and setup the environment for other tasks.'
-	task :bowerrc do
+	task :environment do
 		require 'json'
 		
 		bowerrc_path = SITE_ROOT + ".bowerrc"
 		bowerrc = JSON.load(File.read(bowerrc_path))
 		
-		@bower_package_root = SITE_ROOT + bowerrc['directory']
-		@bower_install_root = SITE_ROOT + bowerrc['public']
-		@bower_install_method = (bowerrc['install'] || :copy).to_sym
+		@yarn_package_root = SITE_ROOT + "lib/components"
+		@yarn_install_root = SITE_ROOT + "public/_components"
 	end
 	
 	desc 'Update the bower packages and link into the public directory.'
-	task :update => :bowerrc do
+	task :update => :environment do
 		require 'fileutils'
 		require 'utopia/path'
 		
-		#sh %W{bower update}
-		
-		@bower_package_root.children.select(&:directory?).collect(&:basename).each do |package_directory|
-			install_path = @bower_install_root + package_directory
-			package_path = @bower_package_root + package_directory
+		@yarn_package_root.children.select(&:directory?).collect(&:basename).each do |package_directory|
+			install_path = @yarn_install_root + package_directory
+			package_path = @yarn_package_root + package_directory
 			dist_path = package_path + 'dist'
 			
 			FileUtils::Verbose.rm_rf install_path
@@ -34,12 +31,7 @@ namespace :bower do
 				link_path = Utopia::Path.shortest_path(package_path, install_path)
 			end
 			
-			if @bower_install_method == :symlink
-				# This is useful for some
-				FileUtils::Verbose.ln_s link_path, install_path
-			else
-				FileUtils::Verbose.cp_r File.expand_path(link_path, install_path), install_path
-			end
+			FileUtils::Verbose.cp_r File.expand_path(link_path, install_path), install_path
 		end
 	end
 end
