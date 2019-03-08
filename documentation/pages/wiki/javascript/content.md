@@ -8,7 +8,7 @@ By default, utopia includes a `.yarnrc` file which installs modules into `lib/co
 
 If you don't already have yarn installed, make sure you have npm installed and then run the following command:
 
-	$ sudo nom install -g yarn
+	$ sudo npm install -g yarn
 
 ## Installing jQuery
 
