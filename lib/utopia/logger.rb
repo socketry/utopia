@@ -18,17 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'logger/compact_formatter'
+require 'event/console'
 
 module Utopia
-	# Manages an instance of Logger with useful defaults. Used in rake `tasks/log.rake`.
-	module Logger
-		def self.new(output: STDERR, level: ::Logger::WARN)
-			log = ::Logger.new(output)
-			log.level = level
-			log.formatter = Utopia::Logger::CompactFormatter.new
-			
-			return log
-		end
-	end
+	extend Event::Console
 end
