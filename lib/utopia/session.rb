@@ -22,11 +22,19 @@ require 'openssl'
 require 'securerandom'
 require 'digest/sha2'
 
+require 'json'
+
 require_relative 'session/lazy_hash'
+require_relative 'session/serialization'
 
 module Utopia
 	# A middleware which provides a secure client-side session storage using a private symmetric encrpytion key.
 	class Session
+		class PayloadError < StandardError
+		end
+		
+		MAXIMUM_SIZE = 1024*32
+		
 		SECRET_KEY = 'UTOPIA_SESSION_SECRET'.freeze
 		
 		RACK_SESSION = "rack.session".freeze
@@ -42,7 +50,7 @@ module Utopia
 		# @param secret [Array] The secret text used to generate a symetric encryption key for the coookie data.
 		# @param expires_after [String] The cache-control header to set for static content.
 		# @param options [Hash<Symbol,Object>] Additional defaults used for generating the cookie by `Rack::Utils.set_cookie_header!`.
-		def initialize(app, session_name: RACK_SESSION, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, **options)
+		def initialize(app, session_name: RACK_SESSION, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, maximum_size: MAXIMUM_SIZE, **options)
 			@app = app
 			
 			@session_name = session_name
@@ -67,6 +75,9 @@ module Utopia
 				# The HttpOnly attribute directs browsers not to expose cookies through channels other than HTTP (and HTTPS) requests. This means that the cookie cannot be accessed via client-side scripting languages (notably JavaScript), and therefore cannot be stolen easily via cross-site scripting (a pervasive attack technique).
 				http_only: true,
 			}.merge(options)
+			
+			@serialization = Serialization.new
+			@maximum_size = maximum_size
 		end
 		
 		attr :cookie_name
@@ -135,8 +146,14 @@ module Utopia
 			
 			# Decrypt the data from the user if possible:
 			if data = request.cookies[@cookie_name]
-				if values = decrypt(data) and valid_session?(request, values)
-					return values
+				begin
+					if values = decrypt(data)
+						validate_session!(request, values)
+						
+						return values
+					end
+				rescue => error
+					request.logger&.error(error)
 				end
 			end
 			
@@ -144,11 +161,9 @@ module Utopia
 			return build_initial_session(request)
 		end
 		
-		def valid_session?(request, values)
+		def validate_session!(request, values)
 			if values[:user_agent] != request.user_agent
-				warn "Invalid session because #{values[:user_agent]} doesn't match #{request.user_agent}!" if $VERBOSE
-				
-				return false
+				raise PayloadError, "Invalid session because supplied user agent #{request.user_agent.inspect} does not match session user agent #{values[:user_agent].inspect}!"
 			end
 			
 			return true
@@ -177,13 +192,17 @@ module Utopia
 			c.key = @key
 			c.iv = iv = c.random_iv
 			
-			e = c.update(Marshal.dump(hash))
+			e = c.update(@serialization.dump(hash))
 			e << c.final
 			
 			return [iv, e].pack("m16m*")
 		end
 		
 		def decrypt(data)
+			if @maximum_size and data.bytesize > @maximum_size
+				raise PayloadError, "Session payload size #{data.bytesize}bytes exceeds maximum allowed size #{@maximum_size}bytes!"
+			end
+			
 			iv, e = data.unpack("m16m*")
 			
 			c = OpenSSL::Cipher.new(CIPHER_ALGORITHM)
@@ -195,9 +214,7 @@ module Utopia
 			d = c.update(e)
 			d << c.final
 			
-			return Marshal.load(d)
-		rescue
-			return nil
+			return @serialization.load(d)
 		end
 	end
 end

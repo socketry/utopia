@@ -13,9 +13,8 @@ group :development do
 	gem 'kramdown-parser-gfm'
 	
 	gem 'json'
-	gem 'msgpack'
 	
-	gem "rackula"
+	gem 'rackula'
 end
 
 group :test do
