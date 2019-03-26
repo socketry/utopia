@@ -26,8 +26,8 @@ require_relative 'command/environment'
 
 module Utopia
 	module Command
-		def self.parse(*args)
-			Top.parse(*args)
+		def self.call(*args)
+			Top.call(*args)
 		end
 		
 		# The top level utopia command.
@@ -40,23 +40,24 @@ module Utopia
 				option '-v/--version', "Print out the application version."
 			end
 			
-			nested '<command>',
+			nested :command, {
 				'site' => Site,
 				'server' => Server,
 				'environment' => Environment
+			}
 			
 			# The root directory for the site.
 			def root
 				File.expand_path(@options.fetch(:root, ''), Dir.getwd)
 			end
 			
-			def invoke(program_name: File.basename($0))
+			def call
 				if @options[:version]
-					puts "utopia v#{VERSION}"
-				elsif @options[:help] or @command.nil?
-					print_usage(program_name)
+					puts "#{self.name} v#{VERSION}"
+				elsif @options[:help]
+					print_usage(output: $stdout)
 				else
-					@command.invoke(self)
+					@command.call
 				end
 			end
 		end

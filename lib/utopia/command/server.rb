@@ -32,12 +32,12 @@ module Utopia
 			class Create < Samovar::Command
 				self.description = "Create a remote Utopia website suitable for deployment using git."
 				
-				def invoke(parent)
+				def call
 					destination_root = parent.root
 					
 					FileUtils.mkdir_p File.join(destination_root, "public")
 					
-					Update.new.invoke(parent)
+					Update[parent: parent].call
 					
 					# Print out helpful git remote add message:
 					hostname = `hostname`.chomp
@@ -55,7 +55,7 @@ module Utopia
 					File.join(SETUP_ROOT, 'server')
 				end
 				
-				def invoke(parent)
+				def call
 					destination_root = parent.root
 					
 					Dir.chdir(destination_root) do
@@ -91,12 +91,16 @@ module Utopia
 			
 			self.description = "Manage server deployments."
 			
-			nested '<command>',
+			nested :command,
 				'create' => Create,
 				'update' => Update
 			
-			def invoke(parent)
-				@command.invoke(parent)
+			def root
+				@parent.root
+			end
+			
+			def call
+				@command.call
 			end
 		end
 	end

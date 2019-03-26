@@ -46,7 +46,7 @@ module Utopia
 			class Create < Samovar::Command
 				self.description = "Create a new local Utopia website using the default template."
 				
-				def invoke(parent)
+				def call
 					destination_root = parent.root
 					
 					$stderr.puts "Setting up initial site in #{destination_root} for Utopia v#{Utopia::VERSION}..."
@@ -135,7 +135,7 @@ module Utopia
 					end
 				end
 				
-				def invoke(parent)
+				def call
 					destination_root = parent.root
 					branch_name = "utopia-upgrade-#{Utopia::VERSION}"
 					
@@ -195,14 +195,18 @@ module Utopia
 				end
 			end
 			
-			nested '<command>',
+			nested :command,
 				'create' => Create,
 				'update' => Update
 			
 			self.description = "Manage local utopia sites."
 			
-			def invoke(parent)
-				@command.invoke(parent)
+			def root
+				@parent.root
+			end
+			
+			def call
+				@command.call
 			end
 		end
 	end
