@@ -18,8 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'event/console'
+require 'console'
 
 module Utopia
-	extend Event::Console
+	extend Console
 end
