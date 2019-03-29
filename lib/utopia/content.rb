@@ -32,8 +32,6 @@ require 'concurrent/map'
 module Utopia
 	# A middleware which serves dynamically generated content based on markup files.
 	class Content
-		INDEX = 'index'.freeze
-		
 		CONTENT_NAMESPACE = 'content'.freeze
 		UTOPIA_NAMESPACE = 'utopia'.freeze
 		DEFERRED_TAG_NAME = 'utopia:deferred'.freeze

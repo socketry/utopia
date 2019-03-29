@@ -28,6 +28,8 @@ require_relative '../locale'
 
 module Utopia
 	class Content
+		INDEX = 'index'.freeze
+		
 		# Represents a link to some content with associated metadata.
 		class Link
 			def initialize(kind, path, info = nil)
