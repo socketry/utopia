@@ -1,7 +1,5 @@
 
-require 'bundler/setup'
 require 'covered/rspec'
-require "utopia"
 
 RSpec.configure do |config|
 	# Enable flags like --only-failures and --next-failure
