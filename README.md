@@ -41,7 +41,7 @@ Create a new site:
 
 ## Usage
 
-There is an excellent documentation wiki included with the source code. Simply clone this repository and `rake documentation:server`. This documentation wiki is editable, so feel free to submit a PR with improvements.
+There is an excellent [documentation wiki](https://ioquatix.github.io/utopia/) included with the source code. Simply clone this repository and `rake documentation:server`. This documentation wiki is editable, so feel free to submit a PR with improvements.
 
 ## Contributing
 
