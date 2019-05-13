@@ -81,7 +81,12 @@ module Utopia
 			def respond!(response)
 				throw :response, response
 			end
-
+			
+			# Respond with the response, but only if it's not nil.
+			def respond?(response)
+				respond!(response) if response
+			end
+			
 			# This will cause the controller middleware to pass on the request.
 			def ignore!
 				throw :response, nil
