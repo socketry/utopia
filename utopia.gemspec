@@ -38,9 +38,12 @@ Gem::Specification.new do |spec|
 	
 	spec.add_dependency 'concurrent-ruby', '~> 1.0'
 	
+	spec.add_development_dependency 'falcon'
+	spec.add_development_dependency 'async-rspec'
+	spec.add_development_dependency 'async-websocket'
+	
 	spec.add_development_dependency 'covered'
 	spec.add_development_dependency 'bundler'
 	spec.add_development_dependency 'rspec', '~> 3.6'
-	spec.add_development_dependency 'falcon'
 	spec.add_development_dependency 'rake'
 end
