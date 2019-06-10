@@ -102,6 +102,15 @@ module Utopia::SessionSpec
 			get "/session-get?key=foo"
 			expect(last_response.body).to be == ""
 		end
+
+		it "should fail if expired cookie is sent with the request" do
+			session_cookie = last_response['Set-Cookie'].split(';')[0]
+			sleep 6 # sleep longer than the session timeout
+			header 'Cookie', session_cookie
+
+			get "/session-get?key=foo"
+			expect(last_response.body).to be == ""
+		end
 		
 		it "shouldn't fail if ip address is changed" do
 			# Change user agent:
