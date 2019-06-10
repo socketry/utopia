@@ -24,19 +24,19 @@ require 'rack/test'
 require 'utopia/controller'
 
 require 'async/websocket/client'
-require 'async/websocket/server/rack'
+require 'async/websocket/adapters/rack'
 
 require 'falcon/server'
 require 'falcon/adapters/rack'
 
 require 'async/http/client'
-require 'async/http/url_endpoint'
+require 'async/http/endpoint'
 
 RSpec.describe Utopia::Controller do
 	include Rack::Test::Methods
 	include_context Async::RSpec::Reactor
 	
-	let(:endpoint) {Async::HTTP::URLEndpoint.parse("http://localhost:7050/server/events")}
+	let(:endpoint) {Async::HTTP::Endpoint.parse("http://localhost:7050/server/events")}
 	let(:app) {Rack::Builder.parse_file(File.expand_path('websocket_spec.ru', __dir__)).first}
 	let(:server) {Falcon::Server.new(Falcon::Server.middleware(app), endpoint)}
 	let(:client) {Async::HTTP::Client.new(endpoint)}
@@ -58,7 +58,7 @@ RSpec.describe Utopia::Controller do
 	end
 	
 	it "can connect to websocket" do
-		Async::WebSocket::Client.open(endpoint) do |connection|
+		Async::WebSocket::Client.connect(endpoint) do |connection|
 			expect(connection.read).to be == {type: "test", data: "Hello World"}
 		end
 	end
