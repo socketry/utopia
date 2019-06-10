@@ -1,7 +1,6 @@
 #!/usr/bin/env -S falcon host
 
-load :rack, :lets_encrypt, :supervisor
+load :rack, :self_signed_tls, :supervisor
 
-host 'utopia.localhost', :rack, :lets_encrypt
-
+rack 'utopia.localhost', :self_signed_tls
 supervisor
