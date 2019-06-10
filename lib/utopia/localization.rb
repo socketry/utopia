@@ -180,14 +180,10 @@ module Utopia
 		
 		# Set the Vary: header on the response to indicate that this response should include the header in the cache key.
 		def vary(env, response)
-			headers = response[1]
+			headers = response[1].to_a
 			
 			# This response was based on the Accept-Language header:
-			if headers['Vary']
-				headers['Vary'] += ',Accept-Language'
-			else
-				headers['Vary'] = 'Accept-Language'
-			end
+			headers << ['Vary', 'Accept-Language']
 			
 			# Althought this header is generally not supported, we supply it anyway as it is useful for debugging:
 			if locale = env[CURRENT_LOCALE_KEY]
