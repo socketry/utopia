@@ -1,6 +1,6 @@
 
 desc 'Set up the environment for running your web application'
-task :environment do |task|
+task :environment => :log do |task|
 	require SITE_ROOT + 'config/environment'
 	
 	# We ensure this is part of the shell environment so if other commands are invoked they will work correctly.
@@ -11,7 +11,7 @@ task :environment do |task|
 	if ENV['UTOPIA_SESSION_SECRET'].nil?
 		require 'securerandom'
 		
-		warn 'Generating transient session key for development...'
+		Utopia.logger.warn 'Generating transient session key for development...'
 		ENV['UTOPIA_SESSION_SECRET'] = SecureRandom.hex(32)
 	end
 end
