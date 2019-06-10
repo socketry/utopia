@@ -126,7 +126,7 @@ module Utopia
 				
 				data = encrypt(session_hash.values)
 				
-				commit(data, headers)
+				commit(data, values[:updated_at], headers)
 			end
 		end
 		
@@ -165,20 +165,26 @@ module Utopia
 			if values[:user_agent] != request.user_agent
 				raise PayloadError, "Invalid session because supplied user agent #{request.user_agent.inspect} does not match session user agent #{values[:user_agent].inspect}!"
 			end
+
+			if expires_at = expires(values[:updated_at])
+				if expires_at < Time.now.utc
+					raise PayloadError, "Expired session cookie, user agent submitted a cookie that should have expired at #{expires_at}."
+				end
+			end
 			
 			return true
 		end
 		
-		def expires
+		def expires(updated_at=Time.now.utc)
 			if @expires_after
-				return Time.now.utc + @expires_after
+				return updated_at + @expires_after
 			end
 		end
 		
-		def commit(value, headers)
+		def commit(value, updated_at, headers)
 			cookie = {
 				value: value,
-				expires: expires
+				expires: expires(updated_at)
 			}.merge(@cookie_defaults)
 			
 			Rack::Utils.set_cookie_header!(headers, @cookie_name, cookie)

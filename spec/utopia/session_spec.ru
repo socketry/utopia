@@ -1,7 +1,7 @@
 
 use Utopia::Session,
 	secret: "97111cabf4c1a5e85b8029cf7c61aa44424fc24a",
-	expires_after: 3600 * 48,
+	expires_after: 5,
 	update_timeout: 1
 
 run lambda { |env|
