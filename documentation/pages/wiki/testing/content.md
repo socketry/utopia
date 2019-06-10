@@ -1,6 +1,6 @@
 # Testing
 
-Utopia websites include a default set of tests, and associated `rake test` tasks. These specs can test against the actual running website. By default, `simplecov` is included for coverage testing.
+Utopia websites include a default set of tests, and associated `rake test` tasks. These specs can test against the actual running website. By default, [covered](https://github.com/socketry/covered) is included for coverage testing.
 
 ```bash
 $ rake coverage test
