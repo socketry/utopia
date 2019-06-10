@@ -36,7 +36,7 @@ module Utopia
 		def call(env)
 			response = @app.call(env)
 			
-			unless response[2].empty? or response[1].include?(Rack::CONTENT_LENGTH)
+			unless response[2]&.empty? or response[1].include?(Rack::CONTENT_LENGTH)
 				if content_length = self.content_length_of(response[2])
 					response[1][Rack::CONTENT_LENGTH] = content_length
 				end
