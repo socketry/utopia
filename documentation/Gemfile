@@ -14,6 +14,7 @@ gem "kramdown-parser-gfm"
 group :development do
 	# For `rake server`:
 	gem "guard-falcon"
+	gem "falcon"
 	
 	# For `rake console`:
 	gem "pry"
@@ -21,9 +22,4 @@ group :development do
 	
 	# For `rspec` testing:
 	gem "rspec"
-end
-
-group :production do
-	# Used for passenger-config to restart server after deployment:
-	gem "passenger"
 end
