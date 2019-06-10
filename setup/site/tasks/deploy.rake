@@ -6,8 +6,7 @@ end
 
 desc 'Restart the application server'
 task :restart do
-	# This task is run after the deployment task above.
-	if passenger_config = `which passenger-config`.chomp!
-		sh(passenger_config, 'restart-app', '--ignore-passenger-not-running', SITE_ROOT.to_s)
+	if falcon = `which falcon`.chomp! and File.exist?("supervisor.ipc")
+		sh(falcon, 'supervisor', 'restart')
 	end
 end

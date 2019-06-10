@@ -23,7 +23,7 @@
 		<div>
 			<i class="fa fa-server"></i>
 			<h2>Batteries included</h2>
-			<p>Utopia includes both a recommended development model and a server deployment model out of the box. This is exposed via the <code>utopia</code> command. We recommend use of <a href="https://www.nginx.com">Nginx</a> and <a href="https://www.phusionpassenger.com">Passenger</a> for server side deployment.</p>
+			<p>Utopia includes both a recommended development model and a server deployment model out of the box. This is exposed via the <code>utopia</code> command. We recommend use of <a href="https://github.com/socketry/falcon">Falcon</a> for server side deployment.</p>
 		</div>
 		
 		<div>
