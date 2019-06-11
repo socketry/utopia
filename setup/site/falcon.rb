@@ -2,5 +2,7 @@
 
 load :rack, :self_signed_tls, :supervisor
 
-rack 'utopia.localhost', :self_signed_tls
+hostname = File.basename(__dir__)
+rack hostname, :lets_encrypt
+
 supervisor
