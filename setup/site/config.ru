@@ -23,7 +23,7 @@ use Utopia::Redirection::DirectoryIndex
 use Utopia::Redirection::Errors,
 	404 => '/errors/file-not-found'
 
-require_relative 'utopia/localization'
+require 'utopia/localization'
 use Utopia::Localization,
 	default_locale: 'en',
 	locales: ['en', 'de', 'ja', 'zh']
