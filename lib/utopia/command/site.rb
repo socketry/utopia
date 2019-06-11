@@ -31,7 +31,7 @@ module Utopia
 		# Local site setup commands.
 		class Site < Samovar::Command
 			# Configuration files which should be installed/updated:
-			CONFIGURATION_FILES = ['.yarnrc', '.gitignore', 'config.ru', 'config/environment.rb', 'Gemfile', 'Guardfile', 'Rakefile', 'tasks/yarn.rake', 'tasks/deploy.rake', 'tasks/development.rake', 'tasks/environment.rake', 'tasks/log.rake']
+			CONFIGURATION_FILES = ['.yarnrc', '.gitignore', 'config.ru', 'config/environment.rb', 'falcon.rb', 'Gemfile', 'Guardfile', 'Rakefile', 'tasks/yarn.rake', 'tasks/deploy.rake', 'tasks/development.rake', 'tasks/environment.rake', 'tasks/log.rake']
 			
 			# Directories that should exist:
 			DIRECTORIES = ["config", "lib", "pages", "public", "tasks"]
