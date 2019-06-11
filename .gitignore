@@ -5,3 +5,4 @@ Gemfile.lock
 documentation/run/*
 documentation/public/code/*
 .rspec_status
+.yardoc
