@@ -81,6 +81,20 @@ module Utopia
 				:user_agent,
 			]
 			
+			def generate_backtrace(io, exception, prefix: "Exception")
+				io.puts "#{prefix} #{exception.class.name}: #{exception.to_s}"
+				
+				if exception.respond_to?(:backtrace)
+					io.puts exception.backtrace
+				else
+					io.puts exception.to_s
+				end
+				
+				if cause = exception.cause
+					generate_backtrace(io, cause, prefix: "Caused by")
+				end
+			end
+			
 			def generate_body(exception, env)
 				io = StringIO.new
 				
@@ -111,13 +125,7 @@ module Utopia
 				
 				io.puts
 				
-				io.puts "#{exception.class.name}: #{exception.to_s}"
-				
-				if exception.respond_to?(:backtrace)
-					io.puts exception.backtrace
-				else
-					io.puts exception.to_s
-				end
+				generate_backtrace(io, exception)
 				
 				return io.string
 			end
