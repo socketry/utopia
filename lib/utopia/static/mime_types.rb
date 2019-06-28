@@ -43,7 +43,7 @@ module Utopia
 				"html", "css", "js", ["map", "application/json"], "txt", "rtf", "xml", "pdf"
 			],
 			:fonts => [
-				"otf", ["eot", "application/vnd.ms-fontobject"], "ttf", "woff"
+				"otf", ["eot", "application/vnd.ms-fontobject"], "ttf", "woff", "woff2"
 			],
 			:archive => [
 				"zip", "tar", "tgz", "tar.gz", "tar.bz2", ["dmg", "application/x-apple-diskimage"],
