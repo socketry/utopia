@@ -11,7 +11,7 @@
 		<div>
 			<i class="fa fa-cubes"></i>
 			<h2>Modular code and structure</h2>
-			<p>Utopia provides independently useful <a href="https://github.com/rack/rack">Rack</a> middleware and has been designed with simplicify in mind. Several fully-featured webapps and a ton of commercial websites have guided the development of the Utopia stack. It is capable of handling a diverse range of requirements.</p>
+			<p>Utopia provides independently useful <a href="https://github.com/rack/rack">Rack</a> middleware and has been designed with simplicity in mind. Several fully-featured webapps and a ton of commercial websites have guided the development of the Utopia stack. It is capable of handling a diverse range of requirements.</p>
 		</div>
 		
 		<div>
