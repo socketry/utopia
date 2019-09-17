@@ -26,6 +26,7 @@ require 'json'
 
 require 'utopia/content'
 require 'utopia/controller'
+require 'utopia/redirection'
 
 module Utopia::Controller::RespondSpec
 	describe Utopia::Controller do

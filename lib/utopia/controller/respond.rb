@@ -64,7 +64,7 @@ module Utopia
 				
 				# To accept incoming requests with content-type JSON (e.g. POST with JSON data), consider using `Rack::PostBodyContentTypeParser`.
 				module ToJSON
-					APPLICATION_JSON = HTTP::Accept::ContentType.new('application/json', charset: 'utf-8').freeze
+					APPLICATION_JSON = HTTP::Accept::ContentType.new('application', 'json', charset: 'utf-8').freeze
 					HEADERS = {HTTP::CONTENT_TYPE => APPLICATION_JSON.to_s}.freeze
 					
 					def self.content_type
@@ -94,7 +94,7 @@ module Utopia
 			end
 			
 			module Passthrough
-				WILDCARD = HTTP::Accept::MediaTypes::MediaRange.new('*/*').freeze
+				WILDCARD = HTTP::Accept::MediaTypes::MediaRange.new('*', '*').freeze
 				
 				def self.split(*args)
 					self.media_range.split(*args)
