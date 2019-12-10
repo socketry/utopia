@@ -65,7 +65,14 @@ module Utopia
 					return root.join(*(base + path).components)
 				end
 			end
-
+			
+			def relative_path(path = '.')
+				path = Path[path]
+				base = uri_path.dirname
+				
+				return base + path
+			end
+			
 			def parent_path
 				@uri_path.dirname
 			end
