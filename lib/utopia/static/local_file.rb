@@ -109,7 +109,7 @@ module Utopia
 				else
 					# Partial content:
 					@range = ranges[0]
-					partial_size = @range.count
+					partial_size = @range.size
 					
 					response[0] = 206
 					response[1][CONTENT_LENGTH] = partial_size.to_s
