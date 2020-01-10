@@ -7,3 +7,6 @@ tmp/
 
 # This file should only ever exist on production, and may contain sensitive information:
 config/environment.yaml
+
+# Ignore resized gallery photos:
+public/_gallery/
