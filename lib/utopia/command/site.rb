@@ -195,9 +195,10 @@ module Utopia
 				end
 			end
 			
-			nested :command,
+			nested :command, {
 				'create' => Create,
 				'update' => Update
+			}
 			
 			self.description = "Manage local utopia sites."
 			

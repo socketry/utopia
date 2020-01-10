@@ -91,9 +91,10 @@ module Utopia
 			
 			self.description = "Manage server deployments."
 			
-			nested :command,
+			nested :command, {
 				'create' => Create,
 				'update' => Update
+			}
 			
 			def root
 				@parent.root
