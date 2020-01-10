@@ -6,7 +6,7 @@ gem 'utopia', '~> $UTOPIA_VERSION'
 # gem 'utopia-analytics'
 
 gem 'rake'
-gem 'bundler', '~> 2.0'
+gem 'bundler'
 
 gem 'rack-freeze', '~> 1.2'
 

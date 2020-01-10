@@ -39,7 +39,7 @@ RSpec.describe "utopia command" do
 	end
 	
 	around(:each) do |example|
-		Bundler.with_original_env do
+		Bundler.with_clean_env do
 			# If we don't delete this, when running on travis, it will try submit the coverage report.
 			ENV.delete('COVERAGE')
 			
