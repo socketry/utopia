@@ -2,14 +2,24 @@
 require_relative 'website_context'
 
 # Learn about best practice specs from http://betterspecs.org
-RSpec.describe "my website" do
-	include_context "website"
+RSpec.describe "website", timeout: 120 do
+	include_context "server"
 	
-	it "should have an accessible front page" do
-		get "/"
+	let(:spider) {Benchmark::HTTP::Spider.new(depth: 128)}
+	let(:statistics) {Benchmark::HTTP::Statistics.new}
+	
+	it "should be responsive" do
+		Async::HTTP::Client.open(endpoint, connection_limit: 8) do |client|
+			spider.fetch(statistics, client, endpoint.url) do |method, uri, response|
+				#if response.failure?
+					Async.logger.error{"#{method} #{uri} -> #{response.status}"}
+				#end
+			end.wait
+		end
 		
-		follow_redirect!
+		statistics.print
 		
-		expect(last_response.status).to be == 200
+		expect(statistics.samples).to be_any
+		expect(statistics.failed).to be_zero
 	end
 end
