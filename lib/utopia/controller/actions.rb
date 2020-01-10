@@ -139,7 +139,7 @@ module Utopia
 						first = ['**', first.to_s]
 					end
 					
-					actions.define(Path.split(first) + path, options, &block)
+					actions.define(Path.split(first) + path, **options, &block)
 				end
 				
 				def otherwise(&block)
