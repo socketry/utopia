@@ -23,6 +23,7 @@ require 'tmpdir'
 require 'yaml'
 
 require 'open3'
+require 'bundler'
 
 RSpec.describe "utopia command" do
 	let(:utopia) {File.expand_path("../../bin/utopia", __dir__)}
@@ -38,7 +39,7 @@ RSpec.describe "utopia command" do
 	end
 	
 	around(:each) do |example|
-		Bundler.with_clean_env do
+		Bundler.with_original_env do
 			# If we don't delete this, when running on travis, it will try submit the coverage report.
 			ENV.delete('COVERAGE')
 			
