@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 use Utopia::Session,
 	secret: "97111cabf4c1a5e85b8029cf7c61aa44424fc24a",

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'benchmark/ips'
 
 # This benchmark compares accessing an instance variable vs accessing a struct member (via a function). The actual method dispatch is about 25% slower.

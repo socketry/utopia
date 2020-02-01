@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 localization_spec_root = File.expand_path('localization_spec', __dir__)
 

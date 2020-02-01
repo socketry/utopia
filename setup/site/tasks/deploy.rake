@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 desc 'Run by git post-update hook when deployed to a web server'
 task :deploy do

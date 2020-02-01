@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 namespace :yarn do
 	desc 'Load the .bowerrc file and setup the environment for other tasks.'

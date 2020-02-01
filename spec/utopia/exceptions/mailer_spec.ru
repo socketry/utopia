@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 use Utopia::Exceptions::Mailer,
 	delivery_method: :test,

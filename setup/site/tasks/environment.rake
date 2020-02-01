@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 desc 'Set up the environment for running your web application'
 task :environment => :log do |task|

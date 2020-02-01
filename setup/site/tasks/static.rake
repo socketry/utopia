@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 namespace :static do
 	task :static_environment do

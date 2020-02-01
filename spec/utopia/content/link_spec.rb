@@ -1,4 +1,5 @@
 #!/usr/bin/env rspec
+# frozen_string_literal: true
 
 # Copyright, 2015, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
