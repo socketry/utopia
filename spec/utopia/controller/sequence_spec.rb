@@ -46,7 +46,7 @@ module Utopia::Controller::SequenceSpec
 		prepend Utopia::Controller::Actions
 		
 		def initialize
-			@sequence = ""
+			@sequence = String.new
 		end
 		
 		on('user/update') do
