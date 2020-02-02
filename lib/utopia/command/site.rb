@@ -83,7 +83,7 @@ module Utopia
 						
 						if `which bundle`.strip != ''
 							puts "Generating initial package list with bundle..."
-							system("bundle", "install", "--binstubs") or fail "could not install bundled gems"
+							system("bundle", "install") or fail "could not install bundled gems"
 						end
 						
 						if `which git`.strip == ""
