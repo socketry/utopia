@@ -12,7 +12,7 @@ namespace :documentation do
 
 	desc "Build and run the documentation wiki."
 	task :server => :yard do
-		Bundler.with_clean_env do
+		Bundler.with_unbundled_env do
 			Dir.chdir('documentation') do
 				sh('bundle', 'install', '--quiet')
 				sh('bundle', 'exec', 'rake')
