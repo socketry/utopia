@@ -24,6 +24,9 @@
 require 'utopia/content/links'
 
 RSpec.describe Utopia::Content::Links do
+	let(:root) {File.expand_path("links", __dir__)}
+	subject {described_class.new(root)}
+	
 	describe 'INDEX_XNODE_FILTER' do
 		subject{Utopia::Content::Links::INDEX_XNODE_FILTER}
 		
@@ -37,13 +40,13 @@ RSpec.describe Utopia::Content::Links do
 	end
 	
 	it "should not match partial strings" do
-		links = Utopia::Content::Links.index(File.expand_path("links", __dir__), Utopia::Path.create("/"), name: "come")
+		links = subject.index(Utopia::Path.create("/"), name: "come")
 		
 		expect(links).to be_empty
 	end
 	
 	it "should give a list of links" do
-		links = Utopia::Content::Links.index(File.expand_path("links", __dir__), Utopia::Path.create("/"))
+		links = subject.index(Utopia::Path.create("/"))
 		
 		expect(links.size).to be == 3
 		
@@ -66,37 +69,33 @@ RSpec.describe Utopia::Content::Links do
 	end
 	
 	it "should filter links by name" do
-		links = Utopia::Content::Links.index(File.expand_path("links", __dir__), Utopia::Path.create("/"), name: /foo/)
+		links = subject.index(Utopia::Path.create("/"), name: /foo/)
 		
 		expect(links.size).to be == 1
 	end
 	
 	it "should select localized links" do
-		root = File.expand_path("links", __dir__)
-		
 		# Select both test links
-		links = Utopia::Content::Links.index(root, Utopia::Path.create("/foo"))
+		links = subject.index(Utopia::Path.create("/foo"))
 		expect(links.size).to be == 2
 		
-		links = Utopia::Content::Links.index(root, Utopia::Path.create("/foo"), locale: 'en')
+		links = subject.index(Utopia::Path.create("/foo"), locale: 'en')
 		expect(links.size).to be == 1
 	end
 	
-	it "should read correct link order for en" do
-		root = File.expand_path("localized", __dir__)
+	context 'localized links'  do
+		let(:root) {File.expand_path("localized", __dir__)}
 		
-		# Select both test links
-		links = Utopia::Content::Links.index(root, Utopia::Path.create("/"), locale: 'en')
+		it "should read correct link order for en" do
+			links = subject.index(Utopia::Path.create("/"), locale: 'en')
+			
+			expect(links.collect(&:title)).to be == ['One', 'Two', 'Three', 'Four', 'Five']
+		end
 		
-		expect(links.collect(&:title)).to be == ['One', 'Two', 'Three', 'Four', 'Five']
-	end
-	
-	it "should read correct link order for zh" do
-		root = File.expand_path("localized", __dir__)
-		
-		# Select both test links
-		links = Utopia::Content::Links.index(root, Utopia::Path.create("/"), locale: 'zh')
-		
-		expect(links.collect(&:title)).to be == ['One', 'Two', 'Three', '四']
+		it "should read correct link order for zh" do
+			links = subject.index(Utopia::Path.create("/"), locale: 'zh')
+			
+			expect(links.collect(&:title)).to be == ['One', 'Two', 'Three', '四']
+		end
 	end
 end

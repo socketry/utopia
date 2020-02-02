@@ -23,6 +23,7 @@
 require_relative 'middleware'
 require_relative 'localization'
 
+require_relative 'content/links'
 require_relative 'content/node'
 require_relative 'content/markup'
 require_relative 'content/tags'
@@ -48,6 +49,8 @@ module Utopia
 			@template_cache = Concurrent::Map.new
 			@node_cache = Concurrent::Map.new
 			
+			@links = Links.new(@root)
+			
 			@namespaces = namespaces
 			
 			# Default content namespace for dynamic path based lookup:
@@ -68,6 +71,10 @@ module Utopia
 		end
 		
 		attr :root
+		
+		def links(path, **options)
+			@links.index(path, options)
+		end
 		
 		def fetch_template(path)
 			@template_cache.fetch_or_store(path.to_s) do
@@ -114,7 +121,7 @@ module Utopia
 			end
 
 			locale = env[Localization::CURRENT_LOCALE_KEY]
-			if link = Links.for(@root, path, locale)
+			if link = @links.for(path, locale)
 				if link.path and node = lookup_node(link.path)
 					attributes = request.env.fetch(VARIABLES_KEY, {}).to_hash
 					

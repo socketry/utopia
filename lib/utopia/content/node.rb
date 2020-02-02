@@ -81,7 +81,8 @@ module Utopia
 
 			def links(path = '.', **options, &block)
 				path = uri_path.dirname + Path[path]
-				links = Links.index(@controller.root, path, **options)
+				
+				links = @controller.links(path, **options)
 				
 				if block_given?
 					links.each(&block)
@@ -93,7 +94,7 @@ module Utopia
 			def related_links
 				name = @uri_path.basename
 				
-				return Links.index(@controller.root, @uri_path.dirname, :name => @uri_path.basename, :indices => true)
+				return @controller.links(@uri_path.dirname, :name => @uri_path.basename, :indices => true)
 			end
 
 			def siblings_path
@@ -105,7 +106,7 @@ module Utopia
 			end
 
 			def sibling_links(**options)
-				return Links.index(@controller.root, siblings_path, **options)
+				return @controller.links(siblings_path, **options)
 			end
 			
 			# Lookup the given tag which is being rendered within the given node. Invoked by {Document}.
