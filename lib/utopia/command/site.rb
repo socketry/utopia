@@ -36,7 +36,7 @@ module Utopia
 			CONFIGURATION_FILES = ['.yarnrc', '.gitignore', 'config.ru', 'config/environment.rb', 'falcon.rb', 'Gemfile', 'Guardfile', 'Rakefile', 'tasks/yarn.rake', 'tasks/deploy.rake', 'tasks/development.rake', 'tasks/environment.rake', 'tasks/log.rake', 'spec/spec_helper.rb', 'spec/website_context.rb', 'spec/website_spec.rb']
 			
 			# Directories that should exist:
-			DIRECTORIES = ["config", "lib", "pages", "public", "tasks"]
+			DIRECTORIES = ["config", "lib", "pages", "public", "tasks", "spec"]
 			
 			# Directories that should be removed during upgrade process:
 			OLD_PATHS = ["access_log", "cache", "tmp", 'tasks/test.rake', 'tasks/utopia.rake', '.bowerrc', 'tasks/bower.rake']
