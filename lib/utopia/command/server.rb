@@ -68,6 +68,9 @@ module Utopia
 						system("git", "config", "receive.denyCurrentBranch", "ignore") or fail "could not set configuration"
 						system("git", "config", "core.worktree", destination_root) or fail "could not set configuration"
 						
+						system("bundle", "config", "set", "--local", "deployment", "true")
+						system("bundle", "config", "set", "--local", "without", "development test")
+						
 						# In theory, to convert from non-shared to shared:
 						# chgrp -R <group-name> .                   # Change files and directories' group
 						# chmod -R g+w .                            # Change permissions

@@ -63,7 +63,7 @@ Dir.chdir(GIT_WORK_TREE) do
 	sudo %W{git submodule update -i}
 	
 	if File.exist? 'Gemfile'
-		sudo %W{bundle install --deployment --jobs=4 --retry=2 --quiet}
+		sudo %W{bundle install --jobs=4 --retry=2}
 	end
 	
 	if File.exist? 'Rakefile'
