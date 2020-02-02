@@ -50,9 +50,10 @@ module Utopia
 		
 		# @param session_name [String] The name of the session cookie.
 		# @param secret [Array] The secret text used to generate a symetric encryption key for the coookie data.
+		# @param same_site [Symbol, String] Controls how the cookie is provided to the site.
 		# @param expires_after [String] The cache-control header to set for static content.
 		# @param options [Hash<Symbol,Object>] Additional defaults used for generating the cookie by `Rack::Utils.set_cookie_header!`.
-		def initialize(app, session_name: RACK_SESSION, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, maximum_size: MAXIMUM_SIZE, **options)
+		def initialize(app, session_name: RACK_SESSION, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, same_site: :lax, maximum_size: MAXIMUM_SIZE, **options)
 			@app = app
 			
 			@session_name = session_name
@@ -72,8 +73,13 @@ module Utopia
 			@cookie_defaults = {
 				domain: nil,
 				path: "/",
+				
+				# The SameSite attribute controls when the cookie is sent to the server, from 3rd parties (None), from requests with external referrers (Lax) or from within the site itself (Strict).
+				same_site: same_site,
+				
 				# The Secure attribute is meant to keep cookie communication limited to encrypted transmission, directing browsers to use cookies only via secure/encrypted connections. However, if a web server sets a cookie with a secure attribute from a non-secure connection, the cookie can still be intercepted when it is sent to the user by man-in-the-middle attacks. Therefore, for maximum security, cookies with the Secure attribute should only be set over a secure connection.
 				secure: secure,
+				
 				# The HttpOnly attribute directs browsers not to expose cookies through channels other than HTTP (and HTTPS) requests. This means that the cookie cannot be accessed via client-side scripting languages (notably JavaScript), and therefore cannot be stolen easily via cross-site scripting (a pervasive attack technique).
 				http_only: true,
 			}.merge(options)
