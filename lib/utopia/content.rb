@@ -73,7 +73,7 @@ module Utopia
 		attr :root
 		
 		def links(path, **options)
-			@links.index(path, options)
+			@links.index(path, **options)
 		end
 		
 		def fetch_template(path)
