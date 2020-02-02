@@ -24,3 +24,7 @@ group :development do
 	gem 'async-rspec'
 	gem 'benchmark-http'
 end
+
+group :production do
+	gem 'falcon'
+end
