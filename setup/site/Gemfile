@@ -10,15 +10,12 @@ gem 'rake'
 gem 'bundler'
 
 gem 'rack-freeze', '~> 1.2'
+gem 'rack-test'
 
 group :development do
 	# For `rake server`:
 	gem 'guard-falcon', require: false
 	gem 'guard-rspec', require: false
-	
-	# For `rake console`:
-	gem 'pry'
-	gem 'rack-test'
 	
 	# For `rspec` testing:
 	gem 'rspec'

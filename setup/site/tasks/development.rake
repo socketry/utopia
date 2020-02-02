@@ -20,7 +20,7 @@ end
 
 desc 'Start an interactive console for your web application'
 task :console => :environment do
-	require 'pry'
+	require 'irb'
 	require 'rack/test'
 	
 	include Rack::Test::Methods
@@ -29,5 +29,5 @@ task :console => :environment do
 		@app ||= Rack::Builder.parse_file(SITE_ROOT + 'config.ru').first
 	end
 	
-	Pry.start
+	IRB.start
 end
