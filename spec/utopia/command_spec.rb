@@ -87,7 +87,7 @@ RSpec.describe "utopia command" do
 			result = sh_status(utopia, "--in", dir, "site", "create")
 			expect(result).to be == 0
 			
-			expect(Dir.entries(dir)).to include(".yarnrc", ".git", "Gemfile", "Gemfile.lock", "README.md", "Rakefile", "config.ru", "lib", "pages", "public", "spec")
+			expect(Dir.entries(dir)).to include(".yarnrc", ".git", "Gemfile", "Gemfile.lock", "README.md", "bake.rb", "config.ru", "lib", "pages", "public", "spec")
 			
 			Dir.chdir(dir) do
 				result = sh_status("rake", "test")

@@ -33,7 +33,7 @@ module Utopia
 		# Local site setup commands.
 		class Site < Samovar::Command
 			# Configuration files which should be installed/updated:
-			CONFIGURATION_FILES = ['.yarnrc', '.gitignore', 'config.ru', 'config/environment.rb', 'falcon.rb', 'Gemfile', 'Guardfile', 'Rakefile', 'tasks/yarn.rake', 'tasks/deploy.rake', 'tasks/development.rake', 'tasks/environment.rake', 'tasks/log.rake', 'spec/spec_helper.rb', 'spec/website_context.rb', 'spec/website_spec.rb']
+			CONFIGURATION_FILES = ['.yarnrc', '.gitignore', 'config.ru', 'config/environment.rb', 'falcon.rb', 'Gemfile', 'Guardfile', 'bake.rb', 'spec/spec_helper.rb', 'spec/website_context.rb', 'spec/website_spec.rb']
 			
 			# Directories that should exist:
 			DIRECTORIES = ["config", "lib", "pages", "public", "tasks", "spec"]
@@ -73,9 +73,12 @@ module Utopia
 					CONFIGURATION_FILES.each do |configuration_file|
 						destination_path = File.join(destination_root, configuration_file)
 						
-						buffer = File.read(destination_path).gsub('$UTOPIA_VERSION', Utopia::VERSION)
-						
-						File.open(destination_path, "w") { |file| file.write(buffer) }
+						if File.exist?(destination_path)
+							buffer = File.read(destination_path).gsub('$UTOPIA_VERSION', Utopia::VERSION)
+							File.open(destination_path, "w") { |file| file.write(buffer) }
+						else
+							warn "Could not open #{destination_path}, maybe it should be removed from CONFIGURATION_FILES?"
+						end
 					end
 					
 					Dir.chdir(destination_root) do

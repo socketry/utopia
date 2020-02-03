@@ -66,7 +66,9 @@ Dir.chdir(GIT_WORK_TREE) do
 		sudo %W{bundle install}
 	end
 	
-	if File.exist? 'Rakefile'
+	if File.exist? 'bake.rb'
+		sudo %W{bundle exec bake deploy restart}
+	elsif File.exist? 'Rakefile'
 		sudo %W{bundle exec rake deploy restart}
 	end
 end
