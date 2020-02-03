@@ -1,4 +1,3 @@
-
 # frozen_string_literal: true
 
 recipe :deploy, description: 'Prepare the application for start/restart.' do
@@ -6,7 +5,9 @@ recipe :deploy, description: 'Prepare the application for start/restart.' do
 end
 
 recipe :restart, description: 'Restart the application server.' do
-	if falcon = `which falcon`.chomp! and File.exist?("supervisor.ipc")
-		sh(falcon, 'supervisor', 'restart')
-	end
+	call 'falcon:supervisor:restart'
+end
+
+recipe :default, description: 'Start the development server.' do
+	call 'utopia:development'
 end
