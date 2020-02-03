@@ -1,12 +1,20 @@
 # frozen_string_literal: true
 
-recipe :environment, description: 'Set up the environment for the web application' do
+recipe :environment, description: 'Set up the environment for the web application' do |name: nil|
+	require_relative '../lib/utopia/logger'
+	
+	if name
+		ENV['UTOPIA_ENV'] = name
+	end
+	
 	require File.expand_path('config/environment')
 	
 	# We ensure this is part of the shell environment so if other commands are invoked they will work correctly.
 	ENV['RACK_ENV'] = RACK_ENV.to_s if defined?(RACK_ENV)
 	ENV['DATABASE_ENV'] = DATABASE_ENV.to_s if defined?(DATABASE_ENV)
 	ENV['UTOPIA_ENV'] = UTOPIA_ENV.to_s if defined?(UTOPIA_ENV)
+	
+	Utopia.logger.info "Running with UTOPIA_ENV=#{UTOPIA_ENV}..."
 	
 	# This generates a consistent session secret if one was not already provided:
 	if ENV['UTOPIA_SESSION_SECRET'].nil?
