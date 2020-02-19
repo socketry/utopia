@@ -81,8 +81,7 @@ module Utopia
 					# Set some useful defaults for the environment.
 					environment = Environment[]
 					environment.update_environment(destination_root) do |store|
-						store['RACK_ENV'] ||= 'production'
-						store['DATABASE_ENV'] ||= 'production'
+						store['UTOPIA_ENV'] ||= 'production'
 						store['UTOPIA_SESSION_SECRET'] ||= SecureRandom.hex(40)
 					end
 					

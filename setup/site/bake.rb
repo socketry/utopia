@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
-recipe :deploy, description: 'Prepare the application for start/restart.' do
+# Prepare the application for start/restart.
+def deploy
 	# This task is typiclly run after the site is updated but before the server is restarted.
 end
 
-recipe :restart, description: 'Restart the application server.' do
+# Restart the application server.
+def restart
 	call 'falcon:supervisor:restart'
 end
 
-recipe :default, description: 'Start the development server.' do
+# Start the development server.
+def default
 	call 'utopia:development'
 end

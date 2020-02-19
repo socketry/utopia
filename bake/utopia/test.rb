@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-recipe :coverage do
+# Enable coverage 
+def coverage
 	ENV['COVERAGE'] = 'PartialSummary'
 end
 
-recipe :test do
+def test
 	system("rspec")
 end

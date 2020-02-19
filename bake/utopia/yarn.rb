@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-recipe :update do
+# Copy all installed JavaScript components to the public root.
+def update
 	require 'fileutils'
 	require 'utopia/path'
 	

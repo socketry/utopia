@@ -90,7 +90,7 @@ RSpec.describe "utopia command" do
 			expect(Dir.entries(dir)).to include(".yarnrc", ".git", "Gemfile", "Gemfile.lock", "README.md", "bake.rb", "config.ru", "lib", "pages", "public", "spec")
 			
 			Dir.chdir(dir) do
-				result = sh_status("rake", "test")
+				result = sh_status("bundle", "exec", "bake", "utopia:test")
 				expect(result).to be == 0
 			end
 		end
@@ -113,7 +113,7 @@ RSpec.describe "utopia command" do
 			end
 			
 			environment = YAML.load_file(File.join(dir, 'config/environment.yaml'))
-			expect(environment).to include('RACK_ENV', 'UTOPIA_SESSION_SECRET')
+			expect(environment).to include('UTOPIA_ENV', 'UTOPIA_SESSION_SECRET')
 		end
 	end
 	
@@ -161,7 +161,7 @@ RSpec.describe "utopia command" do
 				expect(result).to be == 0
 			end
 			
-			files = %W[.yarnrc .git Gemfile Gemfile.lock README.md Rakefile config.ru lib pages public]
+			files = %W[.yarnrc .git Gemfile Gemfile.lock README.md bake.rb config.ru lib pages public]
 			
 			expect(Dir.entries(server_path)).to include(*files)
 			

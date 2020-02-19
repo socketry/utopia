@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-recipe :generate, description: "Generate a static copy of the site." do |output_path: 'static'|
+# Generate a static copy of the site.
+# @param output_path [String] the path where the files for the static site will be created.
+def generate(output_path: 'static')
 	require 'falcon/server'
 	require 'async/io'
 	require 'async/http/endpoint'
