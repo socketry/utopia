@@ -22,9 +22,13 @@
 
 require 'yaml'
 
+require_relative 'logger'
+
 module Utopia
 	# Used for setting up a Utopia web application, typically via `config/environment.rb`
 	class Setup
+		ENVIRONMENT_KEY = 'UTOPIA_ENV'.freeze
+		
 		def initialize(config_root, external_encoding: Encoding::UTF_8)
 			@config_root = config_root
 			
@@ -37,10 +41,9 @@ module Utopia
 		attr :external_encoding
 		attr :environment
 		
-		ENVIRONMENT_KEY = 'UTOPIA_ENV'.freeze
-		DEFAULT_ENVIRONMENT = 'environment'.freeze
+		DEFAULT_ENVIRONMENT_NAME = 'environment'.freeze
 		
-		def explicit_environment_name
+		def environment_name
 			ENV[ENVIRONMENT_KEY]
 		end
 		
@@ -58,13 +61,51 @@ module Utopia
 			require_relative '../utopia'
 		end
 		
-		def apply_environment
-			if name = explicit_environment_name
-				load_environment(name)
+		def production?
+			self.environment_name == 'production'
+		end
+		
+		def development?
+			if environment_name = self.environment_name
+				environment_name == 'development'
 			else
-				load_environment(DEFAULT_ENVIRONMENT)
+				true
 			end
 		end
+		
+		def test?
+			self.environment_name == 'test'
+		end
+		
+		def secret_for(key)
+			secret = ENV["UTOPIA_#{key.upcase}_SECRET"]
+			
+			if secret.nil? || secret.empty?
+				secret = SecureRandom.hex(32)
+				
+				Utopia.logger.warn(self) do
+					"Generating transient secret for #{key}: #{secret.inspect}!"
+				end
+			end
+			
+			return secret
+		end
+		
+		def apply_environment
+			if environment_name = self.environment_name
+				load_environment(environment_name)
+			else
+				load_environment(DEFAULT_ENVIRONMENT_NAME)
+			end
+		end
+		
+		# Add the given path to $LOAD_PATH. If it's relative, make it absolute relative to `site_path`.
+		def add_load_path(path)
+			# Allow loading library code from lib directory:
+			$LOAD_PATH << File.expand_path(path, site_root)
+		end
+		
+		private
 		
 		def environment_path(name, root = @config_root)
 			File.expand_path("#{name}.yaml", root)
@@ -92,12 +133,6 @@ module Utopia
 					old_value || new_value
 				end
 			end
-		end
-		
-		# Add the given path to $LOAD_PATH. If it's relative, make it absolute relative to `site_path`.
-		def add_load_path(path)
-			# Allow loading library code from lib directory:
-			$LOAD_PATH << File.expand_path(path, site_root)
 		end
 	end
 	

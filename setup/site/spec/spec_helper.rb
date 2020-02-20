@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+ENV['UTOPIA_ENV'] ||= 'test'
+
 require 'bundler/setup'
 require 'covered/rspec'
 require 'utopia'

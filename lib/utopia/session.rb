@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 
 require 'openssl'
-require 'securerandom'
 require 'digest/sha2'
 
 require 'json'
@@ -60,8 +59,7 @@ module Utopia
 			@cookie_name = @session_name + ".encrypted"
 			
 			if secret.nil? or secret.empty?
-				secret = SecureRandom.hex(32)
-				warn "#{self.class} secret is #{secret.inspect}, generating transient secret key!" if $VERBOSE
+				raise ArgumentError, "invalid session secret: #{secret.inspect}"
 			end
 			
 			# This generates a 32-byte key suitable for aes.
