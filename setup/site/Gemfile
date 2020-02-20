@@ -10,7 +10,6 @@ gem 'rake'
 gem 'bake'
 gem 'bundler'
 
-gem 'rack-freeze', '~> 1.2'
 gem 'rack-test'
 
 group :development do

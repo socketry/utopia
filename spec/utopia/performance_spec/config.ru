@@ -4,7 +4,7 @@
 require 'utopia'
 require 'json'
 
-require 'rack/freeze'
+self.freeze_app
 
 use Utopia::ContentLength
 

@@ -4,8 +4,6 @@ source "https://rubygems.org"
 
 gem "utopia", path: File.expand_path("../", __dir__)
 
-gem "rack-freeze", "~> 1.2"
-
 gem "rake"
 gem "bundler"
 

@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
 	spec.add_dependency 'samovar', '~> 2.1'
 	spec.add_dependency 'console', '~> 1.0'
 	
-	spec.add_dependency 'rack', '~> 2.0'
+	spec.add_dependency 'rack', '~> 2.2'
 	
 	spec.add_dependency 'http-accept', '~> 2.1'
 	

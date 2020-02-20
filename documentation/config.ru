@@ -3,7 +3,7 @@
 
 require_relative 'config/environment'
 
-require 'rack/freeze'
+self.freeze_app
 
 if RACK_ENV == :production
 	# Handle exceptions in production with a error page and send an email notification:

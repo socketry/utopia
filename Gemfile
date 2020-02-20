@@ -26,5 +26,4 @@ group :test do
 	gem 'guard-falcon'
 	
 	gem 'rack-test'
-	gem 'rack-freeze', '~> 1.2'
 end
