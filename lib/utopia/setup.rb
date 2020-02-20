@@ -85,7 +85,7 @@ module Utopia
 				secret = SecureRandom.hex(32)
 				
 				Utopia.logger.warn(self) do
-					"Generating transient secret for #{key}: #{secret.inspect}!"
+					"Generating transient #{key} secret: #{secret.inspect}"
 				end
 			end
 			
