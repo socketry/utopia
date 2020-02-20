@@ -8,26 +8,9 @@ def environment(name: nil)
 		ENV['UTOPIA_ENV'] = name
 	end
 	
-	require File.expand_path('config/environment')
+	require File.expand_path('config/environment', context.root)
 	
-	Utopia.logger.info "Running with UTOPIA_ENV=#{UTOPIA_ENV}..."
-end
-
-# Start an interactive console for the web application.
-def console
-	self.environment
-	
-	require 'irb'
-	require 'rack/test'
-	
-	include Rack::Test::Methods
-	
-	def app
-		@app ||= Rack::Builder.parse_file('config.ru').first
-	end
-	
-	ARGV.clear
-	IRB.start
+	Utopia.logger.info(self) {"Running in #{UTOPIA.environment_name}..."}
 end
 
 # Start the development server.
