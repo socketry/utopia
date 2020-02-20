@@ -8,13 +8,15 @@ self.freeze_app
 
 use Utopia::ContentLength
 
-use Utopia::Redirection::Rewrite,
+use Utopia::Redirection::Rewrite, {
 	'/' => '/welcome/index'
+}
 
 use Utopia::Redirection::DirectoryIndex
 
-use Utopia::Redirection::Errors,
+use Utopia::Redirection::Errors, {
 	404 => '/errors/file-not-found'
+}
 
 # use Utopia::Localization,
 # 	:default_locale => 'en',

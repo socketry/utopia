@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
-use Utopia::Redirection::Rewrite, "/" => "/welcome/index"
+use Utopia::Redirection::Rewrite, {"/" => "/welcome/index"}
 
 use Utopia::Redirection::DirectoryIndex
 
-use Utopia::Redirection::Errors,
+use Utopia::Redirection::Errors, {
 	404 => '/error',
 	418 => '/teapot'
+}
 
 use Utopia::Redirection::Moved, "/a", "/b"
 use Utopia::Redirection::Moved, "/hierarchy/", "/hierarchy", flatten: true

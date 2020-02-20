@@ -16,13 +16,15 @@ end
 
 use Utopia::Static, root: 'public'
 
-use Utopia::Redirection::Rewrite,
+use Utopia::Redirection::Rewrite, {
 	'/' => '/welcome/index'
+}
 
 use Utopia::Redirection::DirectoryIndex
 
-use Utopia::Redirection::Errors,
+use Utopia::Redirection::Errors, {
 	404 => '/errors/file-not-found'
+}
 
 require 'utopia/localization'
 use Utopia::Localization,
