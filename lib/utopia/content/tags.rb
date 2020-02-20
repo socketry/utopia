@@ -57,9 +57,9 @@ module Utopia
 			# Render the contents only if in the correct environment.
 			# @param only [String] A comma separated list of environments to check.
 			tag('environment') do |document, state|
-				environment = document.attributes.fetch(:environment){RACK_ENV}.to_s
+				variant = document.attributes.fetch(:variant){UTOPIA.variant}.to_s
 				
-				if state[:only].split(',').include?(environment)
+				if state[:only].split(',').include?(variant)
 					document.parse_markup(state.content)
 				end
 			end

@@ -34,21 +34,20 @@ module Utopia
 			@external_encoding = external_encoding
 			
 			@environment = nil
+			
+			@variant = ENV.fetch('UTOPIA_ENV', 'development').to_sym
 		end
 		
 		attr :config_root
 		attr :external_encoding
 		attr :environment
 		
-		# For a given key, fetch `KEY_ENV` in the process environment. If it exists, return it, otherwise default to the value of `UTOPIA_ENV`.
-		def environment_name(key = nil, default: 'development')
-			if key
-				ENV.fetch("#{key.upcase}_ENV") do
-					ENV.fetch('UTOPIA_ENV', default)
-				end
-			else
-				ENV.fetch("UTOPIA_ENV", default)
-			end
+		# @param [Symbol] Typically one of `:test`, `:development`, or `:production`.
+		attr :variant
+		
+		# For a given key, e.g. `:database`, fetch `DATABASE_ENV` in the process environment. If it exists, return it, otherwise default to the value of `self.variant`.
+		def variant_for(key, default: @variant)
+			ENV.fetch("#{key.upcase}_ENV", default).to_sym
 		end
 		
 		def site_root
@@ -66,15 +65,15 @@ module Utopia
 		end
 		
 		def production?
-			self.environment_name == 'production'
+			@variant == :production
 		end
 		
 		def development?
-			self.environment_name == 'development'
+			@variant == :development
 		end
 		
 		def test?
-			self.environment_name == 'test'
+			@variant == :test
 		end
 		
 		def secret_for(key)
