@@ -11,14 +11,9 @@ gem "kramdown"
 gem "kramdown-parser-gfm"
 
 group :development do
-	# For `rake server`:
 	gem "guard-falcon"
 	gem "falcon"
 	
-	# For `rake console`:
-	gem "pry"
 	gem "rack-test"
-	
-	# For `rspec` testing:
 	gem "rspec"
 end
