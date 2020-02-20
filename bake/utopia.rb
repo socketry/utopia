@@ -9,8 +9,6 @@ def environment(name: nil)
 	end
 	
 	require File.expand_path('config/environment', context.root)
-	
-	Utopia.logger.info(self) {"Running in #{UTOPIA.environment_name}..."}
 end
 
 # Start the development server.
