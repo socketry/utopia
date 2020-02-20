@@ -92,9 +92,7 @@ module Utopia
 			end
 
 			def related_links
-				name = @uri_path.basename
-				
-				return @controller.links(@uri_path.dirname, :name => @uri_path.basename, :indices => true)
+				@controller.links(@uri_path.dirname, :name => @uri_path.basename, :indices => true)
 			end
 
 			def siblings_path
