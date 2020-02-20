@@ -28,8 +28,6 @@ require_relative 'logger'
 module Utopia
 	# Used for setting up a Utopia web application, typically via `config/environment.rb`
 	class Setup
-		ENVIRONMENT_KEY = 'UTOPIA_ENV'.freeze
-		
 		def initialize(config_root, external_encoding: Encoding::UTF_8)
 			@config_root = config_root
 			
@@ -42,10 +40,15 @@ module Utopia
 		attr :external_encoding
 		attr :environment
 		
-		DEFAULT_ENVIRONMENT_NAME = 'environment'.freeze
-		
-		def environment_name
-			ENV[ENVIRONMENT_KEY]
+		# For a given key, fetch `KEY_ENV` in the process environment. If it exists, return it, otherwise default to the value of `UTOPIA_ENV`.
+		def environment_name(key = nil, default: 'development')
+			if key
+				ENV.fetch("#{key.upcase}_ENV") do
+					ENV.fetch('UTOPIA_ENV', default)
+				end
+			else
+				ENV.fetch("UTOPIA_ENV", default)
+			end
 		end
 		
 		def site_root
@@ -67,11 +70,7 @@ module Utopia
 		end
 		
 		def development?
-			if environment_name = self.environment_name
-				environment_name == 'development'
-			else
-				true
-			end
+			self.environment_name == 'development'
 		end
 		
 		def test?
@@ -92,12 +91,12 @@ module Utopia
 			return secret
 		end
 		
+		DEFAULT_ENVIRONMENT_NAME = :environment
+		
 		def apply_environment
-			if environment_name = self.environment_name
-				load_environment(environment_name)
-			else
-				load_environment(DEFAULT_ENVIRONMENT_NAME)
-			end
+			load_environment(
+				self.environment_name(default: DEFAULT_ENVIRONMENT_NAME)
+			)
 		end
 		
 		# Add the given path to $LOAD_PATH. If it's relative, make it absolute relative to `site_path`.
