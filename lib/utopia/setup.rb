@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 require 'yaml'
+require 'securerandom'
 
 require_relative 'logger'
 
