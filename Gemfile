@@ -24,3 +24,5 @@ group :test do
 	
 	gem 'rack-test'
 end
+
+gem "thread-local", "~> 1.0"

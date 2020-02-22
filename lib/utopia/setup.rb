@@ -22,25 +22,40 @@
 
 require 'yaml'
 require 'securerandom'
+require 'thread/local'
 
 require_relative 'logger'
 
 module Utopia
+	def self.root
+		ENV.fetch('UTOPIA_ROOT') {Dir.pwd}
+	end
+	
 	# Used for setting up a Utopia web application, typically via `config/environment.rb`
 	class Setup
-		def initialize(config_root, external_encoding: Encoding::UTF_8)
-			@config_root = config_root
-			
-			@external_encoding = external_encoding
-			
+		extend Thread::Local
+		
+		def self.local
+			self.new(Utopia.root, Utopia.variant)
+		end
+		
+		def initialize(root, variant)
+			@root = root
+			@variant = variant
 			@environment = nil
 			
 			@variant = ENV.fetch('UTOPIA_ENV', 'development').to_sym
 		end
 		
-		attr :config_root
-		attr :external_encoding
-		attr :environment
+		attr :root
+		
+		# One of testing, staging, or production.
+		attr :variant
+		
+		# The environment as loaded from `config/`
+		def environment
+			@environment ||= load_environment
+		end
 		
 		# @param [Symbol] Typically one of `:test`, `:development`, or `:production`.
 		attr :variant
@@ -50,15 +65,15 @@ module Utopia
 			ENV.fetch("#{key.upcase}_ENV", default).to_sym
 		end
 		
+		def config_root
+			File.expand_path("config", @root)
+		end
+		
 		def site_root
-			File.dirname(@config_root)
+			@root
 		end
 		
 		def apply
-			set_external_encoding
-			
-			apply_environment
-			
 			add_load_path('lib')
 			
 			require_relative '../utopia'
@@ -106,17 +121,8 @@ module Utopia
 		
 		private
 		
-		def environment_path(name, root = @config_root)
-			File.expand_path("#{name}.yaml", root)
-		end
-		
-		# If you don't specify these, it's possible to have issues when encodings mismatch on the server.
-		def set_external_encoding(encoding = Encoding::UTF_8)
-			# TODO: Deprecate and remove this setup - it should be the responsibility of the server to set this correctly.
-			if Encoding.default_external != encoding
-				warn "Updating Encoding.default_external from #{Encoding.default_external} to #{encoding}" if $VERBOSE
-				Encoding.default_external = encoding
-			end
+		def environment_path(variant, root = @root)
+			File.expand_path("config/#{variant}.yaml", root)
 		end
 		
 		# Load the named configuration file from the `config_root` directory.
@@ -125,23 +131,12 @@ module Utopia
 			
 			if File.exist?(path)
 				# Load the YAML environment file:
-				@environment = YAML.load_file(path)
-				
-				# We update ENV but only when it's not already set to something:
-				ENV.update(@environment) do |name, old_value, new_value|
-					old_value || new_value
-				end
+				environment = YAML.load_file(path)
 			end
 		end
 	end
 	
-	# The main entry point for `config/environment.rb` for setting up the site.
-	def self.setup(config_root = nil, **options)
-		# We extract the directory of the caller to get the path to $root/config
-		if config_root.nil?
-			config_root = File.dirname(caller[0])
-		end
-		
-		Setup.new(config_root, **options).tap(&:apply)
+	def self.setup
+		Setup.instance
 	end
 end
