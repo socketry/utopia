@@ -22,48 +22,21 @@
 
 require 'yaml'
 require 'securerandom'
-require 'thread/local'
+
+require 'variant/wrapper'
 
 require_relative 'logger'
 
 module Utopia
-	def self.root
-		ENV.fetch('UTOPIA_ROOT') {Dir.pwd}
-	end
-	
 	# Used for setting up a Utopia web application, typically via `config/environment.rb`
 	class Setup
-		extend Thread::Local
-		
-		def self.local
-			self.new(Utopia.root, Utopia.variant)
-		end
-		
-		def initialize(root, variant)
+		def initialize(root, *arguments, **options)
 			@root = root
-			@variant = variant
-			@environment = nil
 			
-			@variant = ENV.fetch('UTOPIA_ENV', 'development').to_sym
+			super(*arguments, **options)
 		end
 		
 		attr :root
-		
-		# One of testing, staging, or production.
-		attr :variant
-		
-		# The environment as loaded from `config/`
-		def environment
-			@environment ||= load_environment
-		end
-		
-		# @param [Symbol] Typically one of `:test`, `:development`, or `:production`.
-		attr :variant
-		
-		# For a given key, e.g. `:database`, fetch `DATABASE_ENV` in the process environment. If it exists, return it, otherwise default to the value of `self.variant`.
-		def variant_for(key, default: @variant)
-			ENV.fetch("#{key.upcase}_ENV", default).to_sym
-		end
 		
 		def config_root
 			File.expand_path("config", @root)
@@ -73,22 +46,20 @@ module Utopia
 			@root
 		end
 		
-		def apply
-			add_load_path('lib')
-			
-			require_relative '../utopia'
+		def production?
+			Variant.for(:utopia) == :production
 		end
 		
-		def production?
-			@variant == :production
+		def staging?
+			Variant.for(:utopia) == :staging
 		end
 		
 		def development?
-			@variant == :development
+			Variant.for(:utopia) == :development
 		end
 		
-		def test?
-			@variant == :test
+		def testing?
+			Variant.for(:utopia) == :testing
 		end
 		
 		def secret_for(key)
@@ -105,11 +76,21 @@ module Utopia
 			return secret
 		end
 		
+		def apply!
+			add_load_path('lib')
+			
+			apply_environment
+			
+			require_relative '../utopia'
+		end
+		
+		private
+		
 		DEFAULT_ENVIRONMENT_NAME = :environment
 		
 		def apply_environment
 			load_environment(
-				self.environment_name(default: DEFAULT_ENVIRONMENT_NAME)
+				Variant.for(:utopia, DEFAULT_ENVIRONMENT_NAME)
 			)
 		end
 		
@@ -118,8 +99,6 @@ module Utopia
 			# Allow loading library code from lib directory:
 			$LOAD_PATH << File.expand_path(path, site_root)
 		end
-		
-		private
 		
 		def environment_path(variant, root = @root)
 			File.expand_path("config/#{variant}.yaml", root)
@@ -132,11 +111,35 @@ module Utopia
 			if File.exist?(path)
 				# Load the YAML environment file:
 				environment = YAML.load_file(path)
+				
+				# We update ENV but only when it's not already set to something:
+				ENV.update(environment) do |name, old_value, new_value|
+					old_value || new_value
+				end
 			end
 		end
 	end
 	
-	def self.setup
-		Setup.instance
+	class << self
+		@setup = nil
+		
+		# You can call this method exactly once per process.
+		def setup(root = nil, **options)
+			if @setup
+				raise RuntimeError, "Utopia already setup!"
+			end
+			
+			# We extract the root from the caller of this method:
+			if root.nil?
+				config_root = File.dirname(caller[0])
+				root = File.dirname(config_root)
+			end
+			
+			@setup = Setup.new(root, **options)
+			
+			@setup.apply!
+			
+			return @setup
+		end
 	end
 end

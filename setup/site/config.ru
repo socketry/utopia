@@ -11,7 +11,7 @@ if UTOPIA.production?
 	use Utopia::Exceptions::Mailer
 else
 	# We want to propate exceptions up when running tests:
-	use Rack::ShowExceptions unless UTOPIA.test?
+	use Rack::ShowExceptions unless UTOPIA.testing?
 end
 
 use Utopia::Static, root: 'public'
