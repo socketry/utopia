@@ -23,7 +23,7 @@
 require 'yaml'
 require 'securerandom'
 
-require 'variant/wrapper'
+require 'variant'
 
 require_relative 'logger'
 
@@ -89,9 +89,9 @@ module Utopia
 		DEFAULT_ENVIRONMENT_NAME = :environment
 		
 		def apply_environment
-			load_environment(
-				Variant.for(:utopia, DEFAULT_ENVIRONMENT_NAME)
-			)
+			variant = Variant.for(:utopia, DEFAULT_ENVIRONMENT_NAME)
+			
+			load_environment(variant)
 		end
 		
 		# Add the given path to $LOAD_PATH. If it's relative, make it absolute relative to `site_path`.
@@ -120,26 +120,24 @@ module Utopia
 		end
 	end
 	
-	class << self
-		@setup = nil
-		
-		# You can call this method exactly once per process.
-		def setup(root = nil, **options)
-			if @setup
-				raise RuntimeError, "Utopia already setup!"
-			end
-			
-			# We extract the root from the caller of this method:
-			if root.nil?
-				config_root = File.dirname(caller[0])
-				root = File.dirname(config_root)
-			end
-			
-			@setup = Setup.new(root, **options)
-			
-			@setup.apply!
-			
-			return @setup
+	@setup = nil
+	
+	# You can call this method exactly once per process.
+	def self.setup(root = nil, **options)
+		if @setup
+			raise RuntimeError, "Utopia already setup!"
 		end
+		
+		# We extract the root from the caller of this method:
+		if root.nil?
+			config_root = File.dirname(caller[0])
+			root = File.dirname(config_root)
+		end
+		
+		@setup = Setup.new(root, **options)
+		
+		@setup.apply!
+		
+		return @setup
 	end
 end

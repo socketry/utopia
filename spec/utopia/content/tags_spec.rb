@@ -31,7 +31,7 @@ RSpec.describe Utopia::Content::Tags do
 	describe '<utopia:environment>' do
 		let(:node) do
 			MockNode.new('utopia' => subject) do |document, state|
-				document.tag("utopia:environment", only: 'test') do
+				document.tag("utopia:environment", only: 'testing') do
 					document.text("Hello World")
 				end
 				
@@ -42,7 +42,7 @@ RSpec.describe Utopia::Content::Tags do
 		end
 		
 		it "it should render correct content for test" do
-			document[:environment] = "test"
+			document[:variant] = "testing"
 			
 			result = document.render_node(node)
 			
@@ -50,7 +50,7 @@ RSpec.describe Utopia::Content::Tags do
 		end
 		
 		it "it should render correct content for production" do
-			document[:environment] = "production"
+			document[:variant] = "production"
 			
 			result = document.render_node(node)
 			

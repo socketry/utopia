@@ -8,6 +8,7 @@ gem 'utopia', '~> $UTOPIA_VERSION'
 
 gem 'rake'
 gem 'bake'
+gem 'variant'
 gem 'bundler'
 
 gem 'rack-test'

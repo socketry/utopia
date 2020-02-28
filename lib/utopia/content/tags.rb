@@ -22,6 +22,8 @@
 
 require_relative 'namespace'
 
+require 'variant'
+
 module Utopia
 	class Content
 		# Tags which provide intrinsic behaviour within the content middleware.
@@ -57,7 +59,9 @@ module Utopia
 			# Render the contents only if in the correct environment.
 			# @param only [String] A comma separated list of environments to check.
 			tag('environment') do |document, state|
-				variant = document.attributes.fetch(:variant){UTOPIA.variant}.to_s
+				variant = document.attributes.fetch(:variant) do
+					Variant.for(:utopia)
+				end.to_s
 				
 				if state[:only].split(',').include?(variant)
 					document.parse_markup(state.content)
