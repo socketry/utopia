@@ -30,7 +30,8 @@ RSpec.describe Utopia::Setup do
 	
 	it "should load specified environment" do
 		environment.with({'VARIANT' => 'production'}) do
-			expect(subject).to receive(:load_environment).with(:production)
+			expect(subject).to receive(:load_environment).with(:environment).ordered
+			expect(subject).to receive(:load_environment).with(:production).ordered
 			subject.send(:apply_environment)
 		end
 	end
@@ -38,7 +39,8 @@ RSpec.describe Utopia::Setup do
 	it "should load default environment" do
 		environment.with({}) do
 			stub_const("ENV", {})
-			expect(subject).to receive(:load_environment).with(:environment)
+			expect(subject).to receive(:load_environment).with(:environment).ordered
+			expect(subject).to receive(:load_environment).with(:development).ordered
 		end
 		
 		subject.send(:apply_environment)

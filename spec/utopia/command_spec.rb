@@ -113,7 +113,7 @@ RSpec.describe "utopia command" do
 			end
 			
 			environment = YAML.load_file(File.join(dir, 'config/environment.yaml'))
-			expect(environment).to include('UTOPIA_ENV', 'UTOPIA_SESSION_SECRET')
+			expect(environment).to include('VARIANT', 'UTOPIA_SESSION_SECRET')
 		end
 	end
 	

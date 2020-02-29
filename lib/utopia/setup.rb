@@ -86,11 +86,14 @@ module Utopia
 		
 		private
 		
-		DEFAULT_ENVIRONMENT_NAME = :environment
-		
 		def apply_environment
-			variant = Variant.for(:utopia, DEFAULT_ENVIRONMENT_NAME)
+			# First try to load `config/environment.yaml` if it exists:
+			load_environment(:environment)
 			
+			# NOTE: loading the environment above MAY set `VARIANT`. So, it's important to look up the variant AFTER loading that environment.
+			
+			# Then, try to load the variant specific environment:
+			variant = Variant.for(:utopia)
 			load_environment(variant)
 		end
 		
@@ -100,15 +103,17 @@ module Utopia
 			$LOAD_PATH << File.expand_path(path, site_root)
 		end
 		
-		def environment_path(variant, root = @root)
-			File.expand_path("config/#{variant}.yaml", root)
+		def environment_path(variant)
+			File.expand_path("config/#{variant}.yaml", @root)
 		end
 		
 		# Load the named configuration file from the `config_root` directory.
-		def load_environment(*args)
-			path = environment_path(*args)
+		def load_environment(variant)
+			path = environment_path(variant)
 			
 			if File.exist?(path)
+				Utopia.logger.debug(self) {"Loading environment at path: #{path.inspect}"}
+				
 				# Load the YAML environment file:
 				environment = YAML.load_file(path)
 				
@@ -116,6 +121,12 @@ module Utopia
 				ENV.update(environment) do |name, old_value, new_value|
 					old_value || new_value
 				end
+				
+				return true
+			else
+				Utopia.logger.debug(self) {"Ignoring environment at path: #{path.inspect} (file not found)"}
+				
+				return false
 			end
 		end
 	end

@@ -99,6 +99,12 @@ module Utopia
 						end
 					end
 					
+					# Set some useful defaults for the environment.
+					environment = Environment[]
+					environment.update_environment(destination_root, :testing) do |store|
+						store['UTOPIA_SESSION_SECRET'] ||= SecureRandom.hex(40)
+					end
+					
 					name = `git config user.name || whoami`.chomp
 					
 					puts
