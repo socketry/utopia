@@ -30,10 +30,8 @@ require_relative 'logger'
 module Utopia
 	# Used for setting up a Utopia web application, typically via `config/environment.rb`
 	class Setup
-		def initialize(root, *arguments, **options)
+		def initialize(root, **options)
 			@root = root
-			
-			super(*arguments, **options)
 		end
 		
 		attr :root
