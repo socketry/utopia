@@ -6,5 +6,5 @@ def coverage
 end
 
 def test
-	system("rspec", exception: true)
+	system("rspec") or abort
 end
