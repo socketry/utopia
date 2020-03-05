@@ -28,25 +28,14 @@ require 'open3'
 require 'bundler'
 
 RSpec.describe "utopia command" do
-	let(:utopia) {File.expand_path("../../bin/utopia", __dir__)}
-	let(:gemspec) {Gem::Specification.load File.expand_path("../../utopia.gemspec", __dir__)}
-	let(:package_path) {File.expand_path("../../pkg/#{gemspec.file_name}", __dir__)}
+	let(:utopia_path) {File.expand_path("../..", __dir__)}
 	
-	before(:all) do
-		# We need to build a package to test deployment:
-		system("rake", "build") or abort("Could not build package for setup spec!")
-		
-		ENV['DEPLOY_USER'] = 'http'
-		ENV['DEPLOY_GROUP'] = 'http'
-	end
+	let(:utopia) {File.expand_path("../../bin/utopia", __dir__)}
 	
 	around(:each) do |example|
 		Bundler.with_unbundled_env do
 			# If we don't delete this, when running on travis, it will try submit the coverage report.
 			ENV.delete('COVERAGE')
-			
-			# This allows the utopia command to load the correct library:
-			ENV['RUBYLIB'] = File.expand_path("../../lib", __dir__)
 			
 			example.run
 		end
@@ -75,24 +64,21 @@ RSpec.describe "utopia command" do
 	end
 	
 	def install_packages(dir)
-		# We do a bit of a hack here to ensure the package is available:
-		FileUtils.mkpath File.join(dir, "vendor/cache")
-		FileUtils.cp package_path, File.join(dir, "vendor/cache")
+		system("bundle", "config", "local.utopia", utopia_path, chdir: dir)
 	end
 	
 	it "should generate sample site" do
 		Dir.mktmpdir('test-site') do |dir|
 			install_packages(dir)
 			
-			result = sh_status(utopia, "--in", dir, "site", "create")
-			expect(result).to be == 0
+			system(utopia, "--in", dir, "site", "create")
+			system("bundle", "config", "local.utopia", utopia_path, chdir: dir)
 			
 			expect(Dir.entries(dir)).to include(".yarnrc", ".git", "Gemfile", "Gemfile.lock", "README.md", "bake.rb", "config.ru", "lib", "pages", "public", "spec")
 			
-			Dir.chdir(dir) do
-				result = sh_status("bundle", "exec", "bake", "utopia:test")
-				expect(result).to be == 0
-			end
+			expect(
+				system("bundle", "exec", "bake", "utopia:test", chdir: dir)
+			).to be true
 		end
 	end
 	
