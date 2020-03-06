@@ -1,6 +1,7 @@
 # Development specific:
 .rspec_status
 .tags*
+.bundle
 
 # Temporary data should not be added to the repository:
 tmp/

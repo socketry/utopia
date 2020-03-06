@@ -29,8 +29,13 @@ require 'bundler'
 
 RSpec.describe "utopia command" do
 	let(:utopia_path) {File.expand_path("../..", __dir__)}
-	
+	let(:pkg_path) {File.expand_path("pkg", utopia_path)}
 	let(:utopia) {File.expand_path("../../bin/utopia", __dir__)}
+	
+	before(:all) do
+		# We need to build a package to test deployment:
+		system("rake", "build") or abort("Could not build package for setup spec!")
+	end
 	
 	around(:each) do |example|
 		Bundler.with_unbundled_env do
@@ -64,7 +69,8 @@ RSpec.describe "utopia command" do
 	end
 	
 	def install_packages(dir)
-		system("bundle", "config", "local.utopia", utopia_path, chdir: dir)
+		system("bundle", "config", "--local", "local.utopia", utopia_path, chdir: dir)
+		system("bundle", "config", "--local", "cache_path", pkg_path, chdir: dir)
 	end
 	
 	it "should generate sample site" do
@@ -72,7 +78,6 @@ RSpec.describe "utopia command" do
 			install_packages(dir)
 			
 			system(utopia, "--in", dir, "site", "create")
-			system("bundle", "config", "local.utopia", utopia_path, chdir: dir)
 			
 			expect(Dir.entries(dir)).to include(".yarnrc", ".git", "Gemfile", "Gemfile.lock", "README.md", "bake.rb", "config.ru", "lib", "pages", "public", "spec")
 			
