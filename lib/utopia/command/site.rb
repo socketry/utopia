@@ -99,11 +99,7 @@ module Utopia
 						end
 					end
 					
-					# Set some useful defaults for the environment.
-					environment = Environment[]
-					environment.update_environment(destination_root, :testing) do |store|
-						store['UTOPIA_SESSION_SECRET'] ||= SecureRandom.hex(40)
-					end
+					Environment.defaults(destination_root)
 					
 					name = `git config user.name || whoami`.chomp
 					
@@ -176,6 +172,8 @@ module Utopia
 						buffer = File.read(destination_path).gsub('$UTOPIA_VERSION', Utopia::VERSION)
 						File.open(destination_path, "w") { |file| file.write(buffer) }
 					end
+					
+					Environment.defaults(destination_root)
 					
 					begin
 						Dir.chdir(destination_root) do

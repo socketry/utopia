@@ -113,11 +113,11 @@ module Utopia
 				Utopia.logger.debug(self) {"Loading environment at path: #{path.inspect}"}
 				
 				# Load the YAML environment file:
-				environment = YAML.load_file(path)
-				
-				# We update ENV but only when it's not already set to something:
-				ENV.update(environment) do |name, old_value, new_value|
-					old_value || new_value
+				if environment = YAML.load_file(path)
+					# We update ENV but only when it's not already set to something:
+					ENV.update(environment) do |name, old_value, new_value|
+						old_value || new_value
+					end
 				end
 				
 				return true
