@@ -78,7 +78,7 @@ module Utopia
 						end
 					end
 					
-					Console.logger.info(self) do |buffer|
+					Console.logger.debug(self) do |buffer|
 						buffer.puts "Environment #{name} (#{path}):"
 						store.roots.each do |key|
 							value = store[key]
