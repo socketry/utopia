@@ -39,7 +39,7 @@ module Utopia
 			DIRECTORIES = ["config", "lib", "pages", "public", "tasks", "spec"]
 			
 			# Directories that should be removed during upgrade process:
-			OLD_PATHS = ["access_log", "cache", "tmp", 'tasks/test.rake', 'tasks/utopia.rake', '.bowerrc', 'tasks/bower.rake']
+			OLD_PATHS = ["access_log", "cache", "tmp", "Rakefile", "tasks", ".bowerrc"]
 			
 			# The root directory of the template site:
 			ROOT = File.join(SETUP_ROOT, 'site')
