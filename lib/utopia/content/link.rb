@@ -30,60 +30,43 @@ require_relative '../locale'
 
 module Utopia
 	class Content
-		INDEX = 'index'.freeze
-		
 		# Represents a link to some content with associated metadata.
 		class Link
-			def initialize(kind, path, info = nil)
-				path = Path.create(path)
-
-				@info = info || {}
+			# @param kind [Symbol] the kind of link.
+			def initialize(kind, name, locale, path, info, title = nil)
 				@kind = kind
-
-				case @kind
-				when :file
-					@name, @locale = path.last.split('.', 2)
-					@path = path
-				when :directory
-					@name = path.basename
-					
-					if @name == INDEX
-						@name = path.dirname.basename
-					end
-					
-					@locale = path.extension
-					@path = path
-				when :virtual
-					@name, @locale = path.to_s.split('.', 2)
-					@path = @info[:path] ? Path.create(@info[:path]) : nil
-				else
-					raise ArgumentError.new("Unknown link kind #{@kind} with path #{path}")
-				end
-				
-				@title = Trenni::Strings.to_title(@name)
+				@name = name
+				@locale = locale
+				@path = Path.create(path)
+				@info = info || {}
+				@title = Trenni::Strings.to_title(title || name)
 			end
-
+			
 			def href
 				@href ||= @info.fetch(:uri) do
 					(@path.dirname + @path.basename).to_s if @path
 				end
 			end
-
+			
 			# Look up from the `links.yaml` metadata with a given symbolic key.
 			def [] key
 				@info[key]
 			end
-
+			
 			attr :kind
 			attr :name
 			attr :path
 			attr :info
 			attr :locale
-
+			
 			def href?
 				!!href
 			end
-
+			
+			def index?
+				@kind == :index
+			end
+			
 			def relative_href(base = nil)
 				if base and href.start_with? '/'
 					Path.shortest_path(href, base)
@@ -91,11 +74,11 @@ module Utopia
 					href
 				end
 			end
-
+			
 			def title
 				@info.fetch(:title, @title)
 			end
-
+			
 			def to_anchor(base: nil, content: self.title, builder: nil, **attributes)
 				attributes[:class] ||= 'link'
 				
@@ -124,7 +107,7 @@ module Utopia
 			def eql? other
 				self.class.eql?(other.class) and kind.eql?(other.kind) and name.eql?(other.name) and path.eql?(other.path) and info.eql?(other.info)
 			end
-
+			
 			def == other
 				other and kind == other.kind and name == other.name and path == other.path
 			end

@@ -48,7 +48,7 @@ module Utopia
 			end
 
 			def link
-				return Link.new(:file, uri_path)
+				return Link.file(uri_path)
 			end
 
 			def lookup_node(path)

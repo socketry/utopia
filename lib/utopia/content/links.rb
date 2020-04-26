@@ -27,7 +27,7 @@ require 'concurrent/map'
 module Utopia
 	class Content
 		# The file extension for markup nodes on disk.
-		XNODE_EXTENSION = '.xnode'.freeze
+		XNODE_EXTENSION = '.xnode'
 		
 		class Links
 			def self.for(root, path, locale = nil)
@@ -40,47 +40,55 @@ module Utopia
 				self.new(root).index(path, **options)
 			end
 			
-			XNODE_FILTER = /^(.+)#{Regexp.escape XNODE_EXTENSION}$/
-			INDEX_XNODE_FILTER = /^(index(\..+)*)#{Regexp.escape XNODE_EXTENSION}$/
-			
-			def initialize(root)
+			def initialize(root, extension: XNODE_EXTENSION)
 				@root = root
 				
-				@cache = Concurrent::Map.new
+				@extension = extension
+				@file_filter = /\A(?<key>(?<name>[^.]+)(\.(?<locale>.+))?)#{Regexp.escape extension}\Z/
+				@index_filter = /\A(?<key>(?<name>index)(\.(?<locale>.+))?)#{Regexp.escape extension}\Z/
+				
+				@metadata_cache = Concurrent::Map.new
+				@links_cache = Concurrent::Map.new
 			end
 			
+			attr :extension
+			attr :file_filter
+			attr :index_filter
+			
+			# Resolve a link for the specified path, which must be a path to a specific link.
+			# 	for(Path["/index"])
 			def for(path, locale = nil)
-				links = Resolved.new(self, path.dirname)
-				
-				links.lookup(path.last, locale)
+				links(path.dirname).lookup(path.last, locale)
 			end
 			
-			DEFAULT_INDEX_OPTIONS = {
-				:directories => true,
-				:files => true,
-				:virtuals => true,
-				:indices => false,
-				:sort => :order,
-				:display => :display,
-			}
-			
-			def index(path, **options)
-				options = DEFAULT_INDEX_OPTIONS.merge(options)
+			# Give an index of all links that can be reached from the given path.
+			def index(path, name: nil, locale: nil, display: :display, sort: :order, sort_default: 0, directories: true, files: true, virtuals: true, indicies: false)
+				ordered = links(path).ordered.dup
 				
-				ordered = Resolved.new(self, path, options).ordered
+				# Ignore specific kinds of links:
+				ignore = []
+				ignore << :directory unless directories
+				ignore << :file unless files
+				ignore << :virtual unless virtuals
+				ignore << :index unless indicies
 				
-				# This option filters a link based on the display parameter.
-				if display_key = options[:display]
-					ordered.reject!{|link| link.info[display_key] == false}
+				if ignore.any?
+					ordered.reject!{|link| ignore.include?(link.kind)}
 				end
 				
-				# Named:
-				if name = options[:name]
+				# Filter links by display key:
+				if display
+					ordered.reject!{|link| link.info[display] == false}
+				end
+				
+				# Filter links by name:
+				if name
 					# We use pattern === name, which matches either the whole string, or matches a regexp.
 					ordered.select!{|link| name === link.name}
 				end
 				
-				if locale = options[:locale]
+				# Filter by locale:
+				if locale
 					locales = {}
 					
 					ordered.each do |link|
@@ -91,13 +99,15 @@ module Utopia
 						end
 					end
 					
+					binding.irb
+					
 					ordered = locales.values
 				end
 				
-				# Sort:
-				if sort_key = options[:sort]
+				# Order by sort key:
+				if sort
 					# Sort by sort_key, otherwise by title.
-					ordered.sort_by!{|link| [link[sort_key] || options[:sort_default] || 0, link.title]}
+					ordered.sort_by!{|link| [link[sort] || sort_default, link.title]}
 				end
 				
 				return ordered
@@ -105,44 +115,91 @@ module Utopia
 			
 			attr :root
 			
-			# Represents a list of {Link} instances relating to the structure of the content. They are formed from the `links.yaml` file and the actual directory structure on disk.
-			class Resolved
-				DEFAULT_OPTIONS = {
-					:directories => true,
-					:files => true,
-					:virtuals => true,
-					:indices => true,
-				}
+			def metadata(path)
+				@metadata_cache.fetch_or_store(path.to_s) do
+					load_metadata(path)
+				end
+			end
+			
+			def links(path)
+				@links_cache.fetch_or_store(path.to_s) do
+					load_links(path)
+				end
+			end
+			
+			private
+			
+			def symbolize_keys(map)
+				# Second level attributes should be symbolic:
+				map.each do |key, info|
+					map[key] = info.each_with_object({}) { |(k,v),result| result[k.to_sym] = v }
+				end
 				
-				def initialize(links, top = Path.root, options = DEFAULT_OPTIONS)
+				return map
+			end
+			
+			LINKS_YAML = "links.yaml"
+			
+			def load_metadata(path)
+				yaml_path = File.join(path, LINKS_YAML)
+				
+				if File.exist?(yaml_path) && data = YAML::load_file(yaml_path)
+					return symbolize_keys(data)
+				else
+					return {}
+				end
+			end
+			
+			# Represents a list of {Link} instances relating to the structure of the content. They are formed from the `links.yaml` file and the actual directory structure on disk.
+			class Resolver
+				def initialize(links, top = Path.root)
 					raise ArgumentError.new("top path must be absolute") unless top.absolute?
 					
 					@links = links
 					
 					@top = top
-					@options = options
 					
 					# top.components.first == '', but this isn't a problem here.
 					@path = File.join(links.root, top.components)
 					
-					@ordered = []
-					@named = Hash.new{|h,k| h[k] = []}
-					
-					if File.directory? @path
+					if File.directory?(@path)
 						@metadata = links.metadata(@path)
-						
-						load_links(@metadata.dup) do |link|
-							@ordered << link
-							@named[link.name] << link
-						end
+						@ordered = nil
 					else
-						@metadata = {}
+						@metadata = nil
+						@ordered = []
 					end
+					
+					@named = nil
 				end
 				
 				attr :top
-				attr :ordered
-				attr :named
+				
+				def ordered
+					if @ordered.nil?
+						@ordered = []
+						@named = {}
+						
+						load_links(@metadata.dup) do |link|
+							@ordered << link
+							(@named[link.name] ||= []) << link
+						end
+					end
+					
+					return @ordered
+				end
+				
+				def named
+					self.ordered
+					
+					return @named
+				end
+				
+				def indices
+					self.ordered
+					
+					return @ordered.select{|link| link.index?}
+				end
 				
 				def each(locale)
 					return to_enum(:each, locale) unless block_given?
@@ -155,115 +212,107 @@ module Utopia
 				def lookup(name, locale = nil)
 					# This allows generic links to serve any locale requested.
 					if links = @named[name]
-						links.find{|link| link.locale == locale} || links.find{|link| link.locale == nil}
+						generic_link = nil
+						
+						links.each do |link|
+							if link.locale == locale
+								return link
+							elsif link.locale.nil?
+								generic_link = link
+							end
+						end
+						
+						return generic_link
 					end
 				end
 				
 				private
 				
-				def indices(path, &block)
-					Dir.entries(path).select{|filename| filename.match(INDEX_XNODE_FILTER)}
-				end
-				
-				def load_indices(name, path, metadata)
-					directory_metadata = metadata.delete(name) || {}
-					indices_metadata = @links.metadata(path)
-					
-					indices_count = 0
-					
-					indices(path).each do |filename|
-						index_name = File.basename(filename, XNODE_EXTENSION)
-						# Values in indices_metadata will override values in directory_metadata:
-						index_metadata = directory_metadata.merge(indices_metadata[index_name] || {})
-						
-						directory_link = Link.new(:directory, @top + [name, index_name], index_metadata)
-						
-						# Merge metadata from foo.en into foo/index.en
-						if directory_link.locale
-							localized_key = "#{directory_link.name}.#{directory_link.locale}"
-							if localized_metadata = metadata.delete(localized_key)
-								directory_link.info.update(localized_metadata)
-							end
-						end
-						
-						yield directory_link
-						
-						indices_count += 1
-					end
-					
-					if indices_count == 0
-						# Specify a nil uri if no index could be found for the directory:
-						yield Link.new(:directory, top + [name], {:uri => nil}.merge(directory_metadata))
-					end
-				end
-				
 				def entries(path)
-					Dir.entries(path).reject{|filename| filename.match(/^[\._]/)}
+					Dir.entries(path).reject{|entry| entry.match(/^[\._]/)}
+				end
+				
+				# @param name [String] the name of the directory.
+				def load_directory(name, metadata, &block)
+					info = metadata.delete(name) || {} # Messy?
+					
+					links = @links.links(@top + name).indices
+					
+					if links.empty?
+						# Specify a nil uri if no index could be found for the directory:
+						yield Link.new(:directory, name, nil, @top + name, {:uri => nil}.merge(info))
+					else
+						links.each do |link|
+							yield Link.new(:directory, link.name, link.locale, link.path, info.update(link.info))
+						end
+					end
+				end
+				
+				def load_index(name, locale, info)
+					if locale and defaults = @metadata[name]
+						info = defaults.update(info)
+					end
+					
+					yield Link.new(:index, @top.basename, locale, @top + name, info)
+				end
+				
+				def load_file(name, locale, info)
+					if locale and defaults = @metadata[name]
+						info = defaults.update(info || {})
+					end
+					
+					yield Link.new(:file, name, locale, @top + name, info)
+				end
+				
+				def load_virtuals(metadata)
+					virtuals = {}
+					
+					# After processing all directory entries, we are left with virtual links:
+					metadata.each do |key, info|
+						name, locale = key.split('.', 2)
+						localized = (virtuals[name] ||= {})
+						localized[locale] = info
+					end
+					
+					virtuals.each do |name, localized|
+						defaults = localized[nil]
+						
+						localized.each do |locale, info|
+							info = defaults&.update(info) || info
+							path = info[:path]
+							
+							yield Link.new(:virtual, name, locale, path, info)
+						end
+					end
 				end
 				
 				def load_links(metadata, &block)
-					# Load all metadata for a given path:
-					metadata = @metadata.dup
-					
 					# Check all entries in the given directory:
-					entries(@path).each do |filename|
-						path = File.join(@path, filename)
+					entries(@path).each do |entry|
+						path = File.join(@path, entry)
 						
-						# There are two types of filelinks based links:
-						# 1/ Named files, e.g. foo.xnode, name=foo
-						# 2/ Directories, e.g. bar/index.xnode, name=bar
-						if File.directory?(path) and @options[:directories]
-							load_indices(filename, path, metadata, &block)
-						elsif filename.match(INDEX_XNODE_FILTER) and @options[:indices] == false
-							metadata.delete($1) # We don't include indices in the list of pages.
-						elsif filename.match(XNODE_FILTER) and @options[:files]
-							yield Link.new(:file, @top + $1, metadata.delete($1))
+						# There are serveral types of file based links:
+						
+						# 1. Directories, e.g. bar/ (name=bar)
+						if File.directory?(path)
+							load_directory(entry, metadata, &block)
+							
+						# 2. Index files, e.g. index.xnode, name=parent
+						elsif match = entry.match(@links.index_filter)
+							load_index(match[:name], match[:locale], metadata.delete(match[:key]), &block)
+							
+						# 3. Named files, e.g. foo.xnode, name=foo
+						elsif match = entry.match(@links.file_filter)
+							load_file(match[:name], match[:locale], metadata.delete(match[:key]), &block)
 						end
 					end
 					
-					if @options[:virtuals]
-						# After processing all directory entries, we are left with virtual entries in the metadata:
-						metadata.each do |name, info|
-							virtual_link = Link.new(:virtual, name, info)
-							
-							# Given a virtual named such as "welcome.cn", merge it with metadata from "welcome" if it exists:
-							if virtual_metadata = @metadata[virtual_link.name]
-								virtual_link.info.update(virtual_metadata)
-							end
-							
-							yield virtual_link
-						end
-					end
+					load_virtuals(metadata, &block)
 				end
 			end
 			
-			def metadata(path)
-				@cache.fetch_or_store(path.to_s) do
-					load(path).freeze
-				end
-			end
-			
-			private
-			
-			def symbolize_keys(hash)
-				# Second level attributes should be symbolic:
-				hash.each do |key, info|
-					hash[key] = info.each_with_object({}) { |(k,v),result| result[k.to_sym] = v }
-				end
-				
-				return hash
-			end
-			
-			LINKS_YAML = "links.yaml"
-			
-			def load(path)
-				yaml_path = File.join(path, LINKS_YAML)
-				
-				if File.exist?(yaml_path) && data = YAML::load_file(yaml_path)
-					return symbolize_keys(data)
-				else
-					return {}
-				end
+			def load_links(path)
+				Resolver.new(self, Path.create(path))
 			end
 		end
 	end

@@ -24,21 +24,21 @@
 require 'utopia/content/link'
 
 module Utopia::Content::LinkSpec
-	describe Utopia::Content::Link.new(:file, "/foo/bar/baz") do
+	describe Utopia::Content::Link.file("/foo/bar/baz") do
 		it "should be valid file link" do
 			expect(subject.name).to be == "baz"
 			expect(subject.path).to be == Utopia::Path.create("/foo/bar/baz")
 		end
 	end
 	
-	describe Utopia::Content::Link.new(:directory, "/foo/bar/index") do
+	describe Utopia::Content::Link.directory("/foo/bar/index") do
 		it "should be valid directory link" do
 			expect(subject.name).to be == "bar"
 			expect(subject.path).to be == Utopia::Path.create("/foo/bar/index")
 		end
 	end
 	
-	describe Utopia::Content::Link.new(:virtual, "bob") do
+	describe Utopia::Content::Link.virtual("bob") do
 		it "should be valid virtual link" do
 			expect(subject.name).to be == "bob"
 			expect(subject.path).to be == nil
