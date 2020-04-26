@@ -253,7 +253,7 @@ module Utopia
 						info = defaults.merge(info)
 					end
 					
-					yield Link.new(:index, @top.basename, locale, @top + name, info)
+					yield Link.new(:index, name, locale, @top + name, info)
 				end
 				
 				def load_file(name, locale, info)
