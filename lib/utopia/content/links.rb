@@ -62,7 +62,7 @@ module Utopia
 			end
 			
 			# Give an index of all links that can be reached from the given path.
-			def index(path, name: nil, locale: nil, display: :display, sort: :order, sort_default: 0, directories: true, files: true, virtuals: true, indicies: false)
+			def index(path, name: nil, locale: nil, display: :display, sort: :order, sort_default: 0, directories: true, files: true, virtuals: true, indices: false)
 				ordered = links(path).ordered.dup
 				
 				# Ignore specific kinds of links:
@@ -70,7 +70,7 @@ module Utopia
 				ignore << :directory unless directories
 				ignore << :file unless files
 				ignore << :virtual unless virtuals
-				ignore << :index unless indicies
+				ignore << :index unless indices
 				
 				if ignore.any?
 					ordered.reject!{|link| ignore.include?(link.kind)}
@@ -98,8 +98,6 @@ module Utopia
 							locales[link.name] ||= link
 						end
 					end
-					
-					binding.irb
 					
 					ordered = locales.values
 				end
@@ -234,23 +232,25 @@ module Utopia
 				
 				# @param name [String] the name of the directory.
 				def load_directory(name, metadata, &block)
-					info = metadata.delete(name) || {} # Messy?
+					defaults = metadata.delete(name) || {}
 					
 					links = @links.links(@top + name).indices
 					
 					if links.empty?
 						# Specify a nil uri if no index could be found for the directory:
-						yield Link.new(:directory, name, nil, @top + name, {:uri => nil}.merge(info))
+						yield Link.new(:directory, name, nil, @top + name, {:uri => nil}.merge(defaults))
 					else
 						links.each do |link|
-							yield Link.new(:directory, link.name, link.locale, link.path, info.update(link.info))
+							info = metadata.delete("#{name}.#{link.locale}") || {}
+							
+							yield Link.new(:directory, link.name, link.locale, link.path, defaults.merge(info, link.info))
 						end
 					end
 				end
 				
 				def load_index(name, locale, info)
 					if locale and defaults = @metadata[name]
-						info = defaults.update(info)
+						info = defaults.merge(info)
 					end
 					
 					yield Link.new(:index, @top.basename, locale, @top + name, info)
@@ -258,7 +258,7 @@ module Utopia
 				
 				def load_file(name, locale, info)
 					if locale and defaults = @metadata[name]
-						info = defaults.update(info || {})
+						info = defaults.merge(info || {})
 					end
 					
 					yield Link.new(:file, name, locale, @top + name, info)
@@ -278,7 +278,7 @@ module Utopia
 						defaults = localized[nil]
 						
 						localized.each do |locale, info|
-							info = defaults&.update(info) || info
+							info = defaults&.merge(info) || info
 							path = info[:path]
 							
 							yield Link.new(:virtual, name, locale, path, info)
