@@ -27,15 +27,13 @@ RSpec.describe Utopia::Content::Links do
 	let(:root) {File.expand_path("links", __dir__)}
 	subject {described_class.new(root)}
 	
-	describe 'INDEX_XNODE_FILTER' do
-		subject{Utopia::Content::Links::INDEX_XNODE_FILTER}
-		
+	describe '#index_filter' do
 		it "should match index" do
-			expect("index.xnode").to match(subject)
+			expect("index.xnode").to match(subject.index_filter)
 		end
 		
 		it "should not match invalid index" do
-			expect("old-index.xnode").to_not match(subject)
+			expect("old-index.xnode").to_not match(subject.index_filter)
 		end
 	end
 	
@@ -50,19 +48,16 @@ RSpec.describe Utopia::Content::Links do
 		
 		expect(links.size).to be == 3
 		
-		expect(links[0].kind).to be == :virtual
-		expect(links[0].href).to be == nil
+		expect(links[0].title).to be == "Welcome"
+		expect(links[0].to_href).to be == '<a class="link" href="/welcome">Welcome</a>'
+		expect(links[0].kind).to be == :file
+		expect(links[0].href).to be == "/welcome"
+		expect(links[0].name).to be == 'welcome'
 		
-		expect(links[1].title).to be == "Welcome"
-		expect(links[1].to_href).to be == '<a class="link" href="/welcome">Welcome</a>'
-		expect(links[1].kind).to be == :file
-		expect(links[1].href).to be == "/welcome"
-		expect(links[1].name).to be == 'welcome'
-		
-		expect(links[2].title).to be == 'Foo Bar'
-		expect(links[2].kind).to be == :directory
-		expect(links[2].href).to be == "/foo/index"
-		expect(links[2].name).to be == 'foo'
+		expect(links[1].title).to be == 'Foo Bar'
+		expect(links[1].kind).to be == :directory
+		expect(links[1].href).to be == "/foo/index"
+		expect(links[1].name).to be == 'foo'
 		
 		expect(links[1]).to be_eql links[1]
 		expect(links[0]).to_not be_eql links[1]
@@ -83,7 +78,7 @@ RSpec.describe Utopia::Content::Links do
 		expect(links.size).to be == 1
 	end
 	
-	context 'localized links'  do
+	context 'with localized links'  do
 		let(:root) {File.expand_path("localized", __dir__)}
 		
 		it "should read correct link order for en" do
@@ -96,6 +91,55 @@ RSpec.describe Utopia::Content::Links do
 			links = subject.index(Utopia::Path.create("/"), locale: 'zh')
 			
 			expect(links.collect(&:title)).to be == ['One', 'Two', 'Three', '四']
+		end
+	end
+	
+	describe '#index' do
+		it "can get title of /index" do
+			links = subject.index(Utopia::Path.create("/"), indices: true, name: "index")
+			
+			expect(links.size).to be 1
+			
+			link = links.first
+			
+			expect(link.title).to be == "Home"
+		end
+		
+		it "can get title of /foo/index" do
+			links = subject.index(Utopia::Path.create("/foo"), indices: true, name: "index")
+			
+			expect(links.size).to be 1
+			
+			link = links.first
+			
+			expect(link.title).to be == "Foo Bar"
+		end
+		
+		it "can get title of /bar/index" do
+			links = subject.index(Utopia::Path.create("/bar"), indices: true, name: "index")
+			
+			expect(links.size).to be 1
+			
+			link = links.first
+			
+			expect(link.title).to be == "Bar"
+		end
+	end
+	
+	describe '#for' do
+		it "can get title of /index" do
+			link = subject.for(Utopia::Path.create("/index"))
+			expect(link.title).to be == "Home"
+		end
+		
+		it "can get title of /foo/index" do
+			link = subject.for(Utopia::Path.create("/foo/index"))
+			expect(link.title).to be == "Foo Bar"
+		end
+		
+		it "can get title of /bar/index" do
+			link = subject.for(Utopia::Path.create("/bar/index"))
+			expect(link.title).to be == "Bar"
 		end
 	end
 end

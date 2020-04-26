@@ -2,8 +2,14 @@ welcome:
   order: 1
   title: "Welcome"
   uri: "/welcome"
+
 index:
   order: 0
+  title: "Home"
+
 # This metadata also gets merged with foo/links.yml#index
 foo:
   order: 2
+
+bar:
+  order: 3
