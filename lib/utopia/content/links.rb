@@ -240,9 +240,14 @@ module Utopia
 					links = @links.links(@top + name).indices
 					
 					links.each do |link|
-						info = metadata.delete("#{name}.#{link.locale}") || {}
+						# We extract the metadata according to the localized link:
+						if info = metadata.delete("#{name}.#{link.locale}")
+							info = info.merge(link.info)
+						else
+							info = link.info
+						end
 						
-						yield Link.new(:directory, name, link.locale, link.path, defaults.merge(info, link.info))
+						yield Link.new(:directory, name, link.locale, link.path, defaults.merge(info))
 					end
 				end
 				
