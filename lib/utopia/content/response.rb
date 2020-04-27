@@ -39,7 +39,7 @@ module Utopia
 				self.content_type = "text/html; charset=utf-8"
 			end
 			
-			attr :status
+			attr_accessor :status
 			attr :headers
 			attr :body
 			
@@ -68,7 +68,7 @@ module Utopia
 					@headers[EXPIRES] = (Time.now + duration).httpdate
 				end
 			end
-
+			
 			# Specify the content type of the response data.
 			def content_type= value
 				@headers[CONTENT_TYPE] = value
