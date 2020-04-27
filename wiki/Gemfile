@@ -1,0 +1,9 @@
+
+source "https://rubygems.org"
+
+group :preload do
+	gem "falcon"
+	gem "utopia-wiki"
+end
+
+gem "utopia", path: "../"
