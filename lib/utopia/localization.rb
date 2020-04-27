@@ -35,6 +35,10 @@ module Utopia
 				@env[LOCALIZATION_KEY]
 			end
 			
+			def localized?
+				localization != nil
+			end
+			
 			# Returns the current locale or nil if not localized.
 			def current_locale
 				@env[CURRENT_LOCALE_KEY]
@@ -48,6 +52,10 @@ module Utopia
 			# Returns an empty array if not localized.
 			def all_locales
 				localization && localization.all_locales || []
+			end
+			
+			def localized_path(path, locale)
+				"/#{locale}#{path}"
 			end
 		end
 		
@@ -67,7 +75,7 @@ module Utopia
 		# @param default_locales [String] The locales to try in order if none is provided.
 		# @param hosts [Hash<Pattern, String>] Specify a mapping of the HTTP_HOST header to a given locale.
 		# @param ignore [Array<Pattern>] A list of patterns matched against PATH_INFO which will not be localized.
-		def initialize(app, locales:, default_locale: nil, default_locales: nil, hosts: {}, ignore: [], methods: SAFE_METHODS, **options)
+		def initialize(app, locales:, default_locale: nil, default_locales: nil, hosts: {}, ignore: [], methods: SAFE_METHODS)
 			@app = app
 			
 			@all_locales = HTTP::Accept::Languages::Locales.new(locales)
@@ -174,9 +182,11 @@ module Utopia
 		end
 		
 		def localized?(env)
-			# Only the specified methods can be localized:
-			request_method = env[Rack::REQUEST_METHOD]
-			return false unless @methods.include?(request_method)
+			if @methods
+				# Only the specified methods can be localized:
+				request_method = env[Rack::REQUEST_METHOD]
+				return false unless @methods.include?(request_method)
+			end
 			
 			# Ignore requests which match the ignored paths:
 			path_info = env[Rack::PATH_INFO]
@@ -211,7 +221,7 @@ module Utopia
 			
 			# We have a non-localized request, but there might be a localized resource. We return the best localization possible:
 			preferred_locales(env) do |localized_env|
-				# puts "Trying locale: #{env[CURRENT_LOCALE_KEY]}: #{env[Rack::PATH_INFO]}..."
+				# puts "Trying locale: #{localized_env[CURRENT_LOCALE_KEY]}: #{localized_env[Rack::PATH_INFO]}..."
 				
 				response = @app.call(localized_env)
 				
