@@ -161,42 +161,26 @@ module Utopia
 					# top.components.first == '', but this isn't a problem here.
 					@path = File.join(links.root, top.components)
 					
+					@ordered = []
+					@named = {}
+					
 					if File.directory?(@path)
 						@metadata = links.metadata(@path)
-						@ordered = nil
-					else
-						@metadata = nil
-						@ordered = []
-					end
-					
-					@named = nil
-				end
-				
-				attr :top
-				
-				def ordered
-					if @ordered.nil?
-						@ordered = []
-						@named = {}
 						
 						load_links(@metadata.dup) do |link|
 							@ordered << link
 							(@named[link.name] ||= []) << link
 						end
+					else
+						@metadata = nil
 					end
-					
-					return @ordered
 				end
 				
-				def named
-					self.ordered
-					
-					return @named
-				end
+				attr :top
+				attr :ordered
+				attr :named
 				
 				def indices
-					self.ordered
-					
 					return @ordered.select{|link| link.index?}
 				end
 				
@@ -209,8 +193,6 @@ module Utopia
 				end
 				
 				def lookup(name, locale = nil)
-					self.ordered
-					
 					# This allows generic links to serve any locale requested.
 					if links = @named[name]
 						generic_link = nil
