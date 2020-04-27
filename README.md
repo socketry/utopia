@@ -2,9 +2,7 @@
 
 Utopia is a website generation framework which provides a robust set of tools to build highly complex dynamic websites. It uses the filesystem heavily for content and provides functions for interacting with files and directories as structure representing the website.
 
-[![Build Status](https://travis-ci.com/socketry/utopia.svg?branch=master)](http://travis-ci.com/socketry/utopia)
-[![Code Climate](https://codeclimate.com/github/ioquatix/utopia.svg)](https://codeclimate.com/github/ioquatix/utopia)
-[![Coverage Status](https://coveralls.io/repos/ioquatix/utopia/badge.svg)](https://coveralls.io/r/ioquatix/utopia)
+[![Actions Status](https://github.com/socketry/utopia/workflows/Development/badge.svg)](https://github.com/socketry/async/actions?workflow=Development)
 
 ## Motivation
 
