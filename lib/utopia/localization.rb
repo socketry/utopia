@@ -74,8 +74,12 @@ module Utopia
 			
 			# Locales here are represented as an array of strings, e.g. ['en', 'ja', 'cn', 'de'] and are used in order if no locale is specified by the user.
 			unless @default_locales = default_locales
-				# We append nil, i.e. no localization.
-				@default_locales = @all_locales.names + [nil]
+				if default_locale
+					@default_locales = [default_locale, nil]
+				else
+					# We append nil, i.e. no localization.
+					@default_locales = @all_locales.names + [nil]
+				end
 			end
 			
 			@default_locale = default_locale || @default_locales.first
