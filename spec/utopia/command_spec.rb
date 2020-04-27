@@ -34,7 +34,7 @@ RSpec.describe "utopia command" do
 	
 	before(:all) do
 		# We need to build a package to test deployment:
-		system("rake", "build") or abort("Could not build package for setup spec!")
+		system("bundle", "exec", "bake", "bundler:build") or abort("Could not build package for setup spec!")
 	end
 	
 	around(:each) do |example|
