@@ -5,12 +5,14 @@ def update
 	require 'fileutils'
 	require 'utopia/path'
 	
-	yarn_package_root = self.root + "lib/components"
-	yarn_install_root = self.root + "public/_components"
+	root = Pathname.new(context.root)
+	yarn_package_root = root + "lib/components"
+	yarn_install_root = root + "public/_components"
 	
 	yarn_package_root.children.select(&:directory?).collect(&:basename).each do |package_directory|
-		install_path = @yarn_install_root + package_directory
-		package_path = @yarn_package_root + package_directory
+		install_path = yarn_install_root + package_directory
+		package_path = yarn_package_root + package_directory
+		
 		dist_path = package_path + 'dist'
 		
 		FileUtils::Verbose.rm_rf(install_path)
