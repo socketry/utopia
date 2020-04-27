@@ -60,13 +60,14 @@ module Utopia
 		HTTP_ACCEPT_LANGUAGE = 'HTTP_ACCEPT_LANGUAGE'.freeze
 		LOCALIZATION_KEY = 'utopia.localization'.freeze
 		CURRENT_LOCALE_KEY = 'utopia.localization.current_locale'.freeze
+		SAFE_METHODS = {'GET' => true, 'HEAD' => true}
 		
 		# @param locales [Array<String>] An array of all supported locales.
 		# @param default_locale [String] The default locale if none is provided.
 		# @param default_locales [String] The locales to try in order if none is provided.
 		# @param hosts [Hash<Pattern, String>] Specify a mapping of the HTTP_HOST header to a given locale.
 		# @param ignore [Array<Pattern>] A list of patterns matched against PATH_INFO which will not be localized.
-		def initialize(app, locales:, default_locale: nil, default_locales: nil, hosts: {}, ignore: [], **options)
+		def initialize(app, locales:, default_locale: nil, default_locales: nil, hosts: {}, ignore: [], methods: SAFE_METHODS, **options)
 			@app = app
 			
 			@all_locales = HTTP::Accept::Languages::Locales.new(locales)
@@ -87,6 +88,8 @@ module Utopia
 			@hosts = hosts
 			
 			@ignore = ignore || options[:nonlocalized]
+			
+			@methods = methods
 		end
 		
 		def freeze
@@ -166,12 +169,10 @@ module Utopia
 			return []
 		end
 		
-		SAFE_METHODS = ['GET', 'HEAD']
-		
 		def localized?(env)
-			# Only SAFE_METHODS can be localized:
+			# Only the specified methods can be localized:
 			request_method = env[Rack::REQUEST_METHOD]
-			return false unless SAFE_METHODS.include?(request_method)
+			return false unless @methods.include?(request_method)
 			
 			# Ignore requests which match the ignored paths:
 			path_info = env[Rack::PATH_INFO]
