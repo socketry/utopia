@@ -28,6 +28,7 @@ module Utopia
 	class Content
 		# The file extension for markup nodes on disk.
 		XNODE_EXTENSION = '.xnode'
+		INDEX = "index"
 		
 		class Links
 			def self.for(root, path, locale = nil)
@@ -208,6 +209,8 @@ module Utopia
 				end
 				
 				def lookup(name, locale = nil)
+					self.ordered
+					
 					# This allows generic links to serve any locale requested.
 					if links = @named[name]
 						generic_link = nil
@@ -236,29 +239,37 @@ module Utopia
 					
 					links = @links.links(@top + name).indices
 					
-					if links.empty?
-						# Specify a nil uri if no index could be found for the directory:
-						yield Link.new(:directory, name, nil, @top + name, {:uri => nil}.merge(defaults))
-					else
-						links.each do |link|
-							info = metadata.delete("#{name}.#{link.locale}") || {}
-							
-							yield Link.new(:directory, link.name, link.locale, link.path, defaults.merge(info, link.info))
-						end
+					links.each do |link|
+						info = metadata.delete("#{name}.#{link.locale}") || {}
+						
+						yield Link.new(:directory, name, link.locale, link.path, defaults.merge(info, link.info))
 					end
 				end
 				
 				def load_index(name, locale, info)
+					info ||=  {}
+					
 					if locale and defaults = @metadata[name]
 						info = defaults.merge(info)
 					end
 					
-					yield Link.new(:index, name, locale, @top + name, info)
+					path = @top + name
+					
+					yield Link.new(:index, name, locale, path, info, path[-2])
+				end
+				
+				def load_default_index(name = INDEX)
+					path = @top + name
+					
+					# Specify a nil uri if no index could be found for the directory:
+					yield Link.new(:index, name, nil, path, {:uri => nil}, path[-2])
 				end
 				
 				def load_file(name, locale, info)
+					info ||= {}
+					
 					if locale and defaults = @metadata[name]
-						info = defaults.merge(info || {})
+						info = defaults.merge(info)
 					end
 					
 					yield Link.new(:file, name, locale, @top + name, info)
@@ -287,6 +298,8 @@ module Utopia
 				end
 				
 				def load_links(metadata, &block)
+					index_loaded = false
+					
 					# Check all entries in the given directory:
 					entries(@path).each do |entry|
 						path = File.join(@path, entry)
@@ -300,11 +313,16 @@ module Utopia
 						# 2. Index files, e.g. index.xnode, name=parent
 						elsif match = entry.match(@links.index_filter)
 							load_index(match[:name], match[:locale], metadata.delete(match[:key]), &block)
+							index_loaded = true
 							
 						# 3. Named files, e.g. foo.xnode, name=foo
 						elsif match = entry.match(@links.file_filter)
 							load_file(match[:name], match[:locale], metadata.delete(match[:key]), &block)
 						end
+					end
+					
+					unless index_loaded
+						load_default_index(&block)
 					end
 					
 					load_virtuals(metadata, &block)
