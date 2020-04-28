@@ -54,7 +54,7 @@ RSpec.describe Utopia::Content::Links do
 	
 	context 'with name filter' do
 		it "should filter links by name" do
-			links = subject.index(Utopia::Path.create("/"), name: /foo/)
+			links = subject.index("/", name: /foo/)
 			
 			expect(links.size).to be == 1
 		end
@@ -62,7 +62,7 @@ RSpec.describe Utopia::Content::Links do
 	
 	context 'without locale' do
 		it "should index all links" do
-			links = subject.index(Utopia::Path.create("/foo"))
+			links = subject.index("/foo")
 			expect(links.size).to be == 2
 			
 			expect(links[0].name).to be == "test"
@@ -75,7 +75,7 @@ RSpec.describe Utopia::Content::Links do
 	
 	context 'with locale' do
 		it "should select localized links" do
-			links = subject.index(Utopia::Path.create("/foo"), locale: 'en')
+			links = subject.index("/foo", locale: 'en')
 			expect(links.size).to be == 1
 			
 			expect(links[0].name).to be == "test"
@@ -87,13 +87,13 @@ RSpec.describe Utopia::Content::Links do
 		let(:root) {File.expand_path("localized", __dir__)}
 		
 		it "should read correct link order for en" do
-			links = subject.index(Utopia::Path.create("/"), locale: 'en')
+			links = subject.index("/", locale: 'en')
 			
 			expect(links.collect(&:title)).to be == ['One', 'Two', 'Three', 'Four', 'Five']
 		end
 		
 		it "should read correct link order for zh" do
-			links = subject.index(Utopia::Path.create("/"), locale: 'zh')
+			links = subject.index("/", locale: 'zh')
 			
 			expect(links.collect(&:title)).to be == ['One', 'Two', 'Three', '四']
 		end
@@ -136,7 +136,7 @@ RSpec.describe Utopia::Content::Links do
 			
 			expect(links.size).to be == 1
 			
-			expect(links[0].title).to be == "Parent"
+			expect(links[0].title).to be == "Parent?"
 			expect(links[0].kind).to be == :directory
 			expect(links[0].name).to be == "parent"
 			expect(links[0].locale).to be_nil
@@ -162,7 +162,7 @@ RSpec.describe Utopia::Content::Links do
 		end
 		
 		it "can get title of /index" do
-			links = subject.index(Utopia::Path.create("/"), indices: true, name: "index")
+			links = subject.index("/", indices: true, name: "index")
 			
 			expect(links.size).to be 1
 			
@@ -172,7 +172,7 @@ RSpec.describe Utopia::Content::Links do
 		end
 		
 		it "can get title of /foo/index" do
-			links = subject.index(Utopia::Path.create("/foo"), indices: true, name: "index")
+			links = subject.index("/foo", indices: true, name: "index")
 			
 			expect(links.size).to be 1
 			
@@ -182,7 +182,7 @@ RSpec.describe Utopia::Content::Links do
 		end
 		
 		it "can get title of /bar/index" do
-			links = subject.index(Utopia::Path.create("/bar"), indices: true, name: "index")
+			links = subject.index("/bar", indices: true, name: "index")
 			
 			expect(links.size).to be 1
 			
@@ -194,17 +194,17 @@ RSpec.describe Utopia::Content::Links do
 	
 	describe '#for' do
 		it "can get title of /index" do
-			link = subject.for(Utopia::Path.create("/index"))
+			link = subject.for(Utopia::Path["/index"])
 			expect(link.title).to be == "Home"
 		end
 		
 		it "can get title of /foo/index" do
-			link = subject.for(Utopia::Path.create("/foo/index"))
+			link = subject.for(Utopia::Path["/foo/index"])
 			expect(link.title).to be == "Foo Bar"
 		end
 		
 		it "can get title of /bar/index" do
-			link = subject.for(Utopia::Path.create("/bar/index"))
+			link = subject.for(Utopia::Path["/bar/index"])
 			expect(link.title).to be == "Bar"
 		end
 	end

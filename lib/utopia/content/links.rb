@@ -245,11 +245,12 @@ module Utopia
 					yield Link.new(:index, name, locale, path, info, path[-2])
 				end
 				
-				def load_default_index(name = INDEX)
+				def load_default_index(name = INDEX, info = {})
 					path = @top + name
+					info = (info || {}).merge(uri: nil)
 					
 					# Specify a nil uri if no index could be found for the directory:
-					yield Link.new(:index, name, nil, @top, {:uri => nil}, path[-2])
+					yield Link.new(:index, name, nil, @top, info, path[-2])
 				end
 				
 				def load_file(name, locale, info)
@@ -311,7 +312,7 @@ module Utopia
 					end
 					
 					unless index_loaded
-						load_default_index(&block)
+						load_default_index(INDEX, metadata.delete(INDEX), &block)
 					end
 					
 					load_virtuals(metadata, &block)
