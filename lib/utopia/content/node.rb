@@ -47,10 +47,6 @@ module Utopia
 				@uri_path.basename
 			end
 			
-			def link
-				return Link.file(uri_path)
-			end
-			
 			def lookup_node(path)
 				@controller.lookup_node(parent_path + Path[path])
 			end
@@ -92,7 +88,7 @@ module Utopia
 			end
 			
 			def related_links
-				@controller.links(@uri_path.dirname, :name => @uri_path.basename, :indices => true)
+				@controller.links(@uri_path.dirname, name: @uri_path.basename, indices: true)
 			end
 			
 			def siblings_path

@@ -59,7 +59,7 @@ module Utopia
 			# The core namespace for utopia specific functionality:
 			@namespaces[UTOPIA_NAMESPACE] ||= Tags
 		end
-
+		
 		def freeze
 			return self if frozen?
 			
@@ -72,6 +72,7 @@ module Utopia
 		
 		attr :root
 		
+		# TODO we should remove this method and expose `@links` directly.
 		def links(path, **options)
 			@links.index(path, **options)
 		end
@@ -91,20 +92,23 @@ module Utopia
 			end
 		end
 		
-		# The request_path is an absolute uri path, e.g. /foo/bar. If an xnode file exists on disk for this exact path, it is instantiated, otherwise nil.
-		def lookup_node(request_path)
-			name = request_path.last
-			name_xnode = name.to_s + XNODE_EXTENSION
-
-			node_path = File.join(@root, request_path.dirname.components, name_xnode)
-
-			if File.exist? node_path
-				return Node.new(self, request_path.dirname + name, request_path, node_path)
-			end
-
-			return nil
+		# @param path [Path] the request_path is an absolute uri path, e.g. `/foo/bar`. If an xnode file exists on disk for this exact path, it is instantiated, otherwise nil.
+		def lookup_node(path, locale = nil)
+			resolve_link(
+				@links.for(path, locale)
+			)
 		end
-
+		
+		def resolve_link(link)
+			if path = link&.path
+				full_path = File.join(@root, path.dirname, link.key + XNODE_EXTENSION)
+				
+				if File.exist?(full_path)
+					return Node.new(self, path, path, full_path)
+				end
+			end
+		end
+		
 		def call(env)
 			request = Rack::Request.new(env)
 			path = Path.create(request.path_info)
@@ -112,17 +116,17 @@ module Utopia
 			# Check if the request is to a non-specific index. This only works for requests with a given name:
 			basename = path.basename
 			directory_path = File.join(@root, path.dirname.components, basename)
-
+			
 			# If the request for /foo/bar is actually a directory, rewrite it to /foo/bar/index:
 			if File.directory? directory_path
 				index_path = [basename, INDEX]
 				
 				return [307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []]
 			end
-
+			
 			locale = env[Localization::CURRENT_LOCALE_KEY]
 			if link = @links.for(path, locale)
-				if link.path and node = lookup_node(link.path)
+				if node = resolve_link(link)
 					attributes = request.env.fetch(VARIABLES_KEY, {}).to_hash
 					
 					return node.process!(request, attributes)
@@ -153,14 +157,14 @@ module Utopia
 			
 			while components.any?
 				tag_path = File.join(@root, components, name_path)
-
+				
 				if File.exist? tag_path
 					return Node.new(self, Path[components] + name, parent_path + name, tag_path)
 				end
-
+				
 				if String === name_path
 					tag_path = File.join(@root, components, '_' + name_path)
-
+					
 					if File.exist? tag_path
 						return Node.new(self, Path[components] + name, parent_path + name, tag_path)
 					end

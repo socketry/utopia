@@ -47,7 +47,7 @@ RSpec.describe Utopia::Content::Node do
 	end
 	
 	it "should list related links" do
-		node = content.lookup_node(Utopia::Path['/related/foo.en'])
+		node = content.lookup_node(Utopia::Path['/related/foo'], 'en')
 		
 		links = node.related_links
 		

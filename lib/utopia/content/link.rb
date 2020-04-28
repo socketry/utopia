@@ -42,6 +42,14 @@ module Utopia
 				@title = Trenni::Strings.to_title(title || name)
 			end
 			
+			def key
+				if locale
+					"#{@path.last}.#{@locale}"
+				else
+					@path.last
+				end
+			end
+			
 			def href
 				@href ||= @info.fetch(:uri) do
 					(@path.dirname + @path.basename).to_s if @path
@@ -65,6 +73,10 @@ module Utopia
 			
 			def index?
 				@kind == :index
+			end
+			
+			def virtual?
+				@kind == :virtual
 			end
 			
 			def relative_href(base = nil)
