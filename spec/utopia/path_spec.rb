@@ -24,7 +24,7 @@
 require 'utopia/path'
 
 RSpec.describe Utopia::Path do
-	context "coder" do
+	describe '#load / #dump' do
 		subject {"foo/bar/baz"}
 		let(:instance) {described_class.load(subject)}
 		
@@ -37,11 +37,56 @@ RSpec.describe Utopia::Path do
 		end
 	end
 	
-	it "should be root path" do
-		root = Utopia::Path["/"]
+	describe '.root' do
+		subject(:path) {described_class.root}
 		
-		expect(root.components).to be == ['', '']
-		expect(root.to_local_path).to be == '/'
+		it {is_expected.to be == [""]}
+		it {is_expected.to_not be_relative}
+		it {is_expected.to be_absolute}
+		it {is_expected.to have_attributes(local_path: '')}
+	end
+	
+	describe '.create' do
+		subject(:path) {described_class.create(value)}
+		
+		context 'with root path' do
+			let(:value) {"/"}
+			it {is_expected.to be == ["", ""]}
+			it {is_expected.to have_attributes(local_path: '/')}
+		end
+		
+		context 'with nil path' do
+			let(:value) {nil}
+			it {is_expected.to be_nil}
+		end
+		
+		context 'with symbol path' do
+			let(:value) {:symbol}
+			it {is_expected.to be == [:symbol]}
+			it {is_expected.to be_relative}
+			it {is_expected.to_not be_absolute}
+		end
+		
+		context 'with empty string path' do
+			let(:value) {""}
+			it {is_expected.to be == []}
+			it {is_expected.to be_relative}
+			it {is_expected.to_not be_absolute}
+		end
+		
+		context 'with relative string path' do
+			let(:value) {"foo/bar"}
+			it {is_expected.to be == ["foo", "bar"]}
+			it {is_expected.to be_relative}
+			it {is_expected.to_not be_absolute}
+		end
+		
+		context 'with absolute string path' do
+			let(:value) {"/foo/bar"}
+			it {is_expected.to be == ["", "foo", "bar"]}
+			it {is_expected.to_not be_relative}
+			it {is_expected.to be_absolute}
+		end
 	end
 	
 	it "should concatenate absolute paths" do

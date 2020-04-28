@@ -30,9 +30,9 @@ module Utopia
 		def initialize(components = [])
 			@components = components
 		end
-
+		
 		attr_accessor :components
-
+		
 		def freeze
 			@components.freeze
 			
@@ -65,22 +65,22 @@ module Utopia
 			
 			return self.create([".."] * up + path.components[i..-1])
 		end
-
+		
 		def shortest_path(root)
 			self.class.shortest_path(self, root)
 		end
-
+		
 		# Converts '+' into whitespace and hex encoded characters into their equivalent characters.
 		def self.unescape(string)
 			string.tr('+', ' ').gsub(/((?:%[0-9a-fA-F]{2})+)/n) {
 				[$1.delete('%')].pack('H*')
 			}
 		end
-
+		
 		def self.[] path
 			self.create(path)
 		end
-
+		
 		def self.split(path)
 			case path
 			when Path
@@ -115,15 +115,17 @@ module Utopia
 				return self.new(path)
 			when String
 				return self.new(unescape(path).split(SEPARATOR, -1))
+			when nil
+				return nil
 			else
 				return self.new([path])
 			end
 		end
-
+		
 		def replace(other_path)
 			@components = other_path.components.dup
 		end
-
+		
 		def include?(*args)
 			@components.include?(*args)
 		end
@@ -131,7 +133,7 @@ module Utopia
 		def directory?
 			return @components.last == ''
 		end
-
+		
 		def to_directory
 			if directory?
 				return self
@@ -139,15 +141,15 @@ module Utopia
 				return join([''])
 			end
 		end
-
+		
 		def relative?
 			@components.first != ''
 		end
-
+		
 		def absolute?
 			@components.first == ''
 		end
-
+		
 		def to_absolute
 			if absolute?
 				return self
@@ -155,11 +157,11 @@ module Utopia
 				return self.class.new([''] + @components)
 			end
 		end
-
+		
 		def to_relative!
 			@components.shift if relative?
 		end
-
+		
 		def to_str
 			if @components == ['']
 				SEPARATOR
@@ -167,21 +169,21 @@ module Utopia
 				@components.join(SEPARATOR)
 			end
 		end
-
+		
 		alias to_s to_str
 		
 		def to_a
 			@components
 		end
-
+		
 		def join(other)
 			self.class.new(@components + other).simplify
 		end
-
+		
 		def expand(root)
 			root + self
 		end
-
+		
 		def +(other)
 			if other.kind_of? Path
 				if other.absolute?
@@ -197,11 +199,11 @@ module Utopia
 				return join([other.to_s])
 			end
 		end
-
+		
 		def with_prefix(*args)
 			self.class.create(*args) + self
 		end
-
+		
 		# Computes the difference of the path.
 		# /a/b/c - /a/b -> c
 		# a/b/c - a/b -> c
@@ -216,10 +218,10 @@ module Utopia
 			
 			return self.class.new(@components[i,@components.size])
 		end
-
+		
 		def simplify
 			result = absolute? ? [''] : []
-
+			
 			@components.each do |bit|
 				if bit == ".."
 					result.pop
@@ -227,18 +229,20 @@ module Utopia
 					result << bit
 				end
 			end
-
+			
 			result << '' if directory?
 			
 			return self.class.new(result)
 		end
-
+		
+		# @return [String] the last path component without any file extension.
 		def basename
 			basename, _ = @components.last.split('.', 2)
 			
 			return basename || ''
 		end
 		
+		# @return [String] the last path component's file extension.
 		def extension
 			_, extension = @components.last.split('.', 2)
 			
@@ -247,14 +251,14 @@ module Utopia
 		
 		def dirname(count = 1)
 			path = self.class.new(@components[0...-count])
-
+			
 			return absolute? ? path.to_absolute : path
 		end
-
-		def to_local_path(separator = File::SEPARATOR)
+		
+		def local_path(separator = File::SEPARATOR)
 			@components.join(separator)
 		end
-
+		
 		def descend(&block)
 			return to_enum(:descend) unless block_given?
 			
@@ -278,7 +282,7 @@ module Utopia
 				components.pop
 			end
 		end
-
+		
 		def split(at)
 			if at.kind_of? String
 				at = @components.index(at)
@@ -290,15 +294,15 @@ module Utopia
 				return nil
 			end
 		end
-
+		
 		def dup
 			return Path.new(components.dup)
 		end
-
+		
 		def <=> other
 			@components <=> other.components
 		end
-
+		
 		def eql? other
 			self.class.eql?(other.class) and @components.eql?(other.components)
 		end
