@@ -247,7 +247,12 @@ module Utopia
 				
 				def load_default_index(name = INDEX, info = {})
 					path = @top + name
-					info = (info || {}).merge(uri: nil)
+					
+					if info
+						info = {uri: nil}.merge(info)
+					else
+						info = {uri: nil}
+					end
 					
 					# Specify a nil uri if no index could be found for the directory:
 					yield Link.new(:index, name, nil, @top, info, path[-2])

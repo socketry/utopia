@@ -103,7 +103,7 @@ RSpec.describe Utopia::Content::Links do
 		it "should give a list of links" do
 			links = subject.index("/")
 			
-			expect(links.size).to be == 3
+			expect(links.size).to be == 4
 			
 			expect(links[0].title).to be == "Welcome"
 			expect(links[0].kind).to be == :file
@@ -126,6 +126,13 @@ RSpec.describe Utopia::Content::Links do
 			expect(links[2].locale).to be_nil
 			expect(links[2].path).to be == ['', 'bar', 'index']
 			expect(links[2].href).to be == "/bar/index"
+			
+			expect(links[3].title).to be == 'Redirect'
+			expect(links[3].kind).to be == :directory
+			expect(links[3].name).to be == 'redirect'
+			expect(links[3].locale).to be_nil
+			expect(links[3].path).to be == ['', 'redirect']
+			expect(links[3].href).to be == "https://www.codeotaku.com"
 			
 			expect(links[1]).to be_eql links[1]
 			expect(links[0]).to_not be_eql links[1]

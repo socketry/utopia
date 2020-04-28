@@ -13,3 +13,6 @@ foo:
 
 bar:
   order: 3
+
+redirect:
+  order: 4
