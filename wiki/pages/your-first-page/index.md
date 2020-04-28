@@ -9,7 +9,7 @@ $ utopia site create
 $ rake server
 ```
 
-You will now have a basic template site running on `http://localhost:9292`.
+You will now have a basic template site running on `https://localhost:9292`.
 
 ## Welcome Page
 
@@ -34,5 +34,5 @@ You'll notice that there is a file `/links.yaml`. This file contains important m
 
 ```yaml
 errors:
-    display: false 
+  display: false 
 ```

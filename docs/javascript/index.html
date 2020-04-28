@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Javascript</title>
+		
+		<meta charset="UTF-8"/>
+		
+		<link rel="icon" type="image/png" href="../_static/icon.png"/>
+		<link rel="stylesheet" href="../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../_components/jquery/jquery.min.js"></script>
+		<script src="../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body class="show">
+		
+	<nav> › <a href="../index.html">Wiki</a> › <a href="index.html">JavaScript</a></nav>
+
+	
+	<main>
+		<h1 id="installing-javascript-libraries">Installing JavaScript Libraries</h1>
+
+<p>Utopia integrates with Yarn and provides a <a href="https://github.com/ioquatix/bake">bake task</a> to simplify deployment packages distributed using <code>yarn</code> that implement the <code>dist</code> sub-directory convention.</p>
+
+<p>By default, utopia includes a <code>.yarnrc</code> file which installs modules into <code>lib/components</code>. This code can then be copied into <code>public/_components</code> using <code>bake utopia:yarn:update</code>.</p>
+
+<h2 id="installing-yarn">Installing Yarn</h2>
+
+<p>If you don’t already have yarn installed, make sure you have npm installed and then run the following command:</p>
+
+<pre><code class="language-bash">$ sudo npm install -g yarn
+</code></pre>
+
+<h2 id="installing-jquery">Installing jQuery</h2>
+
+<p>Firstly, ensure your project has a <code>package.json</code> file:</p>
+
+<pre><code class="language-bash">$ yarn init
+</code></pre>
+
+<p>Then install jquery using <code>yarn</code>:</p>
+
+<pre><code class="language-bash">$ yarn install jquery
+</code></pre>
+
+<p>Copy the distribution scripts to <code>public/_components</code>:</p>
+
+<pre><code class="language-bash">$ bundle exec bake utopia:yarn:update
+</code></pre>
+
+<p>Then add the appropriate <code>&lt;script&gt;</code> tags to <code>pages/_page.xnode</code>:</p>
+
+<pre><code class="language-html">&lt;script type=&quot;text/javascript&quot; src=&quot;/_components/jquery/jquery.min.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+
+<h2 id="using-javascript">Using JavaScript</h2>
+
+<p>You can use JavaScript by embedding it directly into your HTML, or by creating a JavaScript source file and referencing that.</p>
+
+<h3 id="embedding-code">Embedding Code</h3>
+
+<p>In your HTML view:</p>
+
+<pre><code class="language-trenni">&lt;html&gt;
+  &lt;body&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
+      //&lt;![CDATA[
+      console.log(&quot;Hello World&quot;)
+      //]]&gt;
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<h3 id="external-script">External Script</h3>
+
+<p>In <code>script.js</code>:</p>
+
+<pre><code class="language-javascript">console.log("Hello World")
+</code></pre>
+
+<p>In your HTML view:</p>
+
+<pre><code class="language-trenni">&lt;html&gt;
+  &lt;body&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;script.js&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+	</main>
+	
+	<footer>
+		Last Modified: 2020-04-28 23:19:48 +1200
+		— javascript/index.md
+	</footer>
+
+	</body>
+</html>

@@ -1,4 +1,4 @@
-# What Is `.xnode`?
+# What is `.xnode`?
 
 Xnodes are the files on disk which are used as part of Utopia's content/view layer. Xnode templates are designed to maximise the ratio of content to markup. They improve separation of concerns and semantic organisation because repeated markup can be reused easily.
 

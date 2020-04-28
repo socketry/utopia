@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Controller</title>
+		
+		<meta charset="UTF-8"/>
+		
+		<link rel="icon" type="image/png" href="../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../_components/jquery/jquery.min.js"></script>
+		<script src="../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body class="show">
+		
+	<nav> › <a href="../../index.html">Wiki</a> › <span>Middleware</span> › <a href="index.html">Controller</a></nav>
+
+	
+	<main>
+		<h1 id="controller">Controller</h1>
+
+<p>A simple recursive controller layer which works in isolation from the view rendering middleware.</p>
+
+<pre><code class="language-ruby">use Utopia::Controller,
+	# The root directory where `controller.rb` files can be found.
+	root: 'path/to/root',
+	# The base class to use for all controllers:
+	base: Utopia::Controller::Base,
+	# Whether or not to cache controller classes:
+	cache_controllers: (RACK_ENV == :production)
+</code></pre>
+
+<p>A controller is a file within the root directory (or subdirectory) with the name <code>controller.rb</code>. This code is dynamically loaded into an anonymous class and executed. The default controller has only a single function:</p>
+
+<pre><code class="language-ruby">def passthrough(request, path)
+	# Call one of:
+	
+	# This will cause the middleware to generate a response.
+	# def respond!(response)
+
+	# This will cause the controller to skip the request.
+	# def ignore!
+
+	# Request relative redirect. Respond with a redirect to the given target.
+	# def redirect! (target, status = 302)
+	
+	# Controller relative redirect.
+	# def goto!(target, status = 302)
+	
+	# Respond with an error which indiciates some kind of failure.
+	# def fail!(error = 400, message = nil)
+	
+	# Succeed the request and immediately respond.
+	# def succeed!(status: 200, headers: {}, **options)
+	# options may include content: string or body: Enumerable (as per Rack specifications
+end
+</code></pre>
+
+<p>The controller layer can do more complex operations by prepending modules into it.</p>
+
+<pre><code class="language-ruby">prepend Rewrite, Actions
+
+# Extracts an Integer
+rewrite.extract_prefix id: Integer do
+	@user = User.find_by_id(@id)
+end
+
+on 'edit' do |request, path|
+	if request.post?
+		@user.update_attributes(request[:user])
+	end
+end
+
+otherwise do |request, path|
+	# Executed if no specific named actions were executed.
+	succeed!
+end
+</code></pre>
+
+	</main>
+	
+	<footer>
+		Last Modified: 2020-04-28 11:35:36 +1200
+		— middleware/controller/index.md
+	</footer>
+
+	</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Actions</title>
+		
+		<meta charset="UTF-8"/>
+		
+		<link rel="icon" type="image/png" href="../../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../../_components/jquery/jquery.min.js"></script>
+		<script src="../../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body class="show">
+		
+	<nav> › <a href="../../../index.html">Wiki</a> › <span>Middleware</span> › <a href="../index.html">Controller</a> › <a href="index.html">Actions</a></nav>
+
+	
+	<main>
+		<h1 id="controlleractions">Controller::Actions</h1>
+
+<p>Actions let you match path patterns in your controller and execute code. In your <code>controller.rb</code> simply add:</p>
+
+<pre><code class="language-ruby">prepend Actions
+</code></pre>
+
+<p>If you are adding multiple things, like rewriting, they should come earlier in the chain, e.g:</p>
+
+<pre><code class="language-ruby">prepend Rewrite, Actions
+</code></pre>
+
+<p>A simple CRUD controller might look like:</p>
+
+<pre><code class="language-ruby">prepend Actions
+
+on 'index' do
+	@users = User.all
+end
+
+on 'new' do |request|
+	@user = User.new
+	
+	if request.post?
+		@user.update_attributes(request.params['user'])
+		
+		redirect! "index"
+	end
+end
+
+on 'edit' do |request|
+	@user = User.find(request.params['id'])
+	
+	if request.post?
+		@user.update_attributes(request.params['user'])
+		
+		redirect! "index"
+	end
+end
+
+on 'delete' do |request|
+	User.find(request.params['id']).destroy
+	
+	redirect! "index"
+end
+</code></pre>
+
+<h2 id="path-matching">Path Matching</h2>
+
+<p>Path matching works from right to left, and <code>'**'</code> is a greedy operator. Controllers are invoked with a path relative to the controller’s <code>URI_PATH</code>, so all lookups are relative to the controller.</p>
+
+<dl>
+	<dt><code class="language-ruby">"*"</code></dt>
+	<dd>Match a single path element</dd>
+	<dt><code class="language-ruby">"**"</code></dt>
+	<dd>Match all remaining path elements</dd>
+	<dt><code class="language-ruby">String</code></dt>
+	<dd>Match a named path component, e.g. <code class="language-ruby">"edit"</code>.</dd>
+	<dt><code class="language-ruby">Symbol</code></dt>
+	<dd>Equivalent to <code class="language-ruby">["**", symbol.to_s]</code>, e.g. <code class="language-ruby">:logout</code>.</dd>
+</dl>
+
+<h2 id="otherwise-matching">Otherwise Matching</h2>
+
+<p>If no action was matched, it is sometimes useful to perform some specific behaviour. You can specify this by using the otherwise handler:</p>
+
+<pre><code class="language-ruby">otherwise do |request, path|
+	fail! :teapot
+end
+</code></pre>
+
+<p>If you are doing this to perform some kind of rewriting, it may be preferable to use the <a href="../rewrite/index.html">Rewrite</a> controller layer.</p>
+
+	</main>
+	
+	<footer>
+		Last Modified: 2020-04-28 23:19:19 +1200
+		— middleware/controller/actions/index.md
+	</footer>
+
+	</body>
+</html>

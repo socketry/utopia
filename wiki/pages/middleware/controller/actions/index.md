@@ -50,7 +50,7 @@ end
 	
 ## Path Matching
 
-Path matching works from right to left, and '**' is a greedy operator. Controllers are invoked with a path relative to the controller's `URI_PATH`, so all lookups are relative to the controller.
+Path matching works from right to left, and `'**'` is a greedy operator. Controllers are invoked with a path relative to the controller's `URI_PATH`, so all lookups are relative to the controller.
 
 <dl>
 	<dt><code class="language-ruby">"*"</code></dt>
@@ -73,4 +73,4 @@ otherwise do |request, path|
 end
 ```
 
-If you are doing this to perform some kind of rewriting, it may be preferable to use the [Rewrite](rewrite/) controller layer.
+If you are doing this to perform some kind of rewriting, it may be preferable to use the [Rewrite](../rewrite/) controller layer.

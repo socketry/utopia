@@ -1,40 +1,42 @@
-# Yarn Integration
+# Installing JavaScript Libraries
 
-Utopia integrates with Yarn and provides a rake task to simplify deployment packages distributed using `yarn` that implement the `dist` sub-directory convention.
+Utopia integrates with Yarn and provides a [bake task](https://github.com/ioquatix/bake) to simplify deployment packages distributed using `yarn` that implement the `dist` sub-directory convention.
 
-By default, utopia includes a `.yarnrc` file which installs modules into `lib/components`. This code can then be copied into `public/_components` using `rake yarn:update`.
+By default, utopia includes a `.yarnrc` file which installs modules into `lib/components`. This code can then be copied into `public/_components` using `bake utopia:yarn:update`.
 
 ## Installing Yarn
 
 If you don't already have yarn installed, make sure you have npm installed and then run the following command:
 
-	$ sudo npm install -g yarn
+```bash
+$ sudo npm install -g yarn
+```
 
 ## Installing jQuery
 
 Firstly, ensure your project has a `package.json` file:
 
-	$ yarn init
+```bash
+$ yarn init
+```
 
 Then install jquery using `yarn`:
 
-	$ bower install jquery
+```bash
+$ yarn install jquery
+```
 
 Copy the distribution scripts to `public/_components`:
 
-	$ rake yarn:update
+```bash
+$ bundle exec bake utopia:yarn:update
+```
 
 Then add the appropriate `<script>` tags to `pages/_page.xnode`:
 
 ```html
 <script type="text/javascript" src="/_components/jquery/jquery.min.js"></script>
 ```
-
-### What does `rake yarn:update` do?
-
-This task copies only the contents of the `dist` directory. This ensures that you only get files intended for distribution. If the bower package doesn't have a `dist` directory, the entire contents is copied.
-
-<content:listing rel="site" src="tasks/yarn.rake" brush="ruby" />
 
 ## Using JavaScript
 

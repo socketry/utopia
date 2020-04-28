@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Server Setup</title>
+		
+		<meta charset="UTF-8"/>
+		
+		<link rel="icon" type="image/png" href="../_static/icon.png"/>
+		<link rel="stylesheet" href="../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../_components/jquery/jquery.min.js"></script>
+		<script src="../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body class="show">
+		
+	<nav> › <a href="../index.html">Wiki</a> › <a href="index.html">Server Setup</a></nav>
+
+	
+	<main>
+		<h1 id="server-setup">Server Setup</h1>
+
+<p>Utopia is designed to make deployment to remote servers easy.</p>
+
+<h2 id="deployment">Deployment</h2>
+
+<p>The preferred method of deployment to a production server is via git. The <code>utopia</code> command assists with setup of a remote git repository on the server. It will setup a <code>git</code> <code>post-update</code> hook which will deploy the site correctly and restart the application server for that site.</p>
+
+<p>To setup a server for deployment:</p>
+
+<pre><code class="language-bash">$ mkdir /srv/http/www.example.com
+$ cd /srv/http/www.example.com
+$ sudo -u http utopia server create
+</code></pre>
+
+<p>On your development machine, you should setup the git remote:</p>
+
+<pre><code class="language-bash">$ git remote add production ssh://remote/srv/http/www.example.com
+$ git push --set-upstream production master
+</code></pre>
+
+<h3 id="default-environment">Default Environment</h3>
+
+<p>Utopia will load <code>config/environment.yaml</code> and update <code>ENV</code> before executing any code. You can set default environment values using the <code>utopia</code> command:</p>
+
+<pre><code class="language-bash">$ sudo -u http utopia environment RACK_ENV=production DATABASE_ENV=production_cluster_primary
+ENV["RACK_ENV"] will default to "production" unless otherwise specified.
+ENV["DATABASE_ENV"] will default to "production_cluster_primary" unless otherwise specified.
+</code></pre>
+
+<p>To set a value, write <code>KEY=VALUE</code>. To unset a key, write <code>KEY</code>.</p>
+
+<p>When you run <code>rake</code> tasks or spawn a server, the values in <code>config/environment.yaml</code> will be the defaults. You can override them by manually specifying them, e.g. <code>DATABASE_ENV=development rake db:info</code>.</p>
+
+<h2 id="platform">Platform</h2>
+
+<p>The best deployment platform for Utopia is Linux, using <a href="https://github.com/socketry/falcon">falcon</a>.</p>
+
+<h3 id="sudo-setup">Sudo Setup</h3>
+
+<p>Create a file <code>/etc/sudoers.d/http</code> with the following contents:</p>
+
+<pre><code class="language-sudoers"># Allow user samuel to check out code as user http using git:
+%wheel ALL=(http) NOPASSWD: ALL
+</code></pre>
+
+<p>This allows the deploy task to correctly checkout code as user <code>http</code>.</p>
+
+
+	</main>
+	
+	<footer>
+		Last Modified: 2020-04-28 11:35:36 +1200
+		— server-setup/index.md
+	</footer>
+
+	</body>
+</html>

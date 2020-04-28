@@ -1,6 +1,6 @@
 # Utopia
 
-This wiki includes documentation and examples showing how to use Utopia. You can also browse the [code documentation](/code/index.html) for more detail. Feel free to [edit](edit) any part of this documentation and submit a PR.
+Utopia is a content management system built on top of Ruby. It makes creating, deploying and updating content-driven websites easy.
 
 ## Introduction Guide
 
