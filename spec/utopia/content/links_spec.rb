@@ -144,7 +144,7 @@ RSpec.describe Utopia::Content::Links do
 		end
 		
 		it "can list directories with multiple localized indexes" do
-			links = subject.index("/bar/parent")
+			links = subject.index("/bar/parent").sort_by(&:locale)
 			
 			expect(links.size).to be == 2
 			
