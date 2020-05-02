@@ -79,7 +79,7 @@ RSpec.describe "utopia command" do
 			
 			system(utopia, "--in", dir, "site", "create")
 			
-			expect(Dir.entries(dir)).to include(".yarnrc", ".git", "Gemfile", "Gemfile.lock", "README.md", "bake.rb", "config.ru", "lib", "pages", "public", "spec")
+			expect(Dir.entries(dir)).to include(".git", "Gemfile", "Gemfile.lock", "README.md", "bake.rb", "config.ru", "lib", "pages", "public", "spec")
 			
 			expect(
 				system("bundle", "exec", "bake", "utopia:test", chdir: dir)
@@ -152,7 +152,7 @@ RSpec.describe "utopia command" do
 				expect(result).to be == 0
 			end
 			
-			files = %W[.yarnrc .git Gemfile Gemfile.lock README.md bake.rb config.ru lib pages public]
+			files = %W[.git Gemfile Gemfile.lock README.md bake.rb config.ru lib pages public]
 			
 			expect(Dir.entries(server_path)).to include(*files)
 			

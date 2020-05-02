@@ -2,8 +2,6 @@
 
 Utopia integrates with Yarn and provides a [bake task](https://github.com/ioquatix/bake) to simplify deployment packages distributed using `yarn` that implement the `dist` sub-directory convention.
 
-By default, utopia includes a `.yarnrc` file which installs modules into `lib/components`. This code can then be copied into `public/_components` using `bake utopia:yarn:update`.
-
 ## Installing Yarn
 
 If you don't already have yarn installed, make sure you have npm installed and then run the following command:
