@@ -52,8 +52,8 @@ module Utopia::Controller::RewriteSpec
 		
 		let(:controller) {TestController.new}
 		
-		def mock_request(*args)
-			request = Rack::Request.new(Rack::MockRequest.env_for(*args))
+		def mock_request(*arguments)
+			request = Rack::Request.new(Rack::MockRequest.env_for(*arguments))
 			return request, Utopia::Path[request.path_info]
 		end
 		

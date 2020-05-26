@@ -128,12 +128,12 @@ module Utopia
 			
 			# This is a special context in which a limited set of well defined methods are exposed in the content view.
 			Context = Struct.new(:document, :state) do
-				def partial(*args, &block)
+				def partial(*arguments, &block)
 					if block_given?
 						state.defer(&block)
 					else
 						state.defer do |document|
-							document.tag(*args)
+							document.tag(*arguments)
 						end
 					end
 				end

@@ -49,8 +49,8 @@ module Utopia
 						{HTTP::CONTENT_TYPE => self.content_type}
 					end
 					
-					def split(*args)
-						self.content_type.split(*args)
+					def split(*arguments)
+						self.content_type.split(*arguments)
 					end
 					
 					def call(context, response, media_range)
@@ -60,8 +60,8 @@ module Utopia
 					end
 				end
 				
-				def self.new(*args)
-					Callback.new(*args)
+				def self.new(*arguments)
+					Callback.new(*arguments)
 				end
 				
 				# To accept incoming requests with content-type JSON (e.g. POST with JSON data), consider using `Rack::PostBodyContentTypeParser`.
@@ -73,8 +73,8 @@ module Utopia
 						APPLICATION_JSON
 					end
 					
-					def self.split(*args)
-						self.content_type.split(*args)
+					def self.split(*arguments)
+						self.content_type.split(*arguments)
 					end
 					
 					def self.serialize(content, media_range)
@@ -98,8 +98,8 @@ module Utopia
 			module Passthrough
 				WILDCARD = HTTP::Accept::MediaTypes::MediaRange.new('*', '*').freeze
 				
-				def self.split(*args)
-					self.media_range.split(*args)
+				def self.split(*arguments)
+					self.media_range.split(*arguments)
 				end
 				
 				def self.media_range

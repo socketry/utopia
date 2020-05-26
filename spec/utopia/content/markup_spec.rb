@@ -31,7 +31,7 @@ module Utopia::Content::MarkupSpec
 		
 		attr :events
 		
-		def method_missing(*args)
+		def method_missing(*arguments)
 			@events << args
 		end
 	end

@@ -126,8 +126,8 @@ module Utopia
 			@components = other_path.components.dup
 		end
 		
-		def include?(*args)
-			@components.include?(*args)
+		def include?(*arguments)
+			@components.include?(*arguments)
 		end
 		
 		def directory?
@@ -200,8 +200,8 @@ module Utopia
 			end
 		end
 		
-		def with_prefix(*args)
-			self.class.create(*args) + self
+		def with_prefix(*arguments)
+			self.class.create(*arguments) + self
 		end
 		
 		# Computes the difference of the path.

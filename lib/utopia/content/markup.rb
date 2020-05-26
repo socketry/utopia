@@ -40,7 +40,7 @@ module Utopia
 				super key.to_sym, value
 			end
 			
-			def fetch(key, *args, &block)
+			def fetch(key, *arguments, &block)
 				key = key.to_sym
 				
 				super

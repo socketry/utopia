@@ -46,12 +46,12 @@ RSpec.describe "utopia command" do
 		end
 	end
 	
-	def sh_status(*args)
-		system(*args) ? 0 : false
+	def sh_status(*arguments)
+		system(*arguments) ? 0 : false
 	end
 	
-	def sh_stdout(*args)
-		output, status = Open3.capture2(*args)
+	def sh_stdout(*arguments)
+		output, status = Open3.capture2(*arguments)
 		return output
 	end
 	

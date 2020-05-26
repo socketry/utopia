@@ -39,7 +39,7 @@ module Utopia
 	
 	# The same as {default_root} but returns an instance of {Path}.
 	# @return [Path] The path as requested.
-	def self.default_path(*args)
-		Path[default_root(*args)]
+	def self.default_path(*arguments)
+		Path[default_root(*arguments)]
 	end
 end

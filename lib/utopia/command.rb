@@ -28,8 +28,8 @@ require_relative 'command/environment'
 
 module Utopia
 	module Command
-		def self.call(*args)
-			Top.call(*args)
+		def self.call(*arguments)
+			Top.call(*arguments)
 		end
 		
 		# The top level utopia command.

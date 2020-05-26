@@ -23,8 +23,8 @@
 module Utopia
 	module Extensions
 		module ArraySplit
-			def split_at(*args, &block)
-				if middle = index(*args, &block)
+			def split_at(*arguments, &block)
+				if middle = index(*arguments, &block)
 					[self[0...middle], self[middle], self[middle+1..-1]]
 				else
 					[[], nil, []]
