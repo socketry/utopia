@@ -45,12 +45,12 @@ module Utopia::ContentSpec
 			get '/'
 			
 			expect(last_response.status).to be == 307
-			expect(last_response.headers['Location']).to be == '/index'
+			expect(last_response.headers['location']).to be == '/index'
 			
 			get '/content'
 			
 			expect(last_response.status).to be == 307
-			expect(last_response.headers['Location']).to be == '/content/index'
+			expect(last_response.headers['location']).to be == '/content/index'
 		end
 		
 		it "should successfully render the index page" do
@@ -69,7 +69,7 @@ module Utopia::ContentSpec
 			get '/content/redirect'
 			
 			expect(last_response.status).to be == 307
-			expect(last_response.headers['Location']).to be == 'foo'
+			expect(last_response.headers['location']).to be == 'foo'
 		end
 	end
 	

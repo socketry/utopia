@@ -54,8 +54,6 @@ module Utopia
 				super
 			end
 			
-			CONTENT_TYPE = 'Content-Type'.freeze
-			
 			def unhandled_error?(response)
 				response[0] >= 400 && response[1].empty?
 			end

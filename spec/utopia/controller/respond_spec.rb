@@ -108,37 +108,37 @@ module Utopia::Controller::RespondSpec
 			get '/errors/file-not-found'
 			
 			expect(last_response.status).to be == 404
-			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.headers['content-type']).to be == 'application/json; charset=utf-8'
 			expect(last_response.body).to be == '{"message":"File not found"}'
 		end
 		
 		it 'should get html response' do
-			header 'Accept', '*/*'
+			header 'accept', '*/*'
 			
 			get '/html/hello-world'
 			
 			expect(last_response.status).to be == 200
-			expect(last_response.headers['Content-Type']).to be == 'text/html'
+			expect(last_response.headers['content-type']).to be == 'text/html'
 			expect(last_response.body).to be == '<p>Hello World</p>'
 		end
 		
 		it "should get version 1 response" do
-			header 'Accept', 'application/json;version=1'
+			header 'accept', 'application/json;version=1'
 			
 			get '/api/fetch'
 			
 			expect(last_response.status).to be == 200
-			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.headers['content-type']).to be == 'application/json; charset=utf-8'
 			expect(last_response.body).to be == '{"message":"Hello World"}'
 		end
 		
 		it "should get version 2 response" do
-			header 'Accept', 'application/json;version=2'
+			header 'accept', 'application/json;version=2'
 			
 			get '/api/fetch'
 			
 			expect(last_response.status).to be == 200
-			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.headers['content-type']).to be == 'application/json; charset=utf-8'
 			expect(last_response.body).to be == '{"message":"Goodbye World"}'
 		end
 		
@@ -147,27 +147,27 @@ module Utopia::Controller::RespondSpec
 			get '/api/fetch'
 			
 			expect(last_response.status).to be == 200
-			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.headers['content-type']).to be == 'application/json; charset=utf-8'
 			expect(last_response.body).to be == '{}'
 		end
 		
 		it "should give record as JSON" do
-			header 'Accept', 'application/json'
+			header 'accept', 'application/json'
 			
 			get '/rewrite/2/show'
 			
 			expect(last_response.status).to be == 200
-			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.headers['content-type']).to be == 'application/json; charset=utf-8'
 			expect(last_response.body).to be == '{"id":2,"foo":"bar"}'
 		end
 		
 		it "should give error as JSON" do
-			header 'Accept', 'application/json'
+			header 'accept', 'application/json'
 			
 			get '/rewrite/1/show'
 			
 			expect(last_response.status).to be == 404
-			expect(last_response.headers['Content-Type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.headers['content-type']).to be == 'application/json; charset=utf-8'
 			expect(last_response.body).to be == '{"message":"Could not find record"}'
 		end
 	end

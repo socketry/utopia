@@ -30,7 +30,7 @@ RSpec.describe Utopia::Redirection do
 		get "/welcome/"
 		
 		expect(last_response.status).to be == 307
-		expect(last_response.headers['Location']).to be == '/welcome/index'
+		expect(last_response.headers['location']).to be == '/welcome/index'
 		expect(last_response.headers['cache-control']).to include("max-age=86400")
 	end
 	
@@ -38,7 +38,7 @@ RSpec.describe Utopia::Redirection do
 		get "/a"
 		
 		expect(last_response.status).to be == 301
-		expect(last_response.headers['Location']).to be == '/b'
+		expect(last_response.headers['location']).to be == '/b'
 		expect(last_response.headers['cache-control']).to include("max-age=86400")
 	end
 	
@@ -46,7 +46,7 @@ RSpec.describe Utopia::Redirection do
 		get "/"
 		
 		expect(last_response.status).to be == 301
-		expect(last_response.headers['Location']).to be == '/welcome/index'
+		expect(last_response.headers['location']).to be == '/welcome/index'
 		expect(last_response.headers['cache-control']).to include("max-age=86400")
 	end
 	
@@ -65,13 +65,13 @@ RSpec.describe Utopia::Redirection do
 		get "/hierarchy/a/b/c/d/e"
 		
 		expect(last_response.status).to be == 301
-		expect(last_response.headers['Location']).to be == '/hierarchy'
+		expect(last_response.headers['location']).to be == '/hierarchy'
 	end
 	
 	it "should get a weird status" do
 		get "/weird"
 		
 		expect(last_response.status).to be == 333
-		expect(last_response.headers['Location']).to be == '/status'
+		expect(last_response.headers['location']).to be == '/status'
 	end
 end

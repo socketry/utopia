@@ -90,9 +90,9 @@ module Utopia
 			503 => 'Service Unavailable'.freeze
 		}.merge(Rack::Utils::HTTP_STATUS_CODES)
 		
-		CONTENT_TYPE = 'Content-Type'.freeze
-		LOCATION = 'Location'.freeze
-		CACHE_CONTROL = 'Cache-Control'.freeze
+		CONTENT_TYPE = 'content-type'.freeze
+		LOCATION = 'location'.freeze
+		CACHE_CONTROL = 'cache-control'.freeze
 		
 		# A small HTTP status wrapper that verifies the status code within a given range.
 		class Status
