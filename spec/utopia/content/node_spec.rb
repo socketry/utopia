@@ -62,7 +62,7 @@ RSpec.describe Utopia::Content::Node do
 	it "should look up node by path" do
 		node = content.lookup_node(Utopia::Path['/lookup/index'])
 		
-		expect(node.process!(nil)).to be == [200, {"Content-Type"=>"text/html; charset=utf-8"}, ["<p>Hello World</p>"]]
+		expect(node.process!(nil)).to be == [200, {"content-type"=>"text/html; charset=utf-8"}, ["<p>Hello World</p>"]]
 	end
 	
 	describe '#local_path' do

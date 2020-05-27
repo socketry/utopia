@@ -34,7 +34,7 @@ RSpec.describe Utopia::Exceptions::Handler do
 		get "/blow?fatal=true"
 		
 		expect(last_response.status).to be == 500
-		expect(last_response.headers['Content-Type']).to be == 'text/plain'
+		expect(last_response.headers['content-type']).to be == 'text/plain'
 		expect(last_response.body).to be_include 'fatal error'
 	end
 	

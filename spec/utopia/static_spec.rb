@@ -35,7 +35,7 @@ module Utopia::StaticSpec
 		it "should give the correct mime type" do
 			get "/test.txt"
 			
-			expect(last_response.header['Content-Type']).to be == 'text/plain'
+			expect(last_response.header['content-type']).to be == 'text/plain'
 		end
 		
 		it "should return partial content" do

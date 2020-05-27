@@ -31,7 +31,7 @@ RSpec.describe Utopia::Redirection do
 		
 		expect(last_response.status).to be == 307
 		expect(last_response.headers['Location']).to be == '/welcome/index'
-		expect(last_response.headers['Cache-Control']).to include("max-age=86400")
+		expect(last_response.headers['cache-control']).to include("max-age=86400")
 	end
 	
 	it "should be permanently moved" do
@@ -39,7 +39,7 @@ RSpec.describe Utopia::Redirection do
 		
 		expect(last_response.status).to be == 301
 		expect(last_response.headers['Location']).to be == '/b'
-		expect(last_response.headers['Cache-Control']).to include("max-age=86400")
+		expect(last_response.headers['cache-control']).to include("max-age=86400")
 	end
 	
 	it "should be permanently moved" do
@@ -47,7 +47,7 @@ RSpec.describe Utopia::Redirection do
 		
 		expect(last_response.status).to be == 301
 		expect(last_response.headers['Location']).to be == '/welcome/index'
-		expect(last_response.headers['Cache-Control']).to include("max-age=86400")
+		expect(last_response.headers['cache-control']).to include("max-age=86400")
 	end
 	
 	it "should redirect on 404" do

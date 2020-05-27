@@ -24,6 +24,8 @@ require_relative '../http'
 
 module Utopia
 	class Controller
+		CONTENT_TYPE = HTTP::CONTENT_TYPE
+		
 		# The base implementation of a controller class.
 		class Base
 			# A string which is the full path to the directory which contains the controller.
@@ -116,11 +118,11 @@ module Utopia
 			end
 			
 			# Succeed the request and immediately respond.
-			def succeed!(status: 200, headers: {}, **options)
+			def succeed!(status: 200, headers: {}, type: nil, **options)
 				status = HTTP::Status.new(status, 200...300)
 				
-				if options[:type]
-					headers[Rack::CONTENT_TYPE] = options[:type].to_s
+				if type
+					headers[CONTENT_TYPE] = type.to_s
 				end
 				
 				body = body_for(status, headers, options)

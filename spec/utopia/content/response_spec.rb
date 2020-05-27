@@ -28,9 +28,9 @@ module Utopia::Content::ResponseSpec
 			subject.cache!(1000)
 			subject.do_not_cache!
 			
-			expect(subject.headers['Cache-Control']).to be == "no-cache, must-revalidate"
+			expect(subject.headers['cache-control']).to be == "no-cache, must-revalidate"
 			
-			expires_header = Time.parse(subject.headers['Expires'])
+			expires_header = Time.parse(subject.headers['expires'])
 			expect(expires_header).to be <= Time.now
 		end
 		
@@ -39,16 +39,16 @@ module Utopia::Content::ResponseSpec
 			expires = Time.now + 100 # At least this far into the future
 			subject.cache!(duration)
 			
-			expect(subject.headers['Cache-Control']).to be == "public, max-age=120"
+			expect(subject.headers['cache-control']).to be == "public, max-age=120"
 			
-			expires_header = Time.parse(subject.headers['Expires'])
+			expires_header = Time.parse(subject.headers['expires'])
 			expect(expires_header).to be >= expires
 		end
 		
 		it "should set content type" do
 			subject.content_type! "text/html"
 			
-			expect(subject.headers['Content-Type']).to be == "text/html"
+			expect(subject.headers['content-type']).to be == "text/html"
 		end
 	end
 end

@@ -23,9 +23,9 @@
 module Utopia
 	class Content
 		# Compatibility with older versions of rack:
-		EXPIRES = 'Expires'.freeze
-		CACHE_CONTROL = 'Cache-Control'.freeze
-		CONTENT_TYPE = 'Content-Type'.freeze
+		EXPIRES = 'expires'.freeze
+		CACHE_CONTROL = 'cache-control'.freeze
+		CONTENT_TYPE = 'content-type'.freeze
 		NO_CACHE = 'no-cache'.freeze
 		
 		# A basic content response, including useful defaults for typical HTML5 content.

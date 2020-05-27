@@ -68,7 +68,7 @@ module Utopia::Controller::RespondSpec
 			status, headers, body = controller.process!(request, relative_path)
 			
 			expect(status).to be == 200
-			expect(headers['Content-Type']).to be == "application/json"
+			expect(headers['content-type']).to be == "application/json"
 			expect(body.join).to be == '{"user_id":10}'
 		end
 		
@@ -81,7 +81,7 @@ module Utopia::Controller::RespondSpec
 			status, headers, body = controller.process!(request, relative_path)
 			
 			expect(status).to be == 200
-			expect(headers['Content-Type']).to be == "text/plain"
+			expect(headers['content-type']).to be == "text/plain"
 			expect(body.join).to be == '{:user_id=>10}'
 		end
 	end
@@ -93,17 +93,17 @@ module Utopia::Controller::RespondSpec
 		
 		it "should get html error page" do
 			# Standard web browser header:
-			header 'Accept', 'text/html, text/*, */*'
+			header 'accept', 'text/html, text/*, */*'
 			
 			get '/errors/file-not-found'
 			
 			expect(last_response.status).to be == 200
-			expect(last_response.headers['Content-Type']).to include('text/html')
+			expect(last_response.headers['content-type']).to include('text/html')
 			expect(last_response.body).to be_include "<h1>File Not Found</h1>"
 		end
 		
 		it "should get json error response" do
-			header 'Accept', 'application/json'
+			header 'accept', 'application/json'
 			
 			get '/errors/file-not-found'
 			
