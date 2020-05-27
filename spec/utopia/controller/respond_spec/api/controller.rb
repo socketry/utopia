@@ -5,7 +5,7 @@ respond.with_json
 
 class VersionedResponse
 	def to_json(options = {})
-		JSON::dump(self.as_json(options))
+		JSON.dump(self.as_json(options))
 	end
 	
 	# Modelled after http://api.rubyonrails.org/classes/ActiveModel/Serializers/JSON.html
