@@ -32,7 +32,7 @@ module Utopia::Content::MarkupSpec
 		attr :events
 		
 		def method_missing(*arguments)
-			@events << args
+			@events << arguments
 		end
 	end
 	
@@ -56,7 +56,6 @@ module Utopia::Content::MarkupSpec
 		end
 		
 		it "should parse single tag" do
-			
 			delegate = parse %Q{<foo></foo>}
 			
 			foo_tag = Utopia::Content::Tag.opened("foo")
