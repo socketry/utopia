@@ -56,7 +56,7 @@ module Utopia
 					end
 					
 					def self.call(context, request, media_range, object, **options)
-						context.ignore!
+						# Do nothing.
 					end
 				end
 			end
