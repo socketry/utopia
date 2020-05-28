@@ -119,7 +119,7 @@ module Utopia
 					if headers[HTTP::CONTENT_TYPE]
 						return response
 					else
-						self.response_for(request, response)
+						return self.response_for(request, response)
 					end
 				end
 			end
