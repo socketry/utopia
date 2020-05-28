@@ -35,8 +35,9 @@ module Utopia
 		end
 		
 		Responds = Struct.new(:responder, :context, :request) do
-			def with(*arguments, **options)
-				responder.call(context, request, *arguments, **options)
+			# @todo Refactor `object` -> `*arguments`...
+			def with(object, **options)
+				responder.call(context, request, object, **options)
 			end
 		end
 		
