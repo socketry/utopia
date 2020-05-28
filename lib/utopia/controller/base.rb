@@ -33,6 +33,16 @@ module Utopia
 				self.const_get(:BASE_PATH)
 			end
 			
+			# A relative path to the controller directory relative to the controller root directory.
+			def self.uri_path
+				self.const_get(:URI_PATH)
+			end
+			
+			# The controller middleware itself.
+			def self.controller
+				self.const_get(:CONTROLLER)
+			end
+			
 			def self.inspect
 				"Controller#{self.uri_path}"
 			end
@@ -49,16 +59,6 @@ module Utopia
 				details = self.instance_variables.map{|name| " #{name}=#{self.instance_variable_get(name)}"}
 				
 				"\#<#{self.class}#{details.join}>"
-			end
-			
-			# A relative path to the controller directory relative to the controller root directory.
-			def self.uri_path
-				self.const_get(:URI_PATH)
-			end
-			
-			# The controller middleware itself.
-			def self.controller
-				self.const_get(:CONTROLLER)
 			end
 			
 			class << self
