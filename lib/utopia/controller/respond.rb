@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 require_relative '../http'
-require_relative '../path/matcher'
+require_relative '../responder'
 
 module Utopia
 	class Controller
@@ -31,139 +31,80 @@ module Utopia
 				base.extend(ClassMethods)
 			end
 			
-			module Converter
-				def self.update_response(response, updated_headers)
-					status, headers, body = response
-					
-					# Generate a new body:
-					body = body.collect{|content| yield content}
-					
-					# Update the headers with the requested content type:
-					headers = headers.merge(updated_headers)
-					
-					return [status, headers, body]
-				end
-				
-				Callback = Struct.new(:content_type, :block) do
-					def headers
-						{HTTP::CONTENT_TYPE => self.content_type}
-					end
-					
-					def split(*arguments)
-						self.content_type.split(*arguments)
-					end
-					
-					def call(context, response, media_range)
-						Converter.update_response(response, headers) do |content|
-							context.instance_exec(content, media_range, &block)
-						end
-					end
-				end
-				
-				def self.new(*arguments)
-					Callback.new(*arguments)
-				end
-				
-				# To accept incoming requests with content-type JSON (e.g. POST with JSON data), consider using `Rack::PostBodyContentTypeParser`.
-				module ToJSON
-					APPLICATION_JSON = HTTP::Accept::ContentType.new('application', 'json', charset: 'utf-8').freeze
-					HEADERS = {HTTP::CONTENT_TYPE => APPLICATION_JSON.to_s}.freeze
-					
-					def self.content_type
-						APPLICATION_JSON
-					end
+			module Handlers
+				module JSON
+					APPLICATION_JSON = HTTP::Accept::ContentType.new('application', 'json').freeze
 					
 					def self.split(*arguments)
-						self.content_type.split(*arguments)
+						APPLICATION_JSON.split(*arguments)
 					end
 					
-					def self.serialize(content, media_range)
-						options = {}
-						
+					def self.call(context, request, media_range, object, **options)
 						if version = media_range.parameters['version']
 							options[:version] = version.to_s
 						end
 						
-						return content.to_json(options)
+						context.succeed! content: object.to_json(options), type: APPLICATION_JSON
+					end
+				end
+				
+				module Passthrough
+					WILDCARD = HTTP::Accept::MediaTypes::MediaRange.new('*', '*').freeze
+					
+					def self.split(*arguments)
+						WILDCARD.split(*arguments)
 					end
 					
-					def self.call(context, response, media_range)
-						Converter.update_response(response, HEADERS) do |content|
-							self.serialize(content, media_range)
-						end
+					def self.call(context, request, media_range, object, **options)
+						binding.irb
+						context.ignore!
 					end
 				end
 			end
 			
-			module Passthrough
-				WILDCARD = HTTP::Accept::MediaTypes::MediaRange.new('*', '*').freeze
-				
-				def self.split(*arguments)
-					self.media_range.split(*arguments)
-				end
-				
-				def self.media_range
-					WILDCARD
-				end
-				
-				def self.call(context, response, media_range)
-					return nil
-				end
-			end
-			
-			class Responder
-				HTTP_ACCEPT = 'HTTP_ACCEPT'.freeze
-				NOT_ACCEPTABLE_RESPONSE = [406, {}, []].freeze
-				
-				def initialize
-					@converters = HTTP::Accept::MediaTypes::Map.new
-				end
-				
-				def freeze
-					@converters.freeze
-					
-					super
-				end
-				
-				# Add a converter for the specified content type. Call the block with the response content if the request accepts the specified content_type.
-				def with(content_type, &block)
-					@converters << Converter::Callback.new(content_type, block)
+			class Responder < Utopia::Responder
+				def with_json
+					@handlers << Handlers::JSON
 				end
 				
 				def with_passthrough
-					@converters << Passthrough
+					@handlers << Handlers::Passthrough
 				end
 				
-				# Add a converter for JSON when requests accept 'application/json'
-				def with_json
-					@converters << Converter::ToJSON
-				end
-				
-				def call(context, request, path, response)
-					# Parse the list of browser preferred content types and return ordered by priority:
-					media_types = HTTP::Accept::MediaTypes.browser_preferred_media_types(request.env)
-					
-					converter, media_range = @converters.for(media_types)
-					
-					if converter
-						converter.call(context, response, media_range)
-					else
-						NOT_ACCEPTABLE_RESPONSE
-					end
+				def with(content_type, &block)
+					handle(content_type, &block)
 				end
 			end
 			
 			module ClassMethods
-				def respond
+				def responds
 					@responder ||= Responder.new
 				end
 				
-				def response_for(context, request, path, response)
-					if @responder
-						@responder.call(context, request, path, response)
-					else
-						response
-					end
+				alias respond responds
+				
+				def respond_to(context, request)
+					@responder&.respond_to(context, request)
+				end
+				
+				def response_for(context, request, response)
+					@responder&.respond_to(context, request).with(*response[2])
+				end
+			end
+			
+			def respond_to(request)
+				self.class.respond_to(self, request)
+			end
+			
+			def update_response(original_response, &block)
+				response = catch(:response) do
+					yield and nil
+				end
+				
+				if response = catch_response(&block)
+					return [original_response[0], original_response[1].merge(response[1]), response[2] || original_response[2]]
+				else
+					return nil
 				end
 			end
 			
@@ -173,11 +114,13 @@ module Utopia
 					headers = response[1]
 					
 					# Don't try to convert the response if a content type was explicitly specified.
-					unless headers[Rack::CONTENT_TYPE]
-						response = self.class.response_for(self, request, path, response)
+					if headers[HTTP::CONTENT_TYPE]
+						return response
+					else
+						update_response(response) do
+							self.class.response_for(self, request, response)
+						end
 					end
-					
-					response
 				end
 			end
 		end

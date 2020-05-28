@@ -35,12 +35,12 @@ module Utopia::Controller::RespondSpec
 			# Request goes from right to left.
 			prepend Utopia::Controller::Respond, Utopia::Controller::Actions
 			
-			respond.with("application/json") do |content|
-				JSON::dump(content)
+			responds.with("application/json") do |media_range, object|
+				succeed! content: JSON.dump(object), type: 'application/json'
 			end
 			
-			respond.with("text/plain") do |content|
-				content.inspect
+			responds.with("text/plain") do |media_range, object|
+				succeed! content: object.inspect,	type: 'text/plain'
 			end
 			
 			on 'fetch' do |request, path|
@@ -108,7 +108,7 @@ module Utopia::Controller::RespondSpec
 			get '/errors/file-not-found'
 			
 			expect(last_response.status).to be == 404
-			expect(last_response.headers['content-type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.headers['content-type']).to be == 'application/json'
 			expect(last_response.body).to be == '{"message":"File not found"}'
 		end
 		
@@ -128,7 +128,7 @@ module Utopia::Controller::RespondSpec
 			get '/api/fetch'
 			
 			expect(last_response.status).to be == 200
-			expect(last_response.headers['content-type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.headers['content-type']).to be == 'application/json'
 			expect(last_response.body).to be == '{"message":"Hello World"}'
 		end
 		
@@ -138,7 +138,7 @@ module Utopia::Controller::RespondSpec
 			get '/api/fetch'
 			
 			expect(last_response.status).to be == 200
-			expect(last_response.headers['content-type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.headers['content-type']).to be == 'application/json'
 			expect(last_response.body).to be == '{"message":"Goodbye World"}'
 		end
 		
@@ -147,7 +147,7 @@ module Utopia::Controller::RespondSpec
 			get '/api/fetch'
 			
 			expect(last_response.status).to be == 200
-			expect(last_response.headers['content-type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.headers['content-type']).to be == 'application/json'
 			expect(last_response.body).to be == '{}'
 		end
 		
@@ -157,7 +157,7 @@ module Utopia::Controller::RespondSpec
 			get '/rewrite/2/show'
 			
 			expect(last_response.status).to be == 200
-			expect(last_response.headers['content-type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.headers['content-type']).to be == 'application/json'
 			expect(last_response.body).to be == '{"id":2,"foo":"bar"}'
 		end
 		
@@ -167,7 +167,7 @@ module Utopia::Controller::RespondSpec
 			get '/rewrite/1/show'
 			
 			expect(last_response.status).to be == 404
-			expect(last_response.headers['content-type']).to be == 'application/json; charset=utf-8'
+			expect(last_response.headers['content-type']).to be == 'application/json'
 			expect(last_response.body).to be == '{"message":"Could not find record"}'
 		end
 	end

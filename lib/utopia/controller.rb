@@ -33,20 +33,6 @@ require_relative 'controller/actions'
 require 'concurrent/map'
 
 module Utopia
-	# A container for controller classes which are loaded from disk.
-	module Controllers
-		def self.class_name_for_controller(controller)
-			controller.uri_path.to_a.collect{|_| _.capitalize}.join + "_#{controller.object_id}"
-		end
-		
-		def self.define(klass)
-			self.const_set(
-				class_name_for_controller(klass),
-				klass,
-			)
-		end
-	end
-	
 	# A middleware which loads controller classes and invokes functionality based on the requested path.
 	class Controller
 		# The controller filename.
@@ -104,9 +90,6 @@ module Utopia
 				klass.const_set(:CONTROLLER, self)
 				
 				klass.class_eval(File.read(controller_path), controller_path)
-				
-				# Give the controller a useful name:
-				# Controllers.define(klass)
 				
 				# We lock down the controller class to prevent unsafe modifications:
 				klass.freeze
