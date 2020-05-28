@@ -56,7 +56,6 @@ module Utopia
 					end
 					
 					def self.call(context, request, media_range, object, **options)
-						binding.irb
 						context.ignore!
 					end
 				end
@@ -96,15 +95,18 @@ module Utopia
 				self.class.respond_to(self, request)
 			end
 			
-			def update_response(original_response, &block)
+			def response_for(request, original_response)
 				response = catch(:response) do
-					yield and nil
+					self.class.response_for(self, request, original_response)
+					
+					# If the above code did not throw a new response, we return the original:
+					return original_response
 				end
 				
-				if response = catch_response(&block)
+				# If the user called {Base#ignore!}, it's possible response is nil:
+				if response
+					# There was an updated response so merge it:
 					return [original_response[0], original_response[1].merge(response[1]), response[2] || original_response[2]]
-				else
-					return nil
 				end
 			end
 			
@@ -117,9 +119,7 @@ module Utopia
 					if headers[HTTP::CONTENT_TYPE]
 						return response
 					else
-						update_response(response) do
-							self.class.response_for(self, request, response)
-						end
+						self.response_for(request, response)
 					end
 				end
 			end
