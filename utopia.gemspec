@@ -41,4 +41,5 @@ Gem::Specification.new do |spec|
 	spec.add_development_dependency "covered"
 	spec.add_development_dependency "falcon"
 	spec.add_development_dependency "rspec", "~> 3.6"
+	spec.add_development_dependency "utopia-project"
 end
