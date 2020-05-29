@@ -28,6 +28,10 @@ module Utopia
 		
 		# The base implementation of a controller class.
 		class Base
+			URI_PATH = nil
+			BASE_PATH = nil
+			CONTROLLER = nil
+			
 			# A string which is the full path to the directory which contains the controller.
 			def self.base_path
 				self.const_get(:BASE_PATH)
@@ -44,7 +48,7 @@ module Utopia
 			end
 			
 			def self.inspect
-				"Controller#{self.uri_path}"
+				"#{super}#{self.uri_path}"
 			end
 			
 			def self.to_s
