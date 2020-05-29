@@ -1,7 +1,7 @@
 tmp
 .tags*
 *.gem
-Gemfile.lock
+/gems.locked
 documentation/run/*
 documentation/public/code/*
 .rspec_status

@@ -25,26 +25,18 @@ jobs:
           - os: ubuntu
             ruby: truffleruby
             experimental: true
-            env: JRUBY_OPTS="--debug -X+O"
           - os: ubuntu
             ruby: jruby
             experimental: true
           - os: ubuntu
             ruby: head
             experimental: true
-          - os: ubuntu
-            ruby: 2.6
-            experimental: false
-            env: COVERAGE=PartialSummary,Coveralls
     
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{matrix.ruby}}
-    
-    - name: Install dependencies
-      run: ${{matrix.env}} bundle install
     
     - name: Installing packages (ubuntu)
       if: matrix.os == 'ubuntu'
@@ -53,6 +45,9 @@ jobs:
     - name: Installing packages (macos)
       if: matrix.os == 'macos'
       run: brew install wget
+    
+    - name: Install dependencies
+      run: ${{matrix.env}} bundle install
     
     - name: Run tests
       timeout-minutes: 5
