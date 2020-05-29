@@ -6,18 +6,18 @@ def update
 	require 'utopia/path'
 	
 	root = Pathname.new(context.root)
-	yarn_package_root = root + "node_modules"
+	package_root = root + "node_modules"
 	
 	# This is a legacy path:
-	unless yarn_package_root.directory?
-		yarn_package_root = root + "lib/components"
+	unless package_root.directory?
+		package_root = root + "lib/components"
 	end
 	
-	yarn_install_root = root + "public/_components"
+	install_root = root + "public/_components"
 	
-	yarn_package_root.children.select(&:directory?).collect(&:basename).each do |package_directory|
-		install_path = yarn_install_root + package_directory
-		package_path = yarn_package_root + package_directory
+	package_root.children.select(&:directory?).collect(&:basename).each do |package_directory|
+		install_path = install_root + package_directory
+		package_path = package_root + package_directory
 		
 		dist_path = package_path + 'dist'
 		
