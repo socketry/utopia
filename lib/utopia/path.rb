@@ -235,6 +235,14 @@ module Utopia
 			return self.class.new(result)
 		end
 		
+		def pop
+			@components.pop
+		end
+		
+		def last
+			@components.last
+		end
+		
 		# @return [String] the last path component without any file extension.
 		def basename
 			basename, _ = @components.last.split('.', 2)
@@ -284,7 +292,7 @@ module Utopia
 		end
 		
 		def split(at)
-			if at.kind_of? String
+			if at.kind_of?(String)
 				at = @components.index(at)
 			end
 			

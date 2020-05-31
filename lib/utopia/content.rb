@@ -177,17 +177,19 @@ module Utopia
 		end
 		
 		def content_tag(name, node)
-			parent_path = node.parent_path
+			full_path = node.parent_path + name
+			
+			name = full_path.pop
 			
 			# If the current node is called 'foo', we can't lookup 'foo' in the current directory or we will have infinite recursion.
-			if name == node.name
-				parent_path = parent_path.dirname
+			while full_path.last == name
+				full_path.pop
 			end
 			
-			cache_key = parent_path + name
+			cache_key = full_path + name
 			
 			@node_cache.fetch_or_store(cache_key) do
-				lookup_content(name, parent_path)
+				lookup_content(name, full_path)
 			end
 		end
 	end
