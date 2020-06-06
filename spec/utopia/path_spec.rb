@@ -89,6 +89,38 @@ RSpec.describe Utopia::Path do
 		end
 	end
 	
+	describe '#first' do
+		subject(:path) {described_class.create(value)}
+		
+		context 'with absolute path' do
+			let(:value) {'/foo/bar'}
+			
+			it {is_expected.to have_attributes(first: 'foo')}
+		end
+		
+		context 'with relative path' do
+			let(:value) {'foo/bar'}
+			
+			it {is_expected.to have_attributes(first: 'foo')}
+		end
+	end
+	
+	describe '#last' do
+		subject(:path) {described_class.create(value)}
+		
+		context 'with file path' do
+			let(:value) {'/foo/bar'}
+			
+			it {is_expected.to have_attributes(last: 'bar')}
+		end
+		
+		context 'with directory path' do
+			let(:value) {'/foo/bar/'}
+			
+			it {is_expected.to have_attributes(last: '')}
+		end
+	end
+	
 	it "should concatenate absolute paths" do
 		root = Utopia::Path["/"]
 		

@@ -25,7 +25,7 @@ module Utopia
 	class Path
 		include Comparable
 		
-		SEPARATOR = '/'.freeze
+		SEPARATOR = '/'
 		
 		def initialize(components = [])
 			@components = components
@@ -34,6 +34,8 @@ module Utopia
 		attr_accessor :components
 		
 		def freeze
+			return self if frozen?
+			
 			@components.freeze
 			
 			super
@@ -235,12 +237,20 @@ module Utopia
 			return self.class.new(result)
 		end
 		
-		def pop
-			@components.pop
+		def first
+			if absolute?
+				@components[1]
+			else
+				@components[0]
+			end
 		end
 		
 		def last
 			@components.last
+		end
+		
+		def pop
+			@components.pop
 		end
 		
 		# @return [String] the last path component without any file extension.
@@ -348,22 +358,6 @@ module Utopia
 		
 		def delete_at(index)
 			@components.delete_at(component_offset(index))
-		end
-		
-		def first
-			if absolute?
-				@components[1]
-			else
-				@components[0]
-			end
-		end
-		
-		def last
-			if directory?
-				@components[-2]
-			else
-				@components[-1]
-			end
 		end
 		
 		private
