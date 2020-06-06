@@ -62,7 +62,7 @@ Dir.chdir(GIT_WORK_TREE) do
 	sudo %W{git checkout -f}
 	sudo %W{git submodule update -i}
 	
-	if File.exist? 'Gemfile'
+	if File.exist? 'gems.rb'
 		sudo %W{bundle install}
 	end
 	

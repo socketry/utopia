@@ -33,7 +33,7 @@ module Utopia
 		# Local site setup commands.
 		class Site < Samovar::Command
 			# Configuration files which should be installed/updated:
-			CONFIGURATION_FILES = ['.gitignore', 'config.ru', 'config/environment.rb', 'falcon.rb', 'Gemfile', 'Guardfile', 'bake.rb', 'spec/spec_helper.rb', 'spec/website_context.rb', 'spec/website_spec.rb']
+			CONFIGURATION_FILES = ['.gitignore', 'config.ru', 'config/environment.rb', 'falcon.rb', 'gems.rb', 'Guardfile', 'bake.rb', 'spec/spec_helper.rb', 'spec/website_context.rb', 'spec/website_spec.rb']
 			
 			# Directories that should exist:
 			DIRECTORIES = ["config", "lib", "pages", "public", "tasks", "spec"]
@@ -142,6 +142,15 @@ module Utopia
 					end
 				end
 				
+				# Move `Gemfile` to `gems.rb`.
+				def update_gemfile!
+					# If `Gemfile` doens't exist, we are done:
+					return unless File.exist?('Gemfile')
+					
+					system("git", "mv", "Gemfile", "gems.rb")
+					system("git", "mv", "Gemfile.lock", "gems.locked")
+				end
+				
 				def call
 					destination_root = parent.root
 					branch_name = "utopia-upgrade-#{Utopia::VERSION}"
@@ -184,6 +193,7 @@ module Utopia
 							system("git", "add", *Site::CONFIGURATION_FILES) or fail "could not add files"
 							
 							move_static!
+							update_gemfile!
 							
 							# Commit all changes:
 							system("git", "commit", "-m", "Upgrade to utopia #{Utopia::VERSION}.") or fail "could not commit changes"
