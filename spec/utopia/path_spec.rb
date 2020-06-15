@@ -114,6 +114,18 @@ RSpec.describe Utopia::Path do
 			it {is_expected.to have_attributes(last: 'bar')}
 		end
 		
+		context 'with empty absolute path' do
+			let(:value) {'/'}
+			
+			it {is_expected.to have_attributes(last: '')}
+		end
+		
+		context 'with root path' do
+			subject(:path) {described_class.root}
+			
+			it {is_expected.to have_attributes(last: nil)}
+		end
+		
 		context 'with directory path' do
 			let(:value) {'/foo/bar/'}
 			

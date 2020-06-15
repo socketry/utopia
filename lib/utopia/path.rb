@@ -237,6 +237,7 @@ module Utopia
 			return self.class.new(result)
 		end
 		
+		# Returns the first path component.
 		def first
 			if absolute?
 				@components[1]
@@ -245,12 +246,19 @@ module Utopia
 			end
 		end
 		
+		# Returns the last path component.
 		def last
-			@components.last
+			if @components != ['']
+				@components.last
+			end
 		end
 		
+		# Pops the last path component.
 		def pop
-			@components.pop
+			# We don't want to convert an absolute path to a relative path.
+			if @components != ['']
+				@components.pop
+			end
 		end
 		
 		# @return [String] the last path component without any file extension.
