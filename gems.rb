@@ -6,13 +6,7 @@ source 'https://rubygems.org'
 gemspec
 
 group :development do
-	gem 'yard'
-	
-	gem 'kramdown'
-	gem 'kramdown-parser-gfm'
-	
 	gem 'json'
-	
 	gem 'rackula'
 end
 
