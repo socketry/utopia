@@ -234,7 +234,7 @@ module Utopia
 				end
 				
 				def load_index(name, locale, info)
-					info ||=  {}
+					info ||= {}
 					
 					if locale and defaults = @metadata[name]
 						info = defaults.merge(info)
@@ -245,13 +245,16 @@ module Utopia
 					yield Link.new(:index, name, locale, path, info, path[-2])
 				end
 				
+				DEFAULT_INDEX_INFO = {href: nil}.freeze
+				
+				# The default index for a directory which has no contents.
 				def load_default_index(name = INDEX, info = {})
 					path = @top + name
 					
 					if info
-						info = {uri: nil}.merge(info)
+						info = DEFAULT_INDEX_INFO.merge(info)
 					else
-						info = {uri: nil}
+						info = DEFAULT_INDEX_INFO
 					end
 					
 					# Specify a nil uri if no index could be found for the directory:
