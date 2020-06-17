@@ -35,8 +35,6 @@ Gem::Specification.new do |spec|
 	spec.add_development_dependency "async-rspec"
 	spec.add_development_dependency "async-websocket"
 	spec.add_development_dependency "bake"
-	spec.add_development_dependency "bake-bundler"
-	spec.add_development_dependency "bake-modernize"
 	spec.add_development_dependency "bundler"
 	spec.add_development_dependency "covered"
 	spec.add_development_dependency "falcon"
