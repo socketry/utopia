@@ -258,7 +258,7 @@ module Utopia
 					end
 					
 					# Specify a nil uri if no index could be found for the directory:
-					yield Link.new(:index, name, nil, @top, info, path[-2])
+					yield Link.new(:index, name, nil, @top.to_directory, info, path[-2])
 				end
 				
 				def load_file(name, locale, info)

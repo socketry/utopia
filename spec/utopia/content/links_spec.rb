@@ -131,7 +131,7 @@ RSpec.describe Utopia::Content::Links do
 			expect(links[3].kind).to be == :directory
 			expect(links[3].name).to be == 'redirect'
 			expect(links[3].locale).to be_nil
-			expect(links[3].path).to be == ['', 'redirect']
+			expect(links[3].path).to be == ['', 'redirect', '']
 			expect(links[3].href).to be == "https://www.codeotaku.com"
 			
 			expect(links[1]).to be_eql links[1]
@@ -147,7 +147,7 @@ RSpec.describe Utopia::Content::Links do
 			expect(links[0].kind).to be == :directory
 			expect(links[0].name).to be == "parent"
 			expect(links[0].locale).to be_nil
-			expect(links[0].path).to be == ['', 'bar', 'parent']
+			expect(links[0].path).to be == ['', 'bar', 'parent', '']
 		end
 		
 		it "can list directories with multiple localized indexes" do
