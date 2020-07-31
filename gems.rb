@@ -7,7 +7,6 @@ gemspec
 
 group :maintenance, optional: true do
 	gem "bake-modernize"
-	gem "bake-bundler"
 	
 	gem "utopia-project"
 end
@@ -15,6 +14,8 @@ end
 group :development do
 	gem 'json'
 	gem 'rackula'
+	
+	gem "bake-bundler"
 end
 
 group :test do
