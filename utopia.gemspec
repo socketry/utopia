@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
 	spec.files = Dir.glob('{bake,bin,lib,setup}/**/*', File::FNM_DOTMATCH, base: __dir__)
 	
 	spec.executables = ["utopia"]
-
+	
 	spec.required_ruby_version = "~> 2.5"
 	
 	spec.add_dependency "concurrent-ruby", "~> 1.0"
@@ -39,5 +39,4 @@ Gem::Specification.new do |spec|
 	spec.add_development_dependency "covered"
 	spec.add_development_dependency "falcon"
 	spec.add_development_dependency "rspec", "~> 3.6"
-	spec.add_development_dependency "utopia-project"
 end

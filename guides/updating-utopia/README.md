@@ -1,5 +1,9 @@
 # Updating Utopia
 
+This guide explains how to update existing `utopia` websites.
+
+## Overview
+
 Utopia provides a model for both local development (`utopia site create`) and deployment (`utopia server create`). In addition, Utopia provides a basic upgrade path for existing sites when things within the framework change. These are not always automatic, so below are some recipes for how to update your site.
 
 ## Site Update
@@ -61,3 +65,5 @@ You can run the update process on the server to bring the git hooks up to the la
 $ cd /srv/http/website
 $ utopia server update
 ```
+
+You should keep your client and server deployment hooks in sync.

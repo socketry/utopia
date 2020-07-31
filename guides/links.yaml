@@ -1,0 +1,22 @@
+getting-started:
+  order: 1
+
+middleware:
+  title: "Middleware Overview"
+  order: 2
+
+server-setup:
+  title: "Server Setup & Deployment"
+  order: 3
+
+
+integrating-with-javascript:
+  title: Integrating with JavaScript
+  order: 4
+what-is-xnode:
+  title: "What is XNode?"
+  order: 5
+
+
+updating-utopia:
+  order: 10

@@ -1,6 +1,6 @@
-# Controller::Rewrite
+# Utopia::Controller::Rewrite
 
-The <code class="language-ruby">Controller::Rewrite</code> layer can match and rewrite requests before they processed. This allows you to handle URLs like `/post/15/view` or `/blog/123-pictures-of-my-cat` easily. The basic rewrite operation is to extract some part of the path and optionally executes a block. That means that the path is modified before being passed on to the next layer in the controller, and controller instance variables may be set.
+This module can match and rewrite requests before they processed. This allows you to handle URLs like `/post/15/view` or `/blog/123-pictures-of-my-cat` easily. The basic rewrite operation is to extract some part of the path and optionally executes a block. That means that the path is modified before being passed on to the next layer in the controller, and controller instance variables may be set.
 
 ## Regular Expressions
 

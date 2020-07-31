@@ -1,16 +1,20 @@
-# What is `.xnode`?
+# What is XNode?
 
-Xnodes are the files on disk which are used as part of Utopia's content/view layer. Xnode templates are designed to maximise the ratio of content to markup. They improve separation of concerns and semantic organisation because repeated markup can be reused easily.
+This guide explains the `xnode` view layer and how it can be used to build efficient websites.
+
+## Overview
+
+`.xnode` is the file extension for files which are used to render HTML content. The extension is formed from `XML` document fragment which forms a `node` in a tree. These templates are designed to maximise the ratio of content to markup. They improve separation of concerns and semantic organisation because repeated markup can be reused easily.
 
 Here is a example of a blog post:
 
-```xml
+~~~ xml
 <content:entry title="My day as a fish">
 	<p>It was not very exciting</p>
 </content:entry>
-```
+~~~
 
-The `Utopia::Content` middleware is built on top of the [Trenni](https://github.com/ioquatix/trenni) template language which uses two-phase evaluation.
+The {Utopia::Content} middleware is built on top of the [Trenni](https://github.com/ioquatix/trenni) template language which uses two-phase evaluation.
 
 ## Phase 1: Evaluation
 

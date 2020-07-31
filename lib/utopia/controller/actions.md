@@ -1,4 +1,4 @@
-# Controller::Actions
+# Utopia::Controller::Actions
 
 Actions let you match path patterns in your controller and execute code. In your `controller.rb` simply add:
 
