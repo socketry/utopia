@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Source</title>
+		
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+		<link rel="icon" type="image/png" href="../_static/icon.png"/>
+		<link rel="stylesheet" href="../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../_components/jquery/jquery.min.js"></script>
+		<script src="../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script src="../_static/links.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body>
+		<header><label for="toggle">☰</label>  › <a class="link" href="../index.html">Project</a> › <a class="link" href="index.html">Source</a></header>
+		
+		<main>
+			
+	<h1>Source</h1>
+	
+	<ul class="index"><li>
+					<a href="Utopia/index.html"><code class="language-ruby">module Utopia</code></a>
+					
+						<p>Utopia is a web application framework built on top of Rack.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Responder/index.html"><code class="language-ruby">class Responder</code></a>
+					
+					
+					<ul class="index"><li>
+					<a href="Utopia/Responder/index.html#Utopia%3A%3AResponder%23handle"><code class="language-ruby">def handle(content_type, &amp;block)</code></a>
+					
+						<p>Add a converter for the specified content type. Call the block with the response content if the request accepts the specified content_type.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Path/index.html"><code class="language-ruby">class Path</code></a>
+					
+						<p>Represents a path as an array of path components. Useful for efficient URL manipulation.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Path/index.html#Utopia%3A%3APath.prefix_length"><code class="language-ruby">def self.prefix_length(a, b)</code></a>
+					
+						<p>Returns the length of the prefix which is shared by two strings.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Path/index.html#Utopia%3A%3APath.shortest_path"><code class="language-ruby">def self.shortest_path(path, root)</code></a>
+					
+						<p>Return the shortest relative path to get to path from root:</p>
+
+					
+									</li><li>
+					<a href="Utopia/Path/index.html#Utopia%3A%3APath.unescape"><code class="language-ruby">def self.unescape(string)</code></a>
+					
+						<p>Converts '+' into whitespace and hex encoded characters into their equivalent characters.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Path/index.html#Utopia%3A%3APath.from_string"><code class="language-ruby">def self.from_string(string)</code></a>
+					
+						<p>This constructor takes a string and generates a relative path as efficiently as possible. This is a direct entry point for all controller invocations so it's designed to suit the requirements of that function.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Path/index.html#Utopia%3A%3APath%23-"><code class="language-ruby">def -(other)</code></a>
+					
+						<p>Computes the difference of the path.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Path/index.html#Utopia%3A%3APath%23first"><code class="language-ruby">def first</code></a>
+					
+						<p>Returns the first path component.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Path/index.html#Utopia%3A%3APath%23last"><code class="language-ruby">def last</code></a>
+					
+						<p>Returns the last path component.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Path/index.html#Utopia%3A%3APath%23pop"><code class="language-ruby">def pop</code></a>
+					
+						<p>Pops the last path component.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Path/index.html#Utopia%3A%3APath%23basename"><code class="language-ruby">def basename</code></a>
+					
+					
+									</li><li>
+					<a href="Utopia/Path/index.html#Utopia%3A%3APath%23extension"><code class="language-ruby">def extension</code></a>
+					
+					
+									</li><li>
+					<a href="Utopia/Path/index.html#Utopia%3A%3APath%23%5B%5D%3D"><code class="language-ruby">def []= index, value</code></a>
+					
+						<p>Replaces a named component, indexing as per</p>
+
+					
+									</li><li>
+					<a href="Utopia/Path/index.html#Utopia%3A%3APath%23component_offset"><code class="language-ruby">def component_offset(index)</code></a>
+					
+						<p>We adjust the index slightly so that indices reference path components rather than the directory markers at the start and end of the path components array.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Path/Matcher/index.html"><code class="language-ruby">class Matcher</code></a>
+					
+						<p>Performs structured, efficient, matches against <a href="Utopia/Path/index.html" title="Path"><code class="language-ruby">class Utopia::Path</code></a> instances. Supports regular expressions, type-casts and constants.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Path/Matcher/MatchData/index.html"><code class="language-ruby">class MatchData</code></a>
+					
+						<p>The result of matching against a <a href="Utopia/Path/index.html" title="Path"><code class="language-ruby">class Utopia::Path</code></a>.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Path/Matcher/MatchData/index.html#Utopia%3A%3APath%3A%3AMatcher%3A%3AMatchData%23named_parts"><code class="language-ruby">attr :named_parts</code></a>
+					
+						<p>Matched components by name.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Path/Matcher/MatchData/index.html#Utopia%3A%3APath%3A%3AMatcher%3A%3AMatchData%23post_match"><code class="language-ruby">attr :post_match</code></a>
+					
+						<p>Any remaining part past the end of the explicitly matched components.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Path/Matcher/index.html#Utopia%3A%3APath%3A%3AMatcher%23initialize"><code class="language-ruby">def initialize(patterns = [])</code></a>
+					
+					
+									</li><li>
+					<a href="Utopia/Path/Matcher/index.html#Utopia%3A%3APath%3A%3AMatcher%23match"><code class="language-ruby">def match(path)</code></a>
+					
+						<p>This is a path prefix matching algorithm. The pattern is an array of String, Symbol, Regexp, or nil. The path is an array of String.</p>
+
+					
+									</li></ul>				</li></ul>				</li><li>
+					<a href="Utopia/index.html#Utopia%3A%3APAGES_PATH"><code class="language-ruby">PAGES_PATH = 'pages'.freeze</code></a>
+					
+						<p>The default pages path for <a href="Utopia/Content/index.html" title="Utopia::Content"><code class="language-ruby">class Utopia::Content</code></a> middleware.</p>
+
+					
+									</li><li>
+					<a href="Utopia/index.html#Utopia%3A%3AVARIABLES_KEY"><code class="language-ruby">VARIABLES_KEY = 'utopia.variables'.freeze</code></a>
+					
+						<p>This is used for shared controller variables which get consumed by the content middleware.</p>
+
+					
+									</li><li>
+					<a href="Utopia/index.html#Utopia.default_root"><code class="language-ruby">def self.default_root(subdirectory = PAGES_PATH, pwd = Dir.pwd)</code></a>
+					
+						<p>The default root directory for middleware to operate within, e.g. the web-site directory. Convention over configuration.</p>
+
+					
+									</li><li>
+					<a href="Utopia/index.html#Utopia.default_path"><code class="language-ruby">def self.default_path(*arguments)</code></a>
+					
+						<p>The same as <a href="Utopia/index.html#Utopia.default_root" title="default_root"><code class="language-ruby">Utopia.default_root</code></a> but returns an instance of <a href="Utopia/Path/index.html" title="Path"><code class="language-ruby">class Utopia::Path</code></a>.</p>
+
+					
+									</li><li>
+					<a href="Utopia/HTTP/index.html"><code class="language-ruby">module HTTP</code></a>
+					
+						<p>HTTP protocol implementation.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/HTTP/index.html#Utopia%3A%3AHTTP%3A%3AAccept"><code class="language-ruby">Accept = ::HTTP::Accept</code></a>
+					
+						<p>Pull in <code class="language-ruby">::HTTP::Accept</code> for parsing.</p>
+
+					
+									</li><li>
+					<a href="Utopia/HTTP/index.html#Utopia%3A%3AHTTP%3A%3ASTATUS_CODES"><code class="language-ruby">STATUS_CODES = {...}</code></a>
+					
+						<p>A list of commonly used HTTP status codes.</p>
+
+					
+									</li><li>
+					<a href="Utopia/HTTP/index.html#Utopia%3A%3AHTTP%3A%3ASTATUS_DESCRIPTIONS"><code class="language-ruby">STATUS_DESCRIPTIONS</code></a>
+					
+						<p>A list of human readable descriptions for a given status code.</p>
+
+					
+									</li><li>
+					<a href="Utopia/HTTP/Status/index.html"><code class="language-ruby">class Status</code></a>
+					
+						<p>A small HTTP status wrapper that verifies the status code within a given range.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/HTTP/Status/index.html#Utopia%3A%3AHTTP%3A%3AStatus%23each"><code class="language-ruby">def each</code></a>
+					
+						<p>Allow to be used for rack body:</p>
+
+					
+									</li></ul>				</li></ul>				</li><li>
+					<a href="Utopia/Exceptions/index.html"><code class="language-ruby">module Exceptions</code></a>
+					
+						<p>Middleware for handling exceptional situations.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Exceptions/Mailer/index.html"><code class="language-ruby">class Mailer</code></a>
+					
+						<p>A middleware which catches all exceptions raised from the app it wraps and sends a useful email with the exception, stacktrace, and contents of the environment.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Exceptions/Mailer/index.html#Utopia%3A%3AExceptions%3A%3AMailer%3A%3ALOCAL_SMTP"><code class="language-ruby">LOCAL_SMTP = [...]</code></a>
+					
+						<p>A basic local non-authenticated SMTP server.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Exceptions/Mailer/index.html#Utopia%3A%3AExceptions%3A%3AMailer%23initialize"><code class="language-ruby">def initialize(app, to: &quot;postmaster&quot;, from: DEFAULT_FROM, subject: DEFAULT_SUBJECT, delivery_method: LOCAL_SMTP, dump_environment: false)</code></a>
+					
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Exceptions/Handler/index.html"><code class="language-ruby">class Handler</code></a>
+					
+						<p>A middleware which catches exceptions and performs an internal redirect.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Exceptions/Handler/index.html#Utopia%3A%3AExceptions%3A%3AHandler%23initialize"><code class="language-ruby">def initialize(app, location = '/errors/exception')</code></a>
+					
+					
+									</li><li>
+					<a href="Utopia/Exceptions/Handler/index.html#Utopia%3A%3AExceptions%3A%3AHandler%23fatal_error"><code class="language-ruby">def fatal_error(env, exception)</code></a>
+					
+						<p>Generate a very simple fatal error response. This function should be unlikely to fail. Additionally, it generates a lowest common denominator response which should be suitable as a response to any kind of request. Ideally, this response is also not good or useful for any kind of higher level browser or API client, as this is not a normal error path but one that represents broken behaviour.</p>
+
+					
+									</li></ul>				</li></ul>				</li><li>
+					<a href="Utopia/Static/index.html"><code class="language-ruby">class Static</code></a>
+					
+						<p>A middleware which serves static files from the specified root directory.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Static/index.html#Utopia%3A%3AStatic%23initialize"><code class="language-ruby">def initialize(app, root: Utopia::default_root, types: MIME_TYPES[:default], cache_control: DEFAULT_CACHE_CONTROL)</code></a>
+					
+					
+									</li><li>
+					<a href="Utopia/Static/LocalFile/index.html"><code class="language-ruby">class LocalFile</code></a>
+					
+						<p>Represents a local file on disk which can be served directly, or passed upstream to sendfile.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Static/LocalFile/index.html#Utopia%3A%3AStatic%3A%3ALocalFile%23to_path"><code class="language-ruby">def to_path</code></a>
+					
+						<p>Fit in with Rack::Sendfile</p>
+
+					
+									</li><li>
+					<a href="Utopia/Static/LocalFile/index.html#Utopia%3A%3AStatic%3A%3ALocalFile%23empty%3F"><code class="language-ruby">def empty?</code></a>
+					
+						<p>This reflects whether calling each would yield anything.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Static/index.html#Utopia%3A%3AStatic%3A%3AMIME_TYPES"><code class="language-ruby">MIME_TYPES = {...}</code></a>
+					
+						<p>Default mime-types which are common for files served over HTTP:</p>
+
+					
+									</li><li>
+					<a href="Utopia/Static/MimeTypeLoader/index.html"><code class="language-ruby">class MimeTypeLoader</code></a>
+					
+						<p>A class to assist with loading mime-type metadata.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Static/MimeTypeLoader/ExpansionError/index.html"><code class="language-ruby">class ExpansionError &lt; ArgumentError</code></a>
+					
+					
+					<ul class="index"></ul>				</li></ul>				</li></ul>				</li><li>
+					<a href="Utopia/index.html#Utopia%3A%3ALocale"><code class="language-ruby">Locale</code></a>
+					
+						<p>A structured representation of locale based on RFC3066.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Localization/index.html"><code class="language-ruby">class Localization</code></a>
+					
+						<p>A middleware which attempts to find localized content.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Localization/Wrapper/index.html"><code class="language-ruby">class Wrapper</code></a>
+					
+						<p>A wrapper to provide easy access to locale related data in the request.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Localization/Wrapper/index.html#Utopia%3A%3ALocalization%3A%3AWrapper%23current_locale"><code class="language-ruby">def current_locale</code></a>
+					
+						<p>Returns the current locale or nil if not localized.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Localization/Wrapper/index.html#Utopia%3A%3ALocalization%3A%3AWrapper%23default_locale"><code class="language-ruby">def default_locale</code></a>
+					
+						<p>Returns the default locale or nil if not localized.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Localization/Wrapper/index.html#Utopia%3A%3ALocalization%3A%3AWrapper%23all_locales"><code class="language-ruby">def all_locales</code></a>
+					
+						<p>Returns an empty array if not localized.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Localization/index.html#Utopia%3A%3ALocalization%23initialize"><code class="language-ruby">def initialize(app, locales:, default_locale: nil, default_locales: nil, hosts: {}, ignore: [])</code></a>
+					
+					
+									</li><li>
+					<a href="Utopia/Localization/index.html#Utopia%3A%3ALocalization%23vary"><code class="language-ruby">def vary(env, response)</code></a>
+					
+						<p>Set the Vary: header on the response to indicate that this response should include the header in the cache key.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Content/index.html"><code class="language-ruby">class Content</code></a>
+					
+						<p>A middleware which serves dynamically generated content based on markup files.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Content/Node/index.html"><code class="language-ruby">class Node</code></a>
+					
+						<p>Represents an immutable node within the content hierarchy.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Content/Node/index.html#Utopia%3A%3AContent%3A%3ANode%23lookup_tag"><code class="language-ruby">def lookup_tag(tag)</code></a>
+					
+						<p>Lookup the given tag which is being rendered within the given node. Invoked by <a href="Utopia/Content/Document/index.html" title="Document"><code class="language-ruby">class Utopia::Content::Document</code></a>.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Node/index.html#Utopia%3A%3AContent%3A%3ANode%23call"><code class="language-ruby">def call(document, state)</code></a>
+					
+						<p>Invoked when the node is being rendered by <a href="Utopia/Content/Document/index.html" title="Document"><code class="language-ruby">class Utopia::Content::Document</code></a>.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Node/index.html#Utopia%3A%3AContent%3A%3ANode%3A%3AContext"><code class="language-ruby">Context</code></a>
+					
+						<p>This is a special context in which a limited set of well defined methods are exposed in the content view.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Content/Namespace/index.html"><code class="language-ruby">module Namespace</code></a>
+					
+						<p>A namespace which contains tags which can be rendered within a <a href="Utopia/Content/Document/index.html" title="Document"><code class="language-ruby">class Utopia::Content::Document</code></a>.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Content/Namespace/index.html#Utopia%3A%3AContent%3A%3ANamespace%23call"><code class="language-ruby">def call(name, node)</code></a>
+					
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Content/UnbalancedTagError/index.html"><code class="language-ruby">class UnbalancedTagError &lt; StandardError</code></a>
+					
+						<p>This error is raised if a tag doesn't match up when parsing.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Content/Document/index.html"><code class="language-ruby">class Document &lt; Response</code></a>
+					
+						<p>A single request through content middleware. We use a struct to hide instance varibles since we instance_exec within this context.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Content/Document/index.html#Utopia%3A%3AContent%3A%3ADocument%23controller"><code class="language-ruby">def controller</code></a>
+					
+						<p>A helper method for accessing controller variables from view:</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Document/index.html#Utopia%3A%3AContent%3A%3ADocument%23request"><code class="language-ruby">attr :request</code></a>
+					
+						<p>The Rack::Request for this document.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Document/index.html#Utopia%3A%3AContent%3A%3ADocument%23attributes"><code class="language-ruby">attr :attributes</code></a>
+					
+						<p>Per-document global attributes.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Document/index.html#Utopia%3A%3AContent%3A%3ADocument%23current"><code class="language-ruby">attr :current</code></a>
+					
+						<p>The current state, represents a list from outer to inner most tag by traversing <a href="Utopia/Content/State/index.html#Utopia%3A%3AContent%3A%3AState%23parent" title="State#parent"><code class="language-ruby">attr :parent</code></a>.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Document/index.html#Utopia%3A%3AContent%3A%3ADocument%23first"><code class="language-ruby">attr :first</code></a>
+					
+						<p>The first <a href="Utopia/Content/State/index.html" title="State"><code class="language-ruby">class Utopia::Content::State</code></a> generated by rendering this document. It contains useful information</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Document/index.html#Utopia%3A%3AContent%3A%3ADocument%23end_tags"><code class="language-ruby">attr :end_tags</code></a>
+					
+						<p>End tags represents a list of execution order. This is the order that end tags</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Document/index.html#Utopia%3A%3AContent%3A%3ADocument%23lookup_tag"><code class="language-ruby">def lookup_tag(tag)</code></a>
+					
+						<p>Maps a tag to a node instance by asking the current node to lookup the tag name. This function is called for each tag and thus heavily affects performance.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Document/index.html#Utopia%3A%3AContent%3A%3ADocument%23lookup_node"><code class="language-ruby">def lookup_node(path)</code></a>
+					
+						<p>Lookup a node with the given path relative to the current node.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Document/index.html#Utopia%3A%3AContent%3A%3ADocument%23content"><code class="language-ruby">def content</code></a>
+					
+						<p>The content of the node</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Content/State/index.html"><code class="language-ruby">class State</code></a>
+					
+						<p>The state of a single tag being rendered within a document instance.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Content/State/index.html#Utopia%3A%3AContent%3A%3AState%23tags"><code class="language-ruby">attr :tags</code></a>
+					
+						<p>A list of all tags in order of rendering them, which have not been finished yet.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/State/index.html#Utopia%3A%3AContent%3A%3AState%23empty%3F"><code class="language-ruby">def empty?</code></a>
+					
+						<p>Whether this state has any nested tags.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Content/index.html#Utopia%3A%3AContent%3A%3AXNODE_EXTENSION"><code class="language-ruby">XNODE_EXTENSION = '.xnode'</code></a>
+					
+						<p>The file extension for markup nodes on disk.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Links/index.html"><code class="language-ruby">class Links</code></a>
+					
+					
+					<ul class="index"><li>
+					<a href="Utopia/Content/Links/index.html#Utopia%3A%3AContent%3A%3ALinks%23for"><code class="language-ruby">def for(path, locale = nil)</code></a>
+					
+						<p>Resolve a link for the specified path, which must be a path to a specific link.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Links/index.html#Utopia%3A%3AContent%3A%3ALinks%23index"><code class="language-ruby">def index(path, name: nil, locale: nil, display: :display, sort: :order, sort_default: 0, directories: true, files: true, virtuals: true, indices: false)</code></a>
+					
+						<p>Give an index of all links that can be reached from the given path.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Links/Resolver/index.html"><code class="language-ruby">class Resolver</code></a>
+					
+						<p>Represents a list of <a href="Utopia/Content/Link/index.html" title="Link"><code class="language-ruby">class Utopia::Content::Link</code></a> instances relating to the structure of the content. They are formed from the <code>links.yaml</code> file and the actual directory structure on disk.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Content/Links/Resolver/index.html#Utopia%3A%3AContent%3A%3ALinks%3A%3AResolver%23load_directory"><code class="language-ruby">def load_directory(name, metadata, &amp;block)</code></a>
+					
+					
+									</li><li>
+					<a href="Utopia/Content/Links/Resolver/index.html#Utopia%3A%3AContent%3A%3ALinks%3A%3AResolver%23load_default_index"><code class="language-ruby">def load_default_index(name = INDEX, info = {})</code></a>
+					
+						<p>The default index for a directory which has no contents.</p>
+
+					
+									</li></ul>				</li></ul>				</li><li>
+					<a href="Utopia/Content/index.html#Utopia%3A%3AContent%3A%3AEXPIRES"><code class="language-ruby">EXPIRES = 'expires'.freeze</code></a>
+					
+						<p>Compatibility with older versions of rack:</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Response/index.html"><code class="language-ruby">class Response</code></a>
+					
+						<p>A basic content response, including useful defaults for typical HTML5 content.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Content/Response/index.html#Utopia%3A%3AContent%3A%3AResponse%23do_not_cache%21"><code class="language-ruby">def do_not_cache!</code></a>
+					
+						<p>Specifies that the content shouldn't be cached. Overrides <code>cache!</code> if already called.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Response/index.html#Utopia%3A%3AContent%3A%3AResponse%23cache%21"><code class="language-ruby">def cache!(duration = 3600, access: &quot;public&quot;)</code></a>
+					
+						<p>Specify that the content could be cached.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/Response/index.html#Utopia%3A%3AContent%3A%3AResponse%23content_type%3D"><code class="language-ruby">def content_type= value</code></a>
+					
+						<p>Specify the content type of the response data.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Content/SymbolicHash/index.html"><code class="language-ruby">class SymbolicHash &lt; Hash</code></a>
+					
+						<p>A hash which forces all keys to be symbols and fails with KeyError when strings are used.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Content/MarkupParser/index.html"><code class="language-ruby">class MarkupParser</code></a>
+					
+						<p>Provides a high level interface for parsing markup.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Content/MarkupParser/ParsedTag/index.html"><code class="language-ruby">class ParsedTag</code></a>
+					
+						<p>A tag generated by parsing markup.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Content/MarkupParser/UnbalancedTagError/index.html"><code class="language-ruby">class UnbalancedTagError &lt; StandardError</code></a>
+					
+						<p>The name of a closing tag fails to match up with the corresponding opening tag.</p>
+
+					
+					<ul class="index"></ul>				</li></ul>				</li><li>
+					<a href="Utopia/Content/Tags/index.html"><code class="language-ruby">module Tags</code></a>
+					
+						<p>Tags which provide intrinsic behaviour within the content middleware.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Content/Tags/tag/index.html"><code class="language-ruby">tag('node')</code></a>
+					
+						<p>Invokes a node and renders a single node to the output stream.</p>
+
+					
+					<ul class="index"></ul>				</li></ul>				</li><li>
+					<a href="Utopia/Content/Link/index.html"><code class="language-ruby">class Link</code></a>
+					
+						<p>Represents a link to some content with associated metadata.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Content/Link/index.html#Utopia%3A%3AContent%3A%3ALink%23initialize"><code class="language-ruby">def initialize(kind, name, locale, path, info, title = nil)</code></a>
+					
+					
+									</li><li>
+					<a href="Utopia/Content/Link/index.html#Utopia%3A%3AContent%3A%3ALink%23%5B%5D"><code class="language-ruby">def [] key</code></a>
+					
+						<p>Look up from the <code>links.yaml</code> metadata with a given symbolic key.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Content/index.html#Utopia%3A%3AContent%23initialize"><code class="language-ruby">def initialize(app, root: Utopia::default_root, namespaces: {})</code></a>
+					
+					
+									</li><li>
+					<a href="Utopia/Content/index.html#Utopia%3A%3AContent%23links"><code class="language-ruby">def links(path, **options)</code></a>
+					
+						<p>TODO we should remove this method and expose <code>@links</code> directly.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/index.html#Utopia%3A%3AContent%23lookup_tag"><code class="language-ruby">def lookup_tag(qualified_name, node)</code></a>
+					
+						<p>Look up a named tag such as <code>&lt;entry /&gt;</code> or <code>&lt;content:page&gt;...</code></p>
+
+					
+									</li><li>
+					<a href="Utopia/Content/index.html#Utopia%3A%3AContent%23lookup_node"><code class="language-ruby">def lookup_node(path, locale = nil)</code></a>
+					
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Setup/index.html"><code class="language-ruby">class Setup</code></a>
+					
+						<p>Used for setting up a Utopia web application, typically via <code>config/environment.rb</code></p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Setup/index.html#Utopia%3A%3ASetup%23add_load_path"><code class="language-ruby">def add_load_path(path)</code></a>
+					
+						<p>Add the given path to $LOAD_PATH. If it's relative, make it absolute relative to <code>site_path</code>.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Setup/index.html#Utopia%3A%3ASetup%23load_environment"><code class="language-ruby">def load_environment(variant)</code></a>
+					
+						<p>Load the named configuration file from the <code>config_root</code> directory.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/index.html#Utopia.setup"><code class="language-ruby">def self.setup(root = nil, **options)</code></a>
+					
+						<p>You can call this method exactly once per process.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/index.html"><code class="language-ruby">class Controller</code></a>
+					
+						<p>A middleware which loads controller classes and invokes functionality based on the requested path.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Controller/Base/index.html"><code class="language-ruby">class Base</code></a>
+					
+						<p>The base implementation of a controller class.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Controller/Base/index.html#Utopia%3A%3AController%3A%3ABase.base_path"><code class="language-ruby">def self.base_path</code></a>
+					
+						<p>A string which is the full path to the directory which contains the controller.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/Base/index.html#Utopia%3A%3AController%3A%3ABase.uri_path"><code class="language-ruby">def self.uri_path</code></a>
+					
+						<p>A relative path to the controller directory relative to the controller root directory.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/Base/index.html#Utopia%3A%3AController%3A%3ABase.controller"><code class="language-ruby">def self.controller</code></a>
+					
+						<p>The controller middleware itself.</p>
+
+					
+									</li><li>
+					<a href="http://localhost:62189/source/Utopia/Controller/Base/(self)/index"><code class="language-ruby">class &lt;&lt; (self)</code></a>
+					
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Controller/Base/index.html#Utopia%3A%3AController%3A%3ABase%23process%21"><code class="language-ruby">def process!(request, relative_path)</code></a>
+					
+						<p>Return nil if this controller didn't do anything. Request will keep on processing. Return a valid rack response if the controller can do so.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/Base/index.html#Utopia%3A%3AController%3A%3ABase%23copy_instance_variables"><code class="language-ruby">def copy_instance_variables(from)</code></a>
+					
+						<p>Copy the instance variables from the previous controller to the next controller (usually only a few). This allows controllers to share effectively the same instance variables while still being separate classes/instances.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/Base/index.html#Utopia%3A%3AController%3A%3ABase%23call"><code class="language-ruby">def call(env)</code></a>
+					
+						<p>Call into the next app as defined by rack.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/Base/index.html#Utopia%3A%3AController%3A%3ABase%23respond%21"><code class="language-ruby">def respond!(response)</code></a>
+					
+						<p>This will cause the middleware to generate a response.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/Base/index.html#Utopia%3A%3AController%3A%3ABase%23respond%3F"><code class="language-ruby">def respond?(response)</code></a>
+					
+						<p>Respond with the response, but only if it's not nil.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/Base/index.html#Utopia%3A%3AController%3A%3ABase%23ignore%21"><code class="language-ruby">def ignore!</code></a>
+					
+						<p>This will cause the controller middleware to pass on the request.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/Base/index.html#Utopia%3A%3AController%3A%3ABase%23redirect%21"><code class="language-ruby">def redirect!(target, status = 302)</code></a>
+					
+						<p>Request relative redirect. Respond with a redirect to the given target.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/Base/index.html#Utopia%3A%3AController%3A%3ABase%23goto%21"><code class="language-ruby">def goto!(target, status = 302)</code></a>
+					
+						<p>Controller relative redirect.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/Base/index.html#Utopia%3A%3AController%3A%3ABase%23fail%21"><code class="language-ruby">def fail!(error = 400, message = nil)</code></a>
+					
+						<p>Respond with an error which indiciates some kind of failure.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/Base/index.html#Utopia%3A%3AController%3A%3ABase%23succeed%21"><code class="language-ruby">def succeed!(status: 200, headers: {}, type: nil, **options)</code></a>
+					
+						<p>Succeed the request and immediately respond.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/Base/index.html#Utopia%3A%3AController%3A%3ABase%23body_for"><code class="language-ruby">def body_for(status, headers, options)</code></a>
+					
+						<p>Generate the body for the given status, headers and options.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Controller/Rewrite/index.html"><code class="language-ruby">module Rewrite</code></a>
+					
+						<p>This controller layer rewrites the path before executing controller actions. When the rule matches, the supplied block is executed.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Controller/Rewrite/Rule/index.html"><code class="language-ruby">class Rule</code></a>
+					
+						<p>A abstract rule which can match against a request path.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Controller/Rewrite/ExtractPrefixRule/index.html"><code class="language-ruby">class ExtractPrefixRule &lt; Rule</code></a>
+					
+						<p>A rule which extracts a prefix pattern from the request path.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Controller/Rewrite/Rewriter/index.html"><code class="language-ruby">class Rewriter</code></a>
+					
+						<p>Rewrite a request path based on a set of defined rules.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Controller/Rewrite/ClassMethods/index.html"><code class="language-ruby">module ClassMethods</code></a>
+					
+						<p>Exposed to the controller class.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Controller/Rewrite/index.html#Utopia%3A%3AController%3A%3ARewrite%23process%21"><code class="language-ruby">def process!(request, path)</code></a>
+					
+						<p>Rewrite the path before processing the request if possible.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Controller/Actions/index.html"><code class="language-ruby">module Actions</code></a>
+					
+						<p>A controller layer which invokes functinality based on the request path.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Controller/Actions/Action/index.html"><code class="language-ruby">class Action &lt; Hash</code></a>
+					
+						<p>A nested action lookup hash table.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Controller/Actions/Action/index.html#Utopia%3A%3AController%3A%3AActions%3A%3AAction%3A%3AWILDCARD_GREEDY"><code class="language-ruby">WILDCARD_GREEDY = '**'.freeze</code></a>
+					
+						<p>Matches 0 or more path components.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/Actions/Action/index.html#Utopia%3A%3AController%3A%3AActions%3A%3AAction%3A%3AWILDCARD"><code class="language-ruby">WILDCARD = '*'.freeze</code></a>
+					
+						<p>Matches any 1 path component.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/Actions/Action/index.html#Utopia%3A%3AController%3A%3AActions%3A%3AAction%23apply"><code class="language-ruby">def apply(path, index = -1, &amp;block)</code></a>
+					
+						<p>Given a path, iterate over all actions that match. Actions match from most specific to most general.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Controller/Actions/ClassMethods/index.html"><code class="language-ruby">module ClassMethods</code></a>
+					
+						<p>Exposed to the controller class.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Controller/Actions/index.html#Utopia%3A%3AController%3A%3AActions%23process%21"><code class="language-ruby">def process!(request, path)</code></a>
+					
+						<p>Invoke all matching actions. If no actions match, will call otherwise. If no action gives a response, the request is passed to super.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Controller/Variables/index.html"><code class="language-ruby">class Variables</code></a>
+					
+						<p>Provides a stack-based instance variable lookup mechanism. It can flatten a stack of controllers into a single hash.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Controller/Variables/index.html#Utopia%3A%3AController%3A%3AVariables%23fetch"><code class="language-ruby">def fetch(key, default=self)</code></a>
+					
+						<p>We use self as a seninel</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Controller/Respond/index.html"><code class="language-ruby">module Respond</code></a>
+					
+						<p>A controller layer which provides a convenient way to respond to different requested content types. The order in which you add converters matters, as it determines how the incoming Accept: header is mapped, e.g. the first converter is also defined as matching the media range <em>/</em>.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Controller/Respond/Handlers/index.html"><code class="language-ruby">module Handlers</code></a>
+					
+					
+					<ul class="index"><li>
+					<a href="Utopia/Controller/Respond/Handlers/JSON/index.html"><code class="language-ruby">module JSON</code></a>
+					
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Controller/Respond/Handlers/Passthrough/index.html"><code class="language-ruby">module Passthrough</code></a>
+					
+					
+					<ul class="index"></ul>				</li></ul>				</li><li>
+					<a href="Utopia/Controller/Respond/Responder/index.html"><code class="language-ruby">class Responder &lt; Utopia::Responder</code></a>
+					
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Controller/Respond/ClassMethods/index.html"><code class="language-ruby">module ClassMethods</code></a>
+					
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Controller/Respond/index.html#Utopia%3A%3AController%3A%3ARespond%23process%21"><code class="language-ruby">def process!(request, path)</code></a>
+					
+						<p>Invokes super. If a response is generated, format it based on the Accept: header, unless the content type was already specified.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Controller/index.html#Utopia%3A%3AController%3A%3ACONTROLLER_RB"><code class="language-ruby">CONTROLLER_RB = 'controller.rb'.freeze</code></a>
+					
+						<p>The controller filename.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/index.html#Utopia%3A%3AController%23initialize"><code class="language-ruby">def initialize(app, root: Utopia::default_root, base: Controller::Base)</code></a>
+					
+					
+									</li><li>
+					<a href="Utopia/Controller/index.html#Utopia%3A%3AController%23lookup_controller"><code class="language-ruby">def lookup_controller(path)</code></a>
+					
+						<p>Fetch the controller for the given relative path. May be cached.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/index.html#Utopia%3A%3AController%23load_controller_file"><code class="language-ruby">def load_controller_file(uri_path)</code></a>
+					
+						<p>Loads the controller file for the given relative url_path.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Controller/index.html#Utopia%3A%3AController%23invoke_controllers"><code class="language-ruby">def invoke_controllers(request)</code></a>
+					
+						<p>Invoke the controller layer for a given request. The request path may be rewritten.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Extensions/index.html"><code class="language-ruby">module Extensions</code></a>
+					
+					
+					<ul class="index"><li>
+					<a href="Utopia/Extensions/TimeDateComparison/index.html"><code class="language-ruby">module TimeDateComparison</code></a>
+					
+						<p>Provides comparison operator extensions.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Extensions/DateTimeComparison/index.html"><code class="language-ruby">module DateTimeComparison</code></a>
+					
+						<p>Provides comparison operator extensions.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Extensions/ArraySplit/index.html"><code class="language-ruby">module ArraySplit</code></a>
+					
+					
+					<ul class="index"></ul>				</li></ul>				</li><li>
+					<a href="Utopia/Session/index.html"><code class="language-ruby">class Session</code></a>
+					
+						<p>A middleware which provides a secure client-side session storage using a private symmetric encrpytion key.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Session/PayloadError/index.html"><code class="language-ruby">class PayloadError &lt; StandardError</code></a>
+					
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Session/index.html#Utopia%3A%3ASession%3A%3ADEFAULT_EXPIRES_AFTER"><code class="language-ruby">DEFAULT_EXPIRES_AFTER = 3600*24</code></a>
+					
+						<p>The session will expire if no requests were made within 24 hours:</p>
+
+					
+									</li><li>
+					<a href="Utopia/Session/index.html#Utopia%3A%3ASession%3A%3ADEFAULT_UPDATE_TIMEOUT"><code class="language-ruby">DEFAULT_UPDATE_TIMEOUT = 3600</code></a>
+					
+						<p>At least, the session will be updated every 1 hour:</p>
+
+					
+									</li><li>
+					<a href="Utopia/Session/index.html#Utopia%3A%3ASession%23initialize"><code class="language-ruby">def initialize(app, session_name: RACK_SESSION, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, same_site: :lax, maximum_size: MAXIMUM_SIZE, **options)</code></a>
+					
+					
+									</li><li>
+					<a href="Utopia/Session/index.html#Utopia%3A%3ASession%23build_initial_session"><code class="language-ruby">def build_initial_session(request)</code></a>
+					
+						<p>Constructs a valid session for the given request. These fields must match as per the checks performed in <code>valid_session?</code>:</p>
+
+					
+									</li><li>
+					<a href="Utopia/Session/index.html#Utopia%3A%3ASession%23load_session_values"><code class="language-ruby">def load_session_values(env)</code></a>
+					
+						<p>Load session from user supplied cookie. If the data is invalid or otherwise fails validation, <code>build_iniital_session</code> is invoked.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Session/Serialization/index.html"><code class="language-ruby">class Serialization</code></a>
+					
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Session/LazyHash/index.html"><code class="language-ruby">class LazyHash</code></a>
+					
+						<p>A simple hash table which fetches it's values only when required.</p>
+
+					
+					<ul class="index"></ul>				</li></ul>				</li><li>
+					<a href="Utopia/Shell/index.html"><code class="language-ruby">class Shell</code></a>
+					
+						<p>This is designed to be used with the corresponding bake task.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Redirection/index.html"><code class="language-ruby">module Redirection</code></a>
+					
+						<p>A middleware which assists with redirecting from one path to another.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Redirection/RequestFailure/index.html"><code class="language-ruby">class RequestFailure &lt; StandardError</code></a>
+					
+						<p>An error handler fails to redirect to a valid page.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Redirection/Errors/index.html"><code class="language-ruby">class Errors</code></a>
+					
+						<p>A middleware which performs internal redirects based on error status codes.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Redirection/Errors/index.html#Utopia%3A%3ARedirection%3A%3AErrors%23initialize"><code class="language-ruby">def initialize(app, codes = {})</code></a>
+					
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Redirection/index.html#Utopia%3A%3ARedirection%3A%3ADEFAULT_MAX_AGE"><code class="language-ruby">DEFAULT_MAX_AGE = 3600*24</code></a>
+					
+						<p>We cache 301 redirects for 24 hours.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Redirection/ClientRedirect/index.html"><code class="language-ruby">class ClientRedirect</code></a>
+					
+						<p>A basic client-side redirect.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Redirection/DirectoryIndex/index.html"><code class="language-ruby">class DirectoryIndex &lt; ClientRedirect</code></a>
+					
+						<p>Redirect urls that end with a <code>/</code>, e.g. directories.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Redirection/Rewrite/index.html"><code class="language-ruby">class Rewrite &lt; ClientRedirect</code></a>
+					
+						<p>Rewrite requests that match the given pattern to a single destination.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Redirection/Moved/index.html"><code class="language-ruby">class Moved &lt; ClientRedirect</code></a>
+					
+						<p>Rewrite requests that match the given pattern to a new prefix.</p>
+
+					
+					<ul class="index"></ul>				</li></ul>				</li><li>
+					<a href="Utopia/ContentLength/index.html"><code class="language-ruby">class ContentLength</code></a>
+					
+						<p>A faster implementation of Rack::ContentLength which doesn't rewrite body, but does expect it to either be an Array or an object that responds to #bytesize.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Command/index.html"><code class="language-ruby">module Command</code></a>
+					
+					
+					<ul class="index"><li>
+					<a href="Utopia/Command/Environment/index.html"><code class="language-ruby">class Environment &lt; Samovar::Command</code></a>
+					
+						<p>Set environment variables within the server deployment.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Command/Environment/options/index.html"><code class="language-ruby">options</code></a>
+					
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Command/Environment/index.html#Utopia%3A%3ACommand%3A%3AEnvironment%23update_environment"><code class="language-ruby">def update_environment(root, name = self.environment_name)</code></a>
+					
+						<p>Setup <code>config/environment.yaml</code> according to specified options.</p>
+
+					
+									</li></ul>				</li><li>
+					<a href="Utopia/Command/index.html#Utopia%3A%3ACommand%3A%3ASETUP_ROOT"><code class="language-ruby">SETUP_ROOT = File.expand_path(&quot;../../../setup&quot;, __dir__)</code></a>
+					
+						<p>This path must point to utopia/setup in the gem source.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Command/Site/index.html"><code class="language-ruby">class Site &lt; Samovar::Command</code></a>
+					
+						<p>Local site setup commands.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Command/Site/index.html#Utopia%3A%3ACommand%3A%3ASite%3A%3ACONFIGURATION_FILES"><code class="language-ruby">CONFIGURATION_FILES = ['.gitignore', 'config.ru', 'config/environment.rb', 'falcon.rb', 'gems.rb', 'Guardfile', 'bake.rb', 'spec/spec_helper.rb', 'spec/website_context.rb', 'spec/website_spec.rb']</code></a>
+					
+						<p>Configuration files which should be installed/updated:</p>
+
+					
+									</li><li>
+					<a href="Utopia/Command/Site/index.html#Utopia%3A%3ACommand%3A%3ASite%3A%3ADIRECTORIES"><code class="language-ruby">DIRECTORIES = [&quot;config&quot;, &quot;lib&quot;, &quot;pages&quot;, &quot;public&quot;, &quot;tasks&quot;, &quot;spec&quot;]</code></a>
+					
+						<p>Directories that should exist:</p>
+
+					
+									</li><li>
+					<a href="Utopia/Command/Site/index.html#Utopia%3A%3ACommand%3A%3ASite%3A%3AOLD_PATHS"><code class="language-ruby">OLD_PATHS = [&quot;access_log&quot;, &quot;cache&quot;, &quot;tmp&quot;, &quot;Rakefile&quot;, &quot;tasks&quot;, &quot;.bowerrc&quot;]</code></a>
+					
+						<p>Directories that should be removed during upgrade process:</p>
+
+					
+									</li><li>
+					<a href="Utopia/Command/Site/index.html#Utopia%3A%3ACommand%3A%3ASite%3A%3AROOT"><code class="language-ruby">ROOT = File.join(SETUP_ROOT, 'site')</code></a>
+					
+						<p>The root directory of the template site:</p>
+
+					
+									</li><li>
+					<a href="Utopia/Command/Site/Create/index.html"><code class="language-ruby">class Create &lt; Samovar::Command</code></a>
+					
+						<p>Create a local site.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Command/Site/Update/index.html"><code class="language-ruby">class Update &lt; Samovar::Command</code></a>
+					
+						<p>Update a local site.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Command/Site/Update/index.html#Utopia%3A%3ACommand%3A%3ASite%3A%3AUpdate%23move_static%21"><code class="language-ruby">def move_static!</code></a>
+					
+						<p>Move legacy <code>pages/_static</code> to <code>public/_static</code>.</p>
+
+					
+									</li><li>
+					<a href="Utopia/Command/Site/Update/index.html#Utopia%3A%3ACommand%3A%3ASite%3A%3AUpdate%23update_gemfile%21"><code class="language-ruby">def update_gemfile!</code></a>
+					
+						<p>Move <code>Gemfile</code> to <code>gems.rb</code>.</p>
+
+					
+									</li></ul>				</li></ul>				</li><li>
+					<a href="Utopia/Command/Server/index.html"><code class="language-ruby">class Server &lt; Samovar::Command</code></a>
+					
+						<p>Server setup commands.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Command/Server/Create/index.html"><code class="language-ruby">class Create &lt; Samovar::Command</code></a>
+					
+						<p>Create a server.</p>
+
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Command/Server/Update/index.html"><code class="language-ruby">class Update &lt; Samovar::Command</code></a>
+					
+						<p>Update a server.</p>
+
+					
+					<ul class="index"></ul>				</li></ul>				</li><li>
+					<a href="Utopia/Command/Top/index.html"><code class="language-ruby">class Top &lt; Samovar::Command</code></a>
+					
+						<p>The top level utopia command.</p>
+
+					
+					<ul class="index"><li>
+					<a href="Utopia/Command/Top/options/index.html"><code class="language-ruby">options</code></a>
+					
+					
+					<ul class="index"></ul>				</li><li>
+					<a href="Utopia/Command/Top/index.html#Utopia%3A%3ACommand%3A%3ATop%23root"><code class="language-ruby">def root</code></a>
+					
+						<p>The root directory for the site.</p>
+
+					
+									</li></ul>				</li></ul>				</li></ul>				</li></ul>
+				
+			<footer>Documentation generated by <a href="https://github.com/socketry/utopia-project">Utopia::Project</a>.</footer>
+		</main>
+	</body>
+</html>

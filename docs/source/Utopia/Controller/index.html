@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Utopia::Controller</title>
+		
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+		<link rel="icon" type="image/png" href="../../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../../_components/jquery/jquery.min.js"></script>
+		<script src="../../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script src="../../../_static/links.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body>
+		<header><label for="toggle">☰</label>  › <a class="link" href="../../../index.html">Project</a> › <a class="link" href="../../index.html">Source</a></header>
+		
+		<main>
+			
+	<h1><code class="language-ruby">Utopia::Controller</code></h1>
+	
+	<p>A middleware which loads controller classes and invokes functionality based on the requested path.</p>
+	
+	<section>
+	<h2>Nested</h2>
+	
+	<ul>
+		<li><a href="Base/index.html"><code class="language-ruby">Utopia::Controller::Base</code></a></li>
+		<li><a href="Rewrite/index.html"><code class="language-ruby">Utopia::Controller::Rewrite</code></a></li>
+		<li><a href="Actions/index.html"><code class="language-ruby">Utopia::Controller::Actions</code></a></li>
+		<li><a href="Variables/index.html"><code class="language-ruby">Utopia::Controller::Variables</code></a></li>
+		<li><a href="Respond/index.html"><code class="language-ruby">Utopia::Controller::Respond</code></a></li>
+	</ul>
+	</section>
+	
+	<section>
+	<h2>Definitions</h2>
+	
+	<section id="Utopia::Controller::CONTROLLER_RB"><h3><code class="language-ruby">CONTROLLER_RB = 'controller.rb'.freeze</code></h3><p>The controller filename.</p>
+</section><section id="Utopia::Controller#initialize"><h3><code class="language-ruby">def initialize(app, root: Utopia::default_root, base: Controller::Base)</code></h3><details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def initialize(app, root: Utopia::default_root, base: Controller::Base)
+	@app = app
+	@root = root
+	
+	@controller_cache = Concurrent::Map.new
+	
+	@base = base
+end</code></pre>
+					</details></section><section id="Utopia::Controller#lookup_controller"><h3><code class="language-ruby">def lookup_controller(path)</code></h3><p>Fetch the controller for the given relative path. May be cached.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def lookup_controller(path)
+	@controller_cache.fetch_or_store(path.to_s) do
+		load_controller_file(path)
+	end
+end</code></pre>
+					</details></section><section id="Utopia::Controller#load_controller_file"><h3><code class="language-ruby">def load_controller_file(uri_path)</code></h3><p>Loads the controller file for the given relative url_path.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def load_controller_file(uri_path)
+	base_path = File.join(@root, uri_path.components)
+	
+	controller_path = File.join(base_path, CONTROLLER_RB)
+	# puts &quot;load_controller_file(#{path.inspect}) =&gt; #{controller_path}&quot;
+	
+	if File.exist?(controller_path)
+		klass = Class.new(@base)
+		
+		# base_path is expected to be a string representing a filesystem path:
+		klass.const_set(:BASE_PATH, base_path.freeze)
+		
+		# uri_path is expected to be an instance of Path:
+		klass.const_set(:URI_PATH, uri_path.dup.freeze)
+		
+		klass.const_set(:CONTROLLER, self)
+		
+		klass.class_eval(File.read(controller_path), controller_path)
+		
+		# We lock down the controller class to prevent unsafe modifications:
+		klass.freeze
+		
+		# Create an instance of the controller:
+		return klass.new
+	else
+		return nil
+	end
+end</code></pre>
+					</details></section><section id="Utopia::Controller#invoke_controllers"><h3><code class="language-ruby">def invoke_controllers(request)</code></h3><p>Invoke the controller layer for a given request. The request path may be rewritten.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def invoke_controllers(request)
+	request_path = Path.from_string(request.path_info)
+	
+	# The request path must be absolute. We could handle this internally but it is probably better for this to be an error:
+	raise ArgumentError.new(&quot;Invalid request path #{request_path}&quot;) unless request_path.absolute?
+	
+	# The controller path contains the current complete path being evaluated:
+	controller_path = Path.new
+	
+	# Controller instance variables which eventually get processed by the view:
+	variables = request.env[VARIABLES_KEY]
+	
+	while request_path.components.any?
+		# We copy one path component from the relative path to the controller path at a time. The controller, when invoked, can modify the relative path (by assigning to relative_path.components). This allows for controller-relative rewrites, but only the remaining path postfix can be modified.
+		controller_path.components &lt;&lt; request_path.components.shift
+		
+		if controller = lookup_controller(controller_path)
+			# Don't modify the original controller:
+			controller = controller.clone
+			
+			# Append the controller to the set of controller variables, updates the controller with all current instance variables.
+			variables &lt;&lt; controller
+			
+			if result = controller.process!(request, request_path)
+				return result
+			end
+		end
+	end
+	
+	# Controllers can directly modify relative_path, which is copied into controller_path. The controllers may have rewriten the path so we update the path info:
+	request.env[Rack::PATH_INFO] = controller_path.to_s
+	
+	# No controller gave a useful result:
+	return nil
+end</code></pre>
+					</details></section>	</section>
+
+				
+			<footer>Documentation generated by <a href="https://github.com/socketry/utopia-project">Utopia::Project</a>.</footer>
+		</main>
+	</body>
+</html>

@@ -2,15 +2,19 @@
 <html>
 	<head>
 		
-			<title>Wiki</title>
+			<title>Utopia
+</title>
 		
 		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
 		
 		<link rel="icon" type="image/png" href="_static/icon.png"/>
 		<link rel="stylesheet" href="_static/site.css" type="text/css" media="screen"/>
 		
 		<script src="_components/jquery/jquery.min.js"></script>
 		<script src="_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script src="_static/links.js"></script>
 		
 		<script type="text/javascript">
 		//<![CDATA[
@@ -21,66 +25,108 @@
 		</script>
 	</head>
 
-	<body class="show">
+	<body>
+		<header><label for="toggle">☰</label>  › <a class="link" href="index.html">Project</a></header>
 		
-	<nav> › <a href="index.html">Wiki</a></nav>
-
-	
-	<main>
-		<h1 id="utopia">Utopia</h1>
-
-<p>Utopia is a content management system built on top of Ruby. It makes creating, deploying and updating content-driven websites easy.</p>
-
-<h2 id="introduction-guide">Introduction Guide</h2>
-
-<p>Reading these pages in order will give you an overview of the design of Utopia, how to set it up for local development and how to deploy it.</p>
-
+		<main>
+			
+	<h1><img src="materials/utopia.svg"/></h1><p>Utopia is a website generation framework which provides a robust set of tools to build highly complex dynamic websites. It uses the filesystem heavily for content and provides functions for interacting with files and directories as structure representing the website.</p>
+<p><a href="https://github.com/socketry/utopia/actions?workflow=Development"><img src="https://github.com/socketry/utopia/workflows/Development/badge.svg" alt="Development Status"/></a></p>
+<section id="features"><h2>Features</h2>
 <ul>
-  <li><a href="development-environment-setup/index.html">Development Environment Setup</a></li>
-  <li><a href="server-setup/index.html">Server Setup</a></li>
-  <li><a href="your-first-page/index.html">Your First Page</a>
-    <ul>
-      <li><a href="faq/what-is-xnode/index.html">What is <code>.xnode</code>?</a></li>
-    </ul>
-  </li>
-  <li><a href="javascript/index.html">Installing JavaScript Libraries</a></li>
-  <li><a href="testing/index.html">Website Tests</a></li>
-  <li><a href="updating-utopia/index.html">Updating Your Site</a></li>
+<li>Designed for both content-based websites and applications. Does not depend on a database.</li>
+<li>Supports flexible content localization based on industry recommendations.</li>
+<li>Rack middleware compatible with all major Ruby application servers. Small memory footprint by default.</li>
+<li>Low latency and high throughput. Capable of 10,000+ requests/second out of the box.</li>
 </ul>
+</section><section id="usage"><h2>Usage</h2>
+<p>Please browse the <a href="source/index.html">source code index</a> or refer to the guides below.</p>
 
-<h2 id="middleware">Middleware</h2>
+	<section>
+		<h3><a href="guides/getting-started/index.html">Getting Started</a></h3>
+		
+			<p>This guide explains how to set up a <code>utopia</code> website for local development and deployment.</p>
 
-<p>The following are Rack Middleware which provide the core of Utopia.</p>
+	</section>
+	<section>
+		<h3><a href="guides/middleware/index.html">Middleware</a></h3>
+		
+			<p>This guide gives an overview of the different Rack middleware used by Utopia.</p>
 
+	</section>
+	<section>
+		<h3><a href="guides/server-setup/index.html">Server Setup</a></h3>
+		
+			<p>This guide explains how to deploy a <code>utopia</code> web application.</p>
+
+	</section>
+	<section>
+		<h3><a href="guides/integrating-with-javascript/index.html">Installing JavaScript Libraries</a></h3>
+		
+			<p>Utopia integrates with Yarn and provides a <a href="https://github.com/ioquatix/bake">bake task</a> to simplify deployment packages distributed using <code>yarn</code> that implement the <code>dist</code> sub-directory convention.</p>
+
+	</section>
+	<section>
+		<h3><a href="guides/what-is-xnode/index.html">What is XNode?</a></h3>
+		
+			<p>This guide explains the <code>xnode</code> view layer and how it can be used to build efficient websites.</p>
+
+	</section>
+	<section>
+		<h3><a href="guides/updating-utopia/index.html">Updating Utopia</a></h3>
+		
+			<p>This guide explains how to update existing <code>utopia</code> websites.</p>
+
+	</section>
+
+</section><section id="contributing"><h2>Contributing</h2>
+<p>We welcome contributions to this project.</p>
+<ol>
+<li>Fork it.</li>
+<li>Create your feature branch (<code>git checkout -b my-new-feature</code>).</li>
+<li>Commit your changes (<code>git commit -am 'Add some feature'</code>).</li>
+<li>Push to the branch (<code>git push origin my-new-feature</code>).</li>
+<li>Create new Pull Request.</li>
+</ol>
+</section><section id="see-also"><h2>See Also</h2>
 <ul>
-  <li><a href="middleware/static/index.html">Static</a> — Serve static files efficiently.</li>
-  <li><a href="middleware/redirection/index.html">Redirection</a> — Redirect URL patterns and status codes.</li>
-  <li><a href="middleware/localization/index.html">Localization</a> — Non-intrusive localization of resources.</li>
-  <li><a href="middleware/controller/index.html">Controller</a> — Flexible nested controllers with efficient behaviour.
-    <ul>
-      <li><a href="middleware/controller/actions/index.html">Controller Actions</a> — Invoke named actions.</li>
-      <li><a href="middleware/controller/rewrite/index.html">Controller Rewrite</a> — Pattern match requests.</li>
-    </ul>
-  </li>
-  <li><a href="middleware/content/index.html">Content</a> — XML-style template engine with dynamic markup.</li>
-  <li><a href="middleware/session/index.html">Session</a> — Session storage using encrypted client-side cookies.</li>
+<li><a href="https://github.com/ioquatix/trenni">Trenni</a> — Template and markup parsers, markup generation.</li>
+<li><a href="https://github.com/ioquatix/trenni-formatters">Trenni::Formatters</a> — Helpers for HTML generation including views and forms.</li>
+<li><a href="https://github.com/ioquatix/utopia-gallery">Utopia::Gallery</a> — A fast photo gallery based on <a href="https://github.com/jcupitt/libvips">libvips</a>.</li>
+<li><a href="https://github.com/socketry/utopia-project">Utopia::Project</a> — A Ruby project documentation tool.</li>
+<li><a href="https://github.com/ioquatix/utopia-analytics">Utopia::Analytics</a> — Simple integration with Google Analytics.</li>
+<li><a href="https://github.com/ioquatix/http-accept">HTTP::Accept</a> — RFC compliant header parser.</li>
+<li><a href="https://github.com/ioquatix/samovar">Samovar</a> — Command line parser used by Utopia.</li>
+<li><a href="https://github.com/ioquatix/mapping">Mapping</a> — Provide structured conversions for web interfaces.</li>
+<li><a href="https://github.com/ioquatix/rack-test-body">Rack::Test::Body</a> — Provide convenient helpers for testing web interfaces.</li>
 </ul>
-
-<h2 id="examples">Examples</h2>
-
-<p>Here are some open-source sites built on Utopia.</p>
-
+</section><section id="examples"><h3>Examples</h3>
 <ul>
-  <li><a href="http://www.codeotaku.com">www.codeotaku.com</a> (<a href="https://github.com/ioquatix/www.codeotaku.com">source</a>) — Personal website, blog.</li>
-  <li>Financier (<a href="https://github.com/ioquatix/financier">source</a>) — Small business management platform, invoicing.</li>
+<li><a href="https://github.com/ioquatix/financier">Financier</a> — A small business management platform.</li>
+<li><a href="https://github.com/oriontransfer/mail.oriontransfer.net">mail.oriontransfer.net</a> - Mail server account management.</li>
+<li><a href="http://www.codeotaku.com">www.codeotaku.com</a> (<a href="https://github.com/ioquatix/www.codeotaku.com">source</a>) — Personal website, blog.</li>
 </ul>
-
-	</main>
-	
-	<footer>
-		Last Modified: 2020-04-28 16:31:46 +1200
-		— /index.md
-	</footer>
-
+</section><section id="license"><h2>License</h2>
+<p>Released under the MIT license.</p>
+<p>Copyright, 2009-2020, by <a href="http://www.codeotaku.com">Samuel G. D. Williams</a>.</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:</p>
+<p>The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.</p>
+<p>THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.</p>
+</section>
+				
+			<footer>Documentation generated by <a href="https://github.com/socketry/utopia-project">Utopia::Project</a>.</footer>
+		</main>
 	</body>
 </html>

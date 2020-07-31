@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Utopia::Controller::Base</title>
+		
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+		<link rel="icon" type="image/png" href="../../../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../../../_components/jquery/jquery.min.js"></script>
+		<script src="../../../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script src="../../../../_static/links.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body>
+		<header><label for="toggle">☰</label>  › <a class="link" href="../../../../index.html">Project</a> › <a class="link" href="../../../index.html">Source</a></header>
+		
+		<main>
+			
+	<h1><code class="language-ruby">Utopia::Controller::Base</code></h1>
+	
+	<p>The base implementation of a controller class.</p>
+	
+	<section>
+	<h2>Nested</h2>
+	
+	<ul>
+		<li><a href="http://localhost:62189/source/Utopia/Controller/Base/(self)/index"><code class="language-ruby">Utopia::Controller::Base#(self)</code></a></li>
+	</ul>
+	</section>
+	
+	<section>
+	<h2>Definitions</h2>
+	
+	<section id="Utopia::Controller::Base.base_path"><h3><code class="language-ruby">def self.base_path</code></h3><p>A string which is the full path to the directory which contains the controller.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.base_path
+	self.const_get(:BASE_PATH)
+end</code></pre>
+					</details></section><section id="Utopia::Controller::Base.uri_path"><h3><code class="language-ruby">def self.uri_path</code></h3><p>A relative path to the controller directory relative to the controller root directory.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.uri_path
+	self.const_get(:URI_PATH)
+end</code></pre>
+					</details></section><section id="Utopia::Controller::Base.controller"><h3><code class="language-ruby">def self.controller</code></h3><p>The controller middleware itself.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.controller
+	self.const_get(:CONTROLLER)
+end</code></pre>
+					</details></section><section id="Utopia::Controller::Base#process!"><h3><code class="language-ruby">def process!(request, relative_path)</code></h3><p>Return nil if this controller didn't do anything. Request will keep on processing. Return a valid rack response if the controller can do so.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def process!(request, relative_path)
+	return nil
+end</code></pre>
+					</details></section><section id="Utopia::Controller::Base#copy_instance_variables"><h3><code class="language-ruby">def copy_instance_variables(from)</code></h3><p>Copy the instance variables from the previous controller to the next controller (usually only a few). This allows controllers to share effectively the same instance variables while still being separate classes/instances.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def copy_instance_variables(from)
+	from.instance_variables.each do |name|
+		self.instance_variable_set(name, from.instance_variable_get(name))
+	end
+end</code></pre>
+					</details></section><section id="Utopia::Controller::Base#call"><h3><code class="language-ruby">def call(env)</code></h3><p>Call into the next app as defined by rack.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def call(env)
+	self.class.controller.app.call(env)
+end</code></pre>
+					</details></section><section id="Utopia::Controller::Base#respond!"><h3><code class="language-ruby">def respond!(response)</code></h3><p>This will cause the middleware to generate a response.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def respond!(response)
+	throw :response, response
+end</code></pre>
+					</details></section><section id="Utopia::Controller::Base#respond?"><h3><code class="language-ruby">def respond?(response)</code></h3><p>Respond with the response, but only if it's not nil.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def respond?(response)
+	respond!(response) if response
+end</code></pre>
+					</details></section><section id="Utopia::Controller::Base#ignore!"><h3><code class="language-ruby">def ignore!</code></h3><p>This will cause the controller middleware to pass on the request.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def ignore!
+	throw :response, nil
+end</code></pre>
+					</details></section><section id="Utopia::Controller::Base#redirect!"><h3><code class="language-ruby">def redirect!(target, status = 302)</code></h3><p>Request relative redirect. Respond with a redirect to the given target.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def redirect!(target, status = 302)
+	status = HTTP::Status.new(status, 300...400)
+	location = target.to_s
+	
+	respond! [status.to_i, {HTTP::LOCATION =&gt; location}, [status.to_s]]
+end</code></pre>
+					</details></section><section id="Utopia::Controller::Base#goto!"><h3><code class="language-ruby">def goto!(target, status = 302)</code></h3><p>Controller relative redirect.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def goto!(target, status = 302)
+	redirect! self.class.uri_path + target
+end</code></pre>
+					</details></section><section id="Utopia::Controller::Base#fail!"><h3><code class="language-ruby">def fail!(error = 400, message = nil)</code></h3><p>Respond with an error which indiciates some kind of failure.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def fail!(error = 400, message = nil)
+	status = HTTP::Status.new(error, 400...600)
+	
+	message ||= status.to_s
+	respond! [status.to_i, {}, [message]]
+end</code></pre>
+					</details></section><section id="Utopia::Controller::Base#succeed!"><h3><code class="language-ruby">def succeed!(status: 200, headers: {}, type: nil, **options)</code></h3><p>Succeed the request and immediately respond.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def succeed!(status: 200, headers: {}, type: nil, **options)
+	status = HTTP::Status.new(status, 200...300)
+	
+	if type
+		headers[CONTENT_TYPE] = type.to_s
+	end
+	
+	body = body_for(status, headers, options)
+	respond! [status.to_i, headers, body || []]
+end</code></pre>
+					</details></section><section id="Utopia::Controller::Base#body_for"><h3><code class="language-ruby">def body_for(status, headers, options)</code></h3><p>Generate the body for the given status, headers and options.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def body_for(status, headers, options)
+	if body = options[:body]
+		return body
+	elsif content = options[:content]
+		return [content]
+	end
+end</code></pre>
+					</details></section>	</section>
+
+				
+			<footer>Documentation generated by <a href="https://github.com/socketry/utopia-project">Utopia::Project</a>.</footer>
+		</main>
+	</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Utopia::Path</title>
+		
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+		<link rel="icon" type="image/png" href="../../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../../_components/jquery/jquery.min.js"></script>
+		<script src="../../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script src="../../../_static/links.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body>
+		<header><label for="toggle">☰</label>  › <a class="link" href="../../../index.html">Project</a> › <a class="link" href="../../index.html">Source</a></header>
+		
+		<main>
+			
+	<h1><code class="language-ruby">Utopia::Path</code></h1>
+	
+	<p>Represents a path as an array of path components. Useful for efficient URL manipulation.</p>
+	
+	<section>
+	<h2>Nested</h2>
+	
+	<ul>
+		<li><a href="Matcher/index.html"><code class="language-ruby">Utopia::Path::Matcher</code></a></li>
+	</ul>
+	</section>
+	
+	<section>
+	<h2>Definitions</h2>
+	
+	<section id="Utopia::Path.prefix_length"><h3><code class="language-ruby">def self.prefix_length(a, b)</code></h3><p>Returns the length of the prefix which is shared by two strings.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.prefix_length(a, b)
+	[a.size, b.size].min.times{|i| return i if a[i] != b[i]}
+end</code></pre>
+					</details></section><section id="Utopia::Path.shortest_path"><h3><code class="language-ruby">def self.shortest_path(path, root)</code></h3><p>Return the shortest relative path to get to path from root:</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.shortest_path(path, root)
+	path = self.create(path)
+	root = self.create(root).dirname
+	
+	# Find the common prefix:
+	i = prefix_length(path.components, root.components) || 0
+	
+	# The difference between the root path and the required path, taking into account the common prefix:
+	up = root.components.size - i
+	
+	return self.create([&quot;..&quot;] * up + path.components[i..-1])
+end</code></pre>
+					</details></section><section id="Utopia::Path.unescape"><h3><code class="language-ruby">def self.unescape(string)</code></h3><p>Converts '+' into whitespace and hex encoded characters into their equivalent characters.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.unescape(string)
+	string.tr('+', ' ').gsub(/((?:%[0-9a-fA-F]{2})+)/n) {
+		[$1.delete('%')].pack('H*')
+	}
+end</code></pre>
+					</details></section><section id="Utopia::Path.from_string"><h3><code class="language-ruby">def self.from_string(string)</code></h3><p>This constructor takes a string and generates a relative path as efficiently as possible. This is a direct entry point for all controller invocations so it's designed to suit the requirements of that function.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.from_string(string)
+	self.new(unescape(string).split(SEPARATOR, -1))
+end</code></pre>
+					</details></section><section id="Utopia::Path#-"><h3><code class="language-ruby">def -(other)</code></h3><p>Computes the difference of the path.
+/a/b/c - /a/b -&gt; c
+a/b/c - a/b -&gt; c</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def -(other)
+	i = 0
+	
+	while i &lt; other.components.size
+		break if @components[i] != other.components[i]
+		
+		i += 1
+	end
+	
+	return self.class.new(@components[i,@components.size])
+end</code></pre>
+					</details></section><section id="Utopia::Path#first"><h3><code class="language-ruby">def first</code></h3><p>Returns the first path component.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def first
+	if absolute?
+		@components[1]
+	else
+		@components[0]
+	end
+end</code></pre>
+					</details></section><section id="Utopia::Path#last"><h3><code class="language-ruby">def last</code></h3><p>Returns the last path component.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def last
+	if @components != ['']
+		@components.last
+	end
+end</code></pre>
+					</details></section><section id="Utopia::Path#pop"><h3><code class="language-ruby">def pop</code></h3><p>Pops the last path component.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def pop
+	# We don't want to convert an absolute path to a relative path.
+	if @components != ['']
+		@components.pop
+	end
+end</code></pre>
+					</details></section><section id="Utopia::Path#basename"><h3><code class="language-ruby">def basename</code></h3><details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def basename
+	basename, _ = @components.last.split('.', 2)
+	
+	return basename || ''
+end</code></pre>
+					</details></section><section id="Utopia::Path#extension"><h3><code class="language-ruby">def extension</code></h3><details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def extension
+	_, extension = @components.last.split('.', 2)
+	
+	return extension
+end</code></pre>
+					</details></section><section id="Utopia::Path#[]="><h3><code class="language-ruby">def []= index, value</code></h3><p>Replaces a named component, indexing as per</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def []= index, value
+	return @components[component_offset(index)] = value
+end</code></pre>
+					</details></section><section id="Utopia::Path#component_offset"><h3><code class="language-ruby">def component_offset(index)</code></h3><p>We adjust the index slightly so that indices reference path components rather than the directory markers at the start and end of the path components array.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def component_offset(index)
+	if Range === index
+		Range.new(adjust_index(index.first), adjust_index(index.last), index.exclude_end?)
+	else
+		adjust_index(index)
+	end
+end</code></pre>
+					</details></section>	</section>
+
+				
+			<footer>Documentation generated by <a href="https://github.com/socketry/utopia-project">Utopia::Project</a>.</footer>
+		</main>
+	</body>
+</html>

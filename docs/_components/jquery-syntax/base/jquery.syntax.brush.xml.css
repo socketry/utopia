@@ -16,3 +16,20 @@
   color: #666;
   background-color: #ddd;
   border-radius: 0.5em; }
+
+@media (prefers-color-scheme: dark) {
+  .syntax-theme-base .xml .cdata-content {
+    color: #a46; }
+  .syntax-theme-base .xml .xml-tag, .syntax-theme-base .xml .cdata {
+    color: #c59de7; }
+  .syntax-theme-base .xml .tag-name, .syntax-theme-base .xml .cdata-tag {
+    color: #9ae; }
+  .syntax-theme-base .xml .namespace {
+    color: #c59de7; }
+  .syntax-theme-base .xml .attribute {
+    color: #c59de7; }
+  .syntax-theme-base .xml .instruction {
+    color: #c59de7; }
+  .syntax-theme-base .xml .entity, .syntax-theme-base .xml .percent-escape {
+    color: #999;
+    background-color: #333; } }

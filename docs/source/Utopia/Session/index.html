@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Utopia::Session</title>
+		
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+		<link rel="icon" type="image/png" href="../../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../../_components/jquery/jquery.min.js"></script>
+		<script src="../../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script src="../../../_static/links.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body>
+		<header><label for="toggle">☰</label>  › <a class="link" href="../../../index.html">Project</a> › <a class="link" href="../../index.html">Source</a></header>
+		
+		<main>
+			
+	<h1><code class="language-ruby">Utopia::Session</code></h1>
+	
+	<p>A middleware which provides a secure client-side session storage using a private symmetric encrpytion key.</p>
+	
+	<section>
+	<h2>Nested</h2>
+	
+	<ul>
+		<li><a href="PayloadError/index.html"><code class="language-ruby">Utopia::Session::PayloadError</code></a></li>
+		<li><a href="Serialization/index.html"><code class="language-ruby">Utopia::Session::Serialization</code></a></li>
+		<li><a href="LazyHash/index.html"><code class="language-ruby">Utopia::Session::LazyHash</code></a></li>
+	</ul>
+	</section>
+	
+	<section>
+	<h2>Definitions</h2>
+	
+	<section id="Utopia::Session::DEFAULT_EXPIRES_AFTER"><h3><code class="language-ruby">DEFAULT_EXPIRES_AFTER = 3600*24</code></h3><p>The session will expire if no requests were made within 24 hours:</p>
+</section><section id="Utopia::Session::DEFAULT_UPDATE_TIMEOUT"><h3><code class="language-ruby">DEFAULT_UPDATE_TIMEOUT = 3600</code></h3><p>At least, the session will be updated every 1 hour:</p>
+</section><section id="Utopia::Session#initialize"><h3><code class="language-ruby">def initialize(app, session_name: RACK_SESSION, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, same_site: :lax, maximum_size: MAXIMUM_SIZE, **options)</code></h3><details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def initialize(app, session_name: RACK_SESSION, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, same_site: :lax, maximum_size: MAXIMUM_SIZE, **options)
+	@app = app
+	
+	@session_name = session_name
+	@cookie_name = @session_name + &quot;.encrypted&quot;
+	
+	if secret.nil? or secret.empty?
+		raise ArgumentError, &quot;invalid session secret: #{secret.inspect}&quot;
+	end
+	
+	# This generates a 32-byte key suitable for aes.
+	@key = Digest::SHA2.digest(secret)
+	
+	@expires_after = expires_after
+	@update_timeout = update_timeout
+	
+	@cookie_defaults = {
+		domain: nil,
+		path: &quot;/&quot;,
+		
+		# The SameSite attribute controls when the cookie is sent to the server, from 3rd parties (None), from requests with external referrers (Lax) or from within the site itself (Strict).
+		same_site: same_site,
+		
+		# The Secure attribute is meant to keep cookie communication limited to encrypted transmission, directing browsers to use cookies only via secure/encrypted connections. However, if a web server sets a cookie with a secure attribute from a non-secure connection, the cookie can still be intercepted when it is sent to the user by man-in-the-middle attacks. Therefore, for maximum security, cookies with the Secure attribute should only be set over a secure connection.
+		secure: secure,
+		
+		# The HttpOnly attribute directs browsers not to expose cookies through channels other than HTTP (and HTTPS) requests. This means that the cookie cannot be accessed via client-side scripting languages (notably JavaScript), and therefore cannot be stolen easily via cross-site scripting (a pervasive attack technique).
+		http_only: true,
+	}.merge(options)
+	
+	@serialization = Serialization.new
+	@maximum_size = maximum_size
+end</code></pre>
+					</details></section><section id="Utopia::Session#build_initial_session"><h3><code class="language-ruby">def build_initial_session(request)</code></h3><p>Constructs a valid session for the given request. These fields must match as per the checks performed in <code>valid_session?</code>:</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def build_initial_session(request)
+	{
+		user_agent: request.user_agent,
+		created_at: Time.now.utc,
+		updated_at: Time.now.utc,
+	}
+end</code></pre>
+					</details></section><section id="Utopia::Session#load_session_values"><h3><code class="language-ruby">def load_session_values(env)</code></h3><p>Load session from user supplied cookie. If the data is invalid or otherwise fails validation, <code>build_iniital_session</code> is invoked.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def load_session_values(env)
+	request = Rack::Request.new(env)
+	
+	# Decrypt the data from the user if possible:
+	if data = request.cookies[@cookie_name]
+		begin
+			if values = decrypt(data)
+				validate_session!(request, values)
+				
+				return values
+			end
+		rescue =&gt; error
+			request.logger&amp;.error(error)
+		end
+	end
+	
+	# If we couldn't create a session
+	return build_initial_session(request)
+end</code></pre>
+					</details></section>	</section>
+
+				
+			<footer>Documentation generated by <a href="https://github.com/socketry/utopia-project">Utopia::Project</a>.</footer>
+		</main>
+	</body>
+</html>

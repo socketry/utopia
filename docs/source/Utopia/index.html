@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+			<title>Utopia</title>
+		
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+		<link rel="icon" type="image/png" href="../../_static/icon.png"/>
+		<link rel="stylesheet" href="../../_static/site.css" type="text/css" media="screen"/>
+		
+		<script src="../../_components/jquery/jquery.min.js"></script>
+		<script src="../../_components/jquery-syntax/jquery.syntax.min.js"></script>
+		
+		<script src="../../_static/links.js"></script>
+		
+		<script type="text/javascript">
+		//<![CDATA[
+			jQuery(function($) {
+				$.syntax();
+			});
+		//]]>
+		</script>
+	</head>
+
+	<body>
+		<header><label for="toggle">☰</label>  › <a class="link" href="../../index.html">Project</a> › <a class="link" href="../index.html">Source</a></header>
+		
+		<main>
+			
+	<h1><code class="language-ruby">Utopia</code></h1>
+	
+	<p>Utopia is a web application framework built on top of Rack.</p>
+	
+	<section>
+	<h2>Nested</h2>
+	
+	<ul>
+		<li><a href="Responder/index.html"><code class="language-ruby">Utopia::Responder</code></a></li>
+		<li><a href="Path/index.html"><code class="language-ruby">Utopia::Path</code></a></li>
+		<li><a href="HTTP/index.html"><code class="language-ruby">Utopia::HTTP</code></a></li>
+		<li><a href="Exceptions/index.html"><code class="language-ruby">Utopia::Exceptions</code></a></li>
+		<li><a href="Static/index.html"><code class="language-ruby">Utopia::Static</code></a></li>
+		<li><a href="Localization/index.html"><code class="language-ruby">Utopia::Localization</code></a></li>
+		<li><a href="Content/index.html"><code class="language-ruby">Utopia::Content</code></a></li>
+		<li><a href="Setup/index.html"><code class="language-ruby">Utopia::Setup</code></a></li>
+		<li><a href="Controller/index.html"><code class="language-ruby">Utopia::Controller</code></a></li>
+		<li><a href="Extensions/index.html"><code class="language-ruby">Utopia::Extensions</code></a></li>
+		<li><a href="Session/index.html"><code class="language-ruby">Utopia::Session</code></a></li>
+		<li><a href="Shell/index.html"><code class="language-ruby">Utopia::Shell</code></a></li>
+		<li><a href="Redirection/index.html"><code class="language-ruby">Utopia::Redirection</code></a></li>
+		<li><a href="ContentLength/index.html"><code class="language-ruby">Utopia::ContentLength</code></a></li>
+		<li><a href="Command/index.html"><code class="language-ruby">Utopia::Command</code></a></li>
+	</ul>
+	</section>
+	
+	<section>
+	<h2>Definitions</h2>
+	
+	<section id="Utopia::PAGES_PATH"><h3><code class="language-ruby">PAGES_PATH = 'pages'.freeze</code></h3><p>The default pages path for <a href="Content/index.html" title="Utopia::Content"><code class="language-ruby">class Utopia::Content</code></a> middleware.</p>
+</section><section id="Utopia::VARIABLES_KEY"><h3><code class="language-ruby">VARIABLES_KEY = 'utopia.variables'.freeze</code></h3><p>This is used for shared controller variables which get consumed by the content middleware.</p>
+</section><section id="Utopia.default_root"><h3><code class="language-ruby">def self.default_root(subdirectory = PAGES_PATH, pwd = Dir.pwd)</code></h3><p>The default root directory for middleware to operate within, e.g. the web-site directory. Convention over configuration.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.default_root(subdirectory = PAGES_PATH, pwd = Dir.pwd)
+	File.expand_path(subdirectory, pwd)
+end</code></pre>
+					</details></section><section id="Utopia.default_path"><h3><code class="language-ruby">def self.default_path(*arguments)</code></h3><p>The same as <a href="index.html#Utopia.default_root" title="default_root"><code class="language-ruby">Utopia.default_root</code></a> but returns an instance of <a href="Path/index.html" title="Path"><code class="language-ruby">class Utopia::Path</code></a>.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.default_path(*arguments)
+	Path[default_root(*arguments)]
+end</code></pre>
+					</details></section><section id="Utopia::Locale"><h3><code class="language-ruby">Locale</code></h3><p>A structured representation of locale based on RFC3066.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">Locale = Struct.new(:language, :country, :variant) do
+	def to_s
+		to_a.compact.join('-')
+	end
+	
+	def self.dump(instance)
+		if instance
+			instance.to_s
+		end
+	end
+	
+	def self.load(instance)
+		if instance.is_a? String
+			self.new(*instance.split('-', 3))
+		elsif instance.is_a? Array
+			return self.new(*instance)
+		elsif instance.is_a? self
+			return instance.frozen? ? instance : instance.dup
+		end
+	end
+end</code></pre>
+					</details></section><section id="Utopia.setup"><h3><code class="language-ruby">def self.setup(root = nil, **options)</code></h3><p>You can call this method exactly once per process.</p>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def self.setup(root = nil, **options)
+	if @setup
+		raise RuntimeError, &quot;Utopia already setup!&quot;
+	end
+	
+	# We extract the root from the caller of this method:
+	if root.nil?
+		config_root = File.dirname(caller[0])
+		root = File.dirname(config_root)
+	end
+	
+	@setup = Setup.new(root, **options)
+	
+	@setup.apply!
+	
+	return @setup
+end</code></pre>
+					</details></section>	</section>
+
+				
+			<footer>Documentation generated by <a href="https://github.com/socketry/utopia-project">Utopia::Project</a>.</footer>
+		</main>
+	</body>
+</html>
