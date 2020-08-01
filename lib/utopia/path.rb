@@ -178,8 +178,14 @@ module Utopia
 			@components
 		end
 		
+		# @parameter other [Array(String)] The path components to append.
 		def join(other)
-			self.class.new(@components + other).simplify
+			# Check whether other is an absolute path:
+			if other.first == ''
+				self.class.new(other)
+			else
+				self.class.new(@components + other).simplify
+			end
 		end
 		
 		def expand(root)

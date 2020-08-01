@@ -133,6 +133,14 @@ RSpec.describe Utopia::Path do
 		end
 	end
 	
+	describe '#+' do
+		it "can add root path as string" do
+			root = Utopia::Path["/invoices/_template"]
+			
+			expect(root + "/foo/_bar").to be == Utopia::Path["/foo/_bar"]
+		end
+	end
+	
 	it "should concatenate absolute paths" do
 		root = Utopia::Path["/"]
 		
