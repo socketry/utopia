@@ -177,17 +177,24 @@ RSpec.describe Utopia::Path do
 		expect(path.extension).to be == 'html'
 	end
 	
-	it "should be able to convert into a directory" do
-		path = Utopia::Path["foo/bar"]
+	describe '#to_directory' do
+		subject(:path) {Utopia::Path["foo/bar"]}
 		
-		expect(path).to_not be_directory
+		it {is_expected.to_not be_directory}
 		
-		expect(path.to_directory).to be_directory
+		it "should be able to convert into a directory" do
+			expect(subject.to_directory).to be_directory
+		end
 		
-		dir_path = path.to_directory
-		expect(dir_path.to_directory).to be == dir_path
+		it "should convers to the correct directory" do
+			expect(subject.to_directory).to be == Utopia::Path["foo/bar/"]
+		end
+		
+		it "should remain the same directory" do
+			directory = subject.to_directory
+			expect(directory.to_directory).to be == directory
+		end
 	end
-	
 	it "should start with the given path" do
 		path = Utopia::Path["/a/b/c/d/e"]
 		

@@ -140,7 +140,7 @@ module Utopia
 			if directory?
 				return self
 			else
-				return join([''])
+				return self.class.new(@components + [''])
 			end
 		end
 		
