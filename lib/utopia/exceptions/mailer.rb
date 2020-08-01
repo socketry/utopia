@@ -155,7 +155,7 @@ module Utopia
 				end
 				
 				if @dump_environment
-					mail.attachments['environment.yaml'] = YAML::dump(env)
+					mail.attachments['environment.yaml'] = YAML.dump(env)
 				end
 
 				return mail

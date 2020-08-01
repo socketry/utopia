@@ -142,7 +142,7 @@ module Utopia
 			def load_metadata(path)
 				yaml_path = File.join(path, LINKS_YAML)
 				
-				if File.exist?(yaml_path) && data = YAML::load_file(yaml_path)
+				if File.exist?(yaml_path) && data = YAML.load_file(yaml_path)
 					return symbolize_keys(data)
 				else
 					return {}
