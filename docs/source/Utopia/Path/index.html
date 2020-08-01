@@ -79,6 +79,22 @@ end</code></pre>
 						<pre><code class="language-ruby">def self.from_string(string)
 	self.new(unescape(string).split(SEPARATOR, -1))
 end</code></pre>
+					</details></section><section id="Utopia::Path#join"><h3><code class="language-ruby">def join(other)</code></h3><details open>
+	<summary><h4>Signature</h4></summary>
+	<dl><dt>
+					<strong>parameter</strong>　<code class="syntax">other</code>　<code class="language-ruby">Array(String)</code></dt><dd><p>The path components to append.</p>
+</dd></dl>
+</details>
+<details>
+						<summary><h4>Implementation</h4></summary>
+						<pre><code class="language-ruby">def join(other)
+	# Check whether other is an absolute path:
+	if other.first == ''
+		self.class.new(other)
+	else
+		self.class.new(@components + other).simplify
+	end
+end</code></pre>
 					</details></section><section id="Utopia::Path#-"><h3><code class="language-ruby">def -(other)</code></h3><p>Computes the difference of the path.
 /a/b/c - /a/b -&gt; c
 a/b/c - a/b -&gt; c</p>
