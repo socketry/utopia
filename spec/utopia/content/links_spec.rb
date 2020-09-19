@@ -62,7 +62,7 @@ RSpec.describe Utopia::Content::Links do
 	
 	context 'without locale' do
 		it "should index all links" do
-			links = subject.index("/foo")
+			links = subject.index("/foo").sort_by(&:locale)
 			expect(links.size).to be == 2
 			
 			expect(links[0].name).to be == "test"
