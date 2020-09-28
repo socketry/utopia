@@ -110,10 +110,10 @@ module Utopia
 					puts "make your life easier and more enjoyable.".center(78)
 					puts ""
 					puts "To start the development server, run:".center(78)
-					puts "rake server".center(78)
+					puts "bake utopia:development".center(78)
 					puts ""
 					puts "For extreme productivity, please consult the online documentation".center(78)
-					puts "https://github.com/ioquatix/utopia".center(78)
+					puts "https://github.com/socketry/utopia".center(78)
 					puts " ~ Samuel.  ".rjust(78)
 				end
 			end
