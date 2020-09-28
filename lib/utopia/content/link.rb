@@ -96,17 +96,17 @@ module Utopia
 			def to_anchor(base: nil, content: self.title, builder: nil, **attributes)
 				attributes[:class] ||= 'link'
 				
-				Trenni::Builder.fragment(builder) do |builder|
+				Trenni::Builder.fragment(builder) do |inner_builder|
 					if href?
 						attributes[:href] ||= relative_href(base)
 						attributes[:target] ||= @info[:target]
 						
-						builder.inline('a', attributes) do
-							builder.text(content)
+						inner_builder.inline('a', attributes) do
+							inner_builder.text(content)
 						end
 					else
-						builder.inline('span', attributes) do
-							builder.text(content)
+						inner_builder.inline('span', attributes) do
+							inner_builder.text(content)
 						end
 					end
 				end
