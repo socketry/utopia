@@ -21,13 +21,13 @@ $ yarn init
 Then install jquery using `yarn`:
 
 ```bash
-$ yarn install jquery
+$ yarn add jquery
 ```
 
 Copy the distribution scripts to `public/_components`:
 
 ```bash
-$ bundle exec bake utopia:yarn:update
+$ bundle exec bake utopia:node:update
 ```
 
 Then add the appropriate `<script>` tags to `pages/_page.xnode`:
