@@ -33,7 +33,7 @@ ENV["DATABASE_VARIANT"] will default to "staging1" unless otherwise specified.
 
 To set a value, write `KEY=VALUE`. To unset a key, write `KEY`.
 
-When you run `rake` tasks or spawn a server, the values in `config/environment.yaml` will be the defaults. You can override them by manually specifying them, e.g. `DATABASE_ENV=development rake db:info`.
+When you run `bake` tasks or spawn a server, the values in `config/environment.yaml` will be the defaults. You can override them by manually specifying them, e.g. `DATABASE_ENV=development bake db:info`.
 
 ## Platform
 
