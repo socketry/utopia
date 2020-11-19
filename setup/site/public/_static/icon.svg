@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="100%" height="100%" viewBox="0 0 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:square;stroke-miterlimit:1.5;">
+    <g transform="matrix(0.922789,0,0,0.922789,16.591,0.837867)">
+        <path d="M120.731,31.594L212.702,84.694L212.702,190.893L120.731,243.993L28.759,190.893L28.759,84.694L120.731,31.594Z" style="fill:none;"/>
+        <clipPath id="_clip1">
+            <path d="M120.731,31.594L212.702,84.694L212.702,190.893L120.731,243.993L28.759,190.893L28.759,84.694L120.731,31.594Z"/>
+        </clipPath>
+        <g clip-path="url(#_clip1)">
+            <g transform="matrix(18.3943,0,0,10.62,-1929.57,-966.601)">
+                <g transform="matrix(1,0,0,0.178571,106.463,93.9922)">
+                    <rect x="0" y="0" width="10" height="56" style="fill:#f79433;"/>
+                </g>
+                <g transform="matrix(1,0,0,0.416667,106.463,80.6588)">
+                    <rect x="0" y="56" width="10" height="24" style="fill:#4e8dd8;"/>
+                </g>
+            </g>
+        </g>
+        <path d="M120.731,31.594L212.702,84.694L212.702,190.893L120.731,243.993L28.759,190.893L28.759,84.694L120.731,31.594Z" style="fill:none;stroke:black;stroke-width:26.01px;"/>
+    </g>
+</svg>
