@@ -50,6 +50,12 @@ module Utopia
 				end
 			end
 			
+			def full_path(root, extension = XNODE_EXTENSION)
+				if @path&.file?
+					File.join(root, @path.dirname, self.key + XNODE_EXTENSION)
+				end
+			end
+			
 			def href
 				@href ||= @info.fetch(:uri) do
 					@info.fetch(:href) do

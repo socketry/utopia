@@ -136,6 +136,10 @@ module Utopia
 			return @components.last == ''
 		end
 		
+		def file?
+			return @components.last != ''
+		end
+		
 		def to_directory
 			if directory?
 				return self
@@ -258,6 +262,8 @@ module Utopia
 				@components.last
 			end
 		end
+		
+		alias last? file?
 		
 		# Pops the last path component.
 		def pop

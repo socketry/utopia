@@ -100,9 +100,7 @@ module Utopia
 		end
 		
 		def resolve_link(link)
-			if path = link&.path
-				full_path = File.join(@root, path.dirname, link.key + XNODE_EXTENSION)
-				
+			if full_path = link&.full_path(@root)
 				if File.exist?(full_path)
 					return Node.new(self, path, path, full_path)
 				end
