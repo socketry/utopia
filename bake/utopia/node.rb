@@ -15,9 +15,11 @@ def update
 	
 	install_root = root + "public/_components"
 	
-	package_root.children.select(&:directory?).collect(&:basename).each do |package_directory|
+	package_paths = expand_package_paths(package_root)
+	
+	package_paths.each do |package_path|
+		package_directory = package_path.relative_path_from(package_root)
 		install_path = install_root + package_directory
-		package_path = package_root + package_directory
 		
 		dist_path = package_path + 'dist'
 		
@@ -33,4 +35,22 @@ def update
 		
 		FileUtils::Verbose.cp_r File.expand_path(link_path, install_path), install_path
 	end
+end
+
+private
+
+def expand_package_paths(root, into = [])
+	paths = root.children.select(&:directory?)
+	
+	paths.each do |path|
+		basename = path.basename.to_s
+		# Handle organisation sub-directories which start with an '@' symbol:
+		if basename.start_with?('@')
+			expand_package_paths(path, into)
+		else
+			into << path
+		end
+	end
+	
+	return into
 end
