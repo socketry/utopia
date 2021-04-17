@@ -92,7 +92,7 @@ module Utopia
 			end
 		end
 		
-		# @param path [Path] the request_path is an absolute uri path, e.g. `/foo/bar`. If an xnode file exists on disk for this exact path, it is instantiated, otherwise nil.
+		# @param path [Path] the request path is an absolute uri path, e.g. `/foo/bar`. If an xnode file exists on disk for this exact path, it is instantiated, otherwise nil.
 		def lookup_node(path, locale = nil)
 			resolve_link(
 				@links.for(path, locale)
@@ -102,7 +102,7 @@ module Utopia
 		def resolve_link(link)
 			if full_path = link&.full_path(@root)
 				if File.exist?(full_path)
-					return Node.new(self, path, path, full_path)
+					return Node.new(self, link.path, link.path, full_path)
 				end
 			end
 		end
