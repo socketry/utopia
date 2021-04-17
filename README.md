@@ -2,14 +2,14 @@
 
 Utopia is a website generation framework which provides a robust set of tools to build highly complex dynamic websites. It uses the filesystem heavily for content and provides functions for interacting with files and directories as structure representing the website.
 
-[![Development Status](https://github.com/socketry/utopia/workflows/Development/badge.svg)](https://github.com/socketry/utopia/actions?workflow=Development)
+[![Development Status](https://github.com/ioquatix/utopia/workflows/Development/badge.svg)](https://github.com/ioquatix/utopia/actions?workflow=Development)
 
 ## Features
 
-- Designed for both content-based websites and applications. Does not depend on a database.
-- Supports flexible content localization based on industry recommendations.
-- Rack middleware compatible with all major Ruby application servers. Small memory footprint by default.
-- Low latency and high throughput. Capable of 10,000+ requests/second out of the box.
+  - Designed for both content-based websites and applications. Does not depend on a database.
+  - Supports flexible content localization based on industry recommendations.
+  - Rack middleware compatible with all major Ruby application servers. Small memory footprint by default.
+  - Low latency and high throughput. Capable of 10,000+ requests/second out of the box.
 
 ## Usage
 
