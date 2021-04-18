@@ -53,5 +53,4 @@ jobs:
       run: |
         git config --global user.email "samuel@oriontransfer.net"
         git config --global user.name "Samuel Williams"
-        bundle install
         ${{matrix.env}} bundle exec rspec
