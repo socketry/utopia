@@ -42,6 +42,9 @@ RSpec.describe "utopia command" do
 			# If we don't delete this, when running on travis, it will try submit the coverage report.
 			ENV.delete('COVERAGE')
 			
+			# In order to make this work in a vendored test environment, we need to seed the "local" environment with the "utopia" gem and all it's dependencies. Otherwise, the commands will fail because they can't find the dependencies (they are vendored in the source root but not in `dir`):
+			system("bundle", "install", "--system")
+			
 			example.run
 		end
 	end
