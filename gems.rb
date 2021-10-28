@@ -5,6 +5,7 @@ source 'https://rubygems.org'
 gemspec
 
 group :maintenance, optional: true do
+	gem "bake-gem"
 	gem "bake-modernize"
 	
 	gem "utopia-project"
@@ -13,8 +14,6 @@ end
 group :development do
 	gem 'json'
 	gem 'rackula'
-	
-	gem 'bake-gem'
 end
 
 group :test do
