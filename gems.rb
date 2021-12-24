@@ -14,7 +14,7 @@ group :development do
 	gem 'json'
 	gem 'rackula'
 	
-	gem "bake-bundler"
+	gem 'bake-gem'
 end
 
 group :test do
