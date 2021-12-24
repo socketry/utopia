@@ -151,7 +151,7 @@ RSpec.describe "utopia command" do
 			expect(result).to be == 0
 			
 			Dir.chdir(site_path) do
-				result = sh_status("git", "push", "--set-upstream", server_path, "master")
+				result = sh_status("git", "push", "--set-upstream", server_path, "main")
 				expect(result).to be == 0
 			end
 			
