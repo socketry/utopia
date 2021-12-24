@@ -14,8 +14,6 @@ jobs:
           - macos
         
         ruby:
-          - 2.5
-          - 2.6
           - 2.7
           - 3.0
         
@@ -53,4 +51,5 @@ jobs:
       run: |
         git config --global user.email "samuel@oriontransfer.net"
         git config --global user.name "Samuel Williams"
+        git config --global init.defaultBranch main
         ${{matrix.env}} bundle exec rspec
