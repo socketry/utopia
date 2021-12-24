@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
 	spec.add_dependency "samovar", "~> 2.1"
 	spec.add_dependency "trenni", "~> 3.0"
 	spec.add_dependency "variant", "~> 0.1"
+	spec.add_dependency "net-smtp"
 	
 	spec.add_development_dependency "async-rspec"
 	spec.add_development_dependency "async-websocket"

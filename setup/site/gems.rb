@@ -14,6 +14,7 @@ gem 'rake'
 gem 'bake'
 gem 'bundler'
 gem 'rack-test'
+gem 'net-smtp'
 
 group :development do
 	gem 'guard-falcon', require: false
