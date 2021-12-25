@@ -73,4 +73,4 @@ otherwise do |request, path|
 end
 ```
 
-If you are doing this to perform some kind of rewriting, it may be preferable to use the [Rewrite](../rewrite/) controller layer.
+If you are doing this to perform some kind of rewriting, it may be preferable to use the [Rewrite](../Rewrite/) controller layer.
