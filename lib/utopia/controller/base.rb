@@ -65,19 +65,17 @@ module Utopia
 				"\#<#{self.class}#{details.join}>"
 			end
 			
-			class << self
-				def freeze
-					# This ensures that all class variables are frozen.
-					self.instance_variables.each do |name|
-						self.instance_variable_get(name).freeze
-					end
-					
-					super
+			def self.freeze
+				# This ensures that all class variables are frozen.
+				self.instance_variables.each do |name|
+					self.instance_variable_get(name).freeze
 				end
 				
-				def direct?(path)
-					path.dirname == uri_path
-				end
+				super
+			end
+			
+			def self.direct?(path)
+				path.dirname == uri_path
 			end
 			
 			def catch_response
