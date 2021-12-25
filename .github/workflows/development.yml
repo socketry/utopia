@@ -4,6 +4,7 @@ on: [push, pull_request]
 
 jobs:
   test:
+    name: ${{matrix.ruby}} on ${{matrix.os}}
     runs-on: ${{matrix.os}}-latest
     continue-on-error: ${{matrix.experimental}}
     
@@ -14,8 +15,8 @@ jobs:
           - macos
         
         ruby:
-          - 2.7
-          - 3.0
+          - "2.7"
+          - "3.0"
         
         experimental: [false]
         env: [""]
