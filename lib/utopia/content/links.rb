@@ -142,8 +142,10 @@ module Utopia
 			def load_metadata(path)
 				yaml_path = File.join(path, LINKS_YAML)
 				
-				if File.exist?(yaml_path) && data = YAML.load_file(yaml_path)
-					return symbolize_keys(data)
+				if File.exist?(yaml_path)
+					if data = YAML.safe_load(File.read(yaml_path), permitted_classes: [Date, Time])
+						return symbolize_keys(data)
+					end
 				else
 					return {}
 				end
