@@ -52,7 +52,7 @@ module Utopia
 				["torrent", "application/x-bittorrent"]
 			],
 			:images => [
-				"png", "gif", "jpeg", "tiff", "svg"
+				"png", "gif", "jpeg", "tiff", "svg", "webp"
 			],
 			:default => [
 				:media, :text, :archive, :images, :fonts
