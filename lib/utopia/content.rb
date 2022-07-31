@@ -107,6 +107,16 @@ module Utopia
 			end
 		end
 		
+		def respond(link, request)
+			if node = resolve_link(link)
+				attributes = request.env.fetch(VARIABLES_KEY, {}).to_hash
+				
+				return node.process!(request, attributes)
+			elsif redirect_uri = link[:uri]
+				return [307, {HTTP::LOCATION => redirect_uri}, []]
+			end
+		end
+		
 		def call(env)
 			request = Rack::Request.new(env)
 			path = Path.create(request.path_info)
@@ -124,12 +134,8 @@ module Utopia
 			
 			locale = env[Localization::CURRENT_LOCALE_KEY]
 			if link = @links.for(path, locale)
-				if node = resolve_link(link)
-					attributes = request.env.fetch(VARIABLES_KEY, {}).to_hash
-					
-					return node.process!(request, attributes)
-				elsif redirect_uri = link[:uri]
-					return [307, {HTTP::LOCATION => redirect_uri}, []]
+				if response = self.respond(link, request)
+					return response
 				end
 			end
 			
