@@ -7,6 +7,7 @@ permissions:
 
 env:
   CONSOLE_OUTPUT: XTerm
+  BUNDLE_WITH: maintenance
 
 jobs:
   test:
