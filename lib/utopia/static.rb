@@ -72,34 +72,40 @@ module Utopia
 		ETAG = 'ETag'.freeze
 		ACCEPT_RANGES = 'Accept-Ranges'.freeze
 		
+		def respond(env, path_info, extension)
+			path = Path[path_info].simplify
+			
+			if locale = env[Localization::CURRENT_LOCALE_KEY]
+				path.last.insert(path.last.rindex('.') || -1, ".#{locale}")
+			end
+			
+			if file = fetch_file(path)
+				response_headers = {
+					LAST_MODIFIED => file.mtime_date,
+					CONTENT_TYPE => @extensions[extension],
+					CACHE_CONTROL => @cache_control,
+					ETAG => file.etag,
+					ACCEPT_RANGES => "bytes"
+				}
+				
+				if file.modified?(env)
+					return file.serve(env, response_headers)
+				else
+					return [304, response_headers, []]
+				end
+			end
+		end
+		
 		def call(env)
 			path_info = env[Rack::PATH_INFO]
 			extension = File.extname(path_info)
-
-			if @extensions.key? extension.downcase
-				path = Path[path_info].simplify
-				
-				if locale = env[Localization::CURRENT_LOCALE_KEY]
-					path.last.insert(path.last.rindex('.') || -1, ".#{locale}")
-				end
-				
-				if file = fetch_file(path)
-					response_headers = {
-						LAST_MODIFIED => file.mtime_date,
-						CONTENT_TYPE => @extensions[extension],
-						CACHE_CONTROL => @cache_control,
-						ETAG => file.etag,
-						ACCEPT_RANGES => "bytes"
-					}
-
-					if file.modified?(env)
-						return file.serve(env, response_headers)
-					else
-						return [304, response_headers, []]
-					end
+			
+			if @extensions.key?(extension.downcase)
+				if response = self.respond(env, path_info, extension)
+					return response
 				end
 			end
-
+			
 			# else if no file was found:
 			return @app.call(env)
 		end
