@@ -137,6 +137,8 @@ RSpec.describe "utopia command" do
 	end
 	
 	it "can generate sample site, server and push to the server" do
+		# This assumes your default branch is "main". We should probably be more flexible around this.
+		# git config --global init.defaultBranch main
 		Dir.mktmpdir('test') do |dir|
 			site_path = File.join(dir, 'site')
 			
