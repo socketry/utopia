@@ -219,6 +219,8 @@ module Utopia
 				response = @app.call(localized_env)
 				
 				break unless response[0] >= 400
+
+				response[2].close if response[2].respond_to?(:close)
 			end
 			
 			return vary(env, response)
