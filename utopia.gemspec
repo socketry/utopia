@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
 	spec.authors = ["Samuel Williams", "Huba Nagy", "Michael Adams", "Olle Jonsson", "System Administrator", "k1tsu"]
 	spec.license = "MIT"
 	
-	# spec.cert_chain  = ['release.cert']
-	# spec.signing_key = File.expand_path('~/.gem/release.pem')
+	spec.cert_chain  = ['release.cert']
+	spec.signing_key = File.expand_path('~/.gem/release.pem')
 	
 	spec.homepage = "https://github.com/ioquatix/utopia"
 	
