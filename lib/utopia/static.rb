@@ -26,6 +26,8 @@ require_relative 'localization'
 require_relative 'static/local_file'
 require_relative 'static/mime_types'
 
+require 'traces/provider'
+
 module Utopia
 	# A middleware which serves static files from the specified root directory.
 	class Static
@@ -108,6 +110,16 @@ module Utopia
 			
 			# else if no file was found:
 			return @app.call(env)
+		end
+	end
+	
+	Traces::Provider(Static) do
+		def respond(env, path_info, extension)
+			attributes = {
+				path_info: path_info,
+			}
+			
+			trace("utopia.static.respond", attributes: attributes) {super}
 		end
 	end
 end
