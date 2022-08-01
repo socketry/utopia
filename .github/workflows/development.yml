@@ -8,6 +8,7 @@ permissions:
 env:
   CONSOLE_OUTPUT: XTerm
   BUNDLE_WITH: maintenance
+  TRACES_BACKEND: traces/backend/test
 
 jobs:
   test:

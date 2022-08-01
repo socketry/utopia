@@ -34,6 +34,7 @@ Gem::Specification.new do |spec|
 	spec.add_dependency "net-smtp"
 	spec.add_dependency "rack", "~> 2.2"
 	spec.add_dependency "samovar", "~> 2.1"
+	spec.add_dependency "traces"
 	spec.add_dependency "trenni", "~> 3.0"
 	spec.add_dependency "variant", "~> 0.1"
 	

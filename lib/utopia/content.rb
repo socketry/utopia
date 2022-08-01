@@ -32,6 +32,8 @@ require 'trenni/template'
 
 require 'concurrent/map'
 
+require 'traces/provider'
+
 module Utopia
 	# A middleware which serves dynamically generated content based on markup files.
 	class Content
@@ -195,6 +197,17 @@ module Utopia
 			@node_cache.fetch_or_store(cache_key) do
 				lookup_content(name, full_path)
 			end
+		end
+	end
+	
+	Traces::Provider(Content) do
+		def respond(link, request)
+			attributes = {
+				'link.key' => link.key,
+				'link.href' => link.href
+			}
+			
+			trace("utopia.content.respond", attributes: attributes) {super}
 		end
 	end
 end
