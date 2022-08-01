@@ -43,10 +43,12 @@ module Utopia
 			end
 			
 			def key
-				if locale
-					"#{@path.last}.#{@locale}"
-				else
-					@path.last
+				if @path
+					if locale
+						"#{@path.last}.#{@locale}"
+					else
+						@path.last
+					end
 				end
 			end
 			
