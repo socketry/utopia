@@ -30,12 +30,12 @@ module Utopia::StaticSpec
 	describe Utopia::Static do
 		include Rack::Test::Methods
 		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('../static_spec.ru', __FILE__)).first}
+		let(:app) {Rack::Builder.parse_file(File.expand_path('../static_spec.ru', __FILE__))}
 		
 		it "should give the correct mime type" do
 			get "/test.txt"
 			
-			expect(last_response.header['content-type']).to be == 'text/plain'
+			expect(last_response.headers['content-type']).to be == 'text/plain'
 		end
 		
 		it "should return partial content" do

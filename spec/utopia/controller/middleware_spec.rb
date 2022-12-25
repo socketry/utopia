@@ -29,7 +29,7 @@ module Utopia::Controller::MiddlewareSpec
 	describe Utopia::Controller do
 		include Rack::Test::Methods
 		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('../middleware_spec.ru', __FILE__)).first}
+		let(:app) {Rack::Builder.parse_file(File.expand_path('../middleware_spec.ru', __FILE__))}
 		
 		it "should successfully call empty controller" do
 			get "/empty/index"

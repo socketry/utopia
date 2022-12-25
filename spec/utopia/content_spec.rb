@@ -27,7 +27,7 @@ module Utopia::ContentSpec
 	describe Utopia::Content do
 		include Rack::Test::Methods
 		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('content_spec.ru', __dir__)).first}
+		let(:app) {Rack::Builder.parse_file(File.expand_path('content_spec.ru', __dir__))}
 		
 		it "should generate identical html" do
 			get "/test"

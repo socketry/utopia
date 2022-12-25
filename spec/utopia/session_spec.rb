@@ -30,22 +30,22 @@ module Utopia::SessionSpec
 	describe Utopia::Session do
 		include Rack::Test::Methods
 		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('../session_spec.ru', __FILE__)).first}
+		let(:app) {Rack::Builder.parse_file(File.expand_path('../session_spec.ru', __FILE__))}
 		
 		it "shouldn't commit session values unless required" do
 			# This URL doesn't update the session:
 			get "/"
-			expect(last_response.header).to be == {}
+			expect(last_response.headers).to be == {}
 			
 			# This URL updates the session:
 			get "/login"
-			expect(last_response.header).to_not be == {}
-			expect(last_response.header).to be_include 'Set-Cookie'
+			expect(last_response.headers).to_not be == {}
+			expect(last_response.headers).to be_include 'Set-Cookie'
 		end
 		
 		it "should set and get values correctly" do
 			get "/session-set?key=foo&value=bar"
-			expect(last_response.header).to be_include 'Set-Cookie'
+			expect(last_response.headers).to be_include 'Set-Cookie'
 			
 			get "/session-get?key=foo"
 			expect(last_request.cookies).to include('rack.session.encrypted')
@@ -62,28 +62,28 @@ module Utopia::SessionSpec
 		
 		it "shouldn't update the session if there are no changes" do
 			get "/session-set?key=foo&value=bar"
-			expect(last_response.header).to be_include 'Set-Cookie'
+			expect(last_response.headers).to be_include 'Set-Cookie'
 			
 			get "/session-set?key=foo&value=bar"
-			expect(last_response.header).to_not be_include 'Set-Cookie'
+			expect(last_response.headers).to_not be_include 'Set-Cookie'
 		end
 		
 		it "should update the session if time has passed" do
 			get "/session-set?key=foo&value=bar"
-			expect(last_response.header).to be_include 'Set-Cookie'
+			expect(last_response.headers).to be_include 'Set-Cookie'
 			
 			# Sleep more than update_timeout
 			sleep 2
 			
 			get "/session-set?key=foo&value=bar"
-			expect(last_response.header).to be_include 'Set-Cookie'
+			expect(last_response.headers).to be_include 'Set-Cookie'
 		end
 	end
 	
 	describe Utopia::Session do
 		include Rack::Test::Methods
 		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('../session_spec.ru', __FILE__)).first}
+		let(:app) {Rack::Builder.parse_file(File.expand_path('../session_spec.ru', __FILE__))}
 		
 		before(:each) do
 			# Initial user agent:

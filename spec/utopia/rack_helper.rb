@@ -28,5 +28,5 @@ RSpec.shared_context "rack app" do |relative_rackup_path|
 	let(:rackup_path) {File.expand_path(relative_rackup_path, __dir__)}
 	let(:rackup_directory) {File.dirname(rackup_path)}
 	
-	let(:app) {Rack::Builder.parse_file(rackup_path).first}
+	let(:app) {Rack::Builder.parse_file(rackup_path)}
 end

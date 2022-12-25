@@ -33,7 +33,7 @@ module Utopia::LocalizationSpec
 	describe Utopia::Localization do
 		include Rack::Test::Methods
 		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('../localization_spec.ru', __FILE__)).first}
+		let(:app) {Rack::Builder.parse_file(File.expand_path('../localization_spec.ru', __FILE__))}
 		
 		it "should respond with default localization" do
 			get '/localized.txt'

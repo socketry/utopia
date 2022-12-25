@@ -89,7 +89,7 @@ module Utopia::Controller::RespondSpec
 	describe Utopia::Controller do
 		include Rack::Test::Methods
 		
-		let(:app) {Rack::Builder.parse_file(File.expand_path('respond_spec.ru', __dir__)).first}
+		let(:app) {Rack::Builder.parse_file(File.expand_path('respond_spec.ru', __dir__))}
 		
 		it "should get html error page" do
 			# Standard web browser header:

@@ -26,7 +26,7 @@ require 'utopia/content'
 RSpec.describe Utopia::Content do
 	include Rack::Test::Methods
 	
-	let(:app) {Rack::Builder.parse_file(File.expand_path('empty_spec.ru', __dir__)).first}
+	let(:app) {Rack::Builder.parse_file(File.expand_path('empty_spec.ru', __dir__))}
 	
 	it "should report 404 missing" do
 		get "/index"
