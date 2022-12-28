@@ -8,7 +8,7 @@ source 'https://rubygems.org'
 gemspec
 
 group :maintenance, optional: true do
-	gem "bake-gem", "~> 0.3"
+	# gem "bake-gem"
 	gem "bake-modernize"
 	
 	gem "utopia-project"
@@ -20,6 +20,7 @@ group :development do
 end
 
 group :test do
+	gem 'bake-gem'
 	gem 'bake-test'
 	gem 'benchmark-ips'
 	
