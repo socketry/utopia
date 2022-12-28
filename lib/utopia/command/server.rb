@@ -1,28 +1,12 @@
 # frozen_string_literal: true
 
-# Copyright, 2016, by Samuel G. D. Williams. <http://www.codeotaku.com>
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
+# Released under the MIT License.
+# Copyright, 2017-2022, by Samuel Williams.
 
 require_relative 'site'
 
 require 'fileutils'
+require 'socket'
 
 require 'samovar'
 
@@ -34,6 +18,10 @@ module Utopia
 			class Create < Samovar::Command
 				self.description = "Create a remote Utopia website suitable for deployment using git."
 				
+				def hostname
+					Socket.gethostname
+				end
+				
 				def call
 					destination_root = parent.root
 					
@@ -42,7 +30,6 @@ module Utopia
 					Update[parent: parent].call
 					
 					# Print out helpful git remote add message:
-					hostname = `hostname`.chomp
 					puts "Now add the git remote to your local repository:\n\tgit remote add production ssh://#{hostname}#{destination_root}"
 					puts "Then push to it:\n\tgit push --set-upstream production master"
 				end

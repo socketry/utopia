@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-# Set up the environment for the web application.
+# Released under the MIT License.
+# Copyright, 2017-2022, by Samuel Williams.
+
 def environment(name: nil)
 	require_relative '../lib/utopia/logger'
 	

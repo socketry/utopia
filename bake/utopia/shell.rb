@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-# Start an interactive console for the web application.
+# Released under the MIT License.
+# Copyright, 2020-2022, by Samuel Williams.
+
 def shell
 	call 'utopia:environment'
 	

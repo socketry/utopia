@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-# Enable coverage 
+# Released under the MIT License.
+# Copyright, 2020-2022, by Samuel Williams.
+
 def coverage
 	ENV['COVERAGE'] = 'PartialSummary'
 end
