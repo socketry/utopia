@@ -20,8 +20,8 @@ group :development do
 end
 
 group :test do
+	gem 'bake-test'
 	gem 'benchmark-ips'
-	gem 'ruby-prof', platforms: :mri
 	
 	gem 'guard-falcon'
 	
