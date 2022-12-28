@@ -6,6 +6,7 @@
 require_relative 'site'
 
 require 'fileutils'
+require 'socket'
 
 require 'samovar'
 
@@ -17,6 +18,10 @@ module Utopia
 			class Create < Samovar::Command
 				self.description = "Create a remote Utopia website suitable for deployment using git."
 				
+				def hostname
+					Socket.gethostname
+				end
+				
 				def call
 					destination_root = parent.root
 					
@@ -25,7 +30,6 @@ module Utopia
 					Update[parent: parent].call
 					
 					# Print out helpful git remote add message:
-					hostname = `hostname`.chomp
 					puts "Now add the git remote to your local repository:\n\tgit remote add production ssh://#{hostname}#{destination_root}"
 					puts "Then push to it:\n\tgit push --set-upstream production master"
 				end
