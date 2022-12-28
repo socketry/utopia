@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-# Copy all installed JavaScript components to the public root.
+# Released under the MIT License.
+# Copyright, 2016-2021, by Samuel Williams.
+
 def update
 	require 'fileutils'
 	require 'utopia/path'

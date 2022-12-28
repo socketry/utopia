@@ -1,8 +1,8 @@
-tmp
-.tags*
-*.gem
+/.bundle/
+/pkg/
 /gems.locked
-documentation/run/*
-documentation/public/code/*
+/.covered.db
+/external
+
+.rspec
 .rspec_status
-.yardoc

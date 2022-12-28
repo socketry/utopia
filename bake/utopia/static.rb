@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# Generate a static copy of the site.
-# @param output_path [String] the path where the files for the static site will be created.
+# Released under the MIT License.
+# Copyright, 2017-2020, by Samuel Williams.
+
 def generate(output_path: 'static')
 	require 'falcon/server'
 	require 'async/io'

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Released under the MIT License.
+# Copyright, 2012-2021, by Samuel Williams.
+
 source 'https://rubygems.org'
 
 group :preload do
