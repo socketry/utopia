@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2017-2022, by Samuel Williams.
+# Copyright, 2017-2023, by Samuel Williams.
 # Copyright, 2020, by Michael Adams.
 
 require 'fileutils'
@@ -17,7 +17,7 @@ module Utopia
 		# Local site setup commands.
 		class Site < Samovar::Command
 			# Configuration files which should be installed/updated:
-			CONFIGURATION_FILES = ['.gitignore', 'config.ru', 'config/environment.rb', 'falcon.rb', 'gems.rb', 'Guardfile', 'bake.rb', 'spec/spec_helper.rb', 'spec/website_context.rb', 'spec/website_spec.rb']
+			CONFIGURATION_FILES = ['.gitignore', 'config.ru', 'config/environment.rb', 'falcon.rb', 'gems.rb', 'Guardfile', 'bake.rb', 'test/website.rb', 'fixtures/website.rb']
 			
 			# Directories that should exist:
 			DIRECTORIES = ["config", "lib", "pages", "public", "tasks", "spec"]

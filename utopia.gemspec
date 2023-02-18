@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
 	spec.version = Utopia::VERSION
 	
 	spec.summary = "Utopia is a framework for building dynamic content-driven websites."
-	spec.authors = ["Samuel Williams", "Huba Nagy", "Michael Adams", "Olle Jonsson", "k1tsu"]
+	spec.authors = ["Samuel Williams", "Huba Nagy", "Michael Adams", "Olle Jonsson", "Pierre Montelle"]
 	spec.license = "MIT"
 	
 	spec.cert_chain  = ['release.cert']
@@ -38,11 +38,11 @@ Gem::Specification.new do |spec|
 	spec.add_dependency "trenni", "~> 3.0"
 	spec.add_dependency "variant", "~> 0.1"
 	
-	spec.add_development_dependency "async-rspec"
 	spec.add_development_dependency "async-websocket"
 	spec.add_development_dependency "bake"
 	spec.add_development_dependency "bundler"
 	spec.add_development_dependency "covered"
 	spec.add_development_dependency "falcon"
-	spec.add_development_dependency "rspec", "~> 3.6"
+	spec.add_development_dependency "sus"
+	spec.add_development_dependency "sus-fixtures-async-http"
 end

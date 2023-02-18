@@ -1,9 +1,9 @@
 # MIT License
 
-Copyright, 2009-2022, by Samuel Williams.  
+Copyright, 2009-2023, by Samuel Williams.  
 Copyright, 2015-2019, by Huba Nagy.  
 Copyright, 2020, by Olle Jonsson.  
-Copyright, 2020, by k1tsu.  
+Copyright, 2020, by Pierre Montelle.  
 Copyright, 2020, by Michael Adams.  
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

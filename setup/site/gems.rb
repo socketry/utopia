@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2012-2022, by Samuel Williams.
+# Copyright, 2012-2023, by Samuel Williams.
 
 source 'https://rubygems.org'
 
@@ -13,7 +13,6 @@ group :preload do
 	gem 'variant'
 end
 
-gem 'rake'
 gem 'bake'
 gem 'bundler'
 gem 'rack-test'
@@ -21,12 +20,12 @@ gem 'net-smtp'
 
 group :development do
 	gem 'guard-falcon', require: false
-	gem 'guard-rspec', require: false
 	
-	gem 'rspec'
+	gem 'sus'
+	gem 'sus-fixtures-async-http'
+	
 	gem 'covered'
 	
-	gem 'async-rspec'
 	gem 'benchmark-http'
 end
 

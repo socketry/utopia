@@ -1,5 +1,4 @@
 # Development specific:
-/.rspec_status
 /.bundle
 
 # Temporary data should not be added to the repository:
