@@ -3,6 +3,3 @@
 /gems.locked
 /.covered.db
 /external
-
-.rspec
-.rspec_status

@@ -60,4 +60,4 @@ jobs:
         git config --global user.email "samuel@oriontransfer.net"
         git config --global user.name "Samuel Williams"
         git config --global init.defaultBranch main
-        bundle exec rspec
+        bundle exec bake test

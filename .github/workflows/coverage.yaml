@@ -30,10 +30,22 @@ jobs:
         ruby-version: ${{matrix.ruby}}
         bundler-cache: true
     
+    - name: Installing packages (ubuntu)
+      if: matrix.os == 'ubuntu'
+      run: sudo apt-get install wget
+    
+    - name: Installing packages (macos)
+      if: matrix.os == 'macos'
+      run: brew install wget
+    
     - name: Run tests
-      timeout-minutes: 5
-      run: bundle exec bake test
-
+      timeout-minutes: 10
+      run: |
+        git config --global user.email "samuel@oriontransfer.net"
+        git config --global user.name "Samuel Williams"
+        git config --global init.defaultBranch main
+        bundle exec bake test
+    
     - uses: actions/upload-artifact@v2
       with:
         name: coverage-${{matrix.os}}-${{matrix.ruby}}

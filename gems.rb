@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2012-2022, by Samuel Williams.
+# Copyright, 2012-2023, by Samuel Williams.
 
 source 'https://rubygems.org'
 
@@ -22,6 +22,8 @@ end
 group :test do
 	gem 'bake-gem'
 	gem 'bake-test'
+	gem 'bake-test-external'
+	
 	gem 'benchmark-ips'
 	
 	gem 'guard-falcon'
@@ -30,3 +32,4 @@ group :test do
 end
 
 gem "thread-local", "~> 1.0"
+# gem "sus", path: "../../ioquatix/sus"
