@@ -7,7 +7,6 @@ require 'fileutils'
 require 'tmpdir'
 require 'yaml'
 
-require 'open3'
 require 'bundler'
 
 describe "utopia command" do
@@ -15,36 +14,9 @@ describe "utopia command" do
 	let(:pkg_path) {File.expand_path("pkg", utopia_path)}
 	let(:utopia) {File.expand_path("../../bin/utopia", __dir__)}
 	
-	def before
-		# We need to build a package to test deployment:
-		system("bundle", "exec", "bake", "gem:build", "--signing-key", "no") or abort("Could not build package for setup spec!")
-		
-		super
-	end
-	
 	def around
 		Bundler.with_unbundled_env do
-			# In order to make this work in a vendored test environment, we need to seed the "local" environment with the "utopia" gem and all it's dependencies. Otherwise, the commands will fail because they can't find the dependencies (they are vendored in the source root but not in `dir`):
-			system("bundle", "install", "--system")
-			
 			super
-		end
-	end
-	
-	def sh_status(*arguments)
-		system(*arguments) ? 0 : false
-	end
-	
-	def sh_stdout(*arguments)
-		output, status = Open3.capture2(*arguments)
-		return output
-	end
-	
-	def git_config(name, value=nil)
-		unless value.nil?
-			return sh_status('git', 'config', name, value)
-		else
-			return sh_stdout('git', 'config', name).chomp
 		end
 	end
 	
