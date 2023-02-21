@@ -9,6 +9,7 @@ require 'benchmark/http'
 describe "website" do
 	include_context AServer
 	
+	let(:timeout) {10}
 	let(:spider) {Benchmark::HTTP::Spider.new(depth: 128)}
 	let(:statistics) {Benchmark::HTTP::Statistics.new}
 	

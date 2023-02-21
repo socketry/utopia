@@ -13,12 +13,11 @@ group :preload do
 	gem 'variant'
 end
 
-gem 'bake'
-gem 'bundler'
-gem 'rack-test'
 gem 'net-smtp'
 
 group :development do
+	gem 'bake-test'
+	gem 'rack-test'
 	gem 'guard-falcon', require: false
 	
 	gem 'sus'
