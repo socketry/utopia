@@ -11,8 +11,6 @@ require 'bundler'
 
 describe "utopia command" do
 	let(:utopia_path) {File.expand_path("../..", __dir__)}
-	let(:pkg_path) {File.expand_path("pkg", utopia_path)}
-	let(:utopia) {File.expand_path("../../bin/utopia", __dir__)}
 	
 	def around
 		Bundler.with_unbundled_env do
@@ -25,9 +23,7 @@ describe "utopia command" do
 		return gaccess == '6' || gaccess == '7'
 	end
 	
-	REQUIRED_GEMS = [
-		"bake", "bake-test", "sus", "covered", "rack-test", "sus-fixtures-async-http", "falcon", "net-smtp", "benchmark-http"
-	]
+	REQUIRED_GEMS = ["bake", "bake-test", "sus", "covered", "rack-test", "sus-fixtures-async-http", "falcon", "net-smtp", "benchmark-http", "protocol-rack"]
 	
 	def install_packages(dir)
 		gems_path = File.join(dir, "gems.rb")
