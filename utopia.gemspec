@@ -21,11 +21,9 @@ Gem::Specification.new do |spec|
 	
 	spec.files = Dir.glob(['{bake,bin,lib,setup}/**/*', '*.md'], File::FNM_DOTMATCH, base: __dir__)
 	
-	spec.executables = ["utopia"]
+	spec.required_ruby_version = ">= 2.7"
 	
-	spec.required_ruby_version = ">= 2.5"
-	
-	spec.add_dependency "concurrent-ruby", "~> 1.0"
+	spec.add_dependency "concurrent-ruby", "~> 1.2"
 	spec.add_dependency "console", "~> 1.0"
 	spec.add_dependency "http-accept", "~> 2.1"
 	spec.add_dependency "mail", "~> 2.6"

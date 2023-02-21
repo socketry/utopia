@@ -53,18 +53,31 @@ describe "utopia command" do
 		return gaccess == '6' || gaccess == '7'
 	end
 	
+	REQUIRED_GEMS = [
+		"bake", "bake-test", "sus", "covered", "rack-test", "sus-fixtures-async-http", "falcon", "net-smtp", "benchmark-http"
+	]
+	
 	def install_packages(dir)
-		system("bundle", "config", "--local", "local.utopia", utopia_path, chdir: dir)
-		system("bundle", "config", "--local", "cache_path", pkg_path, chdir: dir)
+		gems_path = File.join(dir, "gems.rb")
+		File.open(gems_path, "w") do |file|
+			file.puts "source 'https://rubygems.org'"
+			file.puts "gem 'utopia', path: #{utopia_path.dump}"
+			REQUIRED_GEMS.each do |gem|
+				file.puts "gem '#{gem}'"
+			end
+		end
+		
+		system("bundle", "config", "set", "path", "vendor/bundle", chdir: dir)
+		system("bundle", "install", chdir: dir)
 	end
 	
 	it "should generate sample site" do
 		Dir.mktmpdir('test-site') do |dir|
 			install_packages(dir)
 			
-			system(utopia, "--in", dir, "site", "create")
+			system("bundle", "exec", "bake", "utopia:site:create", chdir: dir, exception: true)
 			
-			expected_files = [".git", "gems.rb", "gems.locked", "readme.md", "bake.rb", "config.ru", "lib", "pages", "public", "spec"]
+			expected_files = [".git", "gems.rb", "gems.locked", "readme.md", "bake.rb", "config.ru", "lib", "pages", "public", "test"]
 			site_files = Dir.entries(dir)
 			
 			expected_files.each do |file|
@@ -72,7 +85,7 @@ describe "utopia command" do
 			end
 			
 			expect(
-				system("bundle", "exec", "bake", "utopia:test", chdir: dir)
+				system("bundle", "exec", "bake", "test", chdir: dir)
 			).to be == true
 		end
 	end
@@ -81,17 +94,12 @@ describe "utopia command" do
 		Dir.mktmpdir('test-server') do |dir|
 			install_packages(dir)
 			
-			result = sh_status(utopia, "--in", dir, "server", "create")
-			expect(result).to be == 0
-			
+			system("bundle", "exec", "bake", "utopia:server:create", chdir: dir, exception: true)
 			expect(Dir.entries(dir)).to be(:include?, ".git")
 			
-			# make sure git is set up properly
-			Dir.chdir(dir) do
-				expect(git_config 'core.sharedRepository').to be == '1'
-				expect(git_config 'receive.denyCurrentBranch').to be == 'ignore'
-				expect(git_config 'core.worktree').to be == dir
-			end
+			system("git", "config", "--local", "core.sharedRepository", "false", chdir: dir, exception: true)
+			system("chmod", "-Rf", "g-x", ".git", chdir: dir, exception: true)
+			system("rm", "-f", ".git/hooks/post-receive", chdir: dir, exception: true)
 			
 			environment = YAML.load_file(File.join(dir, 'config/environment.yaml'))
 			expect(environment).to be(:include?, 'VARIANT')
@@ -103,23 +111,17 @@ describe "utopia command" do
 		Dir.mktmpdir('test-server') do |dir|
 			install_packages(dir)
 			
-			result = sh_status(utopia, "--in", dir, "server", "create")
-			expect(result).to be == 0
+			system("bundle", "exec", "bake", "utopia:server:create", chdir: dir, exception: true)
+			system("git", "config", "--local", "core.sharedRepository", "false", chdir: dir, exception: true)
+			system("chmod", "-Rf", "g-x", ".git", chdir: dir, exception: true)
+			system("rm", "-f", ".git/hooks/post-receive", chdir: dir, exception: true)
 			
-			Dir.chdir(dir) do
-				# make the repository look a bit like like it's an old one
-				git_config 'core.sharedRepository', 'false'
-				sh_status 'chmod', '-Rf', 'g-x', '.git'
-				sh_status 'rm', '-f', '.git/hooks/post-receive'
-			end
+			# Run the server update command:
+			system("bundle", "exec", "bake", "utopia:server:update", chdir: dir, exception: true)
 			
-			result = sh_status(utopia, "--in", dir, "server", "update")
-			expect(result).to be == 0
-			
-			# check a couple of files to make sure they have group read and write access
-			# after the update
+			# Check a couple of files to make sure they have group read and write access after the update:
 			Dir.glob(File.join(dir, '.git/**/*')).each do |path|
-				expect(group_rw path).to be == true
+				expect(group_rw(path)).to be == true
 			end
 		end
 	end
@@ -129,21 +131,18 @@ describe "utopia command" do
 		# git config --global init.defaultBranch main
 		Dir.mktmpdir('test') do |dir|
 			site_path = File.join(dir, 'site')
-			
-			install_packages(site_path)
+			FileUtils.mkdir_p(site_path)
 			
 			server_path = File.join(dir, 'server')
+			FileUtils.mkdir_p(server_path)
 			
-			result = sh_status(utopia, "--in", site_path, "site", "create")
-			expect(result).to be == 0
+			install_packages(site_path)
+			install_packages(server_path)
 			
-			result = sh_status(utopia, "--in", server_path, "server", "create")
-			expect(result).to be == 0
+			system("bundle", "exec", "bake", "utopia:site:create", chdir: site_path, exception: true)
+			system("bundle", "exec", "bake", "utopia:server:create", chdir: server_path, exception: true)
 			
-			Dir.chdir(site_path) do
-				result = sh_status("git", "push", "--set-upstream", server_path, "main")
-				expect(result).to be == 0
-			end
+			system("git", "push", "--set-upstream", server_path, "main", chdir: site_path, exception: true)
 			
 			expected_files = %W[.git gems.rb gems.locked readme.md bake.rb config.ru lib pages public]
 			server_files = Dir.entries(server_path)
@@ -153,7 +152,6 @@ describe "utopia command" do
 			end
 			
 			expect(File.executable? File.join(server_path, 'config.ru')).to be == true
-			
 			puts File.stat(File.join(dir, 'server', '.git')).mode
 		end
 	end

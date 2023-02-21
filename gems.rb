@@ -8,7 +8,7 @@ source 'https://rubygems.org'
 gemspec
 
 group :maintenance, optional: true do
-	# gem "bake-gem"
+	gem "bake-gem"
 	gem "bake-modernize"
 	
 	gem "utopia-project"
@@ -20,7 +20,6 @@ group :development do
 end
 
 group :test do
-	gem 'bake-gem'
 	gem 'bake-test'
 	gem 'bake-test-external'
 	
@@ -32,4 +31,3 @@ group :test do
 end
 
 gem "thread-local", "~> 1.0"
-# gem "sus", path: "../../ioquatix/sus"
