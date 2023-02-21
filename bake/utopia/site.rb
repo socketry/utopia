@@ -20,7 +20,7 @@ SETUP_ROOT = File.expand_path("../../setup", __dir__)
 CONFIGURATION_FILES = ['.gitignore', 'config.ru', 'config/environment.rb', 'falcon.rb', 'gems.rb', 'Guardfile', 'bake.rb', 'test/website.rb', 'fixtures/website.rb']
 
 # Directories that should exist:
-DIRECTORIES = ["config", "lib", "pages", "public", "bake", "test"]
+DIRECTORIES = ["config", "lib", "pages", "public", "bake", "fixtures", "test"]
 
 # Directories that should be removed during upgrade process:
 OLD_PATHS = ["access_log", "cache", "tmp", "Rakefile", "tasks", ".bowerrc"]
@@ -92,11 +92,11 @@ end
 
 # Upgrade an existing site to use the latest configuration files from the template.
 def upgrade(root: context.root)
-	branch_name = "utopia-upgrade-#{Utopia::VERSION}"
+	message = "Upgrade to utopia v#{Utopia::VERSION}."
 	
 	Console.logger.info(self) {"Upgrading #{root}..."}
 	
-	with_squash_merge_branch(root, branch_name) do
+	commit_changes(root, message) do
 		DIRECTORIES.each do |directory|
 			FileUtils.mkdir_p(File.join(root, directory))
 		end
@@ -131,34 +131,25 @@ def upgrade(root: context.root)
 		
 		move_static!(root)
 		update_gemfile!(root)
-		
-		# Commit all changes:
-		system("git", "commit", "-m", "Upgrade to utopia #{Utopia::VERSION}.", chdir: root) or fail "could not commit changes"
 	end
 end
 
 private
 
-def with_squash_merge_branch(root, branch_name)
-	main_branch_name = `git rev-parse --abbrev-ref HEAD`.chomp
-	system('git', 'checkout', '-b', branch_name, chdir: root) or fail "could not change branch to #{branch_name}"
+def commit_changes(root, message)
+	# Ensure the current branch is clean:
+	system("git", "diff-index", "--quiet", "HEAD", chdir: root) or fail "current branch is not clean"
 	
 	begin
 		yield
 	rescue
-		system('git', 'checkout', '-f', main_branch_name, chdir: root) or fail "could not change branch to #{main_branch_name}"
-		system('git', 'branch', '-D', branch_name, chdir: root)
+		# Clear out the changes:
+		system("git", "reset", "--hard", "HEAD", chdir: root) or fail "could not reset changes"
 		raise
 	end
 	
-	# Checkout the original branch:
-	system("git", "checkout", main_branch_name, chdir: root) or fail "could not checkout #{main_branch_name}"
-	
-	# Merge the changes:
-	system("git", "merge", "--squash", "--no-commit", branch_name, chdir: root) or fail "could not merge changes"
-	
-	# Delete the branch:
-	system("git", "branch", "-D", branch_name, chdir: root) or fail "could not delete #{branch_name}"
+	# Commit all changes:
+	system("git", "commit", "-m", message, chdir: root) or fail "could not commit changes"
 end
 
 # Move legacy `pages/_static` to `public/_static`.
