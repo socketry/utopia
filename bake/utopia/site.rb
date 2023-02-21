@@ -9,6 +9,8 @@ def initialize(...)
 	
 	require 'fileutils'
 	require 'find'
+	
+	require_relative '../../lib/utopia/version'
 end
 
 # The path to the setup directory in the gem:
