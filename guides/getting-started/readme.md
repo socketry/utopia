@@ -16,12 +16,12 @@ Utopia uses [Trenni](https://github.com/ioquatix/trenni) for templates and it ha
 
 ## Your First Page
 
-To setup the default site, create a directory (typically the hostname of the site you want to create) and use the `utopia` command:
+To setup the default site, create a directory (typically the hostname of the site you want to create) and use the `bake utopia:site:create` command:
 
 ~~~ bash
 $ mkdir www.example.com
 $ cd www.example.com
-$ utopia site create
+$ bake --gem utopia utopia:site:create
 $ bake utopia:development
 ~~~
 

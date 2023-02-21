@@ -4,7 +4,7 @@ This guide explains how to update existing `utopia` websites.
 
 ## Overview
 
-Utopia provides a model for both local development (`utopia site create`) and deployment (`utopia server create`). In addition, Utopia provides a basic upgrade path for existing sites when things within the framework change. These are not always automatic, so below are some recipes for how to update your site.
+Utopia provides a model for both local development (`utopia:site:create`) and deployment (`utopia:server:create`). In addition, Utopia provides a basic upgrade path for existing sites when things within the framework change. These are not always automatic, so below are some recipes for how to update your site.
 
 ## Site Update
 
