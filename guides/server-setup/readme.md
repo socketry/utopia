@@ -18,7 +18,7 @@ On your development machine, you should setup the git remote:
 
 ~~~ bash
 $ git remote add production ssh://remote/srv/http/www.example.com
-$ git push --set-upstream production master
+$ git push --set-upstream production main
 ~~~
 
 ### Default Environment
@@ -56,7 +56,7 @@ Automatic deployment allows you to deploy updates to your site when they are com
 
 ### GitHub Actions
 
-Here is a basic workflow, adapted from the [www.codeotaku.com workflow](https://github.com/ioquatix/www.codeotaku.com/blob/master/.github/workflows/development.yml).
+Here is a basic workflow, adapted from the [www.codeotaku.com workflow](https://github.com/ioquatix/www.codeotaku.com/blob/main/.github/workflows/development.yml).
 
 ~~~ yaml
 name: Development
@@ -98,7 +98,7 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     
     steps:
     - uses: actions/checkout@v1
@@ -110,7 +110,7 @@ jobs:
         ssh-add - <<< $DEPLOY_KEY
         mkdir ~/.ssh
         ssh-keyscan -H www.oriontransfer.net >> ~/.ssh/known_hosts
-        git push -f ssh://http@www.oriontransfer.net/srv/http/www.codeotaku.com/ HEAD:master
+        git push -f ssh://http@www.oriontransfer.net/srv/http/www.codeotaku.com/ HEAD:main
 ~~~
 
 You will need to add your own DEPLOY_KEY to the GitHub Secrets of your repository andupdate the hostnames and directories to suit your own setup.

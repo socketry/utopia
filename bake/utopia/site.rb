@@ -64,6 +64,8 @@ def create(root: context.root)
 	
 	system("bundle", "install", chdir: root) or warn "could not install bundled gems"
 	
+	context.lookup('utopia:environment:setup').call(root: root)
+	
 	if !File.exist?('.git')
 		Console.logger.info(self) {"Setting up git repository..."}
 		
@@ -71,8 +73,6 @@ def create(root: context.root)
 		system("git", "add", ".", chdir: root) or warn "could not add all files"
 		system("git", "commit", "-q", "-m", "Initial Utopia v#{Utopia::VERSION} site.", chdir: root) or warn "could not commit files"
 	end
-	
-	context.lookup('utopia:environment:defaults').call(root)
 	
 	name = `git config user.name || whoami`.chomp
 	
@@ -94,34 +94,35 @@ end
 def upgrade(root: context.root)
 	branch_name = "utopia-upgrade-#{Utopia::VERSION}"
 	
-	$stderr.puts "Upgrading #{destination_root}..."
+	Console.logger.info(self) {"Upgrading #{root}..."}
 	
-	system('git', 'checkout', '-b', branch_name, chdir: root) or fail "could not change branch"
-	
-	DIRECTORIES.each do |directory|
-		FileUtils.mkdir_p(File.join(root, directory))
-	end
-	
-	OLD_PATHS.each do |path|
-		path = File.join(root, path)
-		Console.logger.info(self) {"Removing #{path}..."}
-		FileUtils.rm_rf(path)
-	end
-	
-	CONFIGURATION_FILES.each do |configuration_file|
-		source_path = File.join(SITE_ROOT, configuration_file)
-		destination_path = File.join(root, configuration_file)
+	with_squash_merge_branch(root, branch_name) do
+		DIRECTORIES.each do |directory|
+			FileUtils.mkdir_p(File.join(root, directory))
+		end
 		
-		Console.logger.info(self) {"Updating #{destination_path}..."}
+		OLD_PATHS.each do |path|
+			path = File.join(root, path)
+			
+			if File.exist?(path)
+				Console.logger.info(self) {"Removing #{path}..."}
+				FileUtils.rm_rf(path)
+			end
+		end
 		
-		FileUtils.copy_entry(source_path, destination_path)
-		buffer = File.read(destination_path).gsub('$UTOPIA_VERSION', Utopia::VERSION)
-		File.open(destination_path, "w") { |file| file.write(buffer) }
-	end
+		CONFIGURATION_FILES.each do |configuration_file|
+			source_path = File.join(SITE_ROOT, configuration_file)
+			destination_path = File.join(root, configuration_file)
+			
+			Console.logger.info(self) {"Updating #{destination_path}..."}
+			
+			FileUtils.copy_entry(source_path, destination_path)
+			buffer = File.read(destination_path).gsub('$UTOPIA_VERSION', Utopia::VERSION)
+			File.open(destination_path, "w") { |file| file.write(buffer) }
+		end
+		
+		context.lookup('utopia:environment:setup').call(root: root)
 	
-	context.lookup('environment:defaults').call(root)
-	
-	begin
 		# Stage any files that have been changed or removed:
 		system("git", "add", "-u", chdir: root) or fail "could not add files"
 		
@@ -133,22 +134,32 @@ def upgrade(root: context.root)
 		
 		# Commit all changes:
 		system("git", "commit", "-m", "Upgrade to utopia #{Utopia::VERSION}.", chdir: root) or fail "could not commit changes"
-		
-		# Checkout main..
-		system("git", "checkout", "main", chdir: root) or fail "could not checkout main"
-		
-		# and merge:
-		system("git", "merge", "--squash", "--no-commit", branch_name, chdir: root) or fail "could not merge changes"
-	rescue => error
-		Console.logger.error(self, error) {"Upgrade failed."}
-		
-		system("git", "checkout", "master", chdir: root)
-	ensure
-		system("git", "branch", "-D", branch_name, chdir: root)
 	end
 end
 
 private
+
+def with_squash_merge_branch(root, branch_name)
+	main_branch_name = `git rev-parse --abbrev-ref HEAD`.chomp
+	system('git', 'checkout', '-b', branch_name, chdir: root) or fail "could not change branch to #{branch_name}"
+	
+	begin
+		yield
+	rescue
+		system('git', 'checkout', '-f', main_branch_name, chdir: root) or fail "could not change branch to #{main_branch_name}"
+		system('git', 'branch', '-D', branch_name, chdir: root)
+		raise
+	end
+	
+	# Checkout the original branch:
+	system("git", "checkout", main_branch_name, chdir: root) or fail "could not checkout #{main_branch_name}"
+	
+	# Merge the changes:
+	system("git", "merge", "--squash", "--no-commit", branch_name, chdir: root) or fail "could not merge changes"
+	
+	# Delete the branch:
+	system("git", "branch", "-D", branch_name, chdir: root) or fail "could not delete #{branch_name}"
+end
 
 # Move legacy `pages/_static` to `public/_static`.
 def move_static!(root)

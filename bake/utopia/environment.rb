@@ -15,8 +15,8 @@ end
 # Setup default environemnts "testing" and "development".
 # @parameter root [String] The root directory of the project.
 def setup(root: context.root)
-	defaults(name: "testing", root: root)
-	defaults(name: "development", root: root)
+	defaults("testing", root: root)
+	defaults("development", root: root)
 end
 
 # Setup the defaults for a specific environment.
@@ -24,6 +24,7 @@ end
 # @parameter root [String] The root directory of the project.
 def defaults(name, root: context.root)
 	update_environment(root, name) do |store|
+		Console.logger.info(self) {"Setting up defaults for environment #{name}..."}
 		# Set some useful defaults for the environment.
 		store['UTOPIA_SESSION_SECRET'] ||= SecureRandom.hex(40)
 	end
@@ -33,22 +34,23 @@ end
 # @parameter name [String] The name of the environment to update.
 # @parameter variables [Hash(String, String)] A list of environment KEY=VALUE pairs to set.
 def update(name, root: context.root, **variables)
-	update_environment(root, name) do |store|
-		variables&.each do |variable|
-			key, value = variable.split('=', 2)
+	update_environment(root, name) do |store, _, path|
+		variables&.each do |key, value|
+			# Ensure the key is a string...
+			key = key.to_s
 			
-			if value
-				puts "ENV[#{key.inspect}] will default to #{value.inspect} unless otherwise specified."
+			if value && !value.empty?
+				Console.logger.info(self) {"ENV[#{key.inspect}] will default to #{value.inspect} unless otherwise specified."}
 				store[key] = value
 			else
-				puts "ENV[#{key.inspect}] will be unset unless otherwise specified."
+				Console.logger.info(self) {"ENV[#{key.inspect}] will be unset unless otherwise specified."}
 				store.delete(key)
 			end
 		end
 		
 		yield store if block_given?
 		
-		Console.logger.debug(self) do |buffer|
+		Console.logger.info(self) do |buffer|
 			buffer.puts "Environment #{name} (#{path}):"
 			store.roots.each do |key|
 				value = store[key]
