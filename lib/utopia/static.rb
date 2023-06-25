@@ -102,7 +102,7 @@ module Utopia
 				path_info: path_info,
 			}
 			
-			trace("utopia.static.respond", attributes: attributes) {super}
+			Traces.trace("utopia.static.respond", attributes: attributes) {super}
 		end
 	end
 end

@@ -190,7 +190,7 @@ module Utopia
 				'link.href' => link.href
 			}
 			
-			trace("utopia.content.respond", attributes: attributes) {super}
+			Traces.trace("utopia.content.respond", attributes: attributes) {super}
 		end
 	end
 end
