@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2022, by Samuel Williams.
+# Copyright, 2009-2023, by Samuel Williams.
 
 require_relative 'middleware'
 require_relative 'localization'
