@@ -13,7 +13,7 @@ class MockNode
 	end
 	
 	def lookup_tag(tag)
-		namespace, name = Trenni::Tag.split(tag.name)
+		namespace, name = XRB::Tag.split(tag.name)
 		
 		if library = @namespaces[namespace]
 			library.call(name, self)

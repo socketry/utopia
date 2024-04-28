@@ -216,7 +216,7 @@ module Utopia
 				@node = node
 				@attributes = attributes
 				
-				@buffer = Trenni::MarkupString.new.force_encoding(Encoding::UTF_8)
+				@buffer = XRB::MarkupString.new.force_encoding(Encoding::UTF_8)
 				@content = nil
 				
 				@deferred = []
@@ -246,7 +246,7 @@ module Utopia
 
 			def call(document)
 				@content = @buffer
-				@buffer = Trenni::MarkupString.new.force_encoding(Encoding::UTF_8)
+				@buffer = XRB::MarkupString.new.force_encoding(Encoding::UTF_8)
 				
 				if node.respond_to? :call
 					node.call(document, self)
@@ -262,7 +262,7 @@ module Utopia
 			end
 
 			def text(string)
-				Trenni::Markup.append(@buffer, string)
+				XRB::Markup.append(@buffer, string)
 			end
 
 			def tag_complete(tag)

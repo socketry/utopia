@@ -73,7 +73,7 @@ describe Utopia::Content do
 		
 		template = content.fetch_template(node_path)
 		
-		expect(template).to be_a Trenni::MarkupTemplate
+		expect(template).to be_a XRB::Template
 		
 		# Check that the same object is returned:
 		expect(template).to be == content.fetch_template(node_path)

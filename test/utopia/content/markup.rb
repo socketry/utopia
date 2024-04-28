@@ -30,7 +30,7 @@ describe Utopia::Content::MarkupParser do
 	def parse(string)
 		delegate = TestDelegate.new
 		
-		buffer = Trenni::Buffer.new(string)
+		buffer = XRB::Buffer.new(string)
 		Utopia::Content::MarkupParser.new(buffer, delegate).parse!
 		
 		return delegate

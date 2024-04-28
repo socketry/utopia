@@ -11,7 +11,7 @@ require_relative 'content/node'
 require_relative 'content/markup'
 require_relative 'content/tags'
 
-require 'trenni/template'
+require 'xrb/template'
 
 require 'concurrent/map'
 
@@ -64,13 +64,13 @@ module Utopia
 		
 		def fetch_template(path)
 			@template_cache.fetch_or_store(path.to_s) do
-				Trenni::MarkupTemplate.load_file(path)
+				XRB::Template.load_file(path)
 			end
 		end
 		
 		# Look up a named tag such as `<entry />` or `<content:page>...`
 		def lookup_tag(qualified_name, node)
-			namespace, name = Trenni::Tag.split(qualified_name)
+			namespace, name = XRB::Tag.split(qualified_name)
 			
 			if library = @namespaces[namespace]
 				library.call(name, node)

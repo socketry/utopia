@@ -3,14 +3,14 @@
 # Released under the MIT License.
 # Copyright, 2009-2022, by Samuel Williams.
 
-require 'trenni/parsers'
-require 'trenni/entities'
-require 'trenni/strings'
-require 'trenni/tag'
+require 'xrb/parsers'
+require 'xrb/entities'
+require 'xrb/strings'
+require 'xrb/tag'
 
 module Utopia
 	class Content
-		Tag = Trenni::Tag
+		Tag = XRB::Tag
 		
 		# A hash which forces all keys to be symbols and fails with KeyError when strings are used.
 		class SymbolicHash < Hash
@@ -66,12 +66,12 @@ module Utopia
 				attr :closing_tag
 				
 				def start_location
-					Trenni::Location.new(@buffer.read, opening_tag.offset)
+					XRB::Location.new(@buffer.read, opening_tag.offset)
 				end
 				
 				def end_location
 					if closing_tag and closing_tag.respond_to? :offset
-						Trenni::Location.new(@buffer.read, closing_tag.offset)
+						XRB::Location.new(@buffer.read, closing_tag.offset)
 					end
 				end
 				
@@ -84,14 +84,14 @@ module Utopia
 				end
 			end
 			
-			def self.parse(buffer, delegate, entities = Trenni::Entities::HTML5)
+			def self.parse(buffer, delegate, entities = XRB::Entities::HTML5)
 				# This is for compatibility with the existing API which passes in a string:
-				buffer = Trenni::Buffer(buffer)
+				buffer = XRB::Buffer(buffer)
 				
 				self.new(buffer, delegate, entities).parse!
 			end
 			
-			def initialize(buffer, delegate, entities = Trenni::Entities::HTML5)
+			def initialize(buffer, delegate, entities = XRB::Entities::HTML5)
 				@buffer = buffer
 				
 				@delegate = delegate
@@ -102,7 +102,7 @@ module Utopia
 			end
 			
 			def parse!
-				Trenni::Parsers.parse_markup(@buffer, self, @entities)
+				XRB::Parsers.parse_markup(@buffer, self, @entities)
 				
 				if tag = @stack.pop
 					raise UnbalancedTagError.new(@buffer, tag)

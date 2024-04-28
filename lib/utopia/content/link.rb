@@ -6,9 +6,9 @@
 # Copyright, 2020, by Michael Adams.
 
 require 'yaml'
-require 'trenni/builder'
+require 'xrb/builder'
 
-require 'trenni/strings'
+require 'xrb/strings'
 
 require_relative '../path'
 require_relative '../locale'
@@ -24,7 +24,7 @@ module Utopia
 				@locale = locale
 				@path = Path.create(path)
 				@info = info || {}
-				@title = Trenni::Strings.to_title(title || name)
+				@title = XRB::Strings.to_title(title || name)
 			end
 			
 			def key
@@ -89,7 +89,7 @@ module Utopia
 			def to_anchor(base: nil, content: self.title, builder: nil, **attributes)
 				attributes[:class] ||= 'link'
 				
-				Trenni::Builder.fragment(builder) do |inner_builder|
+				XRB::Builder.fragment(builder) do |inner_builder|
 					if href?
 						attributes[:href] ||= relative_href(base)
 						attributes[:target] ||= @info[:target]

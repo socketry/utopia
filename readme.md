@@ -35,8 +35,7 @@ This project is governed by [Contributor Covenant](https://www.contributor-coven
 
 ## See Also
 
-  - [Trenni](https://github.com/ioquatix/trenni) — Template and markup parsers, markup generation.
-  - [Trenni::Formatters](https://github.com/ioquatix/trenni-formatters) — Helpers for HTML generation including views and forms.
+  - [XRB](https://github.com/socketry/xrb) — Template and markup parsers, markup generation.
   - [Utopia::Gallery](https://github.com/ioquatix/utopia-gallery) — A fast photo gallery based on [libvips](https://github.com/jcupitt/libvips).
   - [Utopia::Project](https://github.com/socketry/utopia-project) — A Ruby project documentation tool.
   - [Utopia::Analytics](https://github.com/ioquatix/utopia-analytics) — Simple integration with Google Analytics.
