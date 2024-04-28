@@ -17,11 +17,12 @@ Gem::Specification.new do |spec|
 	
 	spec.metadata = {
 		"funding_uri" => "https://github.com/sponsors/ioquatix/",
+		"source_code_uri" => "https://github.com/ioquatix/utopia.git",
 	}
 	
 	spec.files = Dir.glob(['{bake,lib,setup}/**/*', '*.md'], File::FNM_DOTMATCH, base: __dir__)
 	
-	spec.required_ruby_version = ">= 3.0"
+	spec.required_ruby_version = ">= 3.1"
 	
 	spec.add_dependency "concurrent-ruby", "~> 1.2"
 	spec.add_dependency "console", "~> 1.0"
@@ -33,14 +34,6 @@ Gem::Specification.new do |spec|
 	spec.add_dependency "rack", "~> 3.0"
 	spec.add_dependency "samovar", "~> 2.1"
 	spec.add_dependency "traces", "~> 0.10"
-	spec.add_dependency "xrb", "~> 0.4"
 	spec.add_dependency "variant", "~> 0.1"
-	
-	spec.add_development_dependency "async-websocket"
-	spec.add_development_dependency "bake"
-	spec.add_development_dependency "bundler"
-	spec.add_development_dependency "covered"
-	spec.add_development_dependency "falcon"
-	spec.add_development_dependency "sus"
-	spec.add_development_dependency "sus-fixtures-async-http"
+	spec.add_dependency "xrb", "~> 0.4"
 end

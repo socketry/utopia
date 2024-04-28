@@ -15,24 +15,6 @@ Utopia is a website generation framework which provides a robust set of tools to
 
 Please see the [project documentation](https://socketry.github.io/utopia).
 
-## Contributing
-
-We welcome contributions to this project.
-
-1.  Fork it.
-2.  Create your feature branch (`git checkout -b my-new-feature`).
-3.  Commit your changes (`git commit -am 'Add some feature'`).
-4.  Push to the branch (`git push origin my-new-feature`).
-5.  Create new Pull Request.
-
-### Developer Certificate of Origin
-
-This project uses the [Developer Certificate of Origin](https://developercertificate.org/). All contributors to this project must agree to this document to have their contributions accepted.
-
-### Contributor Covenant
-
-This project is governed by [Contributor Covenant](https://www.contributor-covenant.org/). All contributors and participants agree to abide by its terms.
-
 ## See Also
 
   - [XRB](https://github.com/socketry/xrb) — Template and markup parsers, markup generation.
@@ -49,3 +31,21 @@ This project is governed by [Contributor Covenant](https://www.contributor-coven
   - [Financier](https://github.com/ioquatix/financier) — A small business management platform.
   - [mail.oriontransfer.net](https://github.com/oriontransfer/mail.oriontransfer.net) - Mail server account management.
   - [www.codeotaku.com](http://www.codeotaku.com) ([source](https://github.com/ioquatix/www.codeotaku.com)) — Personal website, blog.
+
+## Contributing
+
+We welcome contributions to this project.
+
+1.  Fork it.
+2.  Create your feature branch (`git checkout -b my-new-feature`).
+3.  Commit your changes (`git commit -am 'Add some feature'`).
+4.  Push to the branch (`git push origin my-new-feature`).
+5.  Create new Pull Request.
+
+### Developer Certificate of Origin
+
+This project uses the [Developer Certificate of Origin](https://developercertificate.org/). All contributors to this project must agree to this document to have their contributions accepted.
+
+### Contributor Covenant
+
+This project is governed by the [Contributor Covenant](https://www.contributor-covenant.org/). All contributors and participants agree to abide by its terms.

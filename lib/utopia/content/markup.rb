@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2022, by Samuel Williams.
+# Copyright, 2009-2024, by Samuel Williams.
 
 require 'xrb/parsers'
 require 'xrb/entities'

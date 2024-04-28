@@ -20,6 +20,13 @@ group :development do
 end
 
 group :test do
+	gem "sus"
+	gem "covered"
+	
+	gem "falcon"
+	gem "async-websocket"
+	gem "sus-fixtures-async-http"
+	
 	gem 'bake-test'
 	gem 'bake-test-external'
 	
