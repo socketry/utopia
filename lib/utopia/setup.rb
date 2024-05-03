@@ -8,7 +8,7 @@ require 'securerandom'
 
 require 'variant'
 
-require_relative 'logger'
+require 'console'
 
 module Utopia
 	# Used for setting up a Utopia web application, typically via `config/environment.rb`
@@ -49,7 +49,7 @@ module Utopia
 			if secret.nil? || secret.empty?
 				secret = SecureRandom.hex(32)
 				
-				Utopia.logger.warn(self) do
+				Console.warn(self) do
 					"Generating transient #{key} secret: #{secret.inspect}"
 				end
 			end
@@ -93,7 +93,7 @@ module Utopia
 			path = environment_path(variant)
 			
 			if File.exist?(path)
-				Utopia.logger.debug(self) {"Loading environment at path: #{path.inspect}"}
+				Console.debug(self) {"Loading environment at path: #{path.inspect}"}
 				
 				# Load the YAML environment file:
 				if environment = YAML.load_file(path)
@@ -105,7 +105,7 @@ module Utopia
 				
 				return true
 			else
-				Utopia.logger.debug(self) {"Ignoring environment at path: #{path.inspect} (file not found)"}
+				Console.debug(self) {"Ignoring environment at path: #{path.inspect} (file not found)"}
 				
 				return false
 			end

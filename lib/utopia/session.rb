@@ -6,7 +6,7 @@
 
 require 'openssl'
 require 'digest/sha2'
-
+require 'console'
 require 'json'
 
 require_relative 'session/lazy_hash'
@@ -143,7 +143,7 @@ module Utopia
 						return values
 					end
 				rescue => error
-					request.logger&.error(error)
+					Console.error(self, error)
 				end
 			end
 			

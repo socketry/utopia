@@ -16,7 +16,7 @@ describe "website" do
 	it "should be responsive" do
 		spider.fetch(statistics, client, endpoint.url) do |method, uri, response|
 			if response.failure?
-				Console.logger.error(endpoint) {"#{method} #{uri} -> #{response.status}"}
+				Console.error(endpoint) {"#{method} #{uri} -> #{response.status}"}
 			end
 		end.wait
 		
