@@ -22,7 +22,7 @@ module Utopia
 				"xspf" => "application/xspf+xml",
 			},
 			:media => [
-				:xiph, "mp3", "mp4", "wav", "aiff", ["aac", "audio/x-aac"], "mov", "avi", "wmv", "mpg"
+				:xiph, "mp3", "mp4", "wav", "aiff", "aac", "webm", "mov", "avi", "wmv", "mpg"
 			],
 			:text => [
 				"html", "css", "js", ["map", "application/json"], "txt", "rtf", "xml", "pdf"
