@@ -4,5 +4,5 @@
 # Copyright, 2009-2024, by Samuel Williams.
 
 module Utopia
-	VERSION = "2.24.4"
+	VERSION = "2.25.0"
 end
