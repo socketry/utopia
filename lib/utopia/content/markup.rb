@@ -153,7 +153,7 @@ module Utopia
 			end
 
 			def cdata(string)
-				@delegate.text(string[9..-4])
+				@delegate.write(string[9..-4])
 			end
 
 			def text(string)

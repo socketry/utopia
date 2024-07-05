@@ -58,7 +58,7 @@ describe Utopia::Content::MarkupParser do
 			[:tag_begin, foo_tag],
 			[:text, "Bob & Barley"],
 			[:write, "<!-- Comment -->"],
-			[:text, "Hello & World"],
+			[:write, "Hello & World"],
 			[:tag_end, foo_tag],
 		]
 		

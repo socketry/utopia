@@ -47,6 +47,32 @@ describe Utopia::Content do
 		expect(last_response.body).to be == '10'
 	end
 	
+	it "should generate valid importmap" do
+		get "/script/importmap"
+		
+		expect(last_response.body).to be == <<~IMPORTMAP.chomp
+			<script type="importmap">
+			{
+				"imports": {
+					"test": "/_assets/test.js",
+					"test2": "/_assets/test2.js"
+				}
+			}
+			</script>
+		IMPORTMAP
+	end
+	
+	it "should generate valid javascript" do
+		get "/script/cdata"
+		
+		# We are expected to generate HTML... there is no good convention for "escaping javascript" in HTML. So we just plonk it in, verbatim. Yay.
+		expect(last_response.body).to be == <<~JAVASCRIPT.chomp
+		<script type="text/javascript">
+		console.log("Hello World!");
+		</script>
+		JAVASCRIPT
+	end
+	
 	it "should successfully redirect to the foo page" do
 		get '/content/redirect'
 		
