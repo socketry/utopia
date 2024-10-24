@@ -17,12 +17,11 @@ describe Utopia::Session do
 	it "shouldn't commit session values unless required" do
 		# This URL doesn't update the session:
 		get "/"
-		expect(last_response.headers).to be == {}
+		expect(last_response.headers).not.to have_keys('set-cookie')
 		
 		# This URL updates the session:
 		get "/login"
-		expect(last_response.headers).not.to be == {}
-		expect(last_response.headers).to be(:include?, 'Set-Cookie')
+		expect(last_response.headers).to have_keys('set-cookie')
 	end
 	
 	it "should set and get values correctly" do
