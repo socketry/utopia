@@ -10,7 +10,7 @@ require "concurrent/map"
 module Utopia
 	class Content
 		# The file extension for markup nodes on disk.
-		XNODE_EXTENSION = ".xnode"
+		EXTENSION = ".xrb"
 		INDEX = "index"
 		
 		class Links
@@ -24,7 +24,7 @@ module Utopia
 				self.new(root).index(path, **options)
 			end
 			
-			def initialize(root, extension: XNODE_EXTENSION)
+			def initialize(root, extension: EXTENSION)
 				@root = root
 				
 				@extension = extension

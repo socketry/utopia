@@ -137,9 +137,9 @@ module Utopia
 			if Path === name
 				name = parent_path + name
 				name_path = name.components.dup
-				name_path[-1] += XNODE_EXTENSION
+				name_path[-1] += EXTENSION
 			else
-				name_path = name + XNODE_EXTENSION
+				name_path = name + EXTENSION
 			end
 			
 			components = parent_path.components.dup

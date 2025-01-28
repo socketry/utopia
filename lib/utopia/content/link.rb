@@ -37,9 +37,9 @@ module Utopia
 				end
 			end
 			
-			def full_path(root, extension = XNODE_EXTENSION)
+			def full_path(root, extension = EXTENSION)
 				if @path&.file?
-					File.join(root, @path.dirname, self.key + XNODE_EXTENSION)
+					File.join(root, @path.dirname, self.key + EXTENSION)
 				end
 			end
 			
