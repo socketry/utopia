@@ -51,10 +51,8 @@ def update(name, root: context.root, **variables)
 		yield store if block_given?
 		
 		Console.info(self) do |buffer|
-			buffer.puts "Environment #{name} (#{path}):"
-			store.roots.each do |key|
-				value = store[key]
-				
+			buffer.puts "Environment #{name.inspect} (#{path}):"
+			store.each do |key, value|
 				buffer.puts "#{key}=#{value.inspect}"
 			end
 		end
@@ -84,9 +82,15 @@ def update_environment(root, name)
 	environment_path = self.environment_path(root, name)
 	FileUtils.mkpath File.dirname(environment_path)
 	
-	store = YAML::Store.new(environment_path)
+	if File.exist?(environment_path)
+		store = YAML.load_file(environment_path)
+	else
+		store = Hash.new
+	end
 	
-	store.transaction do
-		yield store, name, environment_path
+	yield store, name, environment_path
+	
+	File.open(environment_path, "w") do |file|
+		YAML.dump(store, file)
 	end
 end
