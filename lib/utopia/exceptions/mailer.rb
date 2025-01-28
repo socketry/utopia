@@ -66,6 +66,21 @@ module Utopia
 				:user_agent,
 			]
 			
+			ENV_KEYS = [
+				"PATH_INFO",
+				"REQUEST_METHOD",
+				"REQUEST_PATH",
+				"REQUEST_URI",
+				"SCRIPT_NAME",
+				"QUERY_STRING",
+				"SERVER_PROTOCOL",
+				"SERVER_NAME",
+				"SERVER_PORT",
+				"REMOTE_ADDR",
+				"CONTENT_TYPE",
+				"CONTENT_LENGTH",
+			]
+			
 			def generate_backtrace(io, exception, prefix: "Exception")
 				io.puts "#{prefix} #{exception.class.name}: #{exception.to_s}"
 				
@@ -100,6 +115,13 @@ module Utopia
 				
 				request.params.each do |key, value|
 					io.puts "request.params.#{key}: #{value.inspect}"
+				end
+				
+				io.puts
+				
+				ENV_KEYS.each do |key|
+					value = env[key]
+					io.puts "env[#{key.inspect}]: #{value.inspect}"
 				end
 				
 				io.puts
