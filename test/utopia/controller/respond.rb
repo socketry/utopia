@@ -63,7 +63,7 @@ describe Utopia::Controller do
 		
 		expect(status).to be == 200
 		expect(headers["content-type"]).to be == "text/plain"
-		expect(body.join).to be == "{:user_id=>10}"
+		expect(body.join).to be == {user_id: 10}.to_s
 	end
 end
 
