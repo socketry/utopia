@@ -10,7 +10,6 @@ require_relative "utopia/controller"
 require_relative "utopia/exceptions"
 require_relative "utopia/redirection"
 require_relative "utopia/static"
-require_relative "utopia/content_length"
 
 # Utopia is a web application framework built on top of Rack.
 module Utopia

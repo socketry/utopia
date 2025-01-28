@@ -6,8 +6,6 @@ require 'json'
 
 self.freeze_app
 
-use Utopia::ContentLength
-
 use Utopia::Redirection::Rewrite, {
 	'/' => '/welcome/index'
 }
