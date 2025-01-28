@@ -1,0 +1,3 @@
+utopia-project:
+  url: https://github.com/socketry/utopia-project.git
+  command: bundle exec bake test
