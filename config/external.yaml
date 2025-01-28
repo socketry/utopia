@@ -1,3 +1,6 @@
 utopia-project:
   url: https://github.com/socketry/utopia-project.git
   command: bundle exec bake test
+www.codeotaku.com:
+  url: https://github.com/ioquatix/www.codeotaku.com.git
+  command: bundle exec bake test
