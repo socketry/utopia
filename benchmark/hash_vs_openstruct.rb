@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2022, by Samuel Williams.
+# Copyright, 2016-2025, by Samuel Williams.
 
-require 'benchmark/ips'
-require 'ostruct'
+require "benchmark/ips"
+require "ostruct"
 
 # This benchmark compares accessing an instance variable vs accessing a struct member (via a function). The actual method dispatch is about 25% slower.
 
@@ -40,7 +40,7 @@ Benchmark.ips do |x|
 			p = OpenStruct.new(name: NAME, email: EMAIL)
 			
 			test = p.name + p.email
-	 end
+		end
 	end
 	
 	x.report("ObjectHash") do |i|

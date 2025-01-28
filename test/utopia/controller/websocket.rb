@@ -1,24 +1,24 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2019-2023, by Samuel Williams.
+# Copyright, 2019-2025, by Samuel Williams.
 
-require 'rack/test'
-require 'utopia/controller'
+require "rack/test"
+require "utopia/controller"
 
-require 'async/websocket/client'
-require 'async/websocket/adapters/rack'
+require "async/websocket/client"
+require "async/websocket/adapters/rack"
 
-require 'sus/fixtures/async/http/server_context'
+require "sus/fixtures/async/http/server_context"
 
-require 'async/http/client'
-require 'async/http/endpoint'
+require "async/http/client"
+require "async/http/endpoint"
 
 describe Utopia::Controller do
 	include Sus::Fixtures::Async::HTTP::ServerContext
 	
 	with Async::WebSocket::Client do
-		let(:rack_app) {Rack::Builder.parse_file(File.expand_path('websocket.ru', __dir__))}
+		let(:rack_app) {Rack::Builder.parse_file(File.expand_path("websocket.ru", __dir__))}
 		let(:app) {::Protocol::Rack::Adapter.new(rack_app)}
 		
 		it "fails for normal requests" do

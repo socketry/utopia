@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2015-2023, by Samuel Williams.
+# Copyright, 2015-2025, by Samuel Williams.
 
-require 'rack/mock'
-require 'rack/test'
-require 'utopia/controller'
+require "rack/mock"
+require "rack/test"
+require "utopia/controller"
 
 class TestController < Utopia::Controller::Base
 	prepend Utopia::Controller::Actions
 	
-	on 'success' do
+	on "success" do
 		succeed!
 	end
 	
@@ -30,28 +30,28 @@ class TestIndirectController < Utopia::Controller::Base
 		@sequence = String.new
 	end
 	
-	on('user/update') do
-		@sequence << 'A'
+	on("user/update") do
+		@sequence << "A"
 	end
 	
-	on('**/comment/post') do
-		@sequence << 'B'
+	on("**/comment/post") do
+		@sequence << "B"
 	end
 	
-	on('comment/delete') do
-		@sequence << 'C'
+	on("comment/delete") do
+		@sequence << "C"
 	end
 	
-	on('**/comment/delete') do
-		@sequence << 'D'
+	on("**/comment/delete") do
+		@sequence << "D"
 	end
 	
-	on('**') do
-		@sequence << 'E'
+	on("**") do
+		@sequence << "E"
 	end
 	
-	on('*') do
-		@sequence << 'F'
+	on("*") do
+		@sequence << "F"
 	end
 end
 
@@ -80,7 +80,7 @@ describe Utopia::Controller do
 		variables << controller
 		
 		controller.process!(request, Utopia::Path["user/update"])
-		expect(variables['sequence']).to be == 'EA'
+		expect(variables["sequence"]).to be == "EA"
 	end
 	
 	it "should call indirect controller methods" do
@@ -90,7 +90,7 @@ describe Utopia::Controller do
 		
 		result = controller.process!(request, Utopia::Path["foo/comment/post"])
 		expect(result).to be_nil
-		expect(variables['sequence']).to be == 'EB'
+		expect(variables["sequence"]).to be == "EB"
 	end
 	
 	it "should call multiple indirect controller methods in order" do
@@ -100,7 +100,7 @@ describe Utopia::Controller do
 		
 		result = controller.process!(request, Utopia::Path["comment/delete"])
 		expect(result).to be_nil
-		expect(variables['sequence']).to be == 'EDC'
+		expect(variables["sequence"]).to be == "EDC"
 	end
 	
 	it "should match single patterns" do
@@ -110,6 +110,6 @@ describe Utopia::Controller do
 		
 		result = controller.process!(request, Utopia::Path["foo"])
 		expect(result).to be_nil
-		expect(variables['sequence']).to be == 'EF'
+		expect(variables["sequence"]).to be == "EF"
 	end
 end

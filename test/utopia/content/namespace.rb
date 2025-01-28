@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2017-2023, by Samuel Williams.
+# Copyright, 2017-2025, by Samuel Williams.
 
-require 'utopia/content/namespace'
+require "utopia/content/namespace"
 
 describe Utopia::Content::Namespace do
 	let(:tags) do
 		Module.new.tap do |mod|
 			mod.extend(Utopia::Content::Namespace)
 			
-			mod.tag('foo') do |document, state|
+			mod.tag("foo") do |document, state|
 			end
 		end
 	end
@@ -23,6 +23,6 @@ describe Utopia::Content::Namespace do
 	end
 	
 	it "should have named tag" do
-		expect(tags.call('foo', nil)).not.to be_nil
+		expect(tags.call("foo", nil)).not.to be_nil
 	end
 end

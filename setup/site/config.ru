@@ -1,7 +1,7 @@
 #!/usr/bin/env rackup
 # frozen_string_literal: true
 
-require_relative 'config/environment'
+require_relative "config/environment"
 
 self.freeze_app
 
@@ -15,24 +15,24 @@ else
 end
 
 # Serve static files from "public" directory:
-use Utopia::Static, root: 'public'
+use Utopia::Static, root: "public"
 
 use Utopia::Redirection::Rewrite, {
-	'/' => '/welcome/index'
+	"/" => "/welcome/index"
 }
 
 use Utopia::Redirection::DirectoryIndex
 
 use Utopia::Redirection::Errors, {
-	404 => '/errors/file-not-found'
+	404 => "/errors/file-not-found"
 }
 
-require 'utopia/localization'
+require "utopia/localization"
 use Utopia::Localization,
-	default_locale: 'en',
-	locales: ['en', 'de', 'ja', 'zh']
+	default_locale: "en",
+	locales: ["en", "de", "ja", "zh"]
 
-require 'utopia/session'
+require "utopia/session"
 use Utopia::Session,
 	expires_after: 3600 * 24,
 	secret: UTOPIA.secret_for(:session),

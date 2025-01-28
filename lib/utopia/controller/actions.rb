@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2014-2024, by Samuel Williams.
+# Copyright, 2014-2025, by Samuel Williams.
 
-require_relative '../http'
+require_relative "../http"
 
 module Utopia
 	class Controller
@@ -45,10 +45,10 @@ module Utopia
 				end
 				
 				# Matches 0 or more path components.
-				WILDCARD_GREEDY = '**'.freeze
+				WILDCARD_GREEDY = "**".freeze
 				
 				# Matches any 1 path component.
-				WILDCARD = '*'.freeze
+				WILDCARD = "*".freeze
 				
 				# Given a path, iterate over all actions that match. Actions match from most specific to most general.
 				# @return nil if nothing matched, or true if something matched.
@@ -121,7 +121,7 @@ module Utopia
 				
 				def on(first, *path, **options, &block)
 					if first.is_a? Symbol
-						first = ['**', first.to_s]
+						first = ["**", first.to_s]
 					end
 					
 					actions.define(Path.split(first) + path, **options, &block)

@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2015-2023, by Samuel Williams.
+# Copyright, 2015-2025, by Samuel Williams.
 
-require 'a_rack_application'
+require "a_rack_application"
 
-require 'utopia/exceptions'
-require 'utopia/controller'
+require "utopia/exceptions"
+require "utopia/controller"
 
 describe Utopia::Exceptions::Handler do
 	include_context ARackApplication, File.expand_path("handler.ru", __dir__)
@@ -16,14 +16,14 @@ describe Utopia::Exceptions::Handler do
 		get "/blow?fatal=true"
 		
 		expect(last_response.status).to be == 500
-		expect(last_response.headers['content-type']).to be == 'text/plain'
-		expect(last_response.body).to be(:include?, 'fatal error')
+		expect(last_response.headers["content-type"]).to be == "text/plain"
+		expect(last_response.body).to be(:include?, "fatal error")
 	end
 	
 	it "should fail with a 500 error" do
 		get "/blow"
 		
 		expect(last_response.status).to be == 500
-		expect(last_response.body).to be(:include?, 'Error Will Robertson')
+		expect(last_response.body).to be(:include?, "Error Will Robertson")
 	end
 end

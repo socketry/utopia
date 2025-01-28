@@ -2,9 +2,9 @@
 
 use Utopia::Exceptions::Mailer,
 	delivery_method: :test,
-	from: 'test@localhost'
+	from: "test@localhost"
 
 use Utopia::Controller,
-	root: File.expand_path('.handler', __dir__)
+	root: File.expand_path(".handler", __dir__)
 
 run lambda {|env| [404, {}, []]}

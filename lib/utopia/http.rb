@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2010-2022, by Samuel Williams.
+# Copyright, 2010-2025, by Samuel Williams.
 
-require 'rack'
+require "rack"
 
-require 'http/accept'
+require "http/accept"
 
 module Utopia
 	# HTTP protocol implementation.
@@ -41,41 +41,41 @@ module Utopia
 		# A list of human readable descriptions for a given status code.
 		# For a more detailed description, see https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
 		STATUS_DESCRIPTIONS = {
-			200 => 'OK'.freeze,
-			201 => 'Created'.freeze,
-			202 => 'Accepted'.freeze,
-			203 => 'Non-Authoritive Information'.freeze,
-			204 => 'No Content'.freeze,
-			205 => 'Reset Content'.freeze,
-			206 => 'Partial Content'.freeze,
-			300 => 'Multiple Choices'.freeze,
-			301 => 'Moved Permanently'.freeze,
-			302 => 'Found'.freeze,
-			303 => 'See Other'.freeze,
-			304 => 'Not Modified'.freeze,
-			305 => 'Use Proxy'.freeze,
-			307 => 'Temporary Redirect'.freeze,
-			308 => 'Permanent Redirect'.freeze,
-			400 => 'Bad Request'.freeze,
-			401 => 'Permission Denied'.freeze,
-			402 => 'Payment Required'.freeze,
-			403 => 'Access Forbidden'.freeze,
-			404 => 'Resource Not Found'.freeze,
-			405 => 'Unsupported Method'.freeze,
-			406 => 'Not Acceptable'.freeze,
-			408 => 'Request Timeout'.freeze,
-			409 => 'Request Conflict'.freeze,
-			410 => 'Resource Removed'.freeze,
-			416 => 'Byte range unsatisfiable'.freeze,
-			422 => 'Unprocessible Entity'.freeze,
-			500 => 'Internal Server Error'.freeze,
-			501 => 'Not Implemented'.freeze,
-			503 => 'Service Unavailable'.freeze
+			200 => "OK".freeze,
+			201 => "Created".freeze,
+			202 => "Accepted".freeze,
+			203 => "Non-Authoritive Information".freeze,
+			204 => "No Content".freeze,
+			205 => "Reset Content".freeze,
+			206 => "Partial Content".freeze,
+			300 => "Multiple Choices".freeze,
+			301 => "Moved Permanently".freeze,
+			302 => "Found".freeze,
+			303 => "See Other".freeze,
+			304 => "Not Modified".freeze,
+			305 => "Use Proxy".freeze,
+			307 => "Temporary Redirect".freeze,
+			308 => "Permanent Redirect".freeze,
+			400 => "Bad Request".freeze,
+			401 => "Permission Denied".freeze,
+			402 => "Payment Required".freeze,
+			403 => "Access Forbidden".freeze,
+			404 => "Resource Not Found".freeze,
+			405 => "Unsupported Method".freeze,
+			406 => "Not Acceptable".freeze,
+			408 => "Request Timeout".freeze,
+			409 => "Request Conflict".freeze,
+			410 => "Resource Removed".freeze,
+			416 => "Byte range unsatisfiable".freeze,
+			422 => "Unprocessible Entity".freeze,
+			500 => "Internal Server Error".freeze,
+			501 => "Not Implemented".freeze,
+			503 => "Service Unavailable".freeze
 		}.merge(Rack::Utils::HTTP_STATUS_CODES)
 		
-		CONTENT_TYPE = 'content-type'.freeze
-		LOCATION = 'location'.freeze
-		CACHE_CONTROL = 'cache-control'.freeze
+		CONTENT_TYPE = "content-type".freeze
+		LOCATION = "location".freeze
+		CACHE_CONTROL = "cache-control".freeze
 		
 		# A small HTTP status wrapper that verifies the status code within a given range.
 		class Status

@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2017-2022, by Samuel Williams.
+# Copyright, 2017-2025, by Samuel Williams.
 
-require 'time'
-require 'digest/sha1'
+require "time"
+require "digest/sha1"
 
 module Utopia
 	# A middleware which serves static files from the specified root directory.
@@ -64,23 +64,23 @@ module Utopia
 			end
 
 			def modified?(env)
-				if modified_since = env['HTTP_IF_MODIFIED_SINCE']
+				if modified_since = env["HTTP_IF_MODIFIED_SINCE"]
 					return false if File.mtime(full_path) <= Time.parse(modified_since)
 				end
 
-				if etags = env['HTTP_IF_NONE_MATCH']
+				if etags = env["HTTP_IF_NONE_MATCH"]
 					etags = etags.split(/\s*,\s*/)
-					return false if etags.include?(etag) || etags.include?('*')
+					return false if etags.include?(etag) || etags.include?("*")
 				end
 
 				return true
 			end
 
 			CONTENT_LENGTH = Rack::CONTENT_LENGTH
-			CONTENT_RANGE = 'Content-Range'.freeze
+			CONTENT_RANGE = "Content-Range".freeze
 			
 			def serve(env, response_headers)
-				ranges = Rack::Utils.get_byte_ranges(env['HTTP_RANGE'], size)
+				ranges = Rack::Utils.get_byte_ranges(env["HTTP_RANGE"], size)
 				response = [200, response_headers, self]
 
 				# puts "Requesting ranges: #{ranges.inspect} (#{size})"

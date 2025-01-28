@@ -1,32 +1,32 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2015-2023, by Samuel Williams.
+# Copyright, 2015-2025, by Samuel Williams.
 
-require 'rack/mock'
-require 'utopia/controller'
+require "rack/mock"
+require "utopia/controller"
 
 describe Utopia::Controller do
 	class TestController < Utopia::Controller::Base
 		prepend Utopia::Controller::Rewrite, Utopia::Controller::Actions
 		
-		on 'edit' do |request, path|
+		on "edit" do |request, path|
 			@edit = true
 		end
 		
 		attr :edit
 		
-		rewrite.extract_prefix user_id: Integer, summary: 'summary', order_id: Integer
+		rewrite.extract_prefix user_id: Integer, summary: "summary", order_id: Integer
 		
 		attr :user_id
 		attr :order_id
 		
-		rewrite.extract_prefix fail: 'fail' do
+		rewrite.extract_prefix fail: "fail" do
 			fail! 444
 		end
 		
 		def self.uri_path
-			Utopia::Path['/']
+			Utopia::Path["/"]
 		end
 	end
 	

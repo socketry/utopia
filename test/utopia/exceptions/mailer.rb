@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2023, by Samuel Williams.
+# Copyright, 2016-2025, by Samuel Williams.
 
-require 'a_rack_application'
+require "a_rack_application"
 
-require 'utopia/exceptions'
-require 'utopia/controller'
+require "utopia/exceptions"
+require "utopia/controller"
 
 describe Utopia::Exceptions::Mailer do
 	include_context ARackApplication, File.expand_path("mailer.ru", __dir__)

@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2023, by Samuel Williams.
+# Copyright, 2016-2025, by Samuel Williams.
 
-require 'rack/test'
-require 'rack/builder'
+require "rack/test"
+require "rack/builder"
 
 ARackApplication = Sus::Shared("a rack app") do |rackup_path|
 	include Rack::Test::Methods

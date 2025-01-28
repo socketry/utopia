@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2022, by Samuel Williams.
+# Copyright, 2016-2025, by Samuel Williams.
 
-require_relative 'middleware'
+require_relative "middleware"
 
 module Utopia
 	# A faster implementation of Rack::ContentLength which doesn't rewrite body, but does expect it to either be an Array or an object that responds to #bytesize.

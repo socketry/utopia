@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2024, by Samuel Williams.
+# Copyright, 2009-2025, by Samuel Williams.
 
-require_relative 'middleware'
+require_relative "middleware"
 
 module Utopia
 	# A middleware which assists with redirecting from one path to another.
@@ -114,7 +114,7 @@ module Utopia
 		
 		# Redirect urls that end with a `/`, e.g. directories.
 		class DirectoryIndex < ClientRedirect
-			def initialize(app, index: 'index')
+			def initialize(app, index: "index")
 				@app = app
 				@index = index
 				
@@ -122,7 +122,7 @@ module Utopia
 			end
 			
 			def [] path
-				if path.end_with?('/')
+				if path.end_with?("/")
 					return redirect(path + @index)
 				end
 			end

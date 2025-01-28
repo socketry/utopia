@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2012-2023, by Samuel Williams.
+# Copyright, 2012-2025, by Samuel Williams.
 
-require 'utopia/path'
+require "utopia/path"
 
 describe Utopia::Path do
-	with '#load / #dump' do
+	with "#load / #dump" do
 		let(:string) {"foo/bar/baz"}
 		let(:path) {subject.load(string)}
 		
@@ -19,26 +19,26 @@ describe Utopia::Path do
 		end
 	end
 	
-	with '.root' do
+	with ".root" do
 		let(:path) {subject.root}
 		
 		it "is a root path" do
 			expect(path).to be == [""]
 			expect(path).not.to be(:relative?)
 			expect(path).to be(:absolute?)
-			expect(path).to have_attributes(local_path: be == '')
+			expect(path).to have_attributes(local_path: be == "")
 		end
 	end
 	
-	with '.create' do
+	with ".create" do
 		let(:path) {subject.create(value)}
 		
-		with value: '/' do
+		with value: "/" do
 			it "is a root path" do
 				expect(path).to be == ["", ""]
 				expect(path).not.to be(:relative?)
 				expect(path).to be(:absolute?)
-				expect(path).to have_attributes(local_path: be == '/')
+				expect(path).to have_attributes(local_path: be == "/")
 			end
 		end
 		
@@ -53,7 +53,7 @@ describe Utopia::Path do
 				expect(path).to be == [:symbol]
 				expect(path).to be(:relative?)
 				expect(path).not.to be(:absolute?)
-				expect(path).to have_attributes(local_path: be == 'symbol')
+				expect(path).to have_attributes(local_path: be == "symbol")
 			end
 		end
 		
@@ -62,61 +62,61 @@ describe Utopia::Path do
 				expect(path).to be == []
 				expect(path).to be(:relative?)
 				expect(path).not.to be(:absolute?)
-				expect(path).to have_attributes(local_path: be == '')
+				expect(path).to have_attributes(local_path: be == "")
 			end
 		end
 		
-		with value: 'foo/bar' do
+		with value: "foo/bar" do
 			it "is a relative path" do
 				expect(path).to be == ["foo", "bar"]
 				expect(path).to be(:relative?)
 				expect(path).not.to be(:absolute?)
-				expect(path).to have_attributes(local_path: be == 'foo/bar')
+				expect(path).to have_attributes(local_path: be == "foo/bar")
 			end
 		end
 		
-		with value: '/foo/bar' do
+		with value: "/foo/bar" do
 			it "is an absolute path" do
 				expect(path).to be == ["", "foo", "bar"]
 				expect(path).not.to be(:relative?)
 				expect(path).to be(:absolute?)
-				expect(path).to have_attributes(local_path: be == '/foo/bar')
+				expect(path).to have_attributes(local_path: be == "/foo/bar")
 			end
 		end
 	end
 	
-	with '#first' do
+	with "#first" do
 		let(:path) {subject.create(value)}
 		
-		with value: '/foo/bar' do
+		with value: "/foo/bar" do
 			it "is a root path" do
 				expect(path.first).to be == "foo"
 			end
 		end
 		
-		with value: 'foo/bar' do
+		with value: "foo/bar" do
 			it "is a relative path" do
 				expect(path.first).to be == "foo"
 			end
 		end
 	end
 	
-	with '#last' do
+	with "#last" do
 		let(:path) {subject.create(value)}
 		
-		with value: '/foo/bar' do
+		with value: "/foo/bar" do
 			it "has a last component" do
 				expect(path.last).to be == "bar"
 			end
 		end
 		
-		with value: '/' do
+		with value: "/" do
 			it "can extract the last path component from an empty absolute path" do
 				expect(path.last).to be == ""
 			end
 		end
 		
-		with 'root path' do
+		with "root path" do
 			let(:path) {subject.root}
 			
 			it "can extract the last path component from a a root path" do
@@ -124,14 +124,14 @@ describe Utopia::Path do
 			end
 		end
 		
-		with value: '/foo/bar' do
+		with value: "/foo/bar" do
 			it "can extract the last path component from an absolute path" do
 				expect(path.last).to be == "bar"
 			end
 		end
 	end
 	
-	with '#+' do
+	with "#+" do
 		it "can add root path as string" do
 			root = Utopia::Path["/invoices/_template"]
 			
@@ -162,20 +162,20 @@ describe Utopia::Path do
 	
 	it "should be able to remove relative path entries" do
 		path = Utopia::Path["/foo/bar/../baz/."]
-		expect(path.simplify.components).to be == ['', 'foo', 'baz']
+		expect(path.simplify.components).to be == ["", "foo", "baz"]
 		
 		path = Utopia::Path["/foo/bar/../baz/./"]
-		expect(path.simplify.components).to be == ['', 'foo', 'baz', '']
+		expect(path.simplify.components).to be == ["", "foo", "baz", ""]
 	end
 	
 	it "should remove the extension from the basename" do
 		path = Utopia::Path["dir/foo.html"]
 		
-		expect(path.basename).to be == 'foo'
-		expect(path.extension).to be == 'html'
+		expect(path.basename).to be == "foo"
+		expect(path.extension).to be == "html"
 	end
 	
-	with '#to_directory' do
+	with "#to_directory" do
 		let(:path) {Utopia::Path["foo/bar"]}
 		
 		it "can determine if it is a directory" do
@@ -204,7 +204,7 @@ describe Utopia::Path do
 	it "should split at the specified point" do
 		path = Utopia::Path["/a/b/c/d/e"]
 		
-		expect(path.split('c')).to be == [Utopia::Path['/a/b'], Utopia::Path['d/e']]
+		expect(path.split("c")).to be == [Utopia::Path["/a/b"], Utopia::Path["d/e"]]
 	end
 	
 	it "shouldn't be able to modify frozen paths" do
@@ -214,13 +214,13 @@ describe Utopia::Path do
 		
 		expect(path.frozen?).to be == true
 		
-		expect{path[0] = 'bob'}.to raise_exception(RuntimeError)
+		expect{path[0] = "bob"}.to raise_exception(RuntimeError)
 	end
 	
 	it "should give the correct locale" do
 		path = Utopia::Path["foo.en"]
 		
-		expect(path.extension).to be == 'en'
+		expect(path.extension).to be == "en"
 	end
 	
 	it "should give no locale" do
@@ -230,14 +230,14 @@ describe Utopia::Path do
 	end
 	
 	it "should expand relative paths" do
-		root = Utopia::Path['/root']
+		root = Utopia::Path["/root"]
 		path = Utopia::Path["dir/foo.html"]
 		
 		expect(path.expand(root)).to be == (root + path)
 	end
 	
 	it "shouldn't expand absolute paths" do
-		root = Utopia::Path['/root']
+		root = Utopia::Path["/root"]
 		
 		expect(root.expand(root)).to be == root
 	end

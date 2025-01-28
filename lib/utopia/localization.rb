@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2022, by Samuel Williams.
+# Copyright, 2009-2025, by Samuel Williams.
 
-require_relative 'middleware'
+require_relative "middleware"
 
 module Utopia
 	# A middleware which attempts to find localized content.
@@ -48,9 +48,9 @@ module Utopia
 		
 		RESOURCE_NOT_FOUND = [400, {}, []].freeze
 		
-		HTTP_ACCEPT_LANGUAGE = 'HTTP_ACCEPT_LANGUAGE'.freeze
-		LOCALIZATION_KEY = 'utopia.localization'.freeze
-		CURRENT_LOCALE_KEY = 'utopia.localization.current_locale'.freeze
+		HTTP_ACCEPT_LANGUAGE = "HTTP_ACCEPT_LANGUAGE".freeze
+		LOCALIZATION_KEY = "utopia.localization".freeze
+		CURRENT_LOCALE_KEY = "utopia.localization.current_locale".freeze
 		
 		# @param locales [Array<String>] An array of all supported locales.
 		# @param default_locale [String] The default locale if none is provided.
@@ -176,12 +176,12 @@ module Utopia
 			headers = response[1].to_a
 			
 			# This response was based on the Accept-Language header:
-			headers << ['Vary', 'Accept-Language']
+			headers << ["Vary", "Accept-Language"]
 			
 			# Althought this header is generally not supported, we supply it anyway as it is useful for debugging:
 			if locale = env[CURRENT_LOCALE_KEY]
 				# Set the Content-Location to point to the localized URI as requested:
-				headers['Content-Location'] = "/#{locale}" + env[Rack::PATH_INFO]
+				headers["Content-Location"] = "/#{locale}" + env[Rack::PATH_INFO]
 			end
 			
 			return response

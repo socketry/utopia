@@ -1,33 +1,33 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2012-2023, by Samuel Williams.
+# Copyright, 2012-2025, by Samuel Williams.
 
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
 group :preload do
-	gem 'utopia', '~> $UTOPIA_VERSION'
+	gem "utopia", "~> $UTOPIA_VERSION"
 	# gem 'utopia-gallery'
 	# gem 'utopia-analytics'
 	
-	gem 'variant'
+	gem "variant"
 end
 
-gem 'net-smtp'
+gem "net-smtp"
 
 group :development do
-	gem 'bake-test'
-	gem 'rack-test'
-	gem 'guard-falcon', require: false
+	gem "bake-test"
+	gem "rack-test"
+	gem "guard-falcon", require: false
 	
-	gem 'sus'
-	gem 'sus-fixtures-async-http'
+	gem "sus"
+	gem "sus-fixtures-async-http"
 	
-	gem 'covered'
+	gem "covered"
 	
-	gem 'benchmark-http'
+	gem "benchmark-http"
 end
 
 group :production do
-	gem 'falcon'
+	gem "falcon"
 end

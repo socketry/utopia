@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2022, by Samuel Williams.
+# Copyright, 2009-2025, by Samuel Williams.
 
 module Utopia
 	# Represents a path as an array of path components. Useful for efficient URL manipulation.
 	class Path
 		include Comparable
 		
-		SEPARATOR = '/'
+		SEPARATOR = "/"
 		
 		def initialize(components = [])
 			@components = components
@@ -29,7 +29,7 @@ module Utopia
 		end
 		
 		def self.root
-			self.new([''])
+			self.new([""])
 		end
 		
 		# Returns the length of the prefix which is shared by two strings.
@@ -57,8 +57,8 @@ module Utopia
 		
 		# Converts '+' into whitespace and hex encoded characters into their equivalent characters.
 		def self.unescape(string)
-			string.tr('+', ' ').gsub(/((?:%[0-9a-fA-F]{2})+)/n) {
-				[$1.delete('%')].pack('H*')
+			string.tr("+", " ").gsub(/((?:%[0-9a-fA-F]{2})+)/n) {
+				[$1.delete("%")].pack("H*")
 			}
 		end
 		
@@ -116,34 +116,34 @@ module Utopia
 		end
 		
 		def directory?
-			return @components.last == ''
+			return @components.last == ""
 		end
 		
 		def file?
-			return @components.last != ''
+			return @components.last != ""
 		end
 		
 		def to_directory
 			if directory?
 				return self
 			else
-				return self.class.new(@components + [''])
+				return self.class.new(@components + [""])
 			end
 		end
 		
 		def relative?
-			@components.first != ''
+			@components.first != ""
 		end
 		
 		def absolute?
-			@components.first == ''
+			@components.first == ""
 		end
 		
 		def to_absolute
 			if absolute?
 				return self
 			else
-				return self.class.new([''] + @components)
+				return self.class.new([""] + @components)
 			end
 		end
 		
@@ -152,7 +152,7 @@ module Utopia
 		end
 		
 		def to_str
-			if @components == ['']
+			if @components == [""]
 				SEPARATOR
 			else
 				@components.join(SEPARATOR)
@@ -168,7 +168,7 @@ module Utopia
 		# @parameter other [Array(String)] The path components to append.
 		def join(other)
 			# Check whether other is an absolute path:
-			if other.first == ''
+			if other.first == ""
 				self.class.new(other)
 			else
 				self.class.new(@components + other).simplify
@@ -215,17 +215,17 @@ module Utopia
 		end
 		
 		def simplify
-			result = absolute? ? [''] : []
+			result = absolute? ? [""] : []
 			
 			@components.each do |bit|
 				if bit == ".."
 					result.pop
-				elsif bit != "." && bit != ''
+				elsif bit != "." && bit != ""
 					result << bit
 				end
 			end
 			
-			result << '' if directory?
+			result << "" if directory?
 			
 			return self.class.new(result)
 		end
@@ -241,7 +241,7 @@ module Utopia
 		
 		# Returns the last path component.
 		def last
-			if @components != ['']
+			if @components != [""]
 				@components.last
 			end
 		end
@@ -251,21 +251,21 @@ module Utopia
 		# Pops the last path component.
 		def pop
 			# We don't want to convert an absolute path to a relative path.
-			if @components != ['']
+			if @components != [""]
 				@components.pop
 			end
 		end
 		
 		# @return [String] the last path component without any file extension.
 		def basename
-			basename, _ = @components.last.split('.', 2)
+			basename, _ = @components.last.split(".", 2)
 			
-			return basename || ''
+			return basename || ""
 		end
 		
 		# @return [String] the last path component's file extension.
 		def extension
-			_, extension = @components.last.split('.', 2)
+			_, extension = @components.last.split(".", 2)
 			
 			return extension
 		end

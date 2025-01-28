@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2023, by Samuel Williams.
+# Copyright, 2016-2025, by Samuel Williams.
 
-require 'utopia/redirection'
-require 'a_rack_application'
+require "utopia/redirection"
+require "a_rack_application"
 
 describe Utopia::Redirection do
 	include_context ARackApplication, File.join(__dir__, "redirection_spec.ru")
@@ -13,24 +13,24 @@ describe Utopia::Redirection do
 		get "/welcome/"
 		
 		expect(last_response.status).to be == 307
-		expect(last_response.headers['location']).to be == '/welcome/index'
-		expect(last_response.headers['cache-control']).to be(:include?, "max-age=86400")
+		expect(last_response.headers["location"]).to be == "/welcome/index"
+		expect(last_response.headers["cache-control"]).to be(:include?, "max-age=86400")
 	end
 	
 	it "should be permanently moved" do
 		get "/a"
 		
 		expect(last_response.status).to be == 301
-		expect(last_response.headers['location']).to be == '/b'
-		expect(last_response.headers['cache-control']).to be(:include?, "max-age=86400")
+		expect(last_response.headers["location"]).to be == "/b"
+		expect(last_response.headers["cache-control"]).to be(:include?, "max-age=86400")
 	end
 	
 	it "should be permanently moved" do
 		get "/"
 		
 		expect(last_response.status).to be == 301
-		expect(last_response.headers['location']).to be == '/welcome/index'
-		expect(last_response.headers['cache-control']).to be(:include?, "max-age=86400")
+		expect(last_response.headers["location"]).to be == "/welcome/index"
+		expect(last_response.headers["cache-control"]).to be(:include?, "max-age=86400")
 	end
 	
 	it "should redirect on 404" do
@@ -48,13 +48,13 @@ describe Utopia::Redirection do
 		get "/hierarchy/a/b/c/d/e"
 		
 		expect(last_response.status).to be == 301
-		expect(last_response.headers['location']).to be == '/hierarchy'
+		expect(last_response.headers["location"]).to be == "/hierarchy"
 	end
 	
 	it "should get a weird status" do
 		get "/weird"
 		
 		expect(last_response.status).to be == 333
-		expect(last_response.headers['location']).to be == '/status'
+		expect(last_response.headers["location"]).to be == "/status"
 	end
 end

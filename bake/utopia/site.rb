@@ -1,24 +1,24 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2017-2024, by Samuel Williams.
+# Copyright, 2017-2025, by Samuel Williams.
 # Copyright, 2020, by Michael Adams.
 
 def initialize(...)
 	super
 	
-	require 'fileutils'
-	require 'find'
-	require 'console'
+	require "fileutils"
+	require "find"
+	require "console"
 	
-	require_relative '../../lib/utopia/version'
+	require_relative "../../lib/utopia/version"
 end
 
 # The path to the setup directory in the gem:
 SETUP_ROOT = File.expand_path("../../setup", __dir__)
 
 # Configuration files which should be installed/updated:
-CONFIGURATION_FILES = ['.gitignore', 'config.ru', 'config/environment.rb', 'falcon.rb', 'gems.rb', 'Guardfile', 'bake.rb', 'test/website.rb', 'fixtures/website.rb']
+CONFIGURATION_FILES = [".gitignore", "config.ru", "config/environment.rb", "falcon.rb", "gems.rb", "Guardfile", "bake.rb", "test/website.rb", "fixtures/website.rb"]
 
 # Directories that should exist:
 DIRECTORIES = ["config", "lib", "pages", "public", "bake", "fixtures", "test"]
@@ -27,7 +27,7 @@ DIRECTORIES = ["config", "lib", "pages", "public", "bake", "fixtures", "test"]
 OLD_PATHS = ["access_log", "cache", "tmp", "Rakefile", "tasks", ".bowerrc"]
 
 # The root directory of the template site:
-SITE_ROOT = File.join(SETUP_ROOT, 'site')
+SITE_ROOT = File.join(SETUP_ROOT, "site")
 
 # Create a new local Utopia website using the default template.
 def create(root: context.root)
@@ -56,7 +56,7 @@ def create(root: context.root)
 		destination_path = File.join(root, configuration_file)
 		
 		if File.exist?(destination_path)
-			buffer = File.read(destination_path).gsub('$UTOPIA_VERSION', Utopia::VERSION)
+			buffer = File.read(destination_path).gsub("$UTOPIA_VERSION", Utopia::VERSION)
 			File.open(destination_path, "w") { |file| file.write(buffer) }
 		else
 			Console.warn(self) {"Could not open #{destination_path}, maybe it should be removed from CONFIGURATION_FILES?"}
@@ -65,9 +65,9 @@ def create(root: context.root)
 	
 	system("bundle", "install", chdir: root) or warn "could not install bundled gems"
 	
-	context.lookup('utopia:environment:setup').call(root: root)
+	context.lookup("utopia:environment:setup").call(root: root)
 	
-	if !File.exist?('.git')
+	if !File.exist?(".git")
 		Console.info(self) {"Setting up git repository..."}
 		
 		system("git", "init", chdir: root) or warn "could not create git repository"
@@ -118,11 +118,11 @@ def upgrade(root: context.root)
 			Console.info(self) {"Updating #{destination_path}..."}
 			
 			FileUtils.copy_entry(source_path, destination_path)
-			buffer = File.read(destination_path).gsub('$UTOPIA_VERSION', Utopia::VERSION)
+			buffer = File.read(destination_path).gsub("$UTOPIA_VERSION", Utopia::VERSION)
 			File.open(destination_path, "w") { |file| file.write(buffer) }
 		end
 		
-		context.lookup('utopia:environment:setup').call(root: root)
+		context.lookup("utopia:environment:setup").call(root: root)
 	
 		# Stage any files that have been changed or removed:
 		system("git", "add", "-u", chdir: root) or fail "could not add files"
@@ -155,12 +155,12 @@ end
 
 # Move legacy `pages/_static` to `public/_static`.
 def move_static!(root)
-	old_static_path = File.expand_path('pages/_static', root)
+	old_static_path = File.expand_path("pages/_static", root)
 	
 	# If public/_static doens't exist, we are done.
 	return unless File.exist?(old_static_path)
 	
-	new_static_path = File.expand_path('public/_static', root)
+	new_static_path = File.expand_path("public/_static", root)
 	
 	if File.exist?(new_static_path)
 		if File.lstat(new_static_path).symlink?
@@ -179,13 +179,13 @@ end
 
 # Move `Gemfile` to `gems.rb`.
 def update_gemfile!(root)
-	gemfile_path = File.expand_path('Gemfile', root)
+	gemfile_path = File.expand_path("Gemfile", root)
 	
 	# If `Gemfile` doens't exist, we are done:
 	return unless File.exist?(gemfile_path)
 	
 	# If `gems.rb` already exists, we are done:
-	gems_path = File.expand_path('gems.rb', root)
+	gems_path = File.expand_path("gems.rb", root)
 	return if File.exist?(gems_path)
 	
 	system("git", "mv", "Gemfile", "gems.rb", chdir: root)

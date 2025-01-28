@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2024, by Samuel Williams.
+# Copyright, 2009-2025, by Samuel Williams.
 # Copyright, 2017, by Huba Nagy.
 # Copyright, 2020, by Michael Adams.
 
-require 'yaml'
-require 'xrb/builder'
+require "yaml"
+require "xrb/builder"
 
-require 'xrb/strings'
+require "xrb/strings"
 
-require_relative '../path'
-require_relative '../locale'
+require_relative "../path"
+require_relative "../locale"
 
 module Utopia
 	class Content
@@ -75,7 +75,7 @@ module Utopia
 			end
 			
 			def relative_href(base = nil)
-				if base and href.start_with? '/'
+				if base and href.start_with? "/"
 					Path.shortest_path(href, base)
 				else
 					href
@@ -87,18 +87,18 @@ module Utopia
 			end
 			
 			def to_anchor(base: nil, content: self.title, builder: nil, **attributes)
-				attributes[:class] ||= 'link'
+				attributes[:class] ||= "link"
 				
 				XRB::Builder.fragment(builder) do |inner_builder|
 					if href?
 						attributes[:href] ||= relative_href(base)
 						attributes[:target] ||= @info[:target]
 						
-						inner_builder.inline('a', attributes) do
+						inner_builder.inline("a", attributes) do
 							inner_builder.text(content)
 						end
 					else
-						inner_builder.inline('span', attributes) do
+						inner_builder.inline("span", attributes) do
 							inner_builder.text(content)
 						end
 					end

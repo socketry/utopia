@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2022, by Samuel Williams.
+# Copyright, 2016-2025, by Samuel Williams.
 
-require_relative '../http'
-require_relative '../responder'
+require_relative "../http"
+require_relative "../responder"
 
 module Utopia
 	class Controller
@@ -16,14 +16,14 @@ module Utopia
 			
 			module Handlers
 				module JSON
-					APPLICATION_JSON = HTTP::Accept::ContentType.new('application', 'json').freeze
+					APPLICATION_JSON = HTTP::Accept::ContentType.new("application", "json").freeze
 					
 					def self.split(*arguments)
 						APPLICATION_JSON.split(*arguments)
 					end
 					
 					def self.call(context, request, media_range, object, **options)
-						if version = media_range.parameters['version']
+						if version = media_range.parameters["version"]
 							options[:version] = version.to_s
 						end
 						
@@ -32,7 +32,7 @@ module Utopia
 				end
 				
 				module Passthrough
-					WILDCARD = HTTP::Accept::MediaTypes::MediaRange.new('*', '*').freeze
+					WILDCARD = HTTP::Accept::MediaTypes::MediaRange.new("*", "*").freeze
 					
 					def self.split(*arguments)
 						WILDCARD.split(*arguments)

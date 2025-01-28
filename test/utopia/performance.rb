@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2023, by Samuel Williams.
+# Copyright, 2016-2025, by Samuel Williams.
 
-require 'a_rack_application'
+require "a_rack_application"
 
-require 'benchmark/ips' if ENV['BENCHMARK']
-require 'ruby-prof' if ENV['PROFILE']
-require 'flamegraph' if ENV['FLAMEGRAPH']
+require "benchmark/ips" if ENV["BENCHMARK"]
+require "ruby-prof" if ENV["PROFILE"]
+require "flamegraph" if ENV["FLAMEGRAPH"]
 
 describe "Utopia Performance" do
 	include_context ARackApplication, File.join(__dir__, ".performance/config.ru")
@@ -33,14 +33,14 @@ describe "Utopia Performance" do
 			printer.print($stderr, min_percent: 1.0)
 			
 			printer = RubyProf::GraphHtmlPrinter.new(result)
-			filename = name.gsub('/', '_') + '.html'
+			filename = name.gsub("/", "_") + ".html"
 			File.open(filename, "w") do |file|
 				printer.print(file)
 			end
 		end
 	elsif defined? Flamegraph
 		def benchmark(name)
-			filename = name.gsub('/', '_') + '.html'
+			filename = name.gsub("/", "_") + ".html"
 			Flamegraph.generate(filename) do
 				yield 1
 			end

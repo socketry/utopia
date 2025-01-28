@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2022, by Samuel Williams.
+# Copyright, 2016-2025, by Samuel Williams.
 
-require 'benchmark/ips'
+require "benchmark/ips"
 
 # This benchmark compares accessing an instance variable vs accessing a struct member (via a function). The actual method dispatch is about 25% slower.
 

@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2022, by Samuel Williams.
+# Copyright, 2009-2025, by Samuel Williams.
 # Copyright, 2015, by Huba Nagy.
 
-require_relative 'markup'
-require_relative 'links'
+require_relative "markup"
+require_relative "links"
 
-require_relative 'document'
+require_relative "document"
 
-require 'pathname'
+require "pathname"
 
 module Utopia
 	class Content
@@ -35,7 +35,7 @@ module Utopia
 				@controller.lookup_node(parent_path + Path[path])
 			end
 			
-			def local_path(path = '.', base = nil)
+			def local_path(path = ".", base = nil)
 				path = Path[path]
 				
 				root = Pathname.new(@controller.root)
@@ -48,7 +48,7 @@ module Utopia
 				end
 			end
 			
-			def relative_path(path = '.')
+			def relative_path(path = ".")
 				path = Path[path]
 				base = uri_path.dirname
 				
@@ -59,7 +59,7 @@ module Utopia
 				@uri_path.dirname
 			end
 			
-			def links(path = '.', **options, &block)
+			def links(path = ".", **options, &block)
 				path = uri_path.dirname + Path[path]
 				
 				links = @controller.links(path, **options)

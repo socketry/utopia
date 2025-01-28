@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2020-2022, by Samuel Williams.
+# Copyright, 2020-2025, by Samuel Williams.
 
-require 'rack/builder'
-require 'rack/test'
-require 'irb'
+require "rack/builder"
+require "rack/test"
+require "irb"
 
 module Utopia
 	# This is designed to be used with the corresponding bake task.
@@ -19,7 +19,7 @@ module Utopia
 		
 		def app
 			@app ||= Rack::Builder.parse_file(
-				File.expand_path('config.ru', @context.root)
+				File.expand_path("config.ru", @context.root)
 			).first
 		end
 		

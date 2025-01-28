@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2010-2022, by Samuel Williams.
+# Copyright, 2010-2025, by Samuel Williams.
 
-require 'date'
+require "date"
 
 module Utopia
 	module Extensions

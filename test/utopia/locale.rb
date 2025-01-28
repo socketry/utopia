@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2015-2023, by Samuel Williams.
+# Copyright, 2015-2025, by Samuel Williams.
 
-require 'utopia/locale'
+require "utopia/locale"
 
 AValidLocale = Sus::Shared("a valid locale") do |input|
 	it "should load locale #{input.inspect}" do
@@ -12,15 +12,15 @@ AValidLocale = Sus::Shared("a valid locale") do |input|
 end
 
 describe Utopia::Locale do
-	it_behaves_like AValidLocale, 'en-US'
-	it_behaves_like AValidLocale, ['en', 'US']
-	it_behaves_like AValidLocale, Utopia::Locale.load('en-US')
+	it_behaves_like AValidLocale, "en-US"
+	it_behaves_like AValidLocale, ["en", "US"]
+	it_behaves_like AValidLocale, Utopia::Locale.load("en-US")
 	
 	it "should load from string" do
-		locale = Utopia::Locale.load('en-US')
+		locale = Utopia::Locale.load("en-US")
 		
-		expect(locale.language).to be == 'en'
-		expect(locale.country).to be == 'US'
+		expect(locale.language).to be == "en"
+		expect(locale.country).to be == "US"
 		expect(locale.variant).to be == nil
 	end
 	
@@ -33,8 +33,8 @@ describe Utopia::Locale do
 	end
 	
 	it "should dump locale and give string" do
-		locale = Utopia::Locale.new('en', 'US')
+		locale = Utopia::Locale.new("en", "US")
 		
-		expect(Utopia::Locale.dump(locale)).to be == 'en-US'
+		expect(Utopia::Locale.dump(locale)).to be == "en-US"
 	end
 end

@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2022, by Samuel Williams.
+# Copyright, 2016-2025, by Samuel Williams.
 
 def update
-	require 'fileutils'
-	require 'utopia/path'
+	require "fileutils"
+	require "utopia/path"
 	
 	root = Pathname.new(context.root)
 	package_root = root + "node_modules"
@@ -23,7 +23,7 @@ def update
 		package_directory = package_path.relative_path_from(package_root)
 		install_path = install_root + package_directory
 		
-		dist_path = package_path + 'dist'
+		dist_path = package_path + "dist"
 		
 		FileUtils::Verbose.rm_rf(install_path)
 		FileUtils::Verbose.mkpath(install_path.dirname)
@@ -47,7 +47,7 @@ def expand_package_paths(root, into = [])
 	paths.each do |path|
 		basename = path.basename.to_s
 		# Handle organisation sub-directories which start with an '@' symbol:
-		if basename.start_with?('@')
+		if basename.start_with?("@")
 			expand_package_paths(path, into)
 		else
 			into << path

@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2014-2023, by Samuel Williams.
+# Copyright, 2014-2025, by Samuel Williams.
 
-require 'utopia/extensions/array_split'
-require 'utopia/extensions/date_comparisons'
+require "utopia/extensions/array_split"
+require "utopia/extensions/date_comparisons"
 
 describe Array do
 	it "should split in the middle" do
@@ -18,7 +18,7 @@ describe Array do
 	end
 	
 	it "should not split empty array" do
-		expect([].split_at('a')).to be == [[], nil, []]
+		expect([].split_at("a")).to be == [[], nil, []]
 	end
 end
 

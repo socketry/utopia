@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2010-2022, by Samuel Williams.
+# Copyright, 2010-2025, by Samuel Williams.
 
 module Utopia
 	class Content
 		# Compatibility with older versions of rack:
-		EXPIRES = 'expires'.freeze
-		CACHE_CONTROL = 'cache-control'.freeze
-		CONTENT_TYPE = 'content-type'.freeze
-		NO_CACHE = 'no-cache'.freeze
+		EXPIRES = "expires".freeze
+		CACHE_CONTROL = "cache-control".freeze
+		CONTENT_TYPE = "content-type".freeze
+		NO_CACHE = "no-cache".freeze
 		
 		# A basic content response, including useful defaults for typical HTML5 content.
 		class Response

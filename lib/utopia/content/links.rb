@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2015-2022, by Samuel Williams.
+# Copyright, 2015-2025, by Samuel Williams.
 
-require_relative 'link'
+require_relative "link"
 
-require 'concurrent/map'
+require "concurrent/map"
 
 module Utopia
 	class Content
 		# The file extension for markup nodes on disk.
-		XNODE_EXTENSION = '.xnode'
+		XNODE_EXTENSION = ".xnode"
 		INDEX = "index"
 		
 		class Links
@@ -263,7 +263,7 @@ module Utopia
 					
 					# After processing all directory entries, we are left with virtual links:
 					metadata.each do |key, info|
-						name, locale = key.split('.', 2)
+						name, locale = key.split(".", 2)
 						localized = (virtuals[name] ||= {})
 						localized[locale] = info
 					end

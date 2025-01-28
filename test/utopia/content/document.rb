@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2017-2023, by Samuel Williams.
+# Copyright, 2017-2025, by Samuel Williams.
 
-require 'utopia/content/document'
+require "utopia/content/document"
 
 describe Utopia::Content::Document do
 	let(:document) {subject.new(nil, {})}
@@ -32,8 +32,8 @@ describe Utopia::Content::Document do
 	
 	it "should fail if tags are unbalanced" do
 		node = proc do |document, state|
-			div = Utopia::Content::Tag.opened('div')
-			span = Utopia::Content::Tag.opened('span')
+			div = Utopia::Content::Tag.opened("div")
+			span = Utopia::Content::Tag.opened("span")
 			document.tag_begin(div)
 			document.tag_end(span)
 		end

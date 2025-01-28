@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2017-2022, by Samuel Williams.
+# Copyright, 2017-2025, by Samuel Williams.
 
-def generate(output_path: 'static')
-	require 'falcon/server'
-	require 'async/io'
-	require 'async/http/endpoint'
-	require 'async/container'
+def generate(output_path: "static")
+	require "falcon/server"
+	require "async/io"
+	require "async/http/endpoint"
+	require "async/container"
 	
-	config_path = File.join(Dir.pwd, 'config.ru')
+	config_path = File.join(Dir.pwd, "config.ru")
 	container_class = Async::Container::Threaded
 	server_port = 9090
 	
@@ -33,7 +33,7 @@ def generate(output_path: 'static')
 	
 	# Copy all public assets:
 	FileUtils::Verbose.mkpath(output_path)
-	Dir.glob(File.join(Dir.pwd, 'public/*')) do |path|
+	Dir.glob(File.join(Dir.pwd, "public/*")) do |path|
 		FileUtils::Verbose.cp_r(path, output_path)
 	end
 	

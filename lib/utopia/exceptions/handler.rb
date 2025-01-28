@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2014-2022, by Samuel Williams.
+# Copyright, 2014-2025, by Samuel Williams.
 
 module Utopia
 	module Exceptions
 		# A middleware which catches exceptions and performs an internal redirect.
 		class Handler
 			# @param location [String] Peform an internal redirect to this location when an exception is raised.
-			def initialize(app, location = '/errors/exception')
+			def initialize(app, location = "/errors/exception")
 				@app = app
 				
 				@location = location
@@ -34,7 +34,7 @@ module Utopia
 			
 			def log_exception(env, exception)
 				# An error has occurred, log it:
-				output = env['rack.errors'] || $stderr
+				output = env["rack.errors"] || $stderr
 				write_exception_to_stream(output, env, exception, true)
 			end
 			

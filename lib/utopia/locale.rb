@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2015-2022, by Samuel Williams.
+# Copyright, 2015-2025, by Samuel Williams.
 
 module Utopia
 	# A structured representation of locale based on RFC3066.
 	Locale = Struct.new(:language, :country, :variant) do
 		def to_s
-			to_a.compact.join('-')
+			to_a.compact.join("-")
 		end
 		
 		def self.dump(instance)
@@ -18,7 +18,7 @@ module Utopia
 		
 		def self.load(instance)
 			if instance.is_a? String
-				self.new(*instance.split('-', 3))
+				self.new(*instance.split("-", 3))
 			elsif instance.is_a? Array
 				return self.new(*instance)
 			elsif instance.is_a? self

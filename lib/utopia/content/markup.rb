@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2024, by Samuel Williams.
+# Copyright, 2009-2025, by Samuel Williams.
 
-require 'xrb/parsers'
-require 'xrb/entities'
-require 'xrb/strings'
-require 'xrb/tag'
+require "xrb/parsers"
+require "xrb/entities"
+require "xrb/strings"
+require "xrb/tag"
 
 module Utopia
 	class Content

@@ -1,29 +1,29 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2024, by Samuel Williams.
+# Copyright, 2009-2025, by Samuel Williams.
 
-require_relative 'middleware'
-require_relative 'localization'
+require_relative "middleware"
+require_relative "localization"
 
-require_relative 'content/links'
-require_relative 'content/node'
-require_relative 'content/markup'
-require_relative 'content/tags'
+require_relative "content/links"
+require_relative "content/node"
+require_relative "content/markup"
+require_relative "content/tags"
 
-require 'xrb/template'
+require "xrb/template"
 
-require 'concurrent/map'
+require "concurrent/map"
 
-require 'traces/provider'
+require "traces/provider"
 
 module Utopia
 	# A middleware which serves dynamically generated content based on markup files.
 	class Content
-		CONTENT_NAMESPACE = 'content'.freeze
-		UTOPIA_NAMESPACE = 'utopia'.freeze
-		DEFERRED_TAG_NAME = 'utopia:deferred'.freeze
-		CONTENT_TAG_NAME = 'utopia:content'.freeze
+		CONTENT_NAMESPACE = "content".freeze
+		UTOPIA_NAMESPACE = "utopia".freeze
+		DEFERRED_TAG_NAME = "utopia:deferred".freeze
+		CONTENT_TAG_NAME = "utopia:content".freeze
 		
 		# @param root [String] The content root where pages will be generated from.
 		# @param namespaces [Hash<String,Library>] Tag namespaces for dynamic tag lookup.
@@ -130,7 +130,7 @@ module Utopia
 		private
 		
 		def lookup_content(name, parent_path)
-			if String === name && name.index('/')
+			if String === name && name.index("/")
 				name = Path.create(name)
 			end
 			
@@ -152,7 +152,7 @@ module Utopia
 				end
 				
 				if String === name_path
-					tag_path = File.join(@root, components, '_' + name_path)
+					tag_path = File.join(@root, components, "_" + name_path)
 					
 					if File.exist? tag_path
 						return Node.new(self, Path[components] + name, parent_path + name, tag_path)
@@ -186,8 +186,8 @@ module Utopia
 	Traces::Provider(Content) do
 		def respond(link, request)
 			attributes = {
-				'link.key' => link.key,
-				'link.href' => link.href
+				"link.key" => link.key,
+				"link.href" => link.href
 			}
 			
 			Traces.trace("utopia.content.respond", attributes: attributes) {super}

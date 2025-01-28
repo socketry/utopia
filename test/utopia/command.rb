@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2018-2023, by Samuel Williams.
+# Copyright, 2018-2025, by Samuel Williams.
 
-require 'fileutils'
-require 'tmpdir'
-require 'yaml'
+require "fileutils"
+require "tmpdir"
+require "yaml"
 
-require 'bundler'
+require "bundler"
 
 describe "utopia command" do
 	let(:utopia_path) {File.expand_path("../..", __dir__)}
@@ -20,7 +20,7 @@ describe "utopia command" do
 	
 	def group_rw(path)
 		gaccess = File.stat(path).mode.to_s(8)[-2]
-		return gaccess == '6' || gaccess == '7'
+		return gaccess == "6" || gaccess == "7"
 	end
 	
 	REQUIRED_GEMS = ["bake", "bake-test", "sus", "covered", "rack-test", "sus-fixtures-async-http", "falcon", "net-smtp", "benchmark-http", "protocol-rack"]
@@ -40,7 +40,7 @@ describe "utopia command" do
 	end
 	
 	it "should generate sample site" do
-		Dir.mktmpdir('test-site') do |dir|
+		Dir.mktmpdir("test-site") do |dir|
 			install_packages(dir)
 			
 			system("bundle", "exec", "bake", "utopia:site:create", chdir: dir, exception: true)
@@ -59,7 +59,7 @@ describe "utopia command" do
 	end
 	
 	it "should generate a sample server" do
-		Dir.mktmpdir('test-server') do |dir|
+		Dir.mktmpdir("test-server") do |dir|
 			install_packages(dir)
 			
 			system("bundle", "exec", "bake", "utopia:server:create", chdir: dir, exception: true)
@@ -69,14 +69,14 @@ describe "utopia command" do
 			system("chmod", "-Rf", "g-x", ".git", chdir: dir, exception: true)
 			system("rm", "-f", ".git/hooks/post-receive", chdir: dir, exception: true)
 			
-			environment = YAML.load_file(File.join(dir, 'config/environment.yaml'))
-			expect(environment).to be(:include?, 'VARIANT')
-			expect(environment).to be(:include?, 'UTOPIA_SESSION_SECRET')
+			environment = YAML.load_file(File.join(dir, "config/environment.yaml"))
+			expect(environment).to be(:include?, "VARIANT")
+			expect(environment).to be(:include?, "UTOPIA_SESSION_SECRET")
 		end
 	end
 	
 	it "should not trash the sample server during update" do
-		Dir.mktmpdir('test-server') do |dir|
+		Dir.mktmpdir("test-server") do |dir|
 			install_packages(dir)
 			
 			system("bundle", "exec", "bake", "utopia:server:create", chdir: dir, exception: true)
@@ -88,7 +88,7 @@ describe "utopia command" do
 			system("bundle", "exec", "bake", "utopia:server:update", chdir: dir, exception: true)
 			
 			# Check a couple of files to make sure they have group read and write access after the update:
-			Dir.glob(File.join(dir, '.git/**/*')).each do |path|
+			Dir.glob(File.join(dir, ".git/**/*")).each do |path|
 				expect(group_rw(path)).to be == true
 			end
 		end
@@ -97,11 +97,11 @@ describe "utopia command" do
 	it "can generate sample site, server and push to the server" do
 		# This assumes your default branch is "main". We should probably be more flexible around this.
 		# git config --global init.defaultBranch main
-		Dir.mktmpdir('test') do |dir|
-			site_path = File.join(dir, 'site')
+		Dir.mktmpdir("test") do |dir|
+			site_path = File.join(dir, "site")
 			FileUtils.mkdir_p(site_path)
 			
-			server_path = File.join(dir, 'server')
+			server_path = File.join(dir, "server")
 			FileUtils.mkdir_p(server_path)
 			
 			install_packages(site_path)
@@ -119,8 +119,8 @@ describe "utopia command" do
 				expect(server_files).to be(:include?, file)
 			end
 			
-			expect(File.executable? File.join(server_path, 'config.ru')).to be == true
-			puts File.stat(File.join(dir, 'server', '.git')).mode
+			expect(File.executable? File.join(server_path, "config.ru")).to be == true
+			puts File.stat(File.join(dir, "server", ".git")).mode
 		end
 	end
 end

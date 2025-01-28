@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2014-2024, by Samuel Williams.
+# Copyright, 2014-2025, by Samuel Williams.
 # Copyright, 2019, by Huba Nagy.
 
-require 'openssl'
-require 'digest/sha2'
-require 'console'
-require 'json'
+require "openssl"
+require "digest/sha2"
+require "console"
+require "json"
 
-require_relative 'session/lazy_hash'
-require_relative 'session/serialization'
+require_relative "session/lazy_hash"
+require_relative "session/serialization"
 
 module Utopia
 	# A middleware which provides a secure client-side session storage using a private symmetric encrpytion key.
@@ -20,7 +20,7 @@ module Utopia
 		
 		MAXIMUM_SIZE = 1024*32
 		
-		SECRET_KEY = 'UTOPIA_SESSION_SECRET'.freeze
+		SECRET_KEY = "UTOPIA_SESSION_SECRET".freeze
 		
 		RACK_SESSION = "rack.session".freeze
 		CIPHER_ALGORITHM = "aes-256-cbc"

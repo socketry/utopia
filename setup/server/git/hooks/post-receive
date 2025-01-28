@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # Copyright, 2016, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
@@ -20,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'etc'
+require "etc"
 
 # Add the following into sudoers for this to work correctly:
 # Users in group wheel can execute all commands as user http with no password.
@@ -29,25 +30,25 @@ require 'etc'
 GIT_WORK_TREE = `git config core.worktree`.chomp
 
 # We convert GIT_DIR to an absolute path:
-ENV['GIT_DIR'] = File.join(Dir.pwd, ENV['GIT_DIR'])
+ENV["GIT_DIR"] = File.join(Dir.pwd, ENV["GIT_DIR"])
 
 # We deploy the site as the user and group of the directory for the working tree:
 File.stat(GIT_WORK_TREE).tap do |stat|
-	ENV['DEPLOY_USER'] = DEPLOY_USER = Etc.getpwuid(stat.uid).name
-	ENV['DEPLOY_GROUP'] = DEPLOY_GROUP = Etc.getgrgid(stat.gid).name
+	ENV["DEPLOY_USER"] = DEPLOY_USER = Etc.getpwuid(stat.uid).name
+	ENV["DEPLOY_GROUP"] = DEPLOY_GROUP = Etc.getgrgid(stat.gid).name
 end
 
 WHOAMI = `whoami`.chomp!
 
 # We should find out if we need to use sudo or not:
 SUDO = if WHOAMI != DEPLOY_USER
-	['sudo', '-u', DEPLOY_USER]
+	["sudo", "-u", DEPLOY_USER]
 end
 
 CommandFailure = Class.new(StandardError)
 
 def sh(command)
-	puts command.join(' ')
+	puts command.join(" ")
 	unless system(*command)
 		raise CommandFailure.new("#{command.join(' ')} failed with #{$?}!")
 	end
@@ -62,13 +63,13 @@ Dir.chdir(GIT_WORK_TREE) do
 	sudo %W{git checkout -f}
 	sudo %W{git submodule update -i}
 	
-	if File.exist? 'gems.rb'
+	if File.exist? "gems.rb"
 		sudo %W{bundle install}
 	end
 	
-	if File.exist? 'bake.rb'
+	if File.exist? "bake.rb"
 		sudo %W{bundle exec bake deploy restart}
-	elsif File.exist? 'Rakefile'
+	elsif File.exist? "Rakefile"
 		sudo %W{bundle exec rake deploy restart}
 	end
 end

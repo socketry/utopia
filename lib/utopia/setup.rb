@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2010-2024, by Samuel Williams.
+# Copyright, 2010-2025, by Samuel Williams.
 
-require 'yaml'
-require 'securerandom'
+require "yaml"
+require "securerandom"
 
-require 'variant'
+require "variant"
 
-require 'console'
+require "console"
 
 module Utopia
 	# Used for setting up a Utopia web application, typically via `config/environment.rb`
@@ -58,11 +58,11 @@ module Utopia
 		end
 		
 		def apply!
-			add_load_path('lib')
+			add_load_path("lib")
 			
 			apply_environment
 			
-			require_relative '../utopia'
+			require_relative "../utopia"
 		end
 		
 		private

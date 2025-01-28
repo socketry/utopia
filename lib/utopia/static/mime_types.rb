@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2017-2022, by Samuel Williams.
+# Copyright, 2017-2025, by Samuel Williams.
 
-require 'mime/types'
+require "mime/types"
 
 module Utopia
 	# A middleware which serves static files from the specified root directory.

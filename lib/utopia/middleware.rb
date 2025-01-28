@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2022, by Samuel Williams.
+# Copyright, 2009-2025, by Samuel Williams.
 
-require_relative 'http'
-require_relative 'path'
+require_relative "http"
+require_relative "path"
 
 module Utopia
 	# The default pages path for {Utopia::Content} middleware.
-	PAGES_PATH = 'pages'.freeze
+	PAGES_PATH = "pages".freeze
 	
 	# This is used for shared controller variables which get consumed by the content middleware.
-	VARIABLES_KEY = 'utopia.variables'.freeze
+	VARIABLES_KEY = "utopia.variables".freeze
 	
 	# The default root directory for middleware to operate within, e.g. the web-site directory. Convention over configuration.
 	# @param subdirectory [String] Appended to the default root to make a more specific path.

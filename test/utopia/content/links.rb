@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2015-2023, by Samuel Williams.
+# Copyright, 2015-2025, by Samuel Williams.
 
-require 'utopia/content/links'
+require "utopia/content/links"
 
 describe Utopia::Content::Links do
 	let(:root) {File.expand_path("links", __dir__)}
 	let(:links) {subject.new(root)}
 	
-	with '#index_filter' do
+	with "#index_filter" do
 		it "should match index" do
 			expect(links.index_filter).to be =~ "index.xnode"
 		end
@@ -19,7 +19,7 @@ describe Utopia::Content::Links do
 		end
 	end
 	
-	with 'matching name' do
+	with "matching name" do
 		it "can match named link" do
 			matched = links.index("/", name: "welcome")
 			
@@ -34,7 +34,7 @@ describe Utopia::Content::Links do
 		end
 	end
 	
-	with 'name filter' do
+	with "name filter" do
 		it "should filter links by name" do
 			matched = links.index("/", name: /foo/)
 			
@@ -42,7 +42,7 @@ describe Utopia::Content::Links do
 		end
 	end
 	
-	with 'without locale' do
+	with "without locale" do
 		it "should index all links" do
 			matched = links.index("/foo").sort_by(&:locale)
 			expect(matched.size).to be == 2
@@ -55,9 +55,9 @@ describe Utopia::Content::Links do
 		end
 	end
 	
-	with 'locale' do
+	with "locale" do
 		it "should select localized links" do
-			matched = links.index("/foo", locale: 'en')
+			matched = links.index("/foo", locale: "en")
 			expect(matched.size).to be == 1
 			
 			expect(matched[0].name).to be == "test"
@@ -65,23 +65,23 @@ describe Utopia::Content::Links do
 		end
 	end
 	
-	with 'localized links'  do
+	with "localized links"  do
 		let(:root) {File.expand_path("localized", __dir__)}
 		
 		it "should read correct link order for en" do
-			matched = links.index("/", locale: 'en')
+			matched = links.index("/", locale: "en")
 			
-			expect(matched.collect(&:title)).to be == ['One', 'Two', 'Three', 'Four', 'Five']
+			expect(matched.collect(&:title)).to be == ["One", "Two", "Three", "Four", "Five"]
 		end
 		
 		it "should read correct link order for zh" do
-			matched = links.index("/", locale: 'zh')
+			matched = links.index("/", locale: "zh")
 			
-			expect(matched.collect(&:title)).to be == ['One', 'Two', 'Three', '四']
+			expect(matched.collect(&:title)).to be == ["One", "Two", "Three", "四"]
 		end
 	end
 	
-	with '#index' do
+	with "#index" do
 		it "should give a list of links" do
 			matched = links.index("/")
 			
@@ -90,9 +90,9 @@ describe Utopia::Content::Links do
 			expect(matched[0]).to have_attributes(
 				title: be == "Welcome",
 				kind: be == :file,
-				name: be == 'welcome',
+				name: be == "welcome",
 				locale: be_nil,
-				path: be == ['', 'welcome'],
+				path: be == ["", "welcome"],
 				href: be == "/welcome",
 				to_href: be == '<a class="link" href="/welcome">Welcome</a>'
 			)
@@ -100,9 +100,9 @@ describe Utopia::Content::Links do
 			expect(matched[1]).to have_attributes(
 				title: be == "Foo Bar",
 				kind: be == :directory,
-				name: be == 'foo',
+				name: be == "foo",
 				locale: be_nil,
-				path: be == ['', 'foo', 'index'],
+				path: be == ["", "foo", "index"],
 				href: be == "/foo/index",
 				to_href: be == '<a class="link" href="/foo/index">Foo Bar</a>'
 			)
@@ -110,9 +110,9 @@ describe Utopia::Content::Links do
 			expect(matched[2]).to have_attributes(
 				title: be == "Bar",
 				kind: be == :directory,
-				name: be == 'bar',
+				name: be == "bar",
 				locale: be_nil,
-				path: be == ['', 'bar', 'index'],
+				path: be == ["", "bar", "index"],
 				href: be == "/bar/index",
 				to_href: be == '<a class="link" href="/bar/index">Bar</a>'
 			)
@@ -120,9 +120,9 @@ describe Utopia::Content::Links do
 			expect(matched[3]).to have_attributes(
 				title: be == "Redirect",
 				kind: be == :directory,
-				name: be == 'redirect',
+				name: be == "redirect",
 				locale: be_nil,
-				path: be == ['', 'redirect', ''],
+				path: be == ["", "redirect", ""],
 				href: be == "https://www.codeotaku.com",
 				to_href: be == '<a class="link" href="https://www.codeotaku.com">Redirect</a>'
 			)
@@ -139,9 +139,9 @@ describe Utopia::Content::Links do
 			expect(matched[0]).to have_attributes(
 				title: be == "Parent?",
 				kind: be == :directory,
-				name: be == 'parent',
+				name: be == "parent",
 				locale: be_nil,
-				path: be == ['', 'bar', 'parent', ''],
+				path: be == ["", "bar", "parent", ""],
 				href: be_nil,
 				to_href: be == '<span class="link">Parent?</span>'
 			)
@@ -155,14 +155,14 @@ describe Utopia::Content::Links do
 			expect(matched[0].title).to be == "Child"
 			expect(matched[0].kind).to be == :directory
 			expect(matched[0].name).to be == "child"
-			expect(matched[0].locale).to be == 'en'
-			expect(matched[0].path).to be == ['', 'bar', 'parent', 'child', 'index']
+			expect(matched[0].locale).to be == "en"
+			expect(matched[0].path).to be == ["", "bar", "parent", "child", "index"]
 			
 			expect(matched[1].title).to be == "Child"
 			expect(matched[1].kind).to be == :directory
 			expect(matched[1].name).to be == "child"
-			expect(matched[1].locale).to be == 'ja'
-			expect(matched[1].path).to be == ['', 'bar', 'parent', 'child', 'index']
+			expect(matched[1].locale).to be == "ja"
+			expect(matched[1].path).to be == ["", "bar", "parent", "child", "index"]
 		end
 		
 		it "can get title of /index" do
@@ -196,7 +196,7 @@ describe Utopia::Content::Links do
 		end
 	end
 	
-	with '#for' do
+	with "#for" do
 		it "can get title of /index" do
 			link = links.for(Utopia::Path["/index"])
 			expect(link.title).to be == "Home"

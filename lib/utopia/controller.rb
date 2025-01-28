@@ -1,25 +1,25 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2022, by Samuel Williams.
+# Copyright, 2009-2025, by Samuel Williams.
 
-require_relative 'path'
+require_relative "path"
 
-require_relative 'middleware'
-require_relative 'controller/variables'
-require_relative 'controller/base'
+require_relative "middleware"
+require_relative "controller/variables"
+require_relative "controller/base"
 
-require_relative 'controller/rewrite'
-require_relative 'controller/respond'
-require_relative 'controller/actions'
+require_relative "controller/rewrite"
+require_relative "controller/respond"
+require_relative "controller/actions"
 
-require 'concurrent/map'
+require "concurrent/map"
 
 module Utopia
 	# A middleware which loads controller classes and invokes functionality based on the requested path.
 	class Controller
 		# The controller filename.
-		CONTROLLER_RB = 'controller.rb'.freeze
+		CONTROLLER_RB = "controller.rb".freeze
 		
 		def self.[] request
 			request.env[VARIABLES_KEY]

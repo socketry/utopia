@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2023, by Samuel Williams.
+# Copyright, 2009-2025, by Samuel Williams.
 
-require_relative 'middleware'
-require_relative 'localization'
+require_relative "middleware"
+require_relative "localization"
 
-require_relative 'static/local_file'
-require_relative 'static/mime_types'
+require_relative "static/local_file"
+require_relative "static/mime_types"
 
-require 'traces/provider'
+require "traces/provider"
 
 module Utopia
 	# A middleware which serves static files from the specified root directory.
 	class Static
-		DEFAULT_CACHE_CONTROL = 'public, max-age=3600'.freeze
+		DEFAULT_CACHE_CONTROL = "public, max-age=3600".freeze
 
 		# @param root [String] The root directory to serve files from.
 		# @param types [Array] The mime-types (and file extensions) to recognize/serve.
@@ -51,17 +51,17 @@ module Utopia
 
 		attr :extensions
 		
-		LAST_MODIFIED = 'Last-Modified'.freeze
+		LAST_MODIFIED = "Last-Modified".freeze
 		CONTENT_TYPE = HTTP::CONTENT_TYPE
 		CACHE_CONTROL = HTTP::CACHE_CONTROL
-		ETAG = 'ETag'.freeze
-		ACCEPT_RANGES = 'Accept-Ranges'.freeze
+		ETAG = "ETag".freeze
+		ACCEPT_RANGES = "Accept-Ranges".freeze
 		
 		def respond(env, path_info, extension)
 			path = Path[path_info].simplify
 			
 			if locale = env[Localization::CURRENT_LOCALE_KEY]
-				path.last.insert(path.last.rindex('.') || -1, ".#{locale}")
+				path.last.insert(path.last.rindex(".") || -1, ".#{locale}")
 			end
 			
 			if file = fetch_file(path)

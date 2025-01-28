@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2022, by Samuel Williams.
+# Copyright, 2016-2025, by Samuel Williams.
 
-require 'net/smtp'
-require 'mail'
+require "net/smtp"
+require "mail"
 
 module Utopia
 	module Exceptions
@@ -17,8 +17,8 @@ module Utopia
 				:enable_starttls_auto => false
 			}]
 			
-			DEFAULT_FROM = (ENV['USER'] || 'utopia').freeze
-			DEFAULT_SUBJECT = '%{exception} [PID %{pid} : %{cwd}]'.freeze
+			DEFAULT_FROM = (ENV["USER"] || "utopia").freeze
+			DEFAULT_SUBJECT = "%{exception} [PID %{pid} : %{cwd}]".freeze
 			
 			# @param to [String] The address to email error reports to.
 			# @param from [String] The from address for error reports.
@@ -104,7 +104,7 @@ module Utopia
 				
 				io.puts
 				
-				env.select{|key,_| key.start_with? 'HTTP_'}.each do |key, value|
+				env.select{|key,_| key.start_with? "HTTP_"}.each do |key, value|
 					io.puts "#{key}: #{value.inspect}"
 				end
 				
@@ -134,11 +134,11 @@ module Utopia
 				mail.text_part.body = generate_body(exception, env)
 			
 				if body = extract_body(env) and body.size > 0
-					mail.attachments['body.bin'] = body
+					mail.attachments["body.bin"] = body
 				end
 				
 				if @dump_environment
-					mail.attachments['environment.yaml'] = YAML.dump(env)
+					mail.attachments["environment.yaml"] = YAML.dump(env)
 				end
 
 				return mail
@@ -156,7 +156,7 @@ module Utopia
 			end
 
 			def extract_body(env)
-				if io = env['rack.input']
+				if io = env["rack.input"]
 					io.rewind if io.respond_to?(:rewind)
 					io.read
 				end

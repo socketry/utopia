@@ -5,8 +5,8 @@ use Utopia::Redirection::Rewrite, {"/" => "/welcome/index"}
 use Utopia::Redirection::DirectoryIndex
 
 use Utopia::Redirection::Errors, {
-	404 => '/error',
-	418 => '/teapot'
+	404 => "/error",
+	418 => "/teapot"
 }
 
 use Utopia::Redirection::Moved, "/a", "/b"

@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2017-2023, by Samuel Williams.
+# Copyright, 2017-2025, by Samuel Williams.
 
 def initialize(...)
 	super
 	
-	require 'fileutils'
-	require 'socket'
+	require "fileutils"
+	require "socket"
 end
 
 # Create a remote Utopia website suitable for deployment using git.
@@ -25,7 +25,7 @@ end
 SETUP_ROOT = File.expand_path("../../setup", __dir__)
 
 # The root directory of the template server deployment:
-SERVER_ROOT = File.join(SETUP_ROOT, 'server')
+SERVER_ROOT = File.join(SETUP_ROOT, "server")
 
 # Update the git hooks in an existing server repository.
 def update(root: context.root)
@@ -49,13 +49,13 @@ def update(root: context.root)
 	# Set some useful defaults for the environment.
 	recipe = context.lookup("utopia:environment:update")
 	recipe.instance.update("environment", root: root) do |store|
-		store['VARIANT'] ||= 'production'
-		store['UTOPIA_SESSION_SECRET'] ||= SecureRandom.hex(40)
+		store["VARIANT"] ||= "production"
+		store["UTOPIA_SESSION_SECRET"] ||= SecureRandom.hex(40)
 	end
 	
 	# Copy git hooks:
-	system("cp", "-r", File.join(SERVER_ROOT, 'git', 'hooks'), File.join(root, '.git')) or fail "could not copy git hooks"
+	system("cp", "-r", File.join(SERVER_ROOT, "git", "hooks"), File.join(root, ".git")) or fail "could not copy git hooks"
 	# finally set everything in the .git directory to be group writable
 	# This failed for me and I had to do sudo chown http:http .git -R first.
-	system("chmod", "-Rf", "g+w", File.join(root, '.git')) or fail "could not update permissions of .git directory"
+	system("chmod", "-Rf", "g+w", File.join(root, ".git")) or fail "could not update permissions of .git directory"
 end

@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2020-2022, by Samuel Williams.
+# Copyright, 2020-2025, by Samuel Williams.
 
 def shell
-	call 'utopia:environment'
+	call "utopia:environment"
 	
-	require 'utopia/shell'
+	require "utopia/shell"
 	
 	binding = Utopia::Shell.new(self.context).binding
 	

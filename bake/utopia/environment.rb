@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2018-2024, by Samuel Williams.
+# Copyright, 2018-2025, by Samuel Williams.
 
 # Update environment variables in config/environment.yaml
 def initialize(...)
 	super
 	
-	require 'securerandom'
-	require 'yaml/store'
-	require 'console'
+	require "securerandom"
+	require "yaml/store"
+	require "console"
 end
 
 # Setup default environemnts "testing" and "development".
@@ -26,7 +26,7 @@ def defaults(name, root: context.root)
 	update_environment(root, name) do |store|
 		Console.info(self) {"Setting up defaults for environment #{name}..."}
 		# Set some useful defaults for the environment.
-		store['UTOPIA_SESSION_SECRET'] ||= SecureRandom.hex(40)
+		store["UTOPIA_SESSION_SECRET"] ||= SecureRandom.hex(40)
 	end
 end
 
