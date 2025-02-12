@@ -3,6 +3,8 @@
 # Released under the MIT License.
 # Copyright, 2016-2025, by Samuel Williams.
 
+NPM = ENV["NPM"] || "npm"
+
 def update
 	require "fileutils"
 	require "utopia/path"
@@ -17,7 +19,11 @@ def update
 	
 	install_root = root + "public/_components"
 	
-	package_paths = expand_package_paths(package_root)
+	# Fetch only production dependencies using `npm ls --production`
+	production_packages = fetch_production_packages(package_root)
+	package_paths = expand_package_paths(package_root).select do |path|
+		production_packages.include?(path.basename.to_s)
+	end
 	
 	package_paths.each do |package_path|
 		package_directory = package_path.relative_path_from(package_root)
@@ -40,6 +46,28 @@ def update
 end
 
 private
+
+def fetch_production_packages(package_root)
+	require "json"
+	require "open3"
+	
+	stdout, _status = Open3.capture2(NPM, "ls", "--production", "--json", chdir: package_root.to_s)
+	
+	json = JSON.parse(stdout)
+	
+	flatten_package_dependencies(json).sort.uniq
+end
+
+def flatten_package_dependencies(json, into = [])
+	if json["dependencies"]
+		json["dependencies"].each do |name, details|
+			into << name
+			flatten_package_dependencies(details, into)
+		end
+	end
+	
+	return into
+end
 
 def expand_package_paths(root, into = [])
 	paths = root.children.select(&:directory?)
