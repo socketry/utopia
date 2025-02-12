@@ -27,6 +27,15 @@ Please see the [project documentation](https://github.com/ioquatix/utopia) for m
 
   - [Updating Utopia](https://github.com/ioquatix/utopiaguides/updating-utopia/index) - This guide explains how to update existing `utopia` websites.
 
+## Releases
+
+Please see the [project releases](https://github.com/ioquatix/utopiareleases/index) for all releases.
+
+### v2.27.0
+
+  - Improved error logging using `Console` gem.
+  - Only install `npm ls --production` dependencies into `public/_components`.
+
 ## See Also
 
   - [XRB](https://github.com/socketry/xrb) — Template and markup parsers, markup generation.
