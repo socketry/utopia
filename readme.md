@@ -13,7 +13,19 @@ Utopia is a website generation framework which provides a robust set of tools to
 
 ## Usage
 
-Please see the [project documentation](https://socketry.github.io/utopia).
+Please see the [project documentation](https://github.com/ioquatix/utopia) for more details.
+
+  - [Getting Started](https://github.com/ioquatix/utopiaguides/getting-started/index) - This guide explains how to set up a `utopia` website for local development and deployment.
+
+  - [Middleware](https://github.com/ioquatix/utopiaguides/middleware/index) - This guide gives an overview of the different Rack middleware used by Utopia.
+
+  - [Server Setup](https://github.com/ioquatix/utopiaguides/server-setup/index) - This guide explains how to deploy a `utopia` web application.
+
+  - [Installing JavaScript Libraries](https://github.com/ioquatix/utopiaguides/integrating-with-javascript/index) - Utopia integrates with Yarn and provides a [bake task](https://github.com/ioquatix/bake) to simplify deployment packages distributed using `yarn` that implement the `dist` sub-directory convention.
+
+  - [What is XNode?](https://github.com/ioquatix/utopiaguides/what-is-xnode/index) - This guide explains the `xnode` view layer and how it can be used to build efficient websites.
+
+  - [Updating Utopia](https://github.com/ioquatix/utopiaguides/updating-utopia/index) - This guide explains how to update existing `utopia` websites.
 
 ## See Also
 
