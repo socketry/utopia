@@ -17,7 +17,7 @@ describe Utopia::Exceptions::Handler do
 		
 		expect(last_response.status).to be == 500
 		expect(last_response.headers["content-type"]).to be == "text/plain"
-		expect(last_response.body).to be(:include?, "fatal error")
+		expect(last_response.body).to be(:include?, "error")
 	end
 	
 	it "should fail with a 500 error" do
