@@ -57,6 +57,22 @@ module Utopia
 		ETAG = "ETag".freeze
 		ACCEPT_RANGES = "Accept-Ranges".freeze
 		
+		def response_headers_for(file, content_type)
+			if @cache_control.respond_to?(:call)
+				cache_control = @cache_control.call(file)
+			else
+				cache_control = @cache_control
+			end
+			
+			{
+				LAST_MODIFIED => file.mtime_date,
+				CONTENT_TYPE => content_type,
+				CACHE_CONTROL => cache_control,
+				ETAG => file.etag,
+				ACCEPT_RANGES => "bytes"
+			}
+		end
+		
 		def respond(env, path_info, extension)
 			path = Path[path_info].simplify
 			
@@ -65,13 +81,7 @@ module Utopia
 			end
 			
 			if file = fetch_file(path)
-				response_headers = {
-					LAST_MODIFIED => file.mtime_date,
-					CONTENT_TYPE => @extensions[extension],
-					CACHE_CONTROL => @cache_control,
-					ETAG => file.etag,
-					ACCEPT_RANGES => "bytes"
-				}
+				response_headers = self.response_headers_for(file, @extensions[extension])
 				
 				if file.modified?(env)
 					return file.serve(env, response_headers)
