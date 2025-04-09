@@ -38,6 +38,27 @@ module Utopia
 				super()
 			end
 			
+			# @returns [Path] The original request path, if known.
+			def request_path
+				Path[request.env["REQUEST_PATH"]]
+			end
+			
+			protected def current_base_uri_path
+				self.current.node.uri_path
+			end
+			
+			# Compute the relative path from the curent base uri (e.g. the node being rendered) to the request uri. This path can be used to ensure resources are loaded relative to a given path.
+			#
+			# | Relative To   | Request Path           | Base URI     |
+			# |---------------|------------------------|--------------|
+			# | "/page"       | "/index"               | ""           |
+			# | "/blog/entry" | "/blog/2025/05/my-cat" | "../.."      |
+			#
+			# @returns [String] the base uri for the current page.
+			def base_uri(relative_to = self.current_base_uri_path)
+				Path[relative_to].dirname.shortest_path(request_path)
+			end
+			
 			def [] key
 				@attributes[key]
 			end
