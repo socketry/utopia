@@ -57,17 +57,14 @@ errors:
 
 ## Testing
 
-Utopia websites include a default set of tests using `rspec`. These specs can test against the actual running website. 
+Utopia websites include a default set of tests using `sus`. These specs can test against the actual running website.
 
 ~~~ bash
-$ rspec
+$ sus
 
-website
-1 samples: 1x 200. 1170.96 requests per second. S/D: 0.000µs.
-  should be responsive
-
-Finished in 0.61764 seconds (files took 0.64705 seconds to load)
-1 example, 0 failures
+1 samples: 1x 200. 3703.7 requests per second. S/D: 0.000µs.
+1 passed out of 1 total (2 assertions)
+🏁 Finished in 247.4ms; 8.085 assertions per second.
 ~~~
 
 The website test will spider all pages on your site and report any broken links as failures.
