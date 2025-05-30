@@ -28,6 +28,7 @@ Gem::Specification.new do |spec|
 	spec.add_dependency "concurrent-ruby", "~> 1.2"
 	spec.add_dependency "console", "~> 1.24"
 	spec.add_dependency "http-accept", "~> 2.1"
+	spec.add_dependency "irb"
 	spec.add_dependency "mail", "~> 2.6"
 	spec.add_dependency "mime-types", "~> 3.0"
 	spec.add_dependency "msgpack"
