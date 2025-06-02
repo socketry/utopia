@@ -60,7 +60,7 @@ module Utopia
 			def extract_extensions(mime_types)
 				mime_types.select{|mime_type| !mime_type.obsolete?}.each do |mime_type|
 					mime_type.extensions.each do |ext|
-						@extensions["." + ext] = mime_type.content_type
+						@extensions["." + ext] ||= mime_type.content_type
 					end
 				end
 			end
@@ -70,28 +70,20 @@ module Utopia
 			
 			def expand(types)
 				types.each do |type|
-					current_count = @extensions.size
-					
-					begin
-						case type
-						when Symbol
-							self.expand(MIME_TYPES[type])
-						when Array
-							@extensions["." + type[0]] = type[1]
-						when String
-							self.extract_extensions MIME::Types.of(type)
-						when Regexp
-							self.extract_extensions MIME::Types[type]
-						when MIME::Type
-							self.extract_extensions.call([type])
-						end
-					rescue
-						raise ExpansionError.new("#{self.class.name}: Error while processing #{type.inspect}!")
+					case type
+					when Symbol
+						self.expand(MIME_TYPES[type])
+					when Array
+						@extensions["." + type[0]] = type[1]
+					when String
+						self.extract_extensions MIME::Types.of(type)
+					when Regexp
+						self.extract_extensions MIME::Types[type]
+					when MIME::Type
+						self.extract_extensions.call([type])
 					end
-					
-					if @extensions.size == current_count
-						raise ExpansionError.new("#{self.class.name}: Could not find any mime type for #{type.inspect}")
-					end
+				rescue
+					raise ExpansionError.new("#{self.class.name}: Error while processing #{type.inspect}!")
 				end
 			end
 		end
