@@ -61,7 +61,7 @@ end
 puts "Deploying to #{GIT_WORK_TREE} as #{DEPLOY_USER}:#{DEPLOY_GROUP}..."
 Dir.chdir(GIT_WORK_TREE) do
 	sudo %W{git checkout -f}
-	sudo %W{git submodule update -i}
+	sudo %W{git submodule update --init}
 	
 	if File.exist? "gems.rb"
 		sudo %W{bundle install}
