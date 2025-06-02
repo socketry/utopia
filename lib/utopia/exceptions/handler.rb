@@ -3,7 +3,7 @@
 # Released under the MIT License.
 # Copyright, 2014-2025, by Samuel Williams.
 
-require 'console'
+require "console"
 
 module Utopia
 	module Exceptions
