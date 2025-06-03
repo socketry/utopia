@@ -1,5 +1,9 @@
 # Releases
 
+## Unreleased
+
+  - Minor compatibility fixes.
+
 ## v2.27.0
 
   - Improved error logging using `Console` gem.
