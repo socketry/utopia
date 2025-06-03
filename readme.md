@@ -31,6 +31,10 @@ Please see the [project documentation](https://socketry.github.io/utopia/) for m
 
 Please see the [project releases](https://socketry.github.io/utopia/releases/index) for all releases.
 
+### v2.30.1
+
+  - Minor compatibility fixes.
+
 ### v2.27.0
 
   - Improved error logging using `Console` gem.

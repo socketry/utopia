@@ -1,6 +1,6 @@
 # Releases
 
-## Unreleased
+## v2.30.1
 
   - Minor compatibility fixes.
 
