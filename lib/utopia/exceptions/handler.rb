@@ -2,6 +2,7 @@
 
 # Released under the MIT License.
 # Copyright, 2014-2025, by Samuel Williams.
+# Copyright, 2025, by Olle Jonsson.
 
 require "console"
 

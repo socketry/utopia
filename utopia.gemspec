@@ -7,22 +7,23 @@ Gem::Specification.new do |spec|
 	spec.version = Utopia::VERSION
 	
 	spec.summary = "Utopia is a framework for building dynamic content-driven websites."
-	spec.authors = ["Samuel Williams", "Huba Nagy", "Michael Adams", "Olle Jonsson", "Pierre Montelle"]
+	spec.authors = ["Samuel Williams", "Huba Nagy", "Matt Quinn", "Michael Adams", "Olle Jonsson", "Pierre Montelle"]
 	spec.license = "MIT"
 	
 	spec.cert_chain  = ["release.cert"]
 	spec.signing_key = File.expand_path("~/.gem/release.pem")
 	
-	spec.homepage = "https://github.com/ioquatix/utopia"
+	spec.homepage = "https://github.com/socketry/utopia"
 	
 	spec.metadata = {
+		"documentation_uri" => "https://socketry.github.io/utopia/",
 		"funding_uri" => "https://github.com/sponsors/ioquatix/",
-		"source_code_uri" => "https://github.com/ioquatix/utopia.git",
+		"source_code_uri" => "https://github.com/socketry/utopia.git",
 	}
 	
 	spec.files = Dir.glob(["{bake,lib,setup}/**/*", "*.md"], File::FNM_DOTMATCH, base: __dir__)
 	
-	spec.required_ruby_version = ">= 3.1"
+	spec.required_ruby_version = ">= 3.2"
 	
 	spec.add_dependency "bake", "~> 0.20"
 	spec.add_dependency "concurrent-ruby", "~> 1.2"
