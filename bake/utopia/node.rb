@@ -22,7 +22,8 @@ def update
 	# Fetch only production dependencies using `npm ls --production`
 	production_packages = fetch_production_packages(package_root)
 	package_paths = expand_package_paths(package_root).select do |path|
-		production_packages.include?(path.basename.to_s)
+		package_name = path.relative_path_from(package_root).to_s
+		production_packages.include?(package_name)
 	end
 	
 	package_paths.each do |package_path|
