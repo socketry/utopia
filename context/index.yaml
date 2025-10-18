@@ -1,0 +1,32 @@
+# Automatically generated context index for Utopia::Project guides.
+# Do not edit then files in this directory directly, instead edit the guides and then run `bake utopia:project:agent:context:update`.
+---
+description: Utopia is a framework for building dynamic content-driven websites.
+metadata:
+  documentation_uri: https://socketry.github.io/utopia/
+  funding_uri: https://github.com/sponsors/ioquatix/
+  source_code_uri: https://github.com/socketry/utopia.git
+files:
+- path: getting-started.md
+  title: Getting Started
+  description: This guide explains how to set up a `utopia` website for local development
+    and deployment.
+- path: middleware.md
+  title: Middleware
+  description: This guide gives an overview of the different Rack middleware used
+    by Utopia.
+- path: server-setup.md
+  title: Server Setup
+  description: This guide explains how to deploy a `utopia` web application.
+- path: integrating-with-javascript.md
+  title: Installing JavaScript Libraries
+  description: Utopia integrates with Yarn and provides a [bake task](https://github.com/ioquatix/bake)
+    to simplify deployment packages distributed using `yarn` that implement the `dist`
+    sub-directory convention.
+- path: what-is-xnode.md
+  title: What is XNode?
+  description: This guide explains the `xnode` view layer and how it can be used to
+    build efficient websites.
+- path: updating-utopia.md
+  title: Updating Utopia
+  description: This guide explains how to update existing `utopia` websites.

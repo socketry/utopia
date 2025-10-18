@@ -1,5 +1,9 @@
 # Releases
 
+## Unreleased
+
+  - Add agent context.
+
 ## v2.30.1
 
   - Minor compatibility fixes.

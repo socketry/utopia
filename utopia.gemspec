@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
 		"source_code_uri" => "https://github.com/socketry/utopia.git",
 	}
 	
-	spec.files = Dir.glob(["{bake,lib,setup}/**/*", "*.md"], File::FNM_DOTMATCH, base: __dir__)
+	spec.files = Dir.glob(["{bake,context,lib,setup}/**/*", "*.md"], File::FNM_DOTMATCH, base: __dir__)
 	
 	spec.required_ruby_version = ">= 3.2"
 	
