@@ -195,6 +195,7 @@ describe Utopia::Path do
 			expect(directory.to_directory).to be == directory
 		end
 	end
+	
 	it "should start with the given path" do
 		path = Utopia::Path["/a/b/c/d/e"]
 		
@@ -262,5 +263,60 @@ describe Utopia::Path do
 		expect(short.components).to be == ["b", "c", "index"]
 		
 		expect((output + short).simplify).to be == input
+	end
+	
+	with "#simplify" do
+		it "doesn't remove leading .. from relative paths" do
+			path = Utopia::Path["../foo/bar"]
+			simplified = path.simplify
+			
+			expect(simplified.components).to be == ["..", "foo", "bar"]
+		end
+		
+		it "removes redundant .. from absolute paths" do
+			path = Utopia::Path["/foo/../../bar"]
+			simplified = path.simplify
+			
+			expect(simplified.components).to be == ["", "bar"]
+		end
+		
+		it "preserves excess .. for purely relative paths" do
+			# ../../foo cannot be reduced without a base; keep leading .. components
+			path = Utopia::Path["../../foo"]
+			simplified = path.simplify
+			
+			expect(simplified.components).to be == ["..", "..", "foo"]
+		end
+		
+		it "reduces relative paths only as far as components allow" do
+			# foo/../../bar -> ../bar (pop foo for first .., then keep remaining ..)
+			path = Utopia::Path["foo/../../bar"]
+			simplified = path.simplify
+			
+			expect(simplified.components).to be == ["..", "bar"]
+		end
+		
+		it "does not traverse above root for absolute paths" do
+			# /a/b/../../../c -> /c (ignore .. beyond root)
+			path = Utopia::Path["/a/b/../../../c"]
+			simplified = path.simplify
+			
+			expect(simplified.components).to be == ["", "c"]
+		end
+		
+		it "ignores leading .. at absolute root" do
+			# /../../c -> /c
+			path = Utopia::Path["/../../c"]
+			simplified = path.simplify
+			
+			expect(simplified.components).to be == ["", "c"]
+		end
+		
+		it "preserves trailing slash for directories after simplify" do
+			path = Utopia::Path["/a/./b/../c/"]
+			simplified = path.simplify
+			
+			expect(simplified.components).to be == ["", "a", "c", ""]
+		end
 	end
 end
