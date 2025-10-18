@@ -37,11 +37,17 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
-    - uses: ruby/setup-ruby@v1
+    - uses: ruby/setup-ruby-pkgs@v1
       with:
         ruby-version: ${{matrix.ruby}}
         bundler-cache: true
+        brew: wget
+        apt-get: wget
     
     - name: Run tests
       timeout-minutes: 10
-      run: bundle exec bake test
+      run: |
+        git config --global user.email "samuel@oriontransfer.net"
+        git config --global user.name "Samuel Williams"
+        git config --global init.defaultBranch main
+        bundle exec bake test
