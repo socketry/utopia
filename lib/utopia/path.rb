@@ -215,19 +215,34 @@ module Utopia
 		end
 		
 		def simplify
-			result = absolute? ? [""] : []
+			components = []
 			
-			@components.each do |bit|
-				if bit == ".."
-					result.pop
-				elsif bit != "." && bit != ""
-					result << bit
-				end
+			index = 0
+			
+			if @components[0] == ""
+				components << ""
+				index += 1
 			end
 			
-			result << "" if directory?
+			while index < @components.size
+				bit = @components[index]
+				if bit == "."
+					# No-op (ignore current directory)
+				elsif bit == "" && index != @components.size - 1
+					# No-op (ignore multiple slashes)
+				elsif bit == ".." && components.last && components.last != ".."
+					if components.last != ""
+						# We can go up one level:
+						components.pop
+					end
+				else
+					components << bit
+				end
+				
+				index += 1
+			end
 			
-			return self.class.new(result)
+			return self.class.new(components)
 		end
 		
 		# Returns the first path component.
