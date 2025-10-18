@@ -17,9 +17,9 @@ module Utopia
 				end
 			end
 		end
-
+		
 		::Time.prepend(TimeDateComparison)
-
+		
 		# Provides comparison operator extensions.
 		module DateTimeComparison
 			def <=>(other)
@@ -30,7 +30,7 @@ module Utopia
 				end
 			end
 		end
-
+		
 		::Date.prepend(DateTimeComparison)
 	end
 end

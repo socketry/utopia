@@ -114,7 +114,7 @@ module Utopia
 			def symbolize_keys(map)
 				# Second level attributes should be symbolic:
 				map.each do |key, info|
-					map[key] = info.each_with_object({}) { |(k,v),result| result[k.to_sym] = v }
+					map[key] = info.each_with_object({}){|(k,v),result| result[k.to_sym] = v}
 				end
 				
 				return map

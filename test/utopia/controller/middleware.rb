@@ -31,7 +31,7 @@ describe Utopia::Controller do
 		expect(last_response.status).to be == 200
 		expect(last_response.body).to be == "Hello World"
 	end
-
+	
 	it "should invoke the controller method with a nested path" do
 		get "/controller/nested/hello-world"
 		

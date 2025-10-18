@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2014-2022, by Samuel Williams.
+# Copyright, 2014-2025, by Samuel Williams.
 
 module Utopia
 	class Controller
@@ -14,7 +14,7 @@ module Utopia
 			def top
 				@controllers.last
 			end
-
+			
 			def << controller
 				if top = self.top
 					# This ensures that most variables will be at the top and controllers can naturally interactive with instance variables:
@@ -42,7 +42,7 @@ module Utopia
 					raise KeyError.new(key)
 				end
 			end
-
+			
 			def to_hash
 				attributes = {}
 				
@@ -56,7 +56,7 @@ module Utopia
 				
 				return attributes
 			end
-
+			
 			def [] key
 				fetch("@#{key}".to_sym, nil)
 			end

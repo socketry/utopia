@@ -58,7 +58,7 @@ describe "Utopia Performance" do
 		expect(status).to be == 200
 		
 		benchmark("/welcome/index") do |i|
-			i.times { app.call(env) }
+			i.times{app.call(env)}
 		end
 	end
 	
@@ -69,7 +69,7 @@ describe "Utopia Performance" do
 		expect(status).to be == 200
 		
 		benchmark("/api/fetch") do |i|
-			i.times { app.call(env) }
+			i.times{app.call(env)}
 		end
 	end
 end

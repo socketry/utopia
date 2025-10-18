@@ -10,9 +10,11 @@ gemspec
 group :maintenance, optional: true do
 	gem "bake-gem"
 	gem "bake-modernize"
+	gem "bake-releases"
+	
+	gem "agent-context"
 	
 	gem "utopia-project"
-	gem "bake-releases"
 end
 
 group :development do
@@ -24,7 +26,10 @@ group :test do
 	gem "sus"
 	gem "covered"
 	gem "decode"
+	
 	gem "rubocop"
+	gem "rubocop-md"
+	gem "rubocop-socketry"
 	
 	gem "falcon"
 	gem "async-websocket"

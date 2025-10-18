@@ -57,7 +57,7 @@ def create(root: context.root)
 		
 		if File.exist?(destination_path)
 			buffer = File.read(destination_path).gsub("$UTOPIA_VERSION", Utopia::VERSION)
-			File.open(destination_path, "w") { |file| file.write(buffer) }
+			File.open(destination_path, "w") {|file| file.write(buffer)}
 		else
 			Console.warn(self) {"Could not open #{destination_path}, maybe it should be removed from CONFIGURATION_FILES?"}
 		end
@@ -119,11 +119,11 @@ def upgrade(root: context.root)
 			
 			FileUtils.copy_entry(source_path, destination_path)
 			buffer = File.read(destination_path).gsub("$UTOPIA_VERSION", Utopia::VERSION)
-			File.open(destination_path, "w") { |file| file.write(buffer) }
+			File.open(destination_path, "w") {|file| file.write(buffer)}
 		end
 		
 		context.lookup("utopia:environment:setup").call(root: root)
-	
+		
 		# Stage any files that have been changed or removed:
 		system("git", "add", "-u", chdir: root) or fail "could not add files"
 		

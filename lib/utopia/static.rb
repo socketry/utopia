@@ -15,7 +15,7 @@ module Utopia
 	# A middleware which serves static files from the specified root directory.
 	class Static
 		DEFAULT_CACHE_CONTROL = "public, max-age=3600".freeze
-
+		
 		# @param root [String] The root directory to serve files from.
 		# @param types [Array] The mime-types (and file extensions) to recognize/serve.
 		# @param cache_control [String] The cache-control header to set for static content.
@@ -27,7 +27,7 @@ module Utopia
 			
 			@cache_control = cache_control
 		end
-
+		
 		def freeze
 			return self if frozen?
 			
@@ -37,7 +37,7 @@ module Utopia
 			
 			super
 		end
-
+		
 		def fetch_file(path)
 			# We need file_path to be an absolute path for X-Sendfile to work correctly.
 			file_path = File.join(@root, path.components)
@@ -48,7 +48,7 @@ module Utopia
 				return nil
 			end
 		end
-
+		
 		attr :extensions
 		
 		LAST_MODIFIED = "Last-Modified".freeze

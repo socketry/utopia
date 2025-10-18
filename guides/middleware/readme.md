@@ -62,9 +62,9 @@ The {ruby Utopia::Controller} middleware provides flexible nested controllers wi
 ```ruby
 use Utopia::Controller,
 	# The root directory where `controller.rb` files can be found.
-	root: 'path/to/root',
+	root: "path/to/root",
 	# The base class to use for all controllers:
-	base: Utopia::Controller::Base,
+	base: Utopia::Controller::Base
 ```
 
 A controller is a file within the specified root directory (typically `pages`) with the name `controller.rb`. This code is dynamically loaded into an anonymous class and executed. The default controller has only a single function:
@@ -75,10 +75,10 @@ def passthrough(request, path)
 	
 	# This will cause the middleware to generate a response.
 	# def respond!(response)
-
+	
 	# This will cause the controller to skip the request.
 	# def ignore!
-
+	
 	# Request relative redirect. Respond with a redirect to the given target.
 	# def redirect! (target, status = 302)
 	
@@ -91,6 +91,8 @@ def passthrough(request, path)
 	# Succeed the request and immediately respond.
 	# def succeed!(status: 200, headers: {}, **options)
 	# options may include content: string or body: Enumerable (as per Rack specifications
+	
+	suceed!
 end
 ```
 
@@ -104,7 +106,7 @@ rewrite.extract_prefix id: Integer do
 	@user = User.find_by_id(@id)
 end
 
-on 'edit' do |request, path|
+on "edit" do |request, path|
 	if request.post?
 		@user.update_attributes(request[:user])
 	end

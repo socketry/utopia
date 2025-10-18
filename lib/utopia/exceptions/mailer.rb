@@ -154,7 +154,7 @@ module Utopia
 				
 				mail.text_part = Mail::Part.new
 				mail.text_part.body = generate_body(exception, env)
-			
+				
 				if body = extract_body(env) and body.size > 0
 					mail.attachments["body.bin"] = body
 				end
@@ -162,10 +162,10 @@ module Utopia
 				if @dump_environment
 					mail.attachments["environment.yaml"] = YAML.dump(env)
 				end
-
+				
 				return mail
 			end
-
+			
 			def send_notification(exception, env)
 				mail = generate_mail(exception, env)
 				
@@ -176,7 +176,7 @@ module Utopia
 				$stderr.puts mail_exception.to_s
 				$stderr.puts mail_exception.backtrace
 			end
-
+			
 			def extract_body(env)
 				if io = env["rack.input"]
 					io.rewind if io.respond_to?(:rewind)

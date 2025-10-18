@@ -5,7 +5,7 @@ use Utopia::Session,
 	expires_after: 5,
 	update_timeout: 1
 
-run lambda { |env|
+run do |env|
 	request = Rack::Request.new(env)
 	
 	if env[Rack::PATH_INFO] =~ /login/
@@ -21,4 +21,4 @@ run lambda { |env|
 	else
 		[404, {}, []]
 	end
-}
+end

@@ -13,7 +13,7 @@ module Utopia
 			def initialize(resource_path, resource_status, error_path, error_status)
 				@resource_path = resource_path
 				@resource_status = resource_status
-
+				
 				@error_path = error_path
 				@error_status = error_status
 				
@@ -47,7 +47,7 @@ module Utopia
 				if unhandled_error?(response) && location = @codes[response[0]]
 					error_request = env.merge(Rack::PATH_INFO => location, Rack::REQUEST_METHOD => Rack::GET)
 					error_response = @app.call(error_request)
-
+					
 					if error_response[0] >= 400
 						raise RequestFailure.new(env[Rack::PATH_INFO], response[0], location, error_response[0])
 					else

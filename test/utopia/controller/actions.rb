@@ -38,7 +38,7 @@ describe Utopia::Controller::Actions::Action do
 	
 	it "should match patterns" do
 		variable_action = action.define(["*", "summary", "*"]) {puts "variable_action"}
-			
+		
 		expect(action.matching(["10", "summary", "20"])).to be(:include?, variable_action)
 	end
 end

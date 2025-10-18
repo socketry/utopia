@@ -17,32 +17,32 @@ A simple CRUD controller might look like:
 ```ruby
 prepend Actions
 
-on 'index' do
+on "index" do
 	@users = User.all
 end
 
-on 'new' do |request|
+on "new" do |request|
 	@user = User.new
 	
 	if request.post?
-		@user.update_attributes(request.params['user'])
+		@user.update_attributes(request.params["user"])
 		
 		redirect! "index"
 	end
 end
 
-on 'edit' do |request|
-	@user = User.find(request.params['id'])
+on "edit" do |request|
+	@user = User.find(request.params["id"])
 	
 	if request.post?
-		@user.update_attributes(request.params['user'])
+		@user.update_attributes(request.params["user"])
 		
 		redirect! "index"
 	end
 end
 
-on 'delete' do |request|
-	User.find(request.params['id']).destroy
+on "delete" do |request|
+	User.find(request.params["id"]).destroy
 	
 	redirect! "index"
 end

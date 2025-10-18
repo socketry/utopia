@@ -60,7 +60,7 @@ module Utopia
 					@opening_tag = opening_tag
 					@closing_tag = closing_tag
 				end
-
+				
 				attr :buffer
 				attr :opening_tag
 				attr :closing_tag
@@ -108,15 +108,15 @@ module Utopia
 					raise UnbalancedTagError.new(@buffer, tag)
 				end
 			end
-
+			
 			def open_tag_begin(name, offset)
 				@current = ParsedTag.new(name, offset)
 			end
-
+			
 			def attribute(key, value)
 				@current.tag.attributes[key] = value
 			end
-
+			
 			def open_tag_end(self_closing)
 				if self_closing
 					@current.tag.closed = true
@@ -128,7 +128,7 @@ module Utopia
 				
 				@current = nil
 			end
-
+			
 			def close_tag(name, offset)
 				@current = @stack.pop
 				tag = @current.tag
@@ -143,19 +143,19 @@ module Utopia
 			def doctype(string)
 				@delegate.write(string)
 			end
-
+			
 			def comment(string)
 				@delegate.write(string)
 			end
-
+			
 			def instruction(string)
 				@delegate.write(string)
 			end
-
+			
 			def cdata(string)
 				@delegate.write(string[9..-4])
 			end
-
+			
 			def text(string)
 				@delegate.text(string)
 			end

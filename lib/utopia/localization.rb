@@ -166,7 +166,7 @@ module Utopia
 		def localized?(env)
 			# Ignore requests which match the ignored paths:
 			path_info = env[Rack::PATH_INFO]
-			return false if @ignore.any? { |pattern| path_info[pattern] != nil }
+			return false if @ignore.any?{|pattern| path_info[pattern] != nil}
 			
 			return true
 		end
@@ -202,7 +202,7 @@ module Utopia
 				response = @app.call(localized_env)
 				
 				break unless response[0] >= 400
-
+				
 				response[2].close if response[2].respond_to?(:close)
 			end
 			

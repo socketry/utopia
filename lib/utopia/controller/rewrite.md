@@ -19,14 +19,14 @@ rewrite.extract_prefix permalink: /(?<id>\d+)-(?<title>.*)/ do |request, path, m
 	end
 end
 
-on 'post' do
+on "post" do
 	# You can do further processing here.
 	fail! unless @post.published?
 	
 	@comments = @post.comments.first(5)
 end
 
-on 'edit' do
+on "edit" do
 	# You can do further processing here.
 	fail! unless @current_user&.editor?
 end

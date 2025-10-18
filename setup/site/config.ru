@@ -46,4 +46,4 @@ use Utopia::Static
 # Serve dynamic content:
 use Utopia::Content
 
-run lambda { |env| [404, {}, []] }
+run lambda {|env| [404, {}, []]}

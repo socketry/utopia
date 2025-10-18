@@ -45,7 +45,7 @@ def update(root: context.root)
 	# chmod -R g+w .                            # Change permissions
 	# chmod g-w .git/objects/pack/*             # Git pack files should be immutable
 	# chmod g+s `find . -type d`                # New files get group id of directory
-		
+	
 	# Set some useful defaults for the environment.
 	recipe = context.lookup("utopia:environment:update")
 	recipe.instance.update("environment", root: root) do |store|

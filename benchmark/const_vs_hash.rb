@@ -21,13 +21,13 @@ Benchmark.ips do |x|
 			Foo.const_get("Bar")
 		end
 	end
-
+	
 	x.report("const_get(:Bar)") do |i|
 		while (i -= 1) > 0
 			Foo.const_get(:Bar)
 		end
 	end
-
+	
 	x.report("Hash\#[]") do |i|
 		while (i -= 1) > 0
 			THINGS["Bar"]

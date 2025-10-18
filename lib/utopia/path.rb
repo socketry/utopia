@@ -57,9 +57,9 @@ module Utopia
 		
 		# Converts '+' into whitespace and hex encoded characters into their equivalent characters.
 		def self.unescape(string)
-			string.tr("+", " ").gsub(/((?:%[0-9a-fA-F]{2})+)/n) {
+			string.tr("+", " ").gsub(/((?:%[0-9a-fA-F]{2})+)/n) do
 				[$1.delete("%")].pack("H*")
-			}
+			end
 		end
 		
 		def self.[] path

@@ -35,7 +35,7 @@ Utopia includes a redirection middleware to redirect all root-level requests to 
 # in config.ru
 
 use Utopia::Redirection::Rewrite,
-	'/' => '/welcome/index'
+	"/" => "/welcome/index"
 ```
 
 The content for this page is stored in `pages/welcome/index.xnode`. The format of this page is a subset of HTML5 - open and close tags are strictly enforced.

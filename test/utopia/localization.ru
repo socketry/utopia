@@ -12,4 +12,4 @@ use Utopia::Controller,
 use Utopia::Static,
 	root: localization_spec_root
 
-run lambda { |env| [404, {}, []] }
+run lambda {|env| [404, {}, []]}

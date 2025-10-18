@@ -89,14 +89,14 @@ module Utopia
 			
 			super
 		end
-
+		
 		def call(env)
 			session_hash = prepare_session(env)
-
+			
 			status, headers, body = @app.call(env)
-
+			
 			update_session(env, session_hash, headers)
-
+			
 			return [status, headers, body]
 		end
 		
@@ -155,7 +155,7 @@ module Utopia
 			if values[:user_agent] != request.user_agent
 				raise PayloadError, "Invalid session because supplied user agent #{request.user_agent.inspect} does not match session user agent #{values[:user_agent].inspect}!"
 			end
-
+			
 			if expires_at = expires(values[:updated_at])
 				if expires_at < Time.now.utc
 					raise PayloadError, "Expired session cookie, user agent submitted a cookie that should have expired at #{expires_at}."

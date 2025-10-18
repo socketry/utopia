@@ -71,14 +71,14 @@ module Utopia
 			def process!(request, relative_path)
 				return nil
 			end
-
+			
 			# Copy the instance variables from the previous controller to the next controller (usually only a few). This allows controllers to share effectively the same instance variables while still being separate classes/instances.
 			def copy_instance_variables(from)
 				from.instance_variables.each do |name|
 					self.instance_variable_set(name, from.instance_variable_get(name))
 				end
 			end
-
+			
 			# Call into the next app as defined by rack.
 			def call(env)
 				self.class.controller.app.call(env)
@@ -98,7 +98,7 @@ module Utopia
 			def ignore!
 				throw :response, nil
 			end
-
+			
 			# Request relative redirect. Respond with a redirect to the given target.
 			def redirect!(target, status = 302)
 				status = HTTP::Status.new(status, 300...400)

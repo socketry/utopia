@@ -62,13 +62,13 @@ describe Utopia::Controller do
 		request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 		controller = TestController.new
 		variables << controller
-	
+		
 		result = controller.process!(request, Utopia::Path["success"])
 		expect(result).to be == [200, {}, []]
-	
+		
 		result = controller.process!(request, Utopia::Path["foo/bar/failure"])
 		expect(result).to be == [400, {}, ["Bad Request"]]
-	
+		
 		result = controller.process!(request, Utopia::Path["variable"])
 		expect(result).to be == nil
 		expect(variables.to_hash).to be == {:variable => :value}

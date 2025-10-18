@@ -89,7 +89,7 @@ describe Utopia::Content do
 		path = Utopia::Path.create("/index")
 		node = content.lookup_node(path)
 		expect(node).to be_a Utopia::Content::Node
-	
+		
 		status, headers, body = node.process!({}, {})
 		expect(body.join).to be == "<h1>Hello World</h1>"
 	end

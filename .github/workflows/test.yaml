@@ -5,9 +5,6 @@ on: [push, pull_request]
 permissions:
   contents: read
 
-env:
-  CONSOLE_OUTPUT: XTerm
-
 jobs:
   test:
     name: ${{matrix.ruby}} on ${{matrix.os}}
@@ -45,18 +42,6 @@ jobs:
         ruby-version: ${{matrix.ruby}}
         bundler-cache: true
     
-    - name: Installing packages (ubuntu)
-      if: matrix.os == 'ubuntu'
-      run: sudo apt-get install wget
-    
-    - name: Installing packages (macos)
-      if: matrix.os == 'macos'
-      run: brew install wget
-    
     - name: Run tests
       timeout-minutes: 10
-      run: |
-        git config --global user.email "samuel@oriontransfer.net"
-        git config --global user.name "Samuel Williams"
-        git config --global init.defaultBranch main
-        bundle exec bake test
+      run: bundle exec bake test
