@@ -5,6 +5,7 @@
 
 require_relative "utopia/version"
 
+require_relative "utopia/import_map"
 require_relative "utopia/content"
 require_relative "utopia/controller"
 require_relative "utopia/exceptions"
