@@ -5,6 +5,7 @@
   - Add agent context.
   - Better simplification of relative paths, e.g. `../../foo` is not modified to `foo`.
   - Move top level classes into `class Middleware` in their respective namespaces.
+  - Move `Utopia::Responder` into `Utopia::Controller` layer.
 
 ## v2.30.1
 

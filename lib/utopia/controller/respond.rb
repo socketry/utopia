@@ -4,7 +4,7 @@
 # Copyright, 2016-2025, by Samuel Williams.
 
 require_relative "../http"
-require_relative "../responder"
+require_relative "responder"
 
 module Utopia
 	module Controller
@@ -12,50 +12,6 @@ module Utopia
 		module Respond
 			def self.prepended(base)
 				base.extend(ClassMethods)
-			end
-			
-			module Handlers
-				module JSON
-					APPLICATION_JSON = HTTP::Accept::ContentType.new("application", "json").freeze
-					
-					def self.split(*arguments)
-						APPLICATION_JSON.split(*arguments)
-					end
-					
-					def self.call(context, request, media_range, object, **options)
-						if version = media_range.parameters["version"]
-							options[:version] = version.to_s
-						end
-						
-						context.succeed! content: object.to_json(options), type: APPLICATION_JSON
-					end
-				end
-				
-				module Passthrough
-					WILDCARD = HTTP::Accept::MediaTypes::MediaRange.new("*", "*").freeze
-					
-					def self.split(*arguments)
-						WILDCARD.split(*arguments)
-					end
-					
-					def self.call(context, request, media_range, object, **options)
-						# Do nothing.
-					end
-				end
-			end
-			
-			class Responder < Utopia::Responder
-				def with_json
-					@handlers << Handlers::JSON
-				end
-				
-				def with_passthrough
-					@handlers << Handlers::Passthrough
-				end
-				
-				def with(content_type, &block)
-					handle(content_type, &block)
-				end
 			end
 			
 			module ClassMethods
