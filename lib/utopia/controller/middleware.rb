@@ -21,10 +21,6 @@ module Utopia
 			# The controller filename.
 			CONTROLLER_RB = "controller.rb".freeze
 			
-			def self.[] request
-				request.env[VARIABLES_KEY]
-			end
-			
 			# @param root [String] The content root where controllers will be loaded from.
 			# @param base [Class] The base class for controllers.
 			def initialize(app, root: Utopia::default_root, base: Controller::Base)

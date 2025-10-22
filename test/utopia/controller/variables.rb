@@ -4,6 +4,7 @@
 # Copyright, 2016-2025, by Samuel Williams.
 
 require "utopia/controller/variables"
+require "rack/request"
 
 class TestController
 	attr_accessor :x, :y, :z
@@ -39,5 +40,20 @@ describe Utopia::Controller::Variables do
 		variables << a << b
 		
 		expect(variables.to_hash).to be == {x: 10, y: 20}
+	end
+	
+	describe Utopia::Controller do
+		it "returns variables from request env" do
+			variables = Utopia::Controller::Variables.new
+			request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
+			
+			expect(Utopia::Controller[request]).to be == variables
+		end
+		
+		it "returns nil when variables are not set" do
+			request = Rack::Request.new({})
+			
+			expect(Utopia::Controller[request]).to be_nil
+		end
 	end
 end

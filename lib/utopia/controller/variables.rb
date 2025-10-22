@@ -3,6 +3,8 @@
 # Released under the MIT License.
 # Copyright, 2014-2025, by Samuel Williams.
 
+require_relative "../middleware"
+
 module Utopia
 	module Controller
 		# Provides a stack-based instance variable lookup mechanism. It can flatten a stack of controllers into a single hash.
@@ -60,6 +62,10 @@ module Utopia
 			def [] key
 				fetch("@#{key}".to_sym, nil)
 			end
+		end
+		
+		def self.[] request
+			request.env[VARIABLES_KEY]
 		end
 	end
 end
