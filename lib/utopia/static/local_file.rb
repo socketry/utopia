@@ -8,7 +8,7 @@ require "digest/sha1"
 
 module Utopia
 	# A middleware which serves static files from the specified root directory.
-	class Static
+	module Static
 		# Represents a local file on disk which can be served directly, or passed upstream to sendfile.
 		class LocalFile
 			def initialize(root, path)

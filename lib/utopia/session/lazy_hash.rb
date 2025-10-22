@@ -4,7 +4,7 @@
 # Copyright, 2014-2022, by Samuel Williams.
 
 module Utopia
-	class Session
+	module Session
 		# A simple hash table which fetches it's values only when required.
 		class LazyHash
 			def initialize(&block)

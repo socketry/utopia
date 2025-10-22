@@ -8,7 +8,7 @@ require_relative "link"
 require "concurrent/map"
 
 module Utopia
-	class Content
+	module Content
 		# The file extension for markup nodes on disk.
 		XNODE_EXTENSION = ".xnode"
 		INDEX = "index"

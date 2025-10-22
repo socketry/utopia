@@ -11,10 +11,9 @@ require "xrb/builder"
 require "xrb/strings"
 
 require_relative "../path"
-require_relative "../locale"
 
 module Utopia
-	class Content
+	module Content
 		# Represents a link to some content with associated metadata.
 		class Link
 			# @param kind [Symbol] the kind of link.

@@ -8,7 +8,7 @@ require_relative "namespace"
 require "variant"
 
 module Utopia
-	class Content
+	module Content
 		# Tags which provide intrinsic behaviour within the content middleware.
 		module Tags
 			extend Namespace

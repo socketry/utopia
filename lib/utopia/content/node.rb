@@ -12,7 +12,7 @@ require_relative "document"
 require "pathname"
 
 module Utopia
-	class Content
+	module Content
 		# Represents an immutable node within the content hierarchy.
 		class Node
 			def initialize(controller, uri_path, request_path, file_path)

@@ -9,7 +9,7 @@ require "xrb/strings"
 require "xrb/tag"
 
 module Utopia
-	class Content
+	module Content
 		Tag = XRB::Tag
 		
 		# A hash which forces all keys to be symbols and fails with KeyError when strings are used.

@@ -6,7 +6,7 @@
 require_relative "../http"
 
 module Utopia
-	class Controller
+	module Controller
 		CONTENT_TYPE = HTTP::CONTENT_TYPE
 		
 		# The base implementation of a controller class.

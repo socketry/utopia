@@ -7,7 +7,7 @@ require "mime/types"
 
 module Utopia
 	# A middleware which serves static files from the specified root directory.
-	class Static
+	module Static
 		# Default mime-types which are common for files served over HTTP:
 		MIME_TYPES = {
 			:xiph => {

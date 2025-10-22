@@ -4,7 +4,7 @@
 # Copyright, 2014-2025, by Samuel Williams.
 
 module Utopia
-	class Controller
+	module Controller
 		# Provides a stack-based instance variable lookup mechanism. It can flatten a stack of controllers into a single hash.
 		class Variables
 			def initialize

@@ -7,7 +7,7 @@ require_relative "../http"
 require_relative "../responder"
 
 module Utopia
-	class Controller
+	module Controller
 		# A controller layer which provides a convenient way to respond to different requested content types. The order in which you add converters matters, as it determines how the incoming Accept: header is mapped, e.g. the first converter is also defined as matching the media range */*.
 		module Respond
 			def self.prepended(base)

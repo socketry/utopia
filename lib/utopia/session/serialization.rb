@@ -9,7 +9,7 @@ require "time"
 require "date"
 
 module Utopia
-	class Session
+	module Session
 		class Serialization
 			def initialize
 				@factory = MessagePack::Factory.new

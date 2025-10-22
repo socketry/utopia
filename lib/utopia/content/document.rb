@@ -8,7 +8,9 @@ require_relative "response"
 require_relative "markup"
 
 module Utopia
-	class Content
+	module Content
+		DEFERRED_TAG_NAME = "utopia:deferred".freeze
+		
 		# This error is raised if a tag doesn't match up when parsing.
 		class UnbalancedTagError < StandardError
 			def initialize(tag)

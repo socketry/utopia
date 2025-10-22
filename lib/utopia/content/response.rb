@@ -4,7 +4,7 @@
 # Copyright, 2010-2025, by Samuel Williams.
 
 module Utopia
-	class Content
+	module Content
 		# Compatibility with older versions of rack:
 		EXPIRES = "expires".freeze
 		CACHE_CONTROL = "cache-control".freeze

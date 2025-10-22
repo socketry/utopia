@@ -6,7 +6,7 @@
 require_relative "../http"
 
 module Utopia
-	class Controller
+	module Controller
 		# A controller layer which invokes functinality based on the request path.
 		# @example
 		# 	on '*' do |request, path|

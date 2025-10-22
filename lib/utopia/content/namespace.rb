@@ -4,7 +4,7 @@
 # Copyright, 2017-2022, by Samuel Williams.
 
 module Utopia
-	class Content
+	module Content
 		# A namespace which contains tags which can be rendered within a {Document}.
 		module Namespace
 			def self.extended(other)

@@ -7,7 +7,7 @@ require_relative "../http"
 require_relative "../path/matcher"
 
 module Utopia
-	class Controller
+	module Controller
 		# This controller layer rewrites the path before executing controller actions. When the rule matches, the supplied block is executed.
 		# @example
 		# 	prepend Rewrite
