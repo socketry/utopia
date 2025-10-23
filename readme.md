@@ -31,6 +31,13 @@ Please see the [project documentation](https://socketry.github.io/utopia/) for m
 
 Please see the [project releases](https://socketry.github.io/utopia/releases/index) for all releases.
 
+### v2.31.0
+
+  - Add agent context.
+  - Better simplification of relative paths, e.g. `../../foo` is not modified to `foo`.
+  - Move top level classes into `class Middleware` in their respective namespaces.
+  - Move `Utopia::Responder` into `Utopia::Controller` layer.
+
 ### v2.30.1
 
   - Minor compatibility fixes.

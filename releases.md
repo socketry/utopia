@@ -1,6 +1,6 @@
 # Releases
 
-## Unreleased
+## v2.31.0
 
   - Add agent context.
   - Better simplification of relative paths, e.g. `../../foo` is not modified to `foo`.
