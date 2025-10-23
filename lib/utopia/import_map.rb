@@ -357,7 +357,7 @@ module Utopia
 			
 			XRB::Builder.fragment do |builder|
 				builder.inline("script", type: "importmap") do
-					builder.text(json_data)
+					builder.raw(json_data)
 				end
 			end
 		end
