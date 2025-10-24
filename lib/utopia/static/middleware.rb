@@ -13,10 +13,10 @@ require "traces/provider"
 
 module Utopia
 	module Static
+		DEFAULT_CACHE_CONTROL = "public, max-age=3600".freeze
+		
 		# A middleware which serves static files from the specified root directory.
 		class Middleware
-			DEFAULT_CACHE_CONTROL = "public, max-age=3600".freeze
-			
 			# @param root [String] The root directory to serve files from.
 			# @param types [Array] The mime-types (and file extensions) to recognize/serve.
 			# @param cache_control [String] The cache-control header to set for static content.
