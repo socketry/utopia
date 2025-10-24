@@ -21,7 +21,7 @@ Please see the [project documentation](https://socketry.github.io/utopia/) for m
 
   - [Server Setup](https://socketry.github.io/utopia/guides/server-setup/index) - This guide explains how to deploy a `utopia` web application.
 
-  - [Installing JavaScript Libraries](https://socketry.github.io/utopia/guides/integrating-with-javascript/index) - Utopia integrates with Yarn and provides a [bake task](https://github.com/ioquatix/bake) to simplify deployment packages distributed using `yarn` that implement the `dist` sub-directory convention.
+  - [Integrating with JavaScript](https://socketry.github.io/utopia/guides/integrating-with-javascript/index) - This guide explains how to integrate JavaScript into your Utopia application.
 
   - [What is XNode?](https://socketry.github.io/utopia/guides/what-is-xnode/index) - This guide explains the `xnode` view layer and how it can be used to build efficient websites.
 

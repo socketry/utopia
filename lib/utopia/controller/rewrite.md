@@ -34,7 +34,7 @@ end
 
 In your `post.xnode`, as an example:
 
-```trenni
+```xrb
 <content:page>
 	<content:heading>Post #{attributes[:permalink][:id]} about #{attributes[:permalink][:title]}</content:heading>
 	

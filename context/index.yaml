@@ -19,10 +19,8 @@ files:
   title: Server Setup
   description: This guide explains how to deploy a `utopia` web application.
 - path: integrating-with-javascript.md
-  title: Installing JavaScript Libraries
-  description: Utopia integrates with Yarn and provides a [bake task](https://github.com/ioquatix/bake)
-    to simplify deployment packages distributed using `yarn` that implement the `dist`
-    sub-directory convention.
+  title: Integrating with JavaScript
+  description: This guide explains how to integrate JavaScript into your Utopia application.
 - path: what-is-xnode.md
   title: What is XNode?
   description: This guide explains the `xnode` view layer and how it can be used to
