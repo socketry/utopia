@@ -6,11 +6,10 @@
 require_relative "links"
 require_relative "response"
 require_relative "markup"
+require_relative "builder"
 
 module Utopia
 	module Content
-		DEFERRED_TAG_NAME = "utopia:deferred".freeze
-		
 		# This error is raised if a tag doesn't match up when parsing.
 		class UnbalancedTagError < StandardError
 			def initialize(tag)
@@ -135,9 +134,9 @@ module Utopia
 				node ||= lookup_tag(tag)
 				
 				if node
-					@current = State.new(@current, tag, node)
+					@current = Builder.new(@current, tag, node, tag.to_hash, indent: false)
 					
-					node.tag_begin(self, state) if node.respond_to?(:tag_begin)
+					node.tag_begin(self, @current) if node.respond_to?(:tag_begin)
 					
 					return node
 				end
@@ -184,7 +183,7 @@ module Utopia
 			end
 			
 			def render_node(node, attributes = {})
-				@current = State.new(@current, nil, node, attributes)
+				@current = Builder.new(@current, nil, node, attributes, indent: false)
 				
 				# We keep track of the first thing rendered by this document.
 				@first ||= @current
@@ -228,85 +227,6 @@ module Utopia
 			
 			def parent
 				@end_tags[-2]
-			end
-		end
-		
-		# The state of a single tag being rendered within a document instance.
-		class Document::State
-			def initialize(parent, tag, node, attributes = tag.to_hash)
-				@parent = parent
-				@tag = tag
-				@node = node
-				@attributes = attributes
-				
-				@buffer = XRB::MarkupString.new.force_encoding(Encoding::UTF_8)
-				@content = nil
-				
-				@deferred = []
-				
-				@tags = []
-			end
-			
-			attr :parent
-			attr :attributes
-			attr :content
-			attr :node
-			
-			# A list of all tags in order of rendering them, which have not been finished yet.
-			attr :tags
-			
-			attr :deferred
-			
-			def defer(value = nil, &block)
-				@deferred << block
-				
-				Tag.closed(DEFERRED_TAG_NAME, :id => @deferred.size - 1)
-			end
-			
-			def [](key)
-				@attributes[key]
-			end
-			
-			def call(document)
-				@content = @buffer
-				@buffer = XRB::MarkupString.new.force_encoding(Encoding::UTF_8)
-				
-				if node.respond_to? :call
-					node.call(document, self)
-				else
-					document.parse_markup(@content)
-				end
-				
-				return @buffer
-			end
-			
-			def write(string)
-				@buffer << string
-			end
-			
-			def text(string)
-				XRB::Markup.append(@buffer, string)
-			end
-			
-			def tag_complete(tag)
-				tag.write(@buffer)
-			end
-			
-			# Whether this state has any nested tags.
-			def empty?
-				@tags.empty?
-			end
-			
-			def tag_begin(tag)
-				# raise ArgumentError.new("tag_begin: #{tag} is tag.self_closed?") if tag.self_closed?
-				
-				@tags << tag
-				tag.write_opening_tag(@buffer)
-			end
-			
-			def tag_end(tag)
-				raise UnbalancedTagError.new(tag) unless @tags.pop.name == tag.name
-				tag.write_closing_tag(@buffer)
 			end
 		end
 	end
