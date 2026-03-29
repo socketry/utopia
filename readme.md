@@ -31,6 +31,10 @@ Please see the [project documentation](https://socketry.github.io/utopia/) for m
 
 Please see the [project releases](https://socketry.github.io/utopia/releases/index) for all releases.
 
+### Unreleasd
+
+  - **Security** Fix handling of redirects that start with `//` to prevent open redirect vulnerabilities.
+
 ### v2.31.0
 
   - Add agent context.
