@@ -1,5 +1,9 @@
 # Releases
 
+## Unreleasd
+
+  - **Security** Fix handling of redirects that start with `//` to prevent open redirect vulnerabilities.
+
 ## v2.31.0
 
   - Add agent context.

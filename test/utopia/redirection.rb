@@ -17,6 +17,15 @@ describe Utopia::Redirection do
 		expect(last_response.headers["cache-control"]).to be(:include?, "max-age=86400")
 	end
 	
+	it "should not allow open redirect via protocol-relative URL" do
+		get "//evil.com/"
+		
+		# Must not redirect to //evil.com/index (external host)
+		if last_response.status == 307
+			expect(last_response.headers["location"]).not.to start_with("//")
+		end
+	end
+	
 	it "should be permanently moved" do
 		get "/a"
 		

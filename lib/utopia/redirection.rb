@@ -89,12 +89,15 @@ module Utopia
 				"max-age=#{self.max_age}"
 			end
 			
-			def headers(location)
-				{HTTP::LOCATION => location, HTTP::CACHE_CONTROL => self.cache_control}
+			def make_headers(location)
+				{
+					HTTP::LOCATION => location,
+					HTTP::CACHE_CONTROL => self.cache_control
+				}
 			end
 			
 			def redirect(location)
-				return [self.status, self.headers(location), []]
+				return [self.status, self.make_headers(location), []]
 			end
 			
 			def [] path
@@ -102,7 +105,10 @@ module Utopia
 			end
 			
 			def call(env)
-				path = env[Rack::PATH_INFO]
+				# Normalize the path to remove redundant slashes, `.` and `..` segments.
+				# This prevents protocol-relative redirect URLs (e.g. //evil.com/index)
+				# from being generated when PATH_INFO contains a double leading slash.
+				path = Path.create(env[Rack::PATH_INFO]).simplify.to_s
 				
 				if redirection = self[path]
 					return redirection
