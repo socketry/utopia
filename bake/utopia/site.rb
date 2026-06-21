@@ -67,10 +67,10 @@ def create(root: context.root)
 	
 	context.lookup("utopia:environment:setup").call(root: root)
 	
-	if !File.exist?(".git")
+	if !File.exist?(File.join(root, ".git"))
 		Console.info(self){"Setting up git repository..."}
 		
-		system("git", "init", chdir: root) or warn "could not create git repository"
+		system("git", "init", "--initial-branch=main", chdir: root) or warn "could not create git repository"
 		system("git", "add", ".", chdir: root) or warn "could not add all files"
 		system("git", "commit", "-q", "-m", "Initial Utopia v#{Utopia::VERSION} site.", chdir: root) or warn "could not commit files"
 	end

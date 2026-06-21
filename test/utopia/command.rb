@@ -95,8 +95,6 @@ describe "utopia command" do
 	end
 	
 	it "can generate sample site, server and push to the server" do
-		# This assumes your default branch is "main". We should probably be more flexible around this.
-		# git config --global init.defaultBranch main
 		Dir.mktmpdir("test") do |dir|
 			site_path = File.join(dir, "site")
 			FileUtils.mkdir_p(site_path)
@@ -108,7 +106,12 @@ describe "utopia command" do
 			install_packages(server_path)
 			
 			system("bundle", "exec", "bake", "utopia:site:create", chdir: site_path, exception: true)
+			branch = IO.popen(["git", "branch", "--show-current"], chdir: site_path, &:read)
+			expect(branch).to be == "main\n"
+			
 			system("bundle", "exec", "bake", "utopia:server:create", chdir: server_path, exception: true)
+			branch = IO.popen(["git", "branch", "--show-current"], chdir: server_path, &:read)
+			expect(branch).to be == "main\n"
 			
 			system("git", "push", "--set-upstream", server_path, "main", chdir: site_path, exception: true)
 			
