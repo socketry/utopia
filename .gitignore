@@ -2,6 +2,7 @@
 /.context
 /.bundle
 /pkg
+/vendor
 /gems.locked
 /.covered.db
 /external

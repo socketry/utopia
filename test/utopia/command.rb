@@ -27,6 +27,10 @@ describe "utopia command" do
 	
 	REQUIRED_GEMS = ["bake", "bake-test", "sus", "covered", "rack-test", "sus-fixtures-async-http", "falcon", "net-smtp", "benchmark-http", "protocol-rack"]
 	
+	def bundle_path
+		File.join(utopia_path, "vendor/bundle")
+	end
+	
 	def install_packages(dir)
 		gems_path = File.join(dir, "gems.rb")
 		File.open(gems_path, "w") do |file|
@@ -37,7 +41,7 @@ describe "utopia command" do
 			end
 		end
 		
-		system("bundle", "config", "set", "path", "vendor/bundle", chdir: dir)
+		system("bundle", "config", "set", "path", bundle_path, chdir: dir)
 		system("bundle", "install", chdir: dir)
 	end
 	
