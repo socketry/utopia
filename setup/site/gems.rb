@@ -18,7 +18,6 @@ gem "net-smtp"
 group :development do
 	gem "bake-test"
 	gem "rack-test"
-	gem "guard-falcon", require: false
 	
 	gem "sus"
 	gem "sus-fixtures-async-http"

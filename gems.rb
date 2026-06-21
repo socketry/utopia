@@ -41,7 +41,5 @@ group :test do
 	
 	gem "benchmark-ips"
 	
-	gem "guard-falcon"
-	
 	gem "rack-test"
 end
