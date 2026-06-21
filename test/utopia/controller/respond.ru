@@ -9,4 +9,4 @@ use Utopia::Controller,
 use Utopia::Content,
 	root: File.expand_path(".respond", __dir__)
 
-run lambda {|env| [404, {}, []]}
+run lambda{|env| [404, {}, []]}

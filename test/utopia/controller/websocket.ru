@@ -2,4 +2,4 @@
 
 use Utopia::Controller, root: File.expand_path(".websocket", __dir__)
 
-run lambda {|env| [404, {}, []]}
+run lambda{|env| [404, {}, []]}

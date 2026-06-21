@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2025, by Samuel Williams.
+# Copyright, 2016-2026, by Samuel Williams.
 
 require "utopia/redirection"
 require "a_rack_application"

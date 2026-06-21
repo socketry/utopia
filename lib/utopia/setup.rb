@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2010-2025, by Samuel Williams.
+# Copyright, 2010-2026, by Samuel Williams.
 
 require "yaml"
 require "securerandom"
@@ -93,7 +93,7 @@ module Utopia
 			path = environment_path(variant)
 			
 			if File.exist?(path)
-				Console.debug(self) {"Loading environment at path: #{path.inspect}"}
+				Console.debug(self){"Loading environment at path: #{path.inspect}"}
 				
 				# Load the YAML environment file:
 				if environment = YAML.load_file(path)
@@ -105,7 +105,7 @@ module Utopia
 				
 				return true
 			else
-				Console.debug(self) {"Ignoring environment at path: #{path.inspect} (file not found)"}
+				Console.debug(self){"Ignoring environment at path: #{path.inspect} (file not found)"}
 				
 				return false
 			end

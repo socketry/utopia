@@ -3,4 +3,4 @@
 use Utopia::Content,
 	root: File.expand_path(".content", __dir__)
 
-run lambda {|env| [404, {}, []]}
+run lambda{|env| [404, {}, []]}

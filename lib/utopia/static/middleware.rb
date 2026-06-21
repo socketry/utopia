@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2025, by Samuel Williams.
+# Copyright, 2025-2026, by Samuel Williams.
 
 require_relative "../middleware"
 require_relative "../localization"
@@ -113,7 +113,7 @@ module Utopia
 					path_info: path_info,
 				}
 				
-				Traces.trace("utopia.static.respond", attributes: attributes) {super}
+				Traces.trace("utopia.static.respond", attributes: attributes){super}
 			end
 		end
 	end

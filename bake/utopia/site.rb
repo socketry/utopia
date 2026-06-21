@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2017-2025, by Samuel Williams.
+# Copyright, 2017-2026, by Samuel Williams.
 # Copyright, 2020, by Michael Adams.
 
 def initialize(...)
@@ -31,7 +31,7 @@ SITE_ROOT = File.join(SETUP_ROOT, "site")
 
 # Create a new local Utopia website using the default template.
 def create(root: context.root)
-	Console.debug(self) {"Setting up site in #{root} for Utopia v#{Utopia::VERSION}..."}
+	Console.debug(self){"Setting up site in #{root} for Utopia v#{Utopia::VERSION}..."}
 	
 	DIRECTORIES.each do |directory|
 		FileUtils.mkdir_p(File.join(root, directory))
@@ -57,9 +57,9 @@ def create(root: context.root)
 		
 		if File.exist?(destination_path)
 			buffer = File.read(destination_path).gsub("$UTOPIA_VERSION", Utopia::VERSION)
-			File.open(destination_path, "w") {|file| file.write(buffer)}
+			File.open(destination_path, "w"){|file| file.write(buffer)}
 		else
-			Console.warn(self) {"Could not open #{destination_path}, maybe it should be removed from CONFIGURATION_FILES?"}
+			Console.warn(self){"Could not open #{destination_path}, maybe it should be removed from CONFIGURATION_FILES?"}
 		end
 	end
 	
@@ -68,7 +68,7 @@ def create(root: context.root)
 	context.lookup("utopia:environment:setup").call(root: root)
 	
 	if !File.exist?(".git")
-		Console.info(self) {"Setting up git repository..."}
+		Console.info(self){"Setting up git repository..."}
 		
 		system("git", "init", chdir: root) or warn "could not create git repository"
 		system("git", "add", ".", chdir: root) or warn "could not add all files"
@@ -95,7 +95,7 @@ end
 def upgrade(root: context.root)
 	message = "Upgrade to utopia v#{Utopia::VERSION}."
 	
-	Console.info(self) {"Upgrading #{root}..."}
+	Console.info(self){"Upgrading #{root}..."}
 	
 	commit_changes(root, message) do
 		DIRECTORIES.each do |directory|
@@ -106,7 +106,7 @@ def upgrade(root: context.root)
 			path = File.join(root, path)
 			
 			if File.exist?(path)
-				Console.info(self) {"Removing #{path}..."}
+				Console.info(self){"Removing #{path}..."}
 				FileUtils.rm_rf(path)
 			end
 		end
@@ -115,11 +115,11 @@ def upgrade(root: context.root)
 			source_path = File.join(SITE_ROOT, configuration_file)
 			destination_path = File.join(root, configuration_file)
 			
-			Console.info(self) {"Updating #{destination_path}..."}
+			Console.info(self){"Updating #{destination_path}..."}
 			
 			FileUtils.copy_entry(source_path, destination_path)
 			buffer = File.read(destination_path).gsub("$UTOPIA_VERSION", Utopia::VERSION)
-			File.open(destination_path, "w") {|file| file.write(buffer)}
+			File.open(destination_path, "w"){|file| file.write(buffer)}
 		end
 		
 		context.lookup("utopia:environment:setup").call(root: root)
@@ -166,7 +166,7 @@ def move_static!(root)
 		if File.lstat(new_static_path).symlink?
 			FileUtils.rm_f new_static_path
 		else
-			Console.warn(self) {"Can't move pages/_static to public/_static, destination already exists."}
+			Console.warn(self){"Can't move pages/_static to public/_static, destination already exists."}
 			return
 		end
 	end

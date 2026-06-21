@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2025, by Samuel Williams.
+# Copyright, 2009-2026, by Samuel Williams.
 # Copyright, 2015, by Huba Nagy.
 
 require_relative "markup"
@@ -145,7 +145,7 @@ module Utopia
 				end
 				
 				def [] key
-					state.attributes.fetch(key) {document.attributes[key]}
+					state.attributes.fetch(key){document.attributes[key]}
 				end
 				
 				alias current state

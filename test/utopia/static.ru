@@ -2,4 +2,4 @@
 
 use Utopia::Static, root: File.expand_path(".static", __dir__)
 
-run lambda {|env| [404, {}, []]}
+run lambda{|env| [404, {}, []]}

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2025, by Samuel Williams.
+# Copyright, 2016-2026, by Samuel Williams.
 
 require "website"
 require "benchmark/http"
@@ -16,7 +16,7 @@ describe "website" do
 	it "should be responsive" do
 		spider.fetch(statistics, client, endpoint.url) do |method, uri, response|
 			if response.failure?
-				Console.error(endpoint) {"#{method} #{uri} -> #{response.status}"}
+				Console.error(endpoint){"#{method} #{uri} -> #{response.status}"}
 			end
 		end.wait
 		

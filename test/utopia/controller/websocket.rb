@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2019-2025, by Samuel Williams.
+# Copyright, 2019-2026, by Samuel Williams.
 
 require "rack/test"
 require "utopia/controller"
@@ -30,7 +30,7 @@ describe Utopia::Controller do
 		
 		it "can connect to websocket" do
 			mock(client_endpoint) do |mock|
-				mock.replace(:path) {"/server/events"}
+				mock.replace(:path){"/server/events"}
 			end
 			
 			Async::WebSocket::Client.connect(client_endpoint) do |connection|

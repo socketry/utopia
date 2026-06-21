@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2018-2025, by Samuel Williams.
+# Copyright, 2018-2026, by Samuel Williams.
 
 # Update environment variables in config/environment.yaml
 def initialize(...)
@@ -24,7 +24,7 @@ end
 # @parameter root [String] The root directory of the project.
 def defaults(name, root: context.root)
 	update_environment(root, name) do |store|
-		Console.info(self) {"Setting up defaults for environment #{name}..."}
+		Console.info(self){"Setting up defaults for environment #{name}..."}
 		# Set some useful defaults for the environment.
 		store["UTOPIA_SESSION_SECRET"] ||= SecureRandom.hex(40)
 	end
@@ -40,10 +40,10 @@ def update(name, root: context.root, **variables)
 			key = key.to_s
 			
 			if value && !value.empty?
-				Console.info(self) {"ENV[#{key.inspect}] will default to #{value.inspect} unless otherwise specified."}
+				Console.info(self){"ENV[#{key.inspect}] will default to #{value.inspect} unless otherwise specified."}
 				store[key] = value
 			else
-				Console.info(self) {"ENV[#{key.inspect}] will be unset unless otherwise specified."}
+				Console.info(self){"ENV[#{key.inspect}] will be unset unless otherwise specified."}
 				store.delete(key)
 			end
 		end
@@ -63,10 +63,10 @@ def read(name, root: context.root)
 	environment_path = self.environment_path(root, name)
 	
 	if File.exist?(environment_path)
-		Console.debug(self) {"Loading environment #{name} from #{environment_path}..."}
+		Console.debug(self){"Loading environment #{name} from #{environment_path}..."}
 		YAML.load_file(environment_path)
 	else
-		Console.debug(self) {"No environment #{name} found at #{environment_path}."}
+		Console.debug(self){"No environment #{name} found at #{environment_path}."}
 		{}
 	end
 end

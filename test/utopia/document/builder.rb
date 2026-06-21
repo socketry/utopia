@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2025, by Samuel Williams.
+# Copyright, 2025-2026, by Samuel Williams.
 
-require 'utopia/content/builder'
-require 'utopia/content/tags'
-require 'xrb/builder'
+require "utopia/content/builder"
+require "utopia/content/tags"
+require "xrb/builder"
 
 describe Utopia::Content::Builder do
 	it "should inherit from XRB::Builder" do
@@ -22,18 +22,18 @@ describe Utopia::Content::Builder do
 	end
 	
 	it "should default attributes to tag.to_hash" do
-		tag = XRB::Tag.new('div', false, {'id' => 'test'})
+		tag = XRB::Tag.new("div", false, {"id" => "test"})
 		
 		builder = Utopia::Content::Builder.new(nil, tag, nil)
 		
-		expect(builder.attributes).to be == {'id' => 'test'}
+		expect(builder.attributes).to be == {"id" => "test"}
 	end
 	
 	it "should support fragment rendering via build_markup protocol" do
 		builder = Utopia::Content::Builder.new(nil, nil, nil, {})
 		
 		fragment = XRB::Builder.fragment do |builder|
-			builder.inline('p') do
+			builder.inline("p") do
 				builder.text "Hello from fragment"
 			end
 		end
@@ -57,7 +57,7 @@ describe Utopia::Content::Builder do
 		expect(builder.tags).to be == []
 		expect(builder).to be(:empty?)
 		
-		tag = XRB::Tag.new('div', false, {})
+		tag = XRB::Tag.new("div", false, {})
 		builder.tag_begin(tag)
 		
 		expect(builder.tags).to be == [tag]
@@ -69,7 +69,7 @@ describe Utopia::Content::Builder do
 		
 		expect(builder.deferred).to be == []
 		
-		deferred_tag = builder.defer { "deferred content" }
+		deferred_tag = builder.defer{"deferred content"}
 		
 		expect(builder.deferred.size).to be == 1
 		expect(deferred_tag.name).to be == "utopia:deferred"
@@ -99,7 +99,7 @@ describe Utopia::Content::Builder do
 		
 		# Use XRB::Builder.fragment which implements build_markup
 		fragment = XRB::Builder.fragment do |b|
-			b.inline('p') { b.text "Safe HTML" }
+			b.inline("p"){b.text "Safe HTML"}
 		end
 		
 		builder.text(fragment)
