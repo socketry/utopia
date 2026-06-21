@@ -9,8 +9,5 @@ To start the development server, simply execute
 	> bake
 	Generating transient session key for development...
 	20:57:36 - INFO - Starting Falcon HTTP server on localhost:9292
-	20:57:36 - INFO - Guard::RSpec is running
-	20:57:36 - INFO - Guard is now watching at '...'
-	[1] guard(main)>
 
 Then browse https://localhost:9292 (or as specified) to see your new site.

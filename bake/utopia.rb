@@ -15,5 +15,5 @@ end
 def development
 	self.environment
 	
-	exec("guard", "-g", "development")
+	exec("falcon", "serve")
 end
