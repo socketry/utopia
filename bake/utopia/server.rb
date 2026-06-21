@@ -31,7 +31,10 @@ SERVER_ROOT = File.join(SETUP_ROOT, "server")
 def update(root: context.root)
 	# It's okay to call this on an existing repo, it will only update config as required to enable --shared.
 	# --shared allows multiple users to access the site with the same group.
-	system("git", "init", "--shared", chdir: root) or fail "could not initialize repository"
+	arguments = ["git", "init", "--shared"]
+	arguments << "--initial-branch=main" unless File.exist?(File.join(root, ".git"))
+	
+	system(*arguments, chdir: root) or fail "could not initialize repository"
 	
 	system("git", "config", "receive.denyCurrentBranch", "ignore", chdir: root) or fail "could not set configuration"
 	system("git", "config", "core.worktree", root, chdir: root) or fail "could not set configuration"
