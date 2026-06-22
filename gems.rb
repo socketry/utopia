@@ -21,7 +21,6 @@ end
 
 group :development do
 	gem "json"
-	gem "rackula"
 end
 
 group :test do
@@ -40,6 +39,4 @@ group :test do
 	gem "bake-test-external"
 	
 	gem "benchmark-ips"
-	
-	gem "rack-test"
 end

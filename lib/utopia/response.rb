@@ -35,40 +35,12 @@ module Utopia
 			case response
 			when Protocol::HTTP::Response
 				response
-			when Array
-				Protocol::HTTP::Response[*response]
 			else
 				if response.respond_to?(:to_protocol_response)
 					response.to_protocol_response
-				elsif response.respond_to?(:to_ary)
-					Protocol::HTTP::Response[*response.to_ary]
 				else
 					response
 				end
-			end
-		end
-		
-		# Convert a response-like value to a Rack response tuple.
-		def self.to_rack(response)
-			return response if response.is_a?(Array)
-			
-			response = self.wrap(response)
-			
-			case response
-			when Protocol::HTTP::Response
-				headers = {}
-				
-				response.headers.each do |key, value|
-					if existing = headers[key]
-						headers[key] = "#{existing}\n#{value}"
-					else
-						headers[key] = value.to_s
-					end
-				end
-				
-				[response.status, headers, response.body || []]
-			else
-				response
 			end
 		end
 		

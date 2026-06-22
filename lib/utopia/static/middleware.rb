@@ -94,20 +94,17 @@ module Utopia
 			end
 			
 			def call(request)
-				legacy = Utopia::Middleware.legacy_request?(request)
-				request = Utopia::Middleware.request(request)
-				
 				path_info = request.path_info
 				extension = File.extname(path_info)
 				
 				if @extensions.key?(extension.downcase)
 					if response = self.respond(request, path_info, extension)
-						return Utopia::Middleware.response(response, legacy)
+						return response
 					end
 				end
 				
 				# else if no file was found:
-				return Utopia::Middleware.response(@app.call(request), legacy)
+				return @app.call(request)
 			end
 		end
 		

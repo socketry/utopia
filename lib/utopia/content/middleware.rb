@@ -102,9 +102,6 @@ module Utopia
 			end
 			
 			def call(request)
-				legacy = Utopia::Middleware.legacy_request?(request)
-				request = Utopia::Middleware.request(request)
-				
 				path = Path.create(request.path_info)
 				
 				# Check if the request is to a non-specific index. This only works for requests with a given name:
@@ -115,17 +112,17 @@ module Utopia
 				if File.directory? directory_path
 					index_path = [basename, INDEX]
 					
-					return Utopia::Middleware.response(Utopia::Response[307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []], legacy)
+					return Utopia::Response[307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []]
 				end
 				
 				locale = request[Localization::CURRENT_LOCALE_KEY]
 				if link = @links.for(path, locale)
 					if response = self.respond(link, request)
-						return Utopia::Middleware.response(response, legacy)
+						return response
 					end
 				end
 				
-				return Utopia::Middleware.response(@app.call(request), legacy)
+				return @app.call(request)
 			end
 			
 			private

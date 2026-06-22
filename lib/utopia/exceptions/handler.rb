@@ -29,11 +29,8 @@ module Utopia
 			end
 			
 			def call(request)
-				legacy = Utopia::Middleware.legacy_request?(request)
-				request = Utopia::Middleware.request(request)
-				
 				begin
-					return Utopia::Middleware.response(@app.call(request), legacy)
+					return @app.call(request)
 				rescue Exception => exception
 					Console.warn(self, "An error occurred while processing the request.", error: exception)
 					
@@ -48,11 +45,11 @@ module Utopia
 						error_response = Response.wrap(@app.call(error_request))
 						error_response.status = 500
 						
-						return Utopia::Middleware.response(error_response, legacy)
+						return error_response
 					rescue Exception => exception
 						# If redirection fails, we also finish with a fatal error:
 						Console.error(self, "An error occurred while invoking the error handler.", error: exception)
-						return Utopia::Middleware.response(Response[500, {"content-type" => "text/plain"}, ["An error occurred while processing the request."]], legacy)
+						return Response[500, {"content-type" => "text/plain"}, ["An error occurred while processing the request."]]
 					end
 				end
 			end

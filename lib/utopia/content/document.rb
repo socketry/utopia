@@ -41,7 +41,7 @@ module Utopia
 			
 			# @returns [Path] The original request path, if known.
 			def request_path
-				Path[request.env["REQUEST_PATH"]]
+				Path[request.attributes["REQUEST_PATH"]]
 			end
 			
 			protected def current_base_uri_path
@@ -87,7 +87,7 @@ module Utopia
 				MarkupParser.parse(markup, self)
 			end
 			
-			# The Rack::Request for this document.
+			# The request for this document.
 			attr :request
 			
 			# Per-document global attributes.

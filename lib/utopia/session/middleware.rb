@@ -26,7 +26,6 @@ module Utopia
 			SECRET_KEY = "UTOPIA_SESSION_SECRET".freeze
 			
 			SESSION_KEY = "utopia.session".freeze
-			RACK_SESSION = "rack.session".freeze
 			CIPHER_ALGORITHM = "aes-256-cbc"
 			
 			# The session will expire if no requests were made within 24 hours:
@@ -40,7 +39,7 @@ module Utopia
 			# @param same_site [Symbol, String] Controls how the cookie is provided to the site.
 			# @param expires_after [String] The cache-control header to set for static content.
 			# @param options [Hash<Symbol,Object>] Additional defaults used for generating the session cookie.
-			def initialize(app, session_name: RACK_SESSION, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, same_site: :lax, maximum_size: MAXIMUM_SIZE, **options)
+			def initialize(app, session_name: SESSION_KEY, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, same_site: :lax, maximum_size: MAXIMUM_SIZE, **options)
 				@app = app
 				
 				@session_name = session_name
@@ -95,16 +94,13 @@ module Utopia
 			end
 			
 			def call(request)
-				legacy = Utopia::Middleware.legacy_request?(request)
-				request = Utopia::Middleware.request(request)
-				
 				session_hash = prepare_session(request)
 				
 				response = Response.wrap(@app.call(request))
 				
 				update_session(session_hash, response.headers)
 				
-				return Utopia::Middleware.response(response, legacy)
+				return response
 			end
 			
 			protected
@@ -115,7 +111,6 @@ module Utopia
 				end
 				
 				request[SESSION_KEY] = session
-				request[RACK_SESSION] = session
 			end
 			
 			def update_session(session_hash, headers)

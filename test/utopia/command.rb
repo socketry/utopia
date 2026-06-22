@@ -25,7 +25,7 @@ describe "utopia command" do
 		return gaccess == "6" || gaccess == "7"
 	end
 	
-	REQUIRED_GEMS = ["bake", "bake-test", "sus", "covered", "rack-test", "sus-fixtures-async-http", "falcon", "net-smtp", "benchmark-http", "protocol-rack"]
+	REQUIRED_GEMS = ["bake", "bake-test", "sus", "covered", "sus-fixtures-async-http", "falcon", "net-smtp", "benchmark-http"]
 	
 	def bundle_path
 		File.join(utopia_path, "vendor/bundle")
@@ -50,7 +50,7 @@ describe "utopia command" do
 		
 		system("bundle", "exec", "bake", "utopia:site:create", chdir: root, exception: true)
 		
-		expected_files = [".git", "gems.rb", "gems.locked", "readme.md", "bake.rb", "config.ru", "lib", "pages", "public", "test"]
+		expected_files = [".git", "gems.rb", "gems.locked", "readme.md", "bake.rb", "config", "lib", "pages", "public", "test"]
 		site_files = Dir.entries(root)
 		
 		expected_files.each do |file|
@@ -114,13 +114,13 @@ describe "utopia command" do
 		
 		system("git", "push", "--set-upstream", server_path, "main", chdir: site_path, exception: true)
 		
-		expected_files = %W[.git gems.rb gems.locked readme.md bake.rb config.ru lib pages public]
+		expected_files = %W[.git gems.rb gems.locked readme.md bake.rb config lib pages public]
 		server_files = Dir.entries(server_path)
 		
 		expected_files.each do |file|
 			expect(server_files).to be(:include?, file)
 		end
 		
-		expect(File.executable? File.join(server_path, "config.ru")).to be == true
+		expect(File.file? File.join(server_path, "config/application.rb")).to be == true
 	end
 end

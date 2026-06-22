@@ -3,11 +3,11 @@
 # Released under the MIT License.
 # Copyright, 2019-2026, by Samuel Williams.
 
-require "rack/test"
 require "utopia/controller"
+require "utopia/application"
 
 require "async/websocket/client"
-require "async/websocket/adapters/rack"
+require "async/websocket/adapters/http"
 
 require "sus/fixtures/async/http/server_context"
 
@@ -18,8 +18,13 @@ describe Utopia::Controller do
 	include Sus::Fixtures::Async::HTTP::ServerContext
 	
 	with Async::WebSocket::Client do
-		let(:rack_app) {Rack::Builder.parse_file(File.expand_path("websocket.ru", __dir__))}
-		let(:app) {::Protocol::Rack::Adapter.new(rack_app)}
+		let(:app) do
+			root = File.expand_path(".websocket", __dir__)
+			
+			Utopia::Application.build do
+				use Utopia::Controller, root: root
+			end
+		end
 		
 		it "fails for normal requests" do
 			response = client.get "/server/events"

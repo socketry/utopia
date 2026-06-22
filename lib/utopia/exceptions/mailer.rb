@@ -26,7 +26,7 @@ module Utopia
 			# @param from [String] The from address for error reports.
 			# @param subject [String] The subject template which can access attributes defined by `#attributes_for`.
 			# @param delivery_method [Object] The delivery method as required by the mail gem.
-			# @param dump_environment [Boolean] Attach `env` as `environment.yaml` to the error report.
+			# @param dump_environment [Boolean] Attach request attributes as `attributes.yaml` to the error report.
 			def initialize(app, to: "postmaster", from: DEFAULT_FROM, subject: DEFAULT_SUBJECT, delivery_method: LOCAL_SMTP, dump_environment: false)
 				@app = app
 				
@@ -50,11 +50,8 @@ module Utopia
 			end
 			
 			def call(request)
-				legacy = Utopia::Middleware.legacy_request?(request)
-				request = Utopia::Middleware.request(request)
-				
 				begin
-					return Utopia::Middleware.response(@app.call(request), legacy)
+					return @app.call(request)
 				rescue => exception
 					send_notification exception, request
 					
@@ -105,7 +102,7 @@ module Utopia
 				
 				io.puts "#{request.method} #{request.url}"
 				
-				# TODO embed `rack.input` if it's textual?
+				# TODO embed the request body if it's textual?
 				# TODO dump and embed `utopia.variables`?
 				
 				io.puts

@@ -118,16 +118,13 @@ module Utopia
 			end
 			
 			def call(request)
-				legacy = Utopia::Middleware.legacy_request?(request)
-				request = Utopia::Middleware.request(request)
-				
 				request[VARIABLES_KEY] ||= Variables.new
 				
 				if result = invoke_controllers(request)
-					return Utopia::Middleware.response(result, legacy)
+					return result
 				end
 				
-				return Utopia::Middleware.response(@app.call(request), legacy)
+				return @app.call(request)
 			end
 		end
 	end

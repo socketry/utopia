@@ -4,6 +4,7 @@
 # Copyright, 2014-2025, by Samuel Williams.
 
 require_relative "../http"
+require_relative "../response"
 
 module Utopia
 	module Controller
@@ -11,6 +12,12 @@ module Utopia
 		
 		# The base implementation of a controller class.
 		class Base
+			Result = Struct.new(:status, :headers, :body) do
+				def to_protocol_response
+					Utopia::Response[status, headers, body || []]
+				end
+			end
+			
 			URI_PATH = nil
 			BASE_PATH = nil
 			CONTROLLER = nil
@@ -67,7 +74,7 @@ module Utopia
 				end
 			end
 			
-			# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid rack response if the controller can do so.
+			# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid response if the controller can do so.
 			def process!(request, relative_path)
 				return nil
 			end
@@ -79,9 +86,9 @@ module Utopia
 				end
 			end
 			
-			# Call into the next app as defined by rack.
-			def call(env)
-				self.class.controller.app.call(env)
+			# Call into the next application.
+			def call(request)
+				self.class.controller.app.call(request)
 			end
 			
 			# This will cause the middleware to generate a response.
@@ -104,7 +111,7 @@ module Utopia
 				status = HTTP::Status.new(status, 300...400)
 				location = target.to_s
 				
-				respond! [status.to_i, {HTTP::LOCATION => location}, [status.to_s]]
+				respond! Result.new(status.to_i, {HTTP::LOCATION => location}, [status.to_s])
 			end
 			
 			# Controller relative redirect.
@@ -117,7 +124,7 @@ module Utopia
 				status = HTTP::Status.new(error, 400...600)
 				
 				message ||= status.to_s
-				respond! [status.to_i, {}, [message]]
+				respond! Result.new(status.to_i, {}, [message])
 			end
 			
 			# Succeed the request and immediately respond.
@@ -129,7 +136,7 @@ module Utopia
 				end
 				
 				body = body_for(status, headers, options)
-				respond! [status.to_i, headers, body || []]
+				respond! Result.new(status.to_i, headers, body || [])
 			end
 			
 			# Generate the body for the given status, headers and options.

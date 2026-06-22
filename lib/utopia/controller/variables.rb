@@ -65,7 +65,7 @@ module Utopia
 		end
 		
 		def self.[] request
-			request.env[VARIABLES_KEY]
+			request.attributes[VARIABLES_KEY]
 		end
 	end
 end

@@ -8,12 +8,13 @@ def generate(output_path: "static")
 	require "async/io"
 	require "async/http/endpoint"
 	require "async/container"
+	require "utopia/application"
 	
-	config_path = File.join(Dir.pwd, "config.ru")
+	application_path = File.join(Dir.pwd, Utopia::Application::CONFIGURATION_PATH)
 	container_class = Async::Container::Threaded
 	server_port = 9090
 	
-	app, options = Rack::Builder.parse_file(config_path)
+	app = Utopia::Application.load(application_path)
 	
 	container = container_class.run(count: 2) do
 		Async do

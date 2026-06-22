@@ -14,58 +14,18 @@ module Utopia
 	#
 	# This class intentionally keeps a small surface area. Framework features such
 	# as arguments, sessions, localization and controller variables should be added
-	# as explicit Utopia concepts rather than relying on a Rack-style env hash.
+	# as explicit Utopia concepts rather than relying on transport-specific state.
 	class Request
-		# Wrap either a {Protocol::HTTP::Request} or a legacy Rack env hash.
+		# Wrap either a {Protocol::HTTP::Request} or an existing Utopia request.
 		def self.wrap(request)
 			case request
 			when self
 				request
 			when Protocol::HTTP::Request
 				self.new(request)
-			when Hash
-				self.from_rack_env(request)
 			else
 				raise ArgumentError, "Unable to wrap request: #{request.inspect}!"
 			end
-		end
-		
-		# Build a Utopia request from a Rack env hash for legacy compatibility.
-		def self.from_rack_env(env)
-			path = env["PATH_INFO"].to_s
-			
-			query = env["QUERY_STRING"]
-			
-			if query && !query.empty?
-				path = "#{path}?#{query}"
-			end
-			
-			headers = Protocol::HTTP::Headers.new
-			
-			env.each do |key, value|
-				case key
-				when "CONTENT_TYPE"
-					headers["content-type"] = value
-				when "CONTENT_LENGTH"
-					headers["content-length"] = value
-				else
-					if key.is_a?(String) && key.start_with?("HTTP_")
-						headers[key[5..].downcase.tr("_", "-")] = value
-					end
-				end
-			end
-			
-			http = Protocol::HTTP::Request.new(
-				env["rack.url_scheme"],
-				env["HTTP_HOST"],
-				env["REQUEST_METHOD"],
-				path,
-				env["SERVER_PROTOCOL"],
-				headers,
-				env["rack.input"]
-			)
-			
-			self.new(http, attributes: env)
 		end
 		
 		# Initialize a request wrapper.
@@ -83,7 +43,6 @@ module Utopia
 		
 		# Request-local application state.
 		attr :attributes
-		alias env attributes
 		
 		# Fetch request-local application state.
 		def [] key
@@ -106,8 +65,6 @@ module Utopia
 				self.headers["if-none-match"]
 			when "HTTP_RANGE"
 				self.headers["range"]
-			when "rack.input"
-				self.body
 			else
 				if key.is_a?(String) && key.start_with?("HTTP_")
 					self.headers[key[5..].downcase.tr("_", "-")]
@@ -290,7 +247,7 @@ module Utopia
 		
 		# @returns [Hash | Nil] The request session, if installed by Utopia::Session.
 		def session
-			@attributes["utopia.session"] || @attributes["rack.session"]
+			@attributes["utopia.session"]
 		end
 		
 		# @returns [String | Nil] The remote peer address, if available.

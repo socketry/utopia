@@ -10,7 +10,7 @@ require_relative "../response"
 module Utopia
 	module Localization
 		class Middleware
-			RESOURCE_NOT_FOUND = [400, {}, []].freeze
+			RESOURCE_NOT_FOUND = Response[400, {}, []].freeze
 			
 			HTTP_ACCEPT_LANGUAGE = "HTTP_ACCEPT_LANGUAGE".freeze
 			
@@ -151,11 +151,8 @@ module Utopia
 			end
 			
 			def call(request)
-				legacy = Utopia::Middleware.legacy_request?(request)
-				request = Utopia::Middleware.request(request)
-				
 				# Pass the request through if it shouldn't be localized:
-				return Utopia::Middleware.response(@app.call(request), legacy) unless localized?(request)
+				return @app.call(request) unless localized?(request)
 				
 				request[LOCALIZATION_KEY] = self
 				
@@ -172,7 +169,7 @@ module Utopia
 					response.close if response.respond_to?(:close)
 				end
 				
-				return Utopia::Middleware.response(vary(request, response), legacy)
+				return vary(request, response)
 			end
 		end
 	end

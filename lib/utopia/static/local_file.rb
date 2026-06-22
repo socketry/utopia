@@ -26,7 +26,7 @@ module Utopia
 			attr :etag
 			attr :range
 			
-			# Fit in with Rack::Sendfile
+			# Expose the filesystem path for upstream sendfile support.
 			def to_path
 				full_path
 			end

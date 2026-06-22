@@ -4,11 +4,12 @@
 # Copyright, 2017-2025, by Samuel Williams.
 
 require "utopia/content/document"
-require "rack/request"
+require "protocol/http/request"
+require "utopia/request"
 
 describe Utopia::Content::Document do
-	let(:env) {Hash["REQUEST_PATH" => "/index"]}
-	let(:request) {Rack::Request.new(env)}
+	let(:path) {"/index"}
+	let(:request) {Utopia::Request.new(Protocol::HTTP::Request["GET", path])}
 	let(:document) {subject.new(request, {})}
 	
 	it "should generate valid self-closing markup" do
@@ -50,7 +51,7 @@ describe Utopia::Content::Document do
 	end
 	
 	with "nested request path" do
-		let(:env) {Hash["REQUEST_PATH" => "/nested/index"]}
+		let(:path) {"/nested/index"}
 		
 		it "generates a relative base uri" do
 			relative_to = Utopia::Path["/page"]

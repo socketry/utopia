@@ -4,7 +4,8 @@
 # Copyright, 2016-2025, by Samuel Williams.
 
 require "utopia/controller/variables"
-require "rack/request"
+require "protocol/http/request"
+require "utopia/request"
 
 class TestController
 	attr_accessor :x, :y, :z
@@ -43,15 +44,16 @@ describe Utopia::Controller::Variables do
 	end
 	
 	describe Utopia::Controller do
-		it "returns variables from request env" do
+		it "returns variables from request attributes" do
 			variables = Utopia::Controller::Variables.new
-			request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
+			request = Utopia::Request.new(Protocol::HTTP::Request["GET", "/"])
+			request[Utopia::VARIABLES_KEY] = variables
 			
 			expect(Utopia::Controller[request]).to be == variables
 		end
 		
 		it "returns nil when variables are not set" do
-			request = Rack::Request.new({})
+			request = Utopia::Request.new(Protocol::HTTP::Request["GET", "/"])
 			
 			expect(Utopia::Controller[request]).to be_nil
 		end

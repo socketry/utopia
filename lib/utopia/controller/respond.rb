@@ -4,6 +4,7 @@
 # Copyright, 2016-2025, by Samuel Williams.
 
 require_relative "../http"
+require_relative "../response"
 require_relative "responder"
 
 module Utopia
@@ -26,7 +27,7 @@ module Utopia
 				end
 				
 				def response_for(context, request, response)
-					@responder&.respond_to(context, request).with(*response[2])
+					@responder&.respond_to(context, request).with(*response.body)
 				end
 			end
 			
@@ -45,14 +46,17 @@ module Utopia
 				# If the user called {Base#ignore!}, it's possible response is nil:
 				if response
 					# There was an updated response so merge it:
-					return [original_response[0], original_response[1].merge(response[1]), response[2] || original_response[2]]
+					headers = original_response.headers.dup
+					headers.update(response.headers)
+					
+					return Utopia::Response[original_response.status, headers, response.body || original_response.body]
 				end
 			end
 			
 			# Invokes super. If a response is generated, format it based on the Accept: header, unless the content type was already specified.
 			def process!(request, path)
 				if response = super
-					headers = response[1]
+					headers = response.headers
 					
 					# Don't try to convert the response if a content type was explicitly specified.
 					if headers[HTTP::CONTENT_TYPE]

@@ -13,12 +13,12 @@ module Utopia
 		
 		# A wrapper to provide easy access to locale related data in the request.
 		class Wrapper
-			def initialize(env)
-				@env = env
+			def initialize(attributes)
+				@attributes = attributes
 			end
 			
 			def localization
-				@env[LOCALIZATION_KEY]
+				@attributes[LOCALIZATION_KEY]
 			end
 			
 			def localized?
@@ -27,7 +27,7 @@ module Utopia
 			
 			# Returns the current locale or nil if not localized.
 			def current_locale
-				@env[CURRENT_LOCALE_KEY]
+				@attributes[CURRENT_LOCALE_KEY]
 			end
 			
 			# Returns the default locale or nil if not localized.
@@ -46,7 +46,7 @@ module Utopia
 		end
 		
 		def self.[] request
-			Wrapper.new(request.env)
+			Wrapper.new(request.attributes)
 		end
 	end
 end

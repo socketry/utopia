@@ -3,8 +3,9 @@
 # Released under the MIT License.
 # Copyright, 2015-2025, by Samuel Williams.
 
-require "rack/mock"
+require "protocol/http/request"
 require "utopia/controller"
+require "utopia/request"
 
 describe Utopia::Controller do
 	class TestController < Utopia::Controller::Base
@@ -32,8 +33,8 @@ describe Utopia::Controller do
 	
 	let(:controller) {TestController.new}
 	
-	def mock_request(*arguments)
-		request = Rack::Request.new(Rack::MockRequest.env_for(*arguments))
+	def mock_request(path)
+		request = Utopia::Request.new(Protocol::HTTP::Request["GET", path])
 		return request, Utopia::Path[request.path_info]
 	end
 	
@@ -54,6 +55,6 @@ describe Utopia::Controller do
 		
 		response = controller.process!(request, relative_path)
 		
-		expect(response[0]).to be == 444
+		expect(response.status).to be == 444
 	end
 end

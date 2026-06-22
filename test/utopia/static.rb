@@ -3,14 +3,19 @@
 # Released under the MIT License.
 # Copyright, 2014-2025, by Samuel Williams.
 
-require "rack"
-require "rack/test"
-
 require "utopia/static"
+require_relative "protocol_application"
 
 describe Utopia::Static do
-	include Rack::Test::Methods
-	let(:app) {Rack::Builder.parse_file(File.expand_path("static.ru", __dir__))}
+	include ProtocolApplication
+	
+	let(:app) do
+		root = File.expand_path(".static", __dir__)
+		
+		Utopia::Application.build do
+			use Utopia::Static, root: root
+		end
+	end
 	
 	it "should give the correct mime type" do
 		get "/test.txt"
@@ -19,11 +24,11 @@ describe Utopia::Static do
 	end
 	
 	it "should return partial content" do
-		get "/test.txt", {}, "HTTP_RANGE" => "bytes=1-4"
+		get "/test.txt", {"range" => "bytes=1-4"}
 		
 		expect(last_response.status).to be == 206
-		expect(last_response.content_length).to be == 4
-		expect(last_response.body).to be == "ello"
+		expect(body.bytesize).to be == 4
+		expect(body).to be == "ello"
 	end
 	
 	describe Utopia::Static::MIME_TYPES do

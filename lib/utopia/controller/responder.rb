@@ -69,7 +69,9 @@ module Utopia
 			
 			def call(context, request, *arguments, **options)
 				# Parse the list of browser preferred content types and return ordered by priority:
-				media_types = HTTP::Accept::MediaTypes.browser_preferred_media_types(request.env)
+				media_types = HTTP::Accept::MediaTypes.browser_preferred_media_types(
+					HTTP::Accept::MediaTypes::HTTP_ACCEPT => Array(request.headers["accept"]).join(",")
+				)
 				
 				handler, media_range = @handlers.for(media_types)
 				

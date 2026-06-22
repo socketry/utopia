@@ -43,9 +43,6 @@ module Utopia
 			end
 			
 			def call(request)
-				legacy = Middleware.legacy_request?(request)
-				request = Middleware.request(request)
-				
 				response = Response.wrap(@app.call(request))
 				
 				if unhandled_error?(response) && location = @codes[response.status]
@@ -57,10 +54,10 @@ module Utopia
 					else
 						# Feed the error code back with the error document:
 						error_response.status = response.status
-						return Middleware.response(error_response, legacy)
+						return error_response
 					end
 				else
-					return Middleware.response(response, legacy)
+					return response
 				end
 			end
 		end
@@ -109,19 +106,16 @@ module Utopia
 			end
 			
 			def call(request)
-				legacy = Middleware.legacy_request?(request)
-				request = Middleware.request(request)
-				
 				# Normalize the path to remove redundant slashes, `.` and `..` segments.
 				# This prevents protocol-relative redirect URLs (e.g. //evil.com/index)
 				# from being generated when PATH_INFO contains a double leading slash.
 				path = Path.create(request.path_info).simplify.to_s
 				
 				if redirection = self[path]
-					return Middleware.response(redirection, legacy)
+					return redirection
 				end
 				
-				return Middleware.response(@app.call(request), legacy)
+				return @app.call(request)
 			end
 		end
 		

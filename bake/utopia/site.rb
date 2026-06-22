@@ -18,7 +18,7 @@ end
 SETUP_ROOT = File.expand_path("../../setup", __dir__)
 
 # Configuration files which should be installed/updated:
-CONFIGURATION_FILES = [".gitignore", "config.ru", "config/environment.rb", "falcon.rb", "gems.rb", "bake.rb", "test/website.rb", "fixtures/website.rb"]
+CONFIGURATION_FILES = [".gitignore", "config/application.rb", "config/environment.rb", "falcon.rb", "gems.rb", "bake.rb", "test/website.rb", "fixtures/website.rb"]
 
 # Directories that should exist:
 DIRECTORIES = ["config", "lib", "pages", "public", "bake", "fixtures", "test"]

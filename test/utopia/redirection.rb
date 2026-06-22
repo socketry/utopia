@@ -4,10 +4,33 @@
 # Copyright, 2016-2026, by Samuel Williams.
 
 require "utopia/redirection"
-require "a_rack_application"
+require_relative "protocol_application"
 
 describe Utopia::Redirection do
-	include_context ARackApplication, File.join(__dir__, "redirection_spec.ru")
+	include ProtocolApplication
+	
+	let(:app) do
+		Utopia::Application.build(lambda{|request|
+			case request.path_info
+			when "/error"
+				Utopia::Response.text("File not found :(", 200)
+			when "/teapot"
+				Utopia::Response[418, {}, ["I'm a teapot!"]]
+			else
+				Utopia::Response[404, {}, []]
+			end
+		}) do
+			use Utopia::Redirection::Rewrite, {"/" => "/welcome/index"}
+			use Utopia::Redirection::DirectoryIndex
+			use Utopia::Redirection::Errors, {
+				404 => "/error",
+				418 => "/teapot"
+			}
+			use Utopia::Redirection::Moved, "/a", "/b"
+			use Utopia::Redirection::Moved, "/hierarchy/", "/hierarchy", flatten: true
+			use Utopia::Redirection::Moved, "/weird", "/status", status: 333
+		end
+	end
 	
 	it "should redirect directory to index" do
 		get "/welcome/"
@@ -22,7 +45,7 @@ describe Utopia::Redirection do
 		
 		# Must not redirect to //evil.com/index (external host)
 		if last_response.status == 307
-			expect(last_response.headers["location"]).not.to start_with("//")
+			expect(last_response.headers["location"]).not.to be(:start_with?, "//")
 		end
 	end
 	
@@ -46,7 +69,7 @@ describe Utopia::Redirection do
 		get "/foo"
 		
 		expect(last_response.status).to be == 404
-		expect(last_response.body).to be == "File not found :("
+		expect(body).to be == "File not found :("
 	end
 	
 	it "should blow up if internal error redirect also fails" do

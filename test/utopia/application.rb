@@ -33,16 +33,22 @@ describe Utopia::Application do
 		expect(response.headers["content-type"]).to be == "text/plain; charset=utf-8"
 	end
 	
-	it "normalizes tuple responses" do
+	it "normalizes protocol response objects" do
+		response_object = Object.new
+		
+		def response_object.to_protocol_response
+			Utopia::Response.text("Created", 201)
+		end
+		
 		application = subject.build do
-			run lambda{|request| [201, {"content-type" => "text/plain"}, ["Created: ", request.path_info]]}
+			run lambda{|request| response_object}
 		end
 		
 		response = application.call(http_request)
 		
 		expect(response).to be_a(Protocol::HTTP::Response)
 		expect(response.status).to be == 201
-		expect(response.headers["content-type"]).to be == "text/plain"
+		expect(response.read).to be == "Created"
 	end
 	
 	it "uses a not found default" do
