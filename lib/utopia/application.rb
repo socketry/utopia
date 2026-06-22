@@ -25,7 +25,14 @@ module Utopia
 		# @returns [Application] The protocol-facing Utopia application.
 		def self.build(default_app = Response::NotFound, **options, &block)
 			builder = Protocol::HTTP::Middleware::Builder.new(default_app)
-			builder.build(&block)
+			
+			if block
+				if block.arity.zero?
+					builder.instance_exec(&block)
+				else
+					block.call(builder)
+				end
+			end
 			
 			return self.new(builder.to_app, **options)
 		end
