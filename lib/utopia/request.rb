@@ -111,8 +111,12 @@ module Utopia
 			else
 				if key.is_a?(String) && key.start_with?("HTTP_")
 					self.headers[key[5..].downcase.tr("_", "-")]
-				else
+				elsif @attributes.key?(key)
 					@attributes[key]
+				elsif key.is_a?(Symbol) && @attributes.key?(key.to_s)
+					@attributes[key.to_s]
+				else
+					self.arguments[key.to_s]
 				end
 			end
 		end
@@ -166,6 +170,42 @@ module Utopia
 		def method
 			@http.method
 		end
+		alias request_method method
+		
+		# @returns [Boolean] Whether the HTTP request method is GET.
+		def get?
+			@http.method == "GET"
+		end
+		
+		# @returns [Boolean] Whether the HTTP request method is HEAD.
+		def head?
+			@http.method == "HEAD"
+		end
+		
+		# @returns [Boolean] Whether the HTTP request method is POST.
+		def post?
+			@http.method == "POST"
+		end
+		
+		# @returns [Boolean] Whether the HTTP request method is PUT.
+		def put?
+			@http.method == "PUT"
+		end
+		
+		# @returns [Boolean] Whether the HTTP request method is PATCH.
+		def patch?
+			@http.method == "PATCH"
+		end
+		
+		# @returns [Boolean] Whether the HTTP request method is DELETE.
+		def delete?
+			@http.method == "DELETE"
+		end
+		
+		# @returns [Boolean] Whether the HTTP request method is OPTIONS.
+		def options?
+			@http.method == "OPTIONS"
+		end
 		
 		# @returns [String] The full request path, including query string.
 		def path
@@ -213,6 +253,29 @@ module Utopia
 		def host
 			@http.authority || @http.headers["host"]
 		end
+		alias host_with_port host
+		
+		# @returns [String | Nil] The request URL scheme.
+		def scheme
+			@http.scheme
+		end
+		
+		# @returns [Boolean] Whether the request URL scheme is HTTPS.
+		def ssl?
+			self.scheme == "https"
+		end
+		
+		# @returns [String] The request base URL if scheme and host are available.
+		def base_url
+			scheme = self.scheme
+			host = self.host
+			
+			if scheme && host
+				"#{scheme}://#{host}"
+			else
+				""
+			end
+		end
 		
 		# @returns [String | Nil] The request user agent.
 		def user_agent
@@ -223,6 +286,12 @@ module Utopia
 		def referrer
 			@http.headers["referer"]
 		end
+		alias referer referrer
+		
+		# @returns [Hash | Nil] The request session, if installed by Utopia::Session.
+		def session
+			@attributes["utopia.session"] || @attributes["rack.session"]
+		end
 		
 		# @returns [String | Nil] The remote peer address, if available.
 		def ip
@@ -231,11 +300,10 @@ module Utopia
 		
 		# @returns [String] The full request URL if scheme and host are available.
 		def url
-			scheme = @http.scheme
-			host = self.host
+			base_url = self.base_url
 			
-			if scheme && host
-				"#{scheme}://#{host}#{self.path}"
+			if !base_url.empty?
+				"#{base_url}#{self.path}"
 			else
 				self.path
 			end

@@ -29,4 +29,39 @@ describe Utopia::Request do
 		
 		expect(request.attributes[:locale]).to be == "en"
 	end
+	
+	it "provides HTTP method predicates" do
+		expect(request.request_method).to be == "POST"
+		expect(request.post?).to be == true
+		expect(request.get?).to be == false
+		expect(request.options?).to be == false
+	end
+	
+	it "looks up arguments by string or symbol keys" do
+		expect(request["q"]).to be == "utopia"
+		expect(request[:q]).to be == "utopia"
+	end
+	
+	it "prefers request-local attributes over arguments" do
+		request[:q] = "local"
+		
+		expect(request[:q]).to be == "local"
+	end
+	
+	it "provides common request conveniences" do
+		http_request.scheme = "https"
+		http_request.authority = "example.com"
+		http_request.headers["referer"] = "/from"
+		
+		request["utopia.session"] = {"user_id" => 10}
+		
+		expect(request.scheme).to be == "https"
+		expect(request.ssl?).to be == true
+		expect(request.host_with_port).to be == "example.com"
+		expect(request.base_url).to be == "https://example.com"
+		expect(request.url).to be == "https://example.com/search?q=utopia"
+		expect(request.referer).to be == "/from"
+		expect(request.referrer).to be == "/from"
+		expect(request.session).to be == {"user_id" => 10}
+	end
 end
