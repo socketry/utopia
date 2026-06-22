@@ -20,10 +20,9 @@ module Utopia
 		
 		# Build a Utopia application stack using the protocol HTTP middleware builder.
 		# @parameter default_app [Interface(:call)] The terminal application used when the block does not call `run`.
-		# @parameter options [Hash] Options passed to {.new}.
 		# @parameter block [Proc] The middleware builder block.
 		# @returns [Application] The protocol-facing Utopia application.
-		def self.build(default_app = Response::NotFound, **options, &block)
+		def self.build(default_app = Response::NotFound, &block)
 			builder = Protocol::HTTP::Middleware::Builder.new(default_app)
 			
 			if block
@@ -34,14 +33,13 @@ module Utopia
 				end
 			end
 			
-			return self.new(builder.to_app, **options)
+			return self.new(builder.to_app)
 		end
 		
 		# Build the default Utopia application.
-		# @parameter options [Hash] Options passed to {.build}.
 		# @returns [Application] The default protocol-facing Utopia application.
-		def self.default(**options)
-			self.build(**options)
+		def self.default
+			self.build
 		end
 		
 		# Load a Utopia application from a conventional configuration file.
@@ -70,33 +68,22 @@ module Utopia
 				end
 			end
 			
-			return self.default(**options)
+			return self.default
 		end
 		
 		# Initialize the protocol-facing application boundary.
 		# @parameter delegate [Interface(:call)] The Utopia application stack.
-		# @parameter request_class [Class] The request wrapper class.
-		# @parameter response_class [#wrap] The response normalization object.
-		def initialize(delegate, request_class: Request, response_class: Response)
+		def initialize(delegate)
 			super(delegate)
-			
-			@request_class = request_class
-			@response_class = response_class
 		end
-		
-		# @attribute [Class] The request wrapper class.
-		attr :request_class
-		
-		# @attribute [#wrap] The response normalization object.
-		attr :response_class
 		
 		# Process a protocol HTTP request.
 		# @parameter http_request [Protocol::HTTP::Request] The incoming protocol request.
 		# @returns [Protocol::HTTP::Response] The normalized protocol response.
 		def call(http_request)
-			request = @request_class.new(http_request)
+			request = Request.new(http_request)
 			
-			return @response_class.wrap(super(request))
+			return Response.wrap(super(request))
 		end
 	end
 end
