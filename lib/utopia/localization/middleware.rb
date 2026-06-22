@@ -4,6 +4,8 @@
 # Copyright, 2025-2026, by Samuel Williams.
 
 require_relative "wrapper"
+require_relative "../middleware"
+require_relative "../response"
 
 module Utopia
 	module Localization
@@ -61,34 +63,34 @@ module Utopia
 			attr :all_locales
 			attr :default_locale
 			
-			def preferred_locales(env)
-				return to_enum(:preferred_locales, env) unless block_given?
+			def preferred_locales(request)
+				return to_enum(:preferred_locales, request) unless block_given?
 				
 				# Keep track of what locales have been tried:
 				locales = Set.new
 				
-				host_preferred_locales(env) do |locale|
-					yield env.merge(CURRENT_LOCALE_KEY => locale) if locales.add? locale
+				host_preferred_locales(request) do |locale|
+					yield request.with(attributes: {CURRENT_LOCALE_KEY => locale}) if locales.add? locale
 				end
 				
-				request_preferred_locale(env) do |locale, path|
+				request_preferred_locale(request) do |locale, path|
 					# We have extracted a locale from the path, so from this point on we should use the updated path:
-					env = env.merge(Rack::PATH_INFO => path.to_s)
+					request = request.with(path_info: path.to_s)
 					
-					yield env.merge(CURRENT_LOCALE_KEY => locale) if locales.add? locale
+					yield request.with(attributes: {CURRENT_LOCALE_KEY => locale}) if locales.add? locale
 				end
 				
-				browser_preferred_locales(env).each do |locale|
-					yield env.merge(CURRENT_LOCALE_KEY => locale) if locales.add? locale
+				browser_preferred_locales(request).each do |locale|
+					yield request.with(attributes: {CURRENT_LOCALE_KEY => locale}) if locales.add? locale
 				end
 				
 				@default_locales.each do |locale|
-					yield env.merge(CURRENT_LOCALE_KEY => locale) if locales.add? locale
+					yield request.with(attributes: {CURRENT_LOCALE_KEY => locale}) if locales.add? locale
 				end
 			end
 			
-			def host_preferred_locales(env)
-				http_host = env[Rack::HTTP_HOST]
+			def host_preferred_locales(request)
+				http_host = request.host.to_s
 				
 				# Yield all hosts which match the incoming http_host:
 				@hosts.each do |pattern, locale|
@@ -96,8 +98,8 @@ module Utopia
 				end
 			end
 			
-			def request_preferred_locale(env)
-				path = Path[env[Rack::PATH_INFO]]
+			def request_preferred_locale(request)
+				path = Path[request.path_info]
 				
 				if request_locale = @all_locales.patterns[path.first]
 					# Remove the localization prefix:
@@ -107,8 +109,8 @@ module Utopia
 				end
 			end
 			
-			def browser_preferred_locales(env)
-				accept_languages = env[HTTP_ACCEPT_LANGUAGE]
+			def browser_preferred_locales(request)
+				accept_languages = request.headers["accept-language"]&.to_s
 				
 				# No user prefered languages:
 				return [] unless accept_languages
@@ -123,50 +125,54 @@ module Utopia
 				return []
 			end
 			
-			def localized?(env)
+			def localized?(request)
 				# Ignore requests which match the ignored paths:
-				path_info = env[Rack::PATH_INFO]
+				path_info = request.path_info
 				return false if @ignore.any?{|pattern| path_info[pattern] != nil}
 				
 				return true
 			end
 			
 			# Set the Vary: header on the response to indicate that this response should include the header in the cache key.
-			def vary(env, response)
-				headers = response[1].to_a
+			def vary(request, response)
+				response = Response.wrap(response)
+				headers = response.headers
 				
 				# This response was based on the Accept-Language header:
-				headers << ["Vary", "Accept-Language"]
+				headers.add("vary", "Accept-Language")
 				
 				# Althought this header is generally not supported, we supply it anyway as it is useful for debugging:
-				if locale = env[CURRENT_LOCALE_KEY]
+				if locale = request[CURRENT_LOCALE_KEY]
 					# Set the Content-Location to point to the localized URI as requested:
-					headers["Content-Location"] = "/#{locale}" + env[Rack::PATH_INFO]
+					headers["content-location"] = "/#{locale}" + request.path_info
 				end
 				
 				return response
 			end
 			
-			def call(env)
-				# Pass the request through if it shouldn't be localized:
-				return @app.call(env) unless localized?(env)
+			def call(request)
+				legacy = Utopia::Middleware.legacy_request?(request)
+				request = Utopia::Middleware.request(request)
 				
-				env[LOCALIZATION_KEY] = self
+				# Pass the request through if it shouldn't be localized:
+				return Utopia::Middleware.response(@app.call(request), legacy) unless localized?(request)
+				
+				request[LOCALIZATION_KEY] = self
 				
 				response = nil
 				
 				# We have a non-localized request, but there might be a localized resource. We return the best localization possible:
-				preferred_locales(env) do |localized_env|
-					# puts "Trying locale: #{localized_env[CURRENT_LOCALE_KEY]}: #{localized_env[Rack::PATH_INFO]}..."
+				preferred_locales(request) do |localized_request|
+					# puts "Trying locale: #{localized_request[CURRENT_LOCALE_KEY]}: #{localized_request.path_info}..."
 					
-					response = @app.call(localized_env)
+					response = Response.wrap(@app.call(localized_request))
 					
-					break unless response[0] >= 400
+					break unless response.status >= 400
 					
-					response[2].close if response[2].respond_to?(:close)
+					response.close if response.respond_to?(:close)
 				end
 				
-				return vary(env, response)
+				return Utopia::Middleware.response(vary(request, response), legacy)
 			end
 		end
 	end

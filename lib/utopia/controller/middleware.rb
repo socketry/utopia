@@ -91,7 +91,7 @@ module Utopia
 				controller_path = Path.new
 				
 				# Controller instance variables which eventually get processed by the view:
-				variables = request.env[VARIABLES_KEY]
+				variables = request[VARIABLES_KEY]
 				
 				while request_path.components.any?
 					# We copy one path component from the relative path to the controller path at a time. The controller, when invoked, can modify the relative path (by assigning to relative_path.components). This allows for controller-relative rewrites, but only the remaining path postfix can be modified.
@@ -111,22 +111,23 @@ module Utopia
 				end
 				
 				# Controllers can directly modify relative_path, which is copied into controller_path. The controllers may have rewriten the path so we update the path info:
-				request.env[Rack::PATH_INFO] = controller_path.to_s
+				request.path_info = controller_path.to_s
 				
 				# No controller gave a useful result:
 				return nil
 			end
 			
-			def call(env)
-				env[VARIABLES_KEY] ||= Variables.new
+			def call(request)
+				legacy = Utopia::Middleware.legacy_request?(request)
+				request = Utopia::Middleware.request(request)
 				
-				request = Rack::Request.new(env)
+				request[VARIABLES_KEY] ||= Variables.new
 				
 				if result = invoke_controllers(request)
-					return result
+					return Utopia::Middleware.response(result, legacy)
 				end
 				
-				return @app.call(env)
+				return Utopia::Middleware.response(@app.call(request), legacy)
 			end
 		end
 	end

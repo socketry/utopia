@@ -4,6 +4,7 @@
 # Copyright, 2009-2026, by Samuel Williams.
 
 require_relative "middleware"
+require_relative "response"
 
 module Utopia
 	# A middleware which assists with redirecting from one path to another.
@@ -38,25 +39,28 @@ module Utopia
 			end
 			
 			def unhandled_error?(response)
-				response[0] >= 400 && response[1].empty?
+				response.status >= 400 && response.headers.empty?
 			end
 			
-			def call(env)
-				response = @app.call(env)
+			def call(request)
+				legacy = Middleware.legacy_request?(request)
+				request = Middleware.request(request)
 				
-				if unhandled_error?(response) && location = @codes[response[0]]
-					error_request = env.merge(Rack::PATH_INFO => location, Rack::REQUEST_METHOD => Rack::GET)
-					error_response = @app.call(error_request)
+				response = Response.wrap(@app.call(request))
+				
+				if unhandled_error?(response) && location = @codes[response.status]
+					error_request = request.with(method: "GET", path_info: location)
+					error_response = Response.wrap(@app.call(error_request))
 					
-					if error_response[0] >= 400
-						raise RequestFailure.new(env[Rack::PATH_INFO], response[0], location, error_response[0])
+					if error_response.status >= 400
+						raise RequestFailure.new(request.path_info, response.status, location, error_response.status)
 					else
 						# Feed the error code back with the error document:
-						error_response[0] = response[0]
-						return error_response
+						error_response.status = response.status
+						return Middleware.response(error_response, legacy)
 					end
 				else
-					return response
+					return Middleware.response(response, legacy)
 				end
 			end
 		end
@@ -97,24 +101,27 @@ module Utopia
 			end
 			
 			def redirect(location)
-				return [self.status, self.make_headers(location), []]
+				return Response[self.status, self.make_headers(location), []]
 			end
 			
 			def [] path
 				false
 			end
 			
-			def call(env)
+			def call(request)
+				legacy = Middleware.legacy_request?(request)
+				request = Middleware.request(request)
+				
 				# Normalize the path to remove redundant slashes, `.` and `..` segments.
 				# This prevents protocol-relative redirect URLs (e.g. //evil.com/index)
 				# from being generated when PATH_INFO contains a double leading slash.
-				path = Path.create(env[Rack::PATH_INFO]).simplify.to_s
+				path = Path.create(request.path_info).simplify.to_s
 				
 				if redirection = self[path]
-					return redirection
+					return Middleware.response(redirection, legacy)
 				end
 				
-				return @app.call(env)
+				return Middleware.response(@app.call(request), legacy)
 			end
 		end
 		

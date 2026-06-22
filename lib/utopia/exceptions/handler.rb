@@ -6,6 +6,9 @@
 
 require "console"
 
+require_relative "../middleware"
+require_relative "../response"
+
 module Utopia
 	module Exceptions
 		# A middleware which catches exceptions and performs an internal redirect.
@@ -25,28 +28,31 @@ module Utopia
 				super
 			end
 			
-			def call(env)
+			def call(request)
+				legacy = Utopia::Middleware.legacy_request?(request)
+				request = Utopia::Middleware.request(request)
+				
 				begin
-					return @app.call(env)
+					return Utopia::Middleware.response(@app.call(request), legacy)
 				rescue Exception => exception
 					Console.warn(self, "An error occurred while processing the request.", error: exception)
 					
 					begin
 						# We do an internal redirection to the error location:
-						error_request = env.merge(
-							Rack::PATH_INFO => @location,
-							Rack::REQUEST_METHOD => Rack::GET,
-							"utopia.exception" => exception,
+						error_request = request.with(
+							method: "GET",
+							path_info: @location,
+							attributes: {"utopia.exception" => exception}
 						)
 						
-						error_response = @app.call(error_request)
-						error_response[0] = 500
+						error_response = Response.wrap(@app.call(error_request))
+						error_response.status = 500
 						
-						return error_response
+						return Utopia::Middleware.response(error_response, legacy)
 					rescue Exception => exception
 						# If redirection fails, we also finish with a fatal error:
 						Console.error(self, "An error occurred while invoking the error handler.", error: exception)
-						return [500, {"content-type" => "text/plain"}, ["An error occurred while processing the request."]]
+						return Utopia::Middleware.response(Response[500, {"content-type" => "text/plain"}, ["An error occurred while processing the request."]], legacy)
 					end
 				end
 			end

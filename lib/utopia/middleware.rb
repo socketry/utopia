@@ -5,8 +5,29 @@
 
 require_relative "http"
 require_relative "path"
+require_relative "request"
+require_relative "response"
 
 module Utopia
+	# Shared helpers for middleware boundary compatibility.
+	module Middleware
+		def self.legacy_request?(request)
+			request.is_a?(Hash)
+		end
+		
+		def self.request(request)
+			Request.wrap(request)
+		end
+		
+		def self.response(response, legacy)
+			if legacy
+				Response.to_rack(response)
+			else
+				response
+			end
+		end
+	end
+	
 	# The default pages path for {Utopia::Content} middleware.
 	PAGES_PATH = "pages".freeze
 	

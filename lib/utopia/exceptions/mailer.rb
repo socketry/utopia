@@ -6,6 +6,8 @@
 require "net/smtp"
 require "mail"
 
+require_relative "../middleware"
+
 module Utopia
 	module Exceptions
 		# A middleware which catches all exceptions raised from the app it wraps and sends a useful email with the exception, stacktrace, and contents of the environment.
@@ -47,11 +49,14 @@ module Utopia
 				super
 			end
 			
-			def call(env)
+			def call(request)
+				legacy = Utopia::Middleware.legacy_request?(request)
+				request = Utopia::Middleware.request(request)
+				
 				begin
-					return @app.call(env)
+					return Utopia::Middleware.response(@app.call(request), legacy)
 				rescue => exception
-					send_notification exception, env
+					send_notification exception, request
 					
 					raise
 				end
@@ -95,13 +100,10 @@ module Utopia
 				end
 			end
 			
-			def generate_body(exception, env)
+			def generate_body(exception, request)
 				io = StringIO.new
 				
-				# Dump out useful rack environment variables:
-				request = Rack::Request.new(env)
-				
-				io.puts "#{request.request_method} #{request.url}"
+				io.puts "#{request.method} #{request.url}"
 				
 				# TODO embed `rack.input` if it's textual?
 				# TODO dump and embed `utopia.variables`?
@@ -113,21 +115,27 @@ module Utopia
 					io.puts "request.#{key}: #{value.inspect}"
 				end
 				
-				request.params.each do |key, value|
-					io.puts "request.params.#{key}: #{value.inspect}"
+				request.arguments.each do |key, value|
+					io.puts "request.arguments.#{key}: #{value.inspect}"
 				end
 				
 				io.puts
 				
 				ENV_KEYS.each do |key|
-					value = env[key]
-					io.puts "env[#{key.inspect}]: #{value.inspect}"
+					value = request[key]
+					io.puts "request[#{key.inspect}]: #{value.inspect}"
 				end
 				
 				io.puts
 				
-				env.select{|key,_| key.start_with? "HTTP_"}.each do |key, value|
-					io.puts "#{key}: #{value.inspect}"
+				request.headers.each do |key, value|
+					io.puts "header[#{key.inspect}]: #{value.inspect}"
+				end
+				
+				request.attributes.each do |key, value|
+					if key.is_a?(String) && key.start_with?("HTTP_")
+						io.puts "#{key}: #{value.inspect}"
+					end
 				end
 				
 				io.puts
@@ -137,7 +145,7 @@ module Utopia
 				return io.string
 			end
 			
-			def attributes_for(exception, env)
+			def attributes_for(exception, request)
 				{
 					exception: exception.class.name,
 					pid: $$,
@@ -145,29 +153,29 @@ module Utopia
 				}
 			end
 			
-			def generate_mail(exception, env)
+			def generate_mail(exception, request)
 				mail = Mail.new(
 					:from => @from,
 					:to => @to,
-					:subject => @subject % attributes_for(exception, env)
+					:subject => @subject % attributes_for(exception, request)
 				)
 				
 				mail.text_part = Mail::Part.new
-				mail.text_part.body = generate_body(exception, env)
+				mail.text_part.body = generate_body(exception, request)
 				
-				if body = extract_body(env) and body.size > 0
+				if body = extract_body(request) and body.size > 0
 					mail.attachments["body.bin"] = body
 				end
 				
 				if @dump_environment
-					mail.attachments["environment.yaml"] = YAML.dump(env)
+					mail.attachments["attributes.yaml"] = YAML.dump(request.attributes)
 				end
 				
 				return mail
 			end
 			
-			def send_notification(exception, env)
-				mail = generate_mail(exception, env)
+			def send_notification(exception, request)
+				mail = generate_mail(exception, request)
 				
 				mail.delivery_method(*@delivery_method) if @delivery_method
 				
@@ -177,11 +185,8 @@ module Utopia
 				$stderr.puts mail_exception.backtrace
 			end
 			
-			def extract_body(env)
-				if io = env["rack.input"]
-					io.rewind if io.respond_to?(:rewind)
-					io.read
-				end
+			def extract_body(request)
+				request.body&.read
 			end
 		end
 	end

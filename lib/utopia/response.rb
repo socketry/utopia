@@ -48,6 +48,30 @@ module Utopia
 			end
 		end
 		
+		# Convert a response-like value to a Rack response tuple.
+		def self.to_rack(response)
+			return response if response.is_a?(Array)
+			
+			response = self.wrap(response)
+			
+			case response
+			when Protocol::HTTP::Response
+				headers = {}
+				
+				response.headers.each do |key, value|
+					if existing = headers[key]
+						headers[key] = "#{existing}\n#{value}"
+					else
+						headers[key] = value.to_s
+					end
+				end
+				
+				[response.status, headers, response.body || []]
+			else
+				response
+			end
+		end
+		
 		# Build a redirect response.
 		# @parameter location [String] The redirect location.
 		# @parameter status [Integer] The redirect status code.

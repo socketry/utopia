@@ -6,6 +6,8 @@
 require "time"
 require "digest/sha1"
 
+require_relative "../response"
+
 module Utopia
 	# A middleware which serves static files from the specified root directory.
 	module Static
@@ -63,12 +65,12 @@ module Utopia
 				end
 			end
 			
-			def modified?(env)
-				if modified_since = env["HTTP_IF_MODIFIED_SINCE"]
+			def modified?(request)
+				if modified_since = request.headers["if-modified-since"]
 					return false if File.mtime(full_path) <= Time.parse(modified_since)
 				end
 				
-				if etags = env["HTTP_IF_NONE_MATCH"]
+				if etags = request.headers["if-none-match"]
 					etags = etags.split(/\s*,\s*/)
 					return false if etags.include?(etag) || etags.include?("*")
 				end
@@ -76,32 +78,53 @@ module Utopia
 				return true
 			end
 			
-			CONTENT_LENGTH = Rack::CONTENT_LENGTH
-			CONTENT_RANGE = "Content-Range".freeze
+			CONTENT_LENGTH = "content-length".freeze
+			CONTENT_RANGE = "content-range".freeze
 			
-			def serve(env, response_headers)
-				ranges = Rack::Utils.get_byte_ranges(env["HTTP_RANGE"], size)
-				response = [200, response_headers, self]
+			def serve(request, response_headers)
+				ranges = byte_ranges(request.headers["range"])
 				
 				# puts "Requesting ranges: #{ranges.inspect} (#{size})"
 				
 				if ranges == nil or ranges.size != 1
 					# No ranges, or multiple ranges (which we don't support).
 					# TODO: Support multiple byte-ranges, for now just send entire file:
-					response[0] = 200
-					response[1][CONTENT_LENGTH] = size.to_s
+					status = 200
+					response_headers[CONTENT_LENGTH] = size.to_s
 					@range = 0...size
 				else
 					# Partial content:
 					@range = ranges[0]
 					partial_size = @range.size
 					
-					response[0] = 206
-					response[1][CONTENT_LENGTH] = partial_size.to_s
-					response[1][CONTENT_RANGE] = "bytes #{@range.min}-#{@range.max}/#{size}"
+					status = 206
+					response_headers[CONTENT_LENGTH] = partial_size.to_s
+					response_headers[CONTENT_RANGE] = "bytes #{@range.min}-#{@range.max}/#{size}"
 				end
 				
-				return response
+				return Response[status, response_headers, self]
+			end
+			
+			def byte_ranges(header)
+				return nil unless header
+				
+				units, ranges = header.split("=", 2)
+				return nil unless units == "bytes" && ranges
+				
+				ranges.split(/\s*,\s*/).map do |range|
+					first, last = range.split("-", 2)
+					
+					if first.empty?
+						length = Integer(last)
+						(size - length)...size
+					else
+						first = Integer(first)
+						last = last.empty? ? size - 1 : Integer(last)
+						first..last
+					end
+				end
+			rescue ArgumentError
+				nil
 			end
 		end
 	end
