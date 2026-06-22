@@ -71,8 +71,22 @@ describe Utopia::Application do
 			
 			expect(response.status).to be == 200
 			expect(response.read).to be == "/hello"
-		ensure
-			Object.send(:remove_const, :Application) if Object.const_defined?(:Application, false)
+			expect(Object.const_defined?(:Application, false)).to be == false
+		end
+	end
+	
+	it "uses the default application if no application constant is defined" do
+		Dir.mktmpdir do |directory|
+			path = File.join(directory, "application.rb")
+			
+			File.write(path, <<~RUBY)
+				require "utopia/application"
+			RUBY
+			
+			application = subject.load(path)
+			response = application.call(http_request)
+			
+			expect(response.status).to be == 404
 		end
 	end
 end

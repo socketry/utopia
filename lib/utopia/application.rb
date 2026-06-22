@@ -46,8 +46,8 @@ module Utopia
 		
 		# Load a Utopia application from a conventional configuration file.
 		#
-		# If the file defines a top-level `Application` constant, it will be
-		# returned directly. If the constant is a class, it will be instantiated.
+		# If the file defines an `Application` constant, it will be returned
+		# directly. If the constant is a class, it will be instantiated.
 		# If the file does not exist, or does not define `Application`, the default
 		# application is returned.
 		#
@@ -56,24 +56,17 @@ module Utopia
 		# @returns [Interface(:call)] The loaded protocol-facing application.
 		def self.load(path = CONFIGURATION_PATH, **options)
 			if File.exist?(path)
-				Kernel.load(path)
+				top = Module.new
+				top.class_eval(File.read(path), path)
 				
-				if Object.const_defined?(:Application, false)
-					application = Object.const_get(:Application)
+				if top.const_defined?(:Application, false)
+					application = top.const_get(:Application)
 					
 					if application.is_a?(Class)
 						return application.new(**options)
 					else
 						return application
 					end
-				end
-			elsif Object.const_defined?(:Application, false)
-				application = Object.const_get(:Application)
-				
-				if application.is_a?(Class)
-					return application.new(**options)
-				else
-					return application
 				end
 			end
 			
