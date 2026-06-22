@@ -252,14 +252,11 @@ call(Utopia::Request) -> response-like value
 
 - whether `use` accepts classes, objects, or both.
 - whether `run Utopia::Content, root: ...` instantiates the app automatically.
-- whether response tuples are accepted during migration.
 - whether `close` is propagated through the stack.
 - whether middleware may return `nil` to pass through.
 - whether middleware may mutate `request.path_info`.
-- how legacy Rack middleware is wrapped explicitly, if supported.
 
 Do not try to preserve Rack middleware compatibility in the core Utopia stack.
-Provide Rack compatibility through an optional adapter if needed.
 
 ## Programmatic Applications
 
@@ -332,8 +329,7 @@ Expected breaking changes:
   need migration.
 - Static file serving should move away from `Rack::Sendfile` and Rack range
   helpers.
-- `config.ru` should become optional Rack compatibility rather than the native
-  boot path.
+- `config.ru` is no longer the native boot path. Use `config/application.rb`.
 - Tests should move from `rack-test` to protocol-http/async-http oriented tests.
 
 Useful preparatory work before the v3 transport change:
@@ -343,6 +339,5 @@ Useful preparatory work before the v3 transport change:
   accessors.
 - Move cookie parsing and serialization behind Utopia-owned helpers.
 - Isolate static range/sendfile behavior from `Rack::Utils`.
-- Make session storage names Utopia-native, with Rack aliases only for
-  compatibility.
+- Make session storage names Utopia-native.
 - Start normalizing response values internally.
