@@ -34,7 +34,7 @@ Protocol::HTTP::Request
 `Utopia::Application` should be directly usable anywhere a
 `Protocol::HTTP::Middleware` is expected:
 
-```ruby
+```text
 application = Utopia::Application.load
 application.call(protocol_http_request)
 application.close
@@ -42,17 +42,17 @@ application.close
 
 Construction should keep object construction separate from DSL configuration:
 
-```ruby
+```text
 Application = Utopia::Application.build do
-  use Utopia::Static, root: "public"
-  use Utopia::Controller
-  run Utopia::Content
+	use Utopia::Static, root: "public"
+	use Utopia::Controller
+	run Utopia::Content
 end
 ```
 
 Preferred API:
 
-```ruby
+```text
 Utopia::Application.new(delegate, **options)
 Utopia::Application.build(**options) { ... }
 Utopia::Application.load(path = "config/application.rb", **options)
@@ -89,13 +89,13 @@ config/application.rb
 
 It should define a top-level `Application` constant:
 
-```ruby
+```text
 require "utopia"
 
 Application = Utopia::Application.build do
-  use Utopia::Static, root: "public"
-  use Utopia::Controller
-  run Utopia::Content
+	use Utopia::Static, root: "public"
+	use Utopia::Controller
+	run Utopia::Content
 end
 ```
 
@@ -117,29 +117,29 @@ Use the modern Falcon service definition shape. Do not use the old
 
 Explicit app configuration:
 
-```ruby
+```text
 require_relative "config/application"
 
 service "utopia" do
-  include Falcon::Environment::Server
-
-  def middleware
-    Application
-  end
+	include Falcon::Environment::Server
+	
+	def middleware
+		Application
+	end
 end
 ```
 
 Generic/default configuration:
 
-```ruby
+```text
 require "utopia"
 
 service "utopia" do
-  include Falcon::Environment::Server
-
-  def middleware
-    Utopia::Application.load
-  end
+	include Falcon::Environment::Server
+	
+	def middleware
+		Utopia::Application.load
+	end
 end
 ```
 
@@ -150,7 +150,7 @@ explicit, and lazy, not a reimplementation of `Rack::Request`.
 
 Likely shape:
 
-```ruby
+```text
 request.http
 request.method
 request.path
@@ -179,7 +179,7 @@ Guidelines:
 
 Possible arguments shape:
 
-```ruby
+```text
 request.arguments.query
 request.arguments.form
 request.arguments.json
@@ -193,7 +193,7 @@ Use `Protocol::HTTP::Response` as the canonical transport response.
 `Utopia::Response` should be a helper/factory/normalizer, not necessarily a
 mandatory rich response object:
 
-```ruby
+```text
 Utopia::Response[200, {"content-type" => "text/plain"}, ["Hello"]]
 Utopia::Response.redirect("/target")
 Utopia::Response.text("Hello")
@@ -226,11 +226,11 @@ framework-specific semantics.
 
 The regular Utopia DSL should compose application middleware:
 
-```ruby
+```text
 Utopia::Application.build do
-  use Utopia::Session
-  use Utopia::Localization, locales: ["en", "ja"]
-  run Utopia::Content
+	use Utopia::Session
+	use Utopia::Localization, locales: ["en", "ja"]
+	run Utopia::Content
 end
 ```
 
@@ -268,45 +268,45 @@ on project-level constants.
 
 For example, `utopia-project` should move from mutating a Rack builder:
 
-```ruby
+```text
 Utopia::Project.call(builder)
 ```
 
 to returning a protocol-compatible middleware:
 
-```ruby
+```text
 module Utopia
-  module Project
-    def self.application(root: Dir.pwd, locales: nil)
-      Utopia::Application.build(root: root) do
-        use Utopia::Static, root: root
-        use Utopia::Static, root: PUBLIC_ROOT
-
-        use Utopia::Redirection::Rewrite, "/" => "/index"
-        use Utopia::Redirection::DirectoryIndex
-        use Utopia::Redirection::Errors, 404 => "/errors/file-not-found"
-
-        if locales
-          use Utopia::Localization, default_locale: locales.first, locales: locales
-        end
-
-        use Utopia::Controller, root: PAGES_ROOT
-        run Utopia::Content, root: PAGES_ROOT
-      end
-    end
-  end
+	module Project
+		def self.application(root: Dir.pwd, locales: nil)
+			Utopia::Application.build(root: root) do
+				use Utopia::Static, root: root
+				use Utopia::Static, root: PUBLIC_ROOT
+				
+				use Utopia::Redirection::Rewrite, "/" => "/index"
+				use Utopia::Redirection::DirectoryIndex
+				use Utopia::Redirection::Errors, 404 => "/errors/file-not-found"
+				
+				if locales
+					use Utopia::Localization, default_locale: locales.first, locales: locales
+				end
+				
+				use Utopia::Controller, root: PAGES_ROOT
+				run Utopia::Content, root: PAGES_ROOT
+			end
+		end
+	end
 end
 ```
 
 Consumers can then choose:
 
-```ruby
+```text
 Application = Utopia::Project.application
 ```
 
 or:
 
-```ruby
+```text
 app = Utopia::Project.application(root: "/path/to/project")
 ```
 

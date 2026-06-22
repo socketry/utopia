@@ -14,7 +14,7 @@ describe Utopia::Application do
 		application_request = nil
 		
 		application = subject.build do
-			run lambda {|request|
+			run lambda{|request|
 				application_request = request
 				
 				Utopia::Response.text("Hello")
@@ -35,7 +35,7 @@ describe Utopia::Application do
 	
 	it "normalizes tuple responses" do
 		application = subject.build do
-			run lambda {|request| [201, {"content-type" => "text/plain"}, ["Created: ", request.path_info]]}
+			run lambda{|request| [201, {"content-type" => "text/plain"}, ["Created: ", request.path_info]]}
 		end
 		
 		response = application.call(http_request)
@@ -62,7 +62,7 @@ describe Utopia::Application do
 				require "utopia/application"
 				
 				Application = Utopia::Application.build do
-					run lambda {|request| Utopia::Response.text(request.path_info)}
+					run lambda{|request| Utopia::Response.text(request.path_info)}
 				end
 			RUBY
 			
