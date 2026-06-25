@@ -10,43 +10,56 @@ require "protocol/http/request"
 
 require_relative "context"
 
+# Protocol namespaces extended with Utopia request helpers.
 module Protocol
+	# HTTP protocol types extended with Utopia request helpers.
 	module HTTP
+		# Convenience methods used by Utopia middleware.
 		class Request
+			# The HTTP request method.
 			alias request_method method
 			
+			# Whether the request method is GET.
 			def get?
 				self.method == "GET"
 			end
 			
+			# Whether the request method is HEAD.
 			def head?
 				self.method == "HEAD"
 			end
 			
+			# Whether the request method is POST.
 			def post?
 				self.method == "POST"
 			end
 			
+			# Whether the request method is PUT.
 			def put?
 				self.method == "PUT"
 			end
 			
+			# Whether the request method is PATCH.
 			def patch?
 				self.method == "PATCH"
 			end
 			
+			# Whether the request method is DELETE.
 			def delete?
 				self.method == "DELETE"
 			end
 			
+			# Whether the request method is OPTIONS.
 			def options?
 				self.method == "OPTIONS"
 			end
 			
+			# The request path without the query string.
 			def path_info
 				self.path&.split("?", 2)&.first
 			end
 			
+			# Set the request path while preserving the query string.
 			def path_info=(value)
 				if query = self.query
 					self.path = "#{value}?#{query}"
@@ -57,28 +70,34 @@ module Protocol
 				@utopia_arguments = nil
 			end
 			
+			# The query string without the leading question mark.
 			def query
 				self.path&.split("?", 2)&.last if self.path&.include?("?")
 			end
 			
+			# Decoded query arguments.
 			def arguments
 				@utopia_arguments ||= decode_arguments(self.query)
 			end
 			alias params arguments
 			
+			# Decoded request cookies.
 			def cookies
 				@utopia_cookies ||= parse_cookies(self.headers["cookie"])
 			end
 			
+			# The request host with optional port.
 			def host
 				self.authority || self.headers["host"]
 			end
 			alias host_with_port host
 			
+			# Whether the request uses HTTPS.
 			def ssl?
 				self.scheme == "https"
 			end
 			
+			# The base URL for the request.
 			def base_url
 				if self.scheme && self.host
 					"#{self.scheme}://#{self.host}"
@@ -87,23 +106,28 @@ module Protocol
 				end
 			end
 			
+			# The request user agent.
 			def user_agent
 				self.headers["user-agent"]
 			end
 			
+			# The request referrer.
 			def referrer
 				self.headers["referer"]
 			end
 			alias referer referrer
 			
+			# The current Utopia session, if installed.
 			def session
 				Utopia::Context.session
 			end
 			
+			# The remote peer IP address, if available.
 			def ip
 				self.peer&.ip_address
 			end
 			
+			# The full request URL, if scheme and host are available.
 			def url
 				base_url = self.base_url
 				
@@ -114,6 +138,7 @@ module Protocol
 				end
 			end
 			
+			# Build a derived request with updated protocol fields.
 			def with(method: self.method, path: self.path, path_info: nil)
 				request = self.dup
 				request.method = method
@@ -134,6 +159,7 @@ module Protocol
 				return request
 			end
 			
+			# Fetch a Rack-style compatibility value or query argument.
 			def [] key
 				case key
 				when "REQUEST_METHOD"
