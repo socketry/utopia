@@ -29,7 +29,7 @@ module Utopia
 		end
 		
 		# The current Utopia request wrapper, or raise if none is installed.
-		def self.required
+		def self.current!
 			self.current or raise RuntimeError, "No current Utopia request!"
 		end
 		

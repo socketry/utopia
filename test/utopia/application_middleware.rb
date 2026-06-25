@@ -24,7 +24,7 @@ describe "Utopia application middleware" do
 			
 			run lambda{|request|
 				seen_request = request
-				Utopia::Response.text(Utopia::Request.current.path_info)
+				Utopia::Response.text(Utopia::Request.current!.path_info)
 			}
 		end
 		

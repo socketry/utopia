@@ -39,23 +39,23 @@ module Utopia
 		end
 		
 		# The current session, or raise a clear error if sessions are unavailable.
-		def self.required
+		def self.current!
 			self.current or raise MissingError, "No current Utopia session!"
 		end
 		
 		# Fetch a value from the current session.
 		def self.[] key
-			self.required[key]
+			self.current![key]
 		end
 		
 		# Assign a value in the current session.
 		def self.[]= key, value
-			self.required[key] = value
+			self.current![key] = value
 		end
 		
 		# Delete a value from the current session.
 		def self.delete(key)
-			self.required.delete(key)
+			self.current!.delete(key)
 		end
 	end
 end

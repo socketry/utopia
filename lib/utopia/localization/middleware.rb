@@ -161,7 +161,7 @@ module Utopia
 			end
 			
 			def call(request)
-				utopia_request = Request.required
+				utopia_request = Request.current!
 				
 				# Pass the request through if it shouldn't be localized:
 				return @app.call(request) unless localized?(utopia_request)

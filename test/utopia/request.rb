@@ -20,7 +20,7 @@ describe Utopia::Request do
 			subject.current = request
 			
 			expect(subject.current).to be_equal(request)
-			expect(subject.required).to be_equal(request)
+			expect(subject.current!).to be_equal(request)
 		ensure
 			subject.current = previous_request
 		end

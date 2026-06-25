@@ -36,7 +36,7 @@ describe Utopia::Application do
 		
 		application = subject.build do
 			run lambda{|request|
-				utopia_request = Utopia::Request.current
+				utopia_request = Utopia::Request.current!
 				
 				Utopia::Response.text(utopia_request.path_info)
 			}
@@ -92,7 +92,7 @@ describe Utopia::Application do
 				require "utopia/application"
 				
 				Application = Utopia::Application.build do
-					run lambda{|request| Utopia::Response.text(Utopia::Request.current.path_info)}
+					run lambda{|request| Utopia::Response.text(Utopia::Request.current!.path_info)}
 				end
 			RUBY
 			

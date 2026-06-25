@@ -47,7 +47,7 @@ module Utopia
 				response = Response.wrap(@app.call(request))
 				
 				if unhandled_error?(response) && location = @codes[response.status]
-					utopia_request = Request.required
+					utopia_request = Request.current!
 					error_request = utopia_request.with(method: "GET", path_info: location)
 					
 					previous_request = Request.current
@@ -119,7 +119,7 @@ module Utopia
 				# Normalize the path to remove redundant slashes, `.` and `..` segments.
 				# This prevents protocol-relative redirect URLs (e.g. //evil.com/index)
 				# from being generated when PATH_INFO contains a double leading slash.
-				path = Path.create(Request.required.path_info).simplify.to_s
+				path = Path.create(Request.current!.path_info).simplify.to_s
 				
 				if redirection = self[path]
 					return redirection

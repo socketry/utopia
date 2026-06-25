@@ -74,6 +74,10 @@ module Utopia
 			Fiber[CURRENT_KEY] = variables
 		end
 		
+		def self.current!
+			self.current or raise RuntimeError, "No current Utopia controller variables!"
+		end
+		
 		def self.[] request = nil
 			self.current
 		end

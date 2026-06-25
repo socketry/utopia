@@ -161,7 +161,7 @@ Likely shape:
 ```text
 Utopia::Request.current
 Utopia::Request.current = request
-Utopia::Request.required
+Utopia::Request.current!
 
 utopia_request.http
 utopia_request.method
@@ -202,10 +202,12 @@ Framework state should be exposed through named Utopia APIs:
 
 ```text
 Utopia::Session.current
+Utopia::Session.current!
 Utopia::Session[:user_id]
 Utopia::Session[:user_id] = 10
 Utopia::Request.current
 Utopia::Controller.current
+Utopia::Controller.current!
 Utopia::Localization.current
 ```
 

@@ -22,7 +22,7 @@ on "index" do
 end
 
 on "new" do |request|
-	utopia_request = Utopia::Request.current
+	utopia_request = Utopia::Request.current!
 	@user = User.new
 	
 	if utopia_request.post?
@@ -33,7 +33,7 @@ on "new" do |request|
 end
 
 on "edit" do |request|
-	utopia_request = Utopia::Request.current
+	utopia_request = Utopia::Request.current!
 	@user = User.find(utopia_request.arguments["id"])
 	
 	if utopia_request.post?
@@ -44,7 +44,7 @@ on "edit" do |request|
 end
 
 on "delete" do |request|
-	User.find(Utopia::Request.current.arguments["id"]).destroy
+	User.find(Utopia::Request.current!.arguments["id"]).destroy
 	
 	redirect! "index"
 end

@@ -49,7 +49,7 @@ module Utopia
 					
 					begin
 						# We do an internal redirection to the error location:
-						error_request = Request.required.with(
+						error_request = Request.current!.with(
 							method: "GET",
 							path_info: @location
 						)

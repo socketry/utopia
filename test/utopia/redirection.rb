@@ -11,7 +11,7 @@ describe Utopia::Redirection do
 	
 	let(:app) do
 		Utopia::Application.build(lambda{|request|
-			case Utopia::Request.current.path_info
+			case Utopia::Request.current!.path_info
 			when "/error"
 				Utopia::Response.text("File not found :(", 200)
 			when "/teapot"

@@ -42,7 +42,7 @@ module Utopia
 			
 			# @returns [Path] The original request path, if known.
 			def request_path
-				Path[Utopia::Request.required.request_path]
+				Path[Utopia::Request.current!.request_path]
 			end
 			
 			protected def current_base_uri_path

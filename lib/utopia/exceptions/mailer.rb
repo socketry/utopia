@@ -58,7 +58,7 @@ module Utopia
 				begin
 					return @app.call(request)
 				rescue => exception
-					send_notification exception, Request.required
+					send_notification exception, Request.current!
 					
 					raise
 				end

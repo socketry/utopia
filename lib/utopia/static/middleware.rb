@@ -95,7 +95,7 @@ module Utopia
 			end
 			
 			def call(request)
-				path_info = Utopia::Request.required.path_info
+				path_info = Utopia::Request.current!.path_info
 				extension = File.extname(path_info)
 				
 				if @extensions.key?(extension.downcase)

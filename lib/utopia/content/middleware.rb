@@ -104,7 +104,7 @@ module Utopia
 			end
 			
 			def call(request)
-				path = Path.create(Utopia::Request.required.path_info)
+				path = Path.create(Utopia::Request.current!.path_info)
 				
 				# Check if the request is to a non-specific index. This only works for requests with a given name:
 				basename = path.basename

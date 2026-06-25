@@ -12,7 +12,7 @@ describe Utopia::Session do
 	
 	let(:app) do
 		Utopia::Application.build(lambda{|request|
-			utopia_request = Utopia::Request.current
+			utopia_request = Utopia::Request.current!
 			
 			case utopia_request.path_info
 			when "/login"
@@ -81,6 +81,12 @@ describe Utopia::Session do
 		get "/session-set?key=foo&value=bar"
 		expect(last_response.headers).to have_keys("set-cookie")
 	end
+	
+	it "raises when the session is required but unavailable" do
+		expect do
+			Utopia::Session.current!
+		end.to raise_exception(Utopia::Session::MissingError, message: be =~ /No current Utopia session/)
+	end
 end
 
 describe Utopia::Session do
@@ -88,7 +94,7 @@ describe Utopia::Session do
 	
 	let(:app) do
 		Utopia::Application.build(lambda{|request|
-			utopia_request = Utopia::Request.current
+			utopia_request = Utopia::Request.current!
 			
 			case utopia_request.path_info
 			when "/session-set"

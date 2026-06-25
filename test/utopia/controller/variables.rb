@@ -53,10 +53,17 @@ describe Utopia::Controller::Variables do
 			Utopia::Controller.current = variables
 			
 			expect(Utopia::Controller.current).to be == variables
+			expect(Utopia::Controller.current!).to be == variables
 		end
 		
 		it "returns nil when variables are not set" do
 			expect(Utopia::Controller.current).to be_nil
+		end
+		
+		it "raises when variables are required but not set" do
+			expect do
+				Utopia::Controller.current!
+			end.to raise_exception(RuntimeError, message: be =~ /No current Utopia controller variables/)
 		end
 	end
 end

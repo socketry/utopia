@@ -95,7 +95,7 @@ module Utopia
 			end
 			
 			def call(request)
-				session_hash = prepare_session(Utopia::Request.required)
+				session_hash = prepare_session(Utopia::Request.current!)
 				previous_session = Session.current
 				
 				Session.current = session_hash

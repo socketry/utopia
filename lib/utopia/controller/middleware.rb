@@ -83,7 +83,7 @@ module Utopia
 			
 			# Invoke the controller layer for a given request. The request path may be rewritten.
 			def invoke_controllers(request)
-				utopia_request = Utopia::Request.required
+				utopia_request = Utopia::Request.current!
 				request_path = Path.from_string(utopia_request.path_info)
 				
 				# The request path must be absolute. We could handle this internally but it is probably better for this to be an error:
@@ -93,7 +93,7 @@ module Utopia
 				controller_path = Path.new
 				
 				# Controller instance variables which eventually get processed by the view:
-				variables = Controller.current
+				variables = Controller.current!
 				
 				while request_path.components.any?
 					# We copy one path component from the relative path to the controller path at a time. The controller, when invoked, can modify the relative path (by assigning to relative_path.components). This allows for controller-relative rewrites, but only the remaining path postfix can be modified.
