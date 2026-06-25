@@ -5,6 +5,7 @@
 
 require_relative "wrapper"
 require_relative "../middleware"
+require_relative "../request"
 require_relative "../response"
 
 module Utopia
@@ -150,14 +151,25 @@ module Utopia
 				return response
 			end
 			
+			def call_with_request(request)
+				previous_request = Request.current
+				Request.current = request
+				
+				return @app.call(request.http)
+			ensure
+				Request.current = previous_request
+			end
+			
 			def call(request)
+				utopia_request = Request.required
+				
 				# Pass the request through if it shouldn't be localized:
-				return @app.call(request) unless localized?(request)
+				return @app.call(request) unless localized?(utopia_request)
 				
 				response = nil
 				
 				# We have a non-localized request, but there might be a localized resource. We return the best localization possible:
-				preferred_locales(request) do |localized_request, locale|
+				preferred_locales(utopia_request) do |localized_request, locale|
 					# puts "Trying locale: #{locale}: #{localized_request.path_info}..."
 					
 					previous_localization = Localization.current
@@ -167,7 +179,7 @@ module Utopia
 						Localization.current = self
 						Localization.current_locale = locale
 						
-						response = Response.wrap(@app.call(localized_request))
+						response = Response.wrap(call_with_request(localized_request))
 					ensure
 						Localization.current = previous_localization
 						Localization.current_locale = previous_locale
@@ -178,7 +190,7 @@ module Utopia
 					response.close if response.respond_to?(:close)
 				end
 				
-				return vary(request, response)
+				return vary(utopia_request, response)
 			end
 		end
 	end

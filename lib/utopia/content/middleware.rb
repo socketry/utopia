@@ -5,6 +5,7 @@
 
 require_relative "../middleware"
 require_relative "../localization"
+require_relative "../request"
 require_relative "../response"
 require_relative "../controller/variables"
 
@@ -103,7 +104,7 @@ module Utopia
 			end
 			
 			def call(request)
-				path = Path.create(request.path_info)
+				path = Path.create(Utopia::Request.required.path_info)
 				
 				# Check if the request is to a non-specific index. This only works for requests with a given name:
 				basename = path.basename

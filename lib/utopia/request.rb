@@ -16,6 +16,23 @@ module Utopia
 	# The underlying protocol request is available via {#http}; parsing and
 	# application conveniences live here rather than on protocol-http itself.
 	class Request
+		CURRENT_KEY = :utopia_request
+		
+		# The current Utopia request wrapper.
+		def self.current
+			Fiber[CURRENT_KEY]
+		end
+		
+		# Assign the current Utopia request wrapper.
+		def self.current= request
+			Fiber[CURRENT_KEY] = request
+		end
+		
+		# The current Utopia request wrapper, or raise if none is installed.
+		def self.required
+			self.current or raise RuntimeError, "No current Utopia request!"
+		end
+		
 		# Build a Utopia request from the given protocol request arguments.
 		def self.[](*arguments)
 			self.new(Protocol::HTTP::Request[*arguments])

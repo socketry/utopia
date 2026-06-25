@@ -12,17 +12,19 @@ describe Utopia::Session do
 	
 	let(:app) do
 		Utopia::Application.build(lambda{|request|
-			case request.path_info
+			utopia_request = Utopia::Request.current
+			
+			case utopia_request.path_info
 			when "/login"
 				Utopia::Session["login"] = "true"
 				
 				Utopia::Response[200, {}, []]
 			when "/session-set"
-				Utopia::Session[request.arguments["key"].to_sym] = request.arguments["value"]
+				Utopia::Session[utopia_request.arguments["key"].to_sym] = utopia_request.arguments["value"]
 				
 				Utopia::Response[200, {}, []]
 			when "/session-get"
-				Utopia::Response[200, {}, [Utopia::Session[request.arguments["key"].to_sym]]]
+				Utopia::Response[200, {}, [Utopia::Session[utopia_request.arguments["key"].to_sym]]]
 			else
 				Utopia::Response[404, {}, []]
 			end
@@ -86,13 +88,15 @@ describe Utopia::Session do
 	
 	let(:app) do
 		Utopia::Application.build(lambda{|request|
-			case request.path_info
+			utopia_request = Utopia::Request.current
+			
+			case utopia_request.path_info
 			when "/session-set"
-				Utopia::Session[request.arguments["key"].to_sym] = request.arguments["value"]
+				Utopia::Session[utopia_request.arguments["key"].to_sym] = utopia_request.arguments["value"]
 				
 				Utopia::Response[200, {}, []]
 			when "/session-get"
-				Utopia::Response[200, {}, [Utopia::Session[request.arguments["key"].to_sym]]]
+				Utopia::Response[200, {}, [Utopia::Session[utopia_request.arguments["key"].to_sym]]]
 			else
 				Utopia::Response[404, {}, []]
 			end

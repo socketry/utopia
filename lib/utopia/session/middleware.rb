@@ -12,6 +12,7 @@ require "cgi"
 require_relative "lazy_hash"
 require_relative "serialization"
 require_relative "../middleware"
+require_relative "../request"
 require_relative "../response"
 
 module Utopia
@@ -94,7 +95,7 @@ module Utopia
 			end
 			
 			def call(request)
-				session_hash = prepare_session(request)
+				session_hash = prepare_session(Utopia::Request.required)
 				previous_session = Session.current
 				
 				Session.current = session_hash

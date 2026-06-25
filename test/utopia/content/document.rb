@@ -9,7 +9,16 @@ require "utopia/request"
 describe Utopia::Content::Document do
 	let(:path) {"/index"}
 	let(:request) {Utopia::Request["GET", path]}
-	let(:document) {subject.new(request, {})}
+	let(:document) {subject.new(request.http, {})}
+	
+	def around
+		previous_request = Utopia::Request.current
+		Utopia::Request.current = request
+		
+		super
+	ensure
+		Utopia::Request.current = previous_request
+	end
 	
 	it "should generate valid self-closing markup" do
 		node = proc do |document, state|

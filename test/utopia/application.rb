@@ -23,14 +23,38 @@ describe Utopia::Application do
 		
 		response = application.call(http_request)
 		
-		expect(application_request).to be_a(Utopia::Request)
-		expect(application_request.http).to be_equal(http_request)
-		expect(application_request.path_info).to be == "/hello"
-		expect(application_request.query).to be == "name=sam"
+		expect(application_request).to be_equal(http_request)
 		
 		expect(response).to be_a(Protocol::HTTP::Response)
 		expect(response.status).to be == 200
 		expect(response.headers["content-type"]).to be == "text/plain; charset=utf-8"
+	end
+	
+	it "installs ambient Utopia request state" do
+		utopia_request = nil
+		previous_request = Object.new
+		
+		application = subject.build do
+			run lambda{|request|
+				utopia_request = Utopia::Request.current
+				
+				Utopia::Response.text(utopia_request.path_info)
+			}
+		end
+		
+		Utopia::Request.current = previous_request
+		
+		begin
+			response = application.call(http_request)
+			
+			expect(utopia_request).to be_a(Utopia::Request)
+			expect(utopia_request.http).to be_equal(http_request)
+			expect(utopia_request.query).to be == "name=sam"
+			expect(response.read).to be == "/hello"
+			expect(Utopia::Request.current).to be_equal(previous_request)
+		ensure
+			Utopia::Request.current = nil
+		end
 	end
 	
 	it "normalizes protocol response objects" do
@@ -68,7 +92,7 @@ describe Utopia::Application do
 				require "utopia/application"
 				
 				Application = Utopia::Application.build do
-					run lambda{|request| Utopia::Response.text(request.path_info)}
+					run lambda{|request| Utopia::Response.text(Utopia::Request.current.path_info)}
 				end
 			RUBY
 			

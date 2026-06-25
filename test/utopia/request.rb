@@ -13,6 +13,35 @@ describe Utopia::Request do
 		expect(request.http).to be_a(Protocol::HTTP::Request)
 	end
 	
+	it "provides ambient request state" do
+		previous_request = subject.current
+		
+		begin
+			subject.current = request
+			
+			expect(subject.current).to be_equal(request)
+			expect(subject.required).to be_equal(request)
+		ensure
+			subject.current = previous_request
+		end
+	end
+	
+	it "inherits ambient request state into nested fibers" do
+		previous_request = subject.current
+		
+		begin
+			subject.current = request
+			
+			fiber = Fiber.new do
+				subject.current
+			end
+			
+			expect(fiber.resume).to be_equal(request)
+		ensure
+			subject.current = previous_request
+		end
+	end
+	
 	it "provides path information" do
 		expect(request.path_info).to be == "/search"
 		expect(request.query).to be == "q=utopia&tag=ruby&tag=async"

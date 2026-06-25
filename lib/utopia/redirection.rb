@@ -4,6 +4,7 @@
 # Copyright, 2009-2026, by Samuel Williams.
 
 require_relative "middleware"
+require_relative "request"
 require_relative "response"
 
 module Utopia
@@ -46,15 +47,24 @@ module Utopia
 				response = Response.wrap(@app.call(request))
 				
 				if unhandled_error?(response) && location = @codes[response.status]
-					error_request = request.with(method: "GET", path_info: location)
-					error_response = Response.wrap(@app.call(error_request))
+					utopia_request = Request.required
+					error_request = utopia_request.with(method: "GET", path_info: location)
 					
-					if error_response.status >= 400
-						raise RequestFailure.new(request.path_info, response.status, location, error_response.status)
-					else
-						# Feed the error code back with the error document:
-						error_response.status = response.status
-						return error_response
+					previous_request = Request.current
+					Request.current = error_request
+					
+					begin
+						error_response = Response.wrap(@app.call(error_request.http))
+						
+						if error_response.status >= 400
+							raise RequestFailure.new(utopia_request.path_info, response.status, location, error_response.status)
+						else
+							# Feed the error code back with the error document:
+							error_response.status = response.status
+							return error_response
+						end
+					ensure
+						Request.current = previous_request
 					end
 				else
 					return response
@@ -109,7 +119,7 @@ module Utopia
 				# Normalize the path to remove redundant slashes, `.` and `..` segments.
 				# This prevents protocol-relative redirect URLs (e.g. //evil.com/index)
 				# from being generated when PATH_INFO contains a double leading slash.
-				path = Path.create(request.path_info).simplify.to_s
+				path = Path.create(Request.required.path_info).simplify.to_s
 				
 				if redirection = self[path]
 					return redirection

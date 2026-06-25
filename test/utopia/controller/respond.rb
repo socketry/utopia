@@ -33,10 +33,22 @@ describe Utopia::Controller do
 	end
 	
 	let(:controller) {TestController.new}
+	let(:utopia_request) {Utopia::Request["GET", "/fetch"]}
+	
+	def around
+		previous_request = Utopia::Request.current
+		Utopia::Request.current = utopia_request
+		
+		super
+	ensure
+		Utopia::Request.current = previous_request
+	end
 	
 	def mock_request(path, headers = {})
-		request = Utopia::Request["GET", path, headers]
-		return request, Utopia::Path[request.path_info]
+		utopia_request = Utopia::Request["GET", path, headers]
+		Utopia::Request.current = utopia_request
+		
+		return utopia_request.http, Utopia::Path[utopia_request.path_info]
 	end
 	
 	it "should serialize response as JSON" do

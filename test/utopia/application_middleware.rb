@@ -24,13 +24,13 @@ describe "Utopia application middleware" do
 			
 			run lambda{|request|
 				seen_request = request
-				Utopia::Response.text(request.path_info)
+				Utopia::Response.text(Utopia::Request.current.path_info)
 			}
 		end
 		
 		response = application.call(request("/hello"))
 		
-		expect(seen_request).to be_a(Utopia::Request)
+		expect(seen_request).to be_a(Protocol::HTTP::Request)
 		expect(response.status).to be == 200
 		expect(response.read).to be == "/hello"
 		

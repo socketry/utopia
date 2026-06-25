@@ -5,6 +5,7 @@
 
 require_relative "../middleware"
 require_relative "../localization"
+require_relative "../request"
 require_relative "../response"
 
 require_relative "local_file"
@@ -94,7 +95,7 @@ module Utopia
 			end
 			
 			def call(request)
-				path_info = request.path_info
+				path_info = Utopia::Request.required.path_info
 				extension = File.extname(path_info)
 				
 				if @extensions.key?(extension.downcase)

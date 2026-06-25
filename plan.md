@@ -20,16 +20,15 @@ The proposed stack is:
 ```text
 Protocol::HTTP::Request
   -> Utopia::Application
-  -> Utopia::Request
   -> Utopia middleware/controllers/content
   -> Utopia::Response or Protocol::HTTP::Response shaped value
   -> Protocol::HTTP::Response
 ```
 
 `Utopia::Application` is the lifecycle boundary. It receives
-`Protocol::HTTP::Request`, adapts it to `Utopia::Request`, dispatches ordinary
-Utopia middleware, and normalizes the response. The request itself flows
-explicitly down the middleware chain; it is not ambient fiber state.
+`Protocol::HTTP::Request`, explicitly constructs a `Utopia::Request` wrapper for
+ambient application-facing request state, dispatches ordinary Utopia middleware
+with the original protocol request, and normalizes the response.
 
 ## Application
 
@@ -147,23 +146,33 @@ end
 
 ## Request And State
 
-Introduce a separate `Utopia::Request` wrapper in the core stack. Utopia
-middleware should receive `Utopia::Request`, while the original
-`Protocol::HTTP::Request` remains available as `request.http` for integrations
-that need the transport-level object.
+Introduce a separate `Utopia::Request` wrapper in the core stack, but do not make
+it the middleware request argument. Utopia middleware, controllers, and terminal
+apps should continue to receive the normal `Protocol::HTTP::Request`.
+
+`Utopia::Application` should explicitly construct `Utopia::Request` at the start
+of each request and assign it to `Utopia::Request.current`. The wrapper provides
+richer, cached access to the protocol request while keeping the protocol request
+argument available for middleware composition, upgrades, streaming, and
+transport-level integrations.
 
 Likely shape:
 
 ```text
-request.method
-request.path
-request.path_info
-request.path_info=
-request.query
-request.headers
-request.cookies
-request.body
-request.arguments
+Utopia::Request.current
+Utopia::Request.current = request
+Utopia::Request.required
+
+utopia_request.http
+utopia_request.method
+utopia_request.path
+utopia_request.path_info
+utopia_request.path_info=
+utopia_request.query
+utopia_request.headers
+utopia_request.cookies
+utopia_request.body
+utopia_request.arguments
 ```
 
 Guidelines:
@@ -174,17 +183,19 @@ Guidelines:
 - Keep query, form, JSON, and multipart parsing separable where possible.
 - Do not monkey patch `Protocol::HTTP::Request`; Utopia-specific convenience
   methods belong on `Utopia::Request`.
-- Keep the request explicit. Do not expose ambient `Utopia.request` style state.
+- Keep the protocol request explicit as the middleware argument.
+- Do not expose generic ambient `Utopia.request` style state; use
+  `Utopia::Request.current` for this specific parsed request view.
 - Use Utopia-owned fiber state for optional adjacent application state rather
   than Rack-style `env` or a Utopia request attribute hash.
 
 Possible arguments shape:
 
 ```text
-request.arguments.query
-request.arguments.form
-request.arguments.json
-request.arguments.multipart
+utopia_request.arguments.query
+utopia_request.arguments.form
+utopia_request.arguments.json
+utopia_request.arguments.multipart
 ```
 
 Framework state should be exposed through named Utopia APIs:
@@ -193,6 +204,7 @@ Framework state should be exposed through named Utopia APIs:
 Utopia::Session.current
 Utopia::Session[:user_id]
 Utopia::Session[:user_id] = 10
+Utopia::Request.current
 Utopia::Controller.current
 Utopia::Localization.current
 ```
@@ -201,6 +213,7 @@ The implementation can store this directly in fiber storage:
 
 ```text
 Fiber[:utopia_session]
+Fiber[:utopia_request]
 Fiber[:utopia_variables]
 Fiber[:utopia_current_locale]
 ```
@@ -247,15 +260,16 @@ Utopia middleware should use the protocol-http middleware shape:
 
 ```text
 initialize(delegate, ...)
-call(Utopia::Request) -> response-like value
+call(Protocol::HTTP::Request) -> response-like value
 ```
 
 Low-level protocol behavior, tracing, compression, authority policy, early
-routing, static transport optimizations, protocol upgrades, sessions,
-localization, content negotiation, controller variables, CSRF, authentication, and
-other framework-specific semantics can all be expressed in that shape. Utopia owns
-the compatibility of its middleware APIs and the request-local state helpers they
-use.
+routing, static transport optimizations, and protocol upgrades can use the
+protocol request argument directly. Framework-specific semantics such as sessions,
+localization, content negotiation, controller variables, CSRF, and authentication
+can use Utopia-owned ambient state APIs when they need richer parsed request
+state. Utopia owns the compatibility of its middleware APIs and the request-local
+state helpers they use.
 
 The regular Utopia DSL should compose application middleware:
 
@@ -271,7 +285,7 @@ Utopia owns what `use` and `run` mean for middleware. Terminal apps should
 satisfy:
 
 ```text
-call(Utopia::Request) -> response-like value
+call(Protocol::HTTP::Request) -> response-like value
 ```
 
 `Utopia::Application.build` can decide compatibility details such as:
@@ -280,7 +294,8 @@ call(Utopia::Request) -> response-like value
 - whether `run Utopia::Content, root: ...` instantiates the app automatically.
 - whether `close` is propagated through the stack.
 - whether middleware may return `nil` to pass through.
-- whether middleware may mutate `request.path_info`.
+- whether middleware may derive a new `Utopia::Request.current` and pass the
+  derived protocol request downstream for internal rewrites.
 
 Do not try to preserve Rack middleware compatibility in the core Utopia stack.
 
@@ -351,8 +366,8 @@ Expected breaking changes:
 
 - Core Utopia middleware no longer receives Rack env hashes.
 - Controllers no longer receive `Rack::Request`.
-- Core Utopia middleware receives `Utopia::Request`, not raw
-  `Protocol::HTTP::Request`.
+- Core Utopia middleware receives `Protocol::HTTP::Request`; parsed Utopia
+  request helpers move to `Utopia::Request.current`.
 - `env[...]`, `rack.session`, `rack.input`, and Rack response tuple assumptions
   need migration.
 - Static file serving should move away from `Rack::Sendfile` and Rack range

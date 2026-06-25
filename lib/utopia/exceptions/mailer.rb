@@ -7,6 +7,7 @@ require "net/smtp"
 require "mail"
 
 require_relative "../middleware"
+require_relative "../request"
 require_relative "../session"
 require_relative "../controller/variables"
 require_relative "../localization"
@@ -57,7 +58,7 @@ module Utopia
 				begin
 					return @app.call(request)
 				rescue => exception
-					send_notification exception, request
+					send_notification exception, Request.required
 					
 					raise
 				end
