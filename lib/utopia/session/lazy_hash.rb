@@ -7,20 +7,34 @@ module Utopia
 	module Session
 		# A simple hash table which fetches it's values only when required.
 		class LazyHash
+			class MutationError < Session::Error
+			end
+			
+			class AlreadyCommittedError < MutationError
+			end
+			
+			class WrongFiberError < MutationError
+			end
+			
 			def initialize(&block)
 				@changed = false
 				@values = nil
+				@owner = Fiber.current
+				@committed = false
 				
 				@loader = block
 			end
 			
 			attr :values
+			attr :owner
 			
 			def [] key
 				load![key]
 			end
 			
 			def []= key, value
+				check_mutable!
+				
 				values = load!
 				
 				if values[key] != value
@@ -36,6 +50,7 @@ module Utopia
 			end
 			
 			def delete(key)
+				check_mutable!
 				load!
 				
 				@changed = true if @values.include? key
@@ -45,6 +60,15 @@ module Utopia
 			
 			def changed?
 				@changed
+			end
+			
+			def committed?
+				@committed
+			end
+			
+			def commit!
+				check_owner!
+				@committed = true
 			end
 			
 			def load!
@@ -66,6 +90,22 @@ module Utopia
 				end
 				
 				return false
+			end
+			
+			private
+			
+			def check_mutable!
+				check_owner!
+				
+				if @committed
+					raise AlreadyCommittedError, "Cannot mutate a committed session!"
+				end
+			end
+			
+			def check_owner!
+				unless Fiber.current.equal?(@owner)
+					raise WrongFiberError, "Cannot mutate session from a different fiber!"
+				end
 			end
 		end
 	end

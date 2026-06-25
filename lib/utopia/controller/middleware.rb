@@ -5,6 +5,7 @@
 
 require_relative "../path"
 require_relative "../middleware"
+require_relative "../context"
 
 require_relative "variables"
 require_relative "base"
@@ -91,7 +92,7 @@ module Utopia
 				controller_path = Path.new
 				
 				# Controller instance variables which eventually get processed by the view:
-				variables = request[VARIABLES_KEY]
+				variables = Context.variables
 				
 				while request_path.components.any?
 					# We copy one path component from the relative path to the controller path at a time. The controller, when invoked, can modify the relative path (by assigning to relative_path.components). This allows for controller-relative rewrites, but only the remaining path postfix can be modified.
@@ -118,7 +119,7 @@ module Utopia
 			end
 			
 			def call(request)
-				request[VARIABLES_KEY] ||= Variables.new
+				Context.variables ||= Variables.new
 				
 				if result = invoke_controllers(request)
 					return result

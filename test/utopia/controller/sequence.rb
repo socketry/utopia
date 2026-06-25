@@ -5,6 +5,7 @@
 
 require "protocol/http/request"
 require "utopia/controller"
+require "utopia/context"
 require "utopia/request"
 
 class TestController < Utopia::Controller::Base
@@ -57,10 +58,16 @@ end
 
 describe Utopia::Controller do
 	let(:variables) {Utopia::Controller::Variables.new}
-	let(:request) do
-		request = Utopia::Request.new(Protocol::HTTP::Request["GET", "/"])
-		request[Utopia::VARIABLES_KEY] = variables
-		request
+	let(:request) {Protocol::HTTP::Request["GET", "/"]}
+	
+	def before
+		super
+		Utopia::Context.variables = variables
+	end
+	
+	def after(error = nil)
+		Utopia::Context.clear
+		super
 	end
 	
 	it "should call controller methods" do

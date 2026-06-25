@@ -6,6 +6,7 @@
 require "utopia/controller/variables"
 require "protocol/http/request"
 require "utopia/request"
+require "utopia/context"
 
 class TestController
 	attr_accessor :x, :y, :z
@@ -44,18 +45,19 @@ describe Utopia::Controller::Variables do
 	end
 	
 	describe Utopia::Controller do
-		it "returns variables from request attributes" do
+		after do
+			Utopia::Context.clear
+		end
+		
+		it "returns variables from fiber state" do
 			variables = Utopia::Controller::Variables.new
-			request = Utopia::Request.new(Protocol::HTTP::Request["GET", "/"])
-			request[Utopia::VARIABLES_KEY] = variables
+			Utopia::Context.variables = variables
 			
-			expect(Utopia::Controller[request]).to be == variables
+			expect(Utopia::Controller.current).to be == variables
 		end
 		
 		it "returns nil when variables are not set" do
-			request = Utopia::Request.new(Protocol::HTTP::Request["GET", "/"])
-			
-			expect(Utopia::Controller[request]).to be_nil
+			expect(Utopia::Controller.current).to be_nil
 		end
 	end
 end

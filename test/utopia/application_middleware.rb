@@ -16,7 +16,7 @@ describe "Utopia application middleware" do
 		Protocol::HTTP::Request["GET", path, headers]
 	end
 	
-	it "passes Utopia::Request through first-party middleware" do
+	it "passes protocol requests through first-party middleware" do
 		seen_request = nil
 		
 		application = Utopia::Application.build do
@@ -30,7 +30,7 @@ describe "Utopia application middleware" do
 		
 		response = application.call(request("/hello"))
 		
-		expect(seen_request).to be_a(Utopia::Request)
+		expect(seen_request).to be_a(Protocol::HTTP::Request)
 		expect(response.status).to be == 200
 		expect(response.read).to be == "/hello"
 		
@@ -61,7 +61,7 @@ describe "Utopia application middleware" do
 			use Utopia::Session, session_name: Utopia::Session::Middleware::SESSION_KEY, secret: "test-secret"
 			
 			run lambda{|request|
-				request[Utopia::Session::Middleware::SESSION_KEY][:value] = "Hello"
+				Utopia::Session[:value] = "Hello"
 				Utopia::Response.text("OK")
 			}
 		end

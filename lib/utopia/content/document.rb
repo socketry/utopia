@@ -7,6 +7,7 @@ require_relative "links"
 require_relative "response"
 require_relative "markup"
 require_relative "builder"
+require_relative "../context"
 
 module Utopia
 	module Content
@@ -41,7 +42,7 @@ module Utopia
 			
 			# @returns [Path] The original request path, if known.
 			def request_path
-				Path[request.attributes["REQUEST_PATH"]]
+				Path[Context.request_path || request.path_info]
 			end
 			
 			protected def current_base_uri_path

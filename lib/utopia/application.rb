@@ -6,15 +6,16 @@
 require "protocol/http/middleware"
 require "protocol/http/middleware/builder"
 
+require_relative "context"
 require_relative "request"
 require_relative "response"
 
 module Utopia
 	# The protocol-facing entrypoint for a Utopia application.
 	#
-	# This object accepts {Protocol::HTTP::Request} instances, wraps them in a
-	# {Utopia::Request}, dispatches to the Utopia application stack, and normalizes
-	# the result back to a {Protocol::HTTP::Response}.
+	# This object accepts {Protocol::HTTP::Request} instances, installs the
+	# request-scoped Utopia fiber state, dispatches to the Utopia application
+	# stack, and normalizes the result back to a {Protocol::HTTP::Response}.
 	class Application < Protocol::HTTP::Middleware
 		CONFIGURATION_PATH = "config/application.rb".freeze
 		
@@ -81,9 +82,13 @@ module Utopia
 		# @parameter http_request [Protocol::HTTP::Request] The incoming protocol request.
 		# @returns [Protocol::HTTP::Response] The normalized protocol response.
 		def call(http_request)
-			request = Request.new(http_request)
+			Context.clear
 			
-			return Response.wrap(super(request))
+			Context.with(request: http_request, request_path: http_request.path_info) do
+				return Response.wrap(super(http_request))
+			end
+		ensure
+			Context.clear
 		end
 	end
 end

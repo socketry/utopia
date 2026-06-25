@@ -6,6 +6,7 @@
 require "net/smtp"
 require "mail"
 
+require_relative "../context"
 require_relative "../middleware"
 
 module Utopia
@@ -129,10 +130,8 @@ module Utopia
 					io.puts "header[#{key.inspect}]: #{value.inspect}"
 				end
 				
-				request.attributes.each do |key, value|
-					if key.is_a?(String) && key.start_with?("HTTP_")
-						io.puts "#{key}: #{value.inspect}"
-					end
+				Context.to_hash.each do |key, value|
+					io.puts "context.#{key}: #{value.inspect}"
 				end
 				
 				io.puts
@@ -165,7 +164,7 @@ module Utopia
 				end
 				
 				if @dump_environment
-					mail.attachments["attributes.yaml"] = YAML.dump(request.attributes)
+					mail.attachments["context.yaml"] = YAML.dump(Context.to_hash)
 				end
 				
 				return mail

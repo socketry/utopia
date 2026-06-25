@@ -4,6 +4,7 @@
 # Copyright, 2025-2026, by Samuel Williams.
 
 require_relative "wrapper"
+require_relative "../context"
 require_relative "../middleware"
 require_relative "../response"
 
@@ -70,22 +71,22 @@ module Utopia
 				locales = Set.new
 				
 				host_preferred_locales(request) do |locale|
-					yield request.with(attributes: {CURRENT_LOCALE_KEY => locale}) if locales.add? locale
+					yield request, locale if locales.add? locale
 				end
 				
 				request_preferred_locale(request) do |locale, path|
 					# We have extracted a locale from the path, so from this point on we should use the updated path:
 					request = request.with(path_info: path.to_s)
 					
-					yield request.with(attributes: {CURRENT_LOCALE_KEY => locale}) if locales.add? locale
+					yield request, locale if locales.add? locale
 				end
 				
 				browser_preferred_locales(request).each do |locale|
-					yield request.with(attributes: {CURRENT_LOCALE_KEY => locale}) if locales.add? locale
+					yield request, locale if locales.add? locale
 				end
 				
 				@default_locales.each do |locale|
-					yield request.with(attributes: {CURRENT_LOCALE_KEY => locale}) if locales.add? locale
+					yield request, locale if locales.add? locale
 				end
 			end
 			
@@ -142,7 +143,7 @@ module Utopia
 				headers.add("vary", "Accept-Language")
 				
 				# Althought this header is generally not supported, we supply it anyway as it is useful for debugging:
-				if locale = request[CURRENT_LOCALE_KEY]
+				if locale = Context.current_locale
 					# Set the Content-Location to point to the localized URI as requested:
 					headers["content-location"] = "/#{locale}" + request.path_info
 				end
@@ -154,15 +155,15 @@ module Utopia
 				# Pass the request through if it shouldn't be localized:
 				return @app.call(request) unless localized?(request)
 				
-				request[LOCALIZATION_KEY] = self
-				
 				response = nil
 				
 				# We have a non-localized request, but there might be a localized resource. We return the best localization possible:
-				preferred_locales(request) do |localized_request|
-					# puts "Trying locale: #{localized_request[CURRENT_LOCALE_KEY]}: #{localized_request.path_info}..."
+				preferred_locales(request) do |localized_request, locale|
+					# puts "Trying locale: #{locale}: #{localized_request.path_info}..."
 					
-					response = Response.wrap(@app.call(localized_request))
+					response = Context.with(request: localized_request, localization: self, current_locale: locale) do
+						Response.wrap(@app.call(localized_request))
+					end
 					
 					break unless response.status >= 400
 					

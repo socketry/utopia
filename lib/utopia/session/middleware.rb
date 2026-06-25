@@ -11,6 +11,7 @@ require "cgi"
 
 require_relative "lazy_hash"
 require_relative "serialization"
+require_relative "../context"
 require_relative "../middleware"
 require_relative "../response"
 
@@ -96,21 +97,23 @@ module Utopia
 			def call(request)
 				session_hash = prepare_session(request)
 				
-				response = Response.wrap(@app.call(request))
-				
-				update_session(session_hash, response.headers)
-				
-				return response
+				Context.with(session: session_hash) do
+					response = Response.wrap(@app.call(request))
+					
+					update_session(session_hash, response.headers)
+					
+					return response
+				ensure
+					session_hash.commit!
+				end
 			end
 			
 			protected
 			
 			def prepare_session(request)
-				session = LazyHash.new do
+				LazyHash.new do
 					self.load_session_values(request)
 				end
-				
-				request[SESSION_KEY] = session
 			end
 			
 			def update_session(session_hash, headers)

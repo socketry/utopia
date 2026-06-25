@@ -4,6 +4,7 @@
 # Copyright, 2015-2026, by Samuel Williams.
 
 require_relative "middleware"
+require_relative "../context"
 
 module Utopia
 	# A middleware which attempts to find localized content.
@@ -13,12 +14,8 @@ module Utopia
 		
 		# A wrapper to provide easy access to locale related data in the request.
 		class Wrapper
-			def initialize(attributes)
-				@attributes = attributes
-			end
-			
 			def localization
-				@attributes[LOCALIZATION_KEY]
+				Context.localization
 			end
 			
 			def localized?
@@ -27,7 +24,7 @@ module Utopia
 			
 			# Returns the current locale or nil if not localized.
 			def current_locale
-				@attributes[CURRENT_LOCALE_KEY]
+				Context.current_locale
 			end
 			
 			# Returns the default locale or nil if not localized.
@@ -45,8 +42,12 @@ module Utopia
 			end
 		end
 		
-		def self.[] request
-			Wrapper.new(request.attributes)
+		def self.current
+			Wrapper.new
+		end
+		
+		def self.[] request = nil
+			self.current
 		end
 	end
 end

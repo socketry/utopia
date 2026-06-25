@@ -4,6 +4,7 @@
 # Copyright, 2025-2026, by Samuel Williams.
 
 require_relative "../middleware"
+require_relative "../context"
 require_relative "../localization"
 require_relative "../response"
 
@@ -78,7 +79,7 @@ module Utopia
 			def respond(request, path_info, extension)
 				path = Path[path_info].simplify
 				
-				if locale = request[Localization::CURRENT_LOCALE_KEY]
+				if locale = Context.current_locale
 					path.last.insert(path.last.rindex(".") || -1, ".#{locale}")
 				end
 				

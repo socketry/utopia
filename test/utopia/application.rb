@@ -10,7 +10,7 @@ require "utopia/application"
 describe Utopia::Application do
 	let(:http_request) {Protocol::HTTP::Request["GET", "/hello?name=sam"]}
 	
-	it "wraps protocol requests for the application stack" do
+	it "passes protocol requests through the application stack" do
 		application_request = nil
 		
 		application = subject.build do
@@ -23,8 +23,8 @@ describe Utopia::Application do
 		
 		response = application.call(http_request)
 		
-		expect(application_request).to be_a(Utopia::Request)
-		expect(application_request.http).to be_equal(http_request)
+		expect(application_request).to be_equal(http_request)
+		expect(Utopia::Context.request).to be_nil
 		expect(application_request.path_info).to be == "/hello"
 		expect(application_request.query).to be == "name=sam"
 		

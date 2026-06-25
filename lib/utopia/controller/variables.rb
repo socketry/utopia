@@ -4,6 +4,7 @@
 # Copyright, 2014-2025, by Samuel Williams.
 
 require_relative "../middleware"
+require_relative "../context"
 
 module Utopia
 	module Controller
@@ -64,8 +65,12 @@ module Utopia
 			end
 		end
 		
-		def self.[] request
-			request.attributes[VARIABLES_KEY]
+		def self.current
+			Context.variables
+		end
+		
+		def self.[] request = nil
+			self.current
 		end
 	end
 end

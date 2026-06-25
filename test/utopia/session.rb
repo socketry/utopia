@@ -14,15 +14,15 @@ describe Utopia::Session do
 		Utopia::Application.build(lambda{|request|
 			case request.path_info
 			when "/login"
-				request.session["login"] = "true"
+				Utopia::Session["login"] = "true"
 				
 				Utopia::Response[200, {}, []]
 			when "/session-set"
-				request.session[request.arguments["key"].to_sym] = request.arguments["value"]
+				Utopia::Session[request.arguments["key"].to_sym] = request.arguments["value"]
 				
 				Utopia::Response[200, {}, []]
 			when "/session-get"
-				Utopia::Response[200, {}, [request.session[request.arguments["key"].to_sym]]]
+				Utopia::Response[200, {}, [Utopia::Session[request.arguments["key"].to_sym]]]
 			else
 				Utopia::Response[404, {}, []]
 			end
@@ -88,11 +88,11 @@ describe Utopia::Session do
 		Utopia::Application.build(lambda{|request|
 			case request.path_info
 			when "/session-set"
-				request.session[request.arguments["key"].to_sym] = request.arguments["value"]
+				Utopia::Session[request.arguments["key"].to_sym] = request.arguments["value"]
 				
 				Utopia::Response[200, {}, []]
 			when "/session-get"
-				Utopia::Response[200, {}, [request.session[request.arguments["key"].to_sym]]]
+				Utopia::Response[200, {}, [Utopia::Session[request.arguments["key"].to_sym]]]
 			else
 				Utopia::Response[404, {}, []]
 			end
@@ -206,5 +206,31 @@ describe Utopia::Session::LazyHash do
 		expect(hash).not.to be(:include?, :a)
 		
 		expect(hash).to be(:needs_update?)
+	end
+	
+	it "does not allow mutation from another fiber" do
+		hash = Utopia::Session::LazyHash.new do
+			{}
+		end
+		
+		fiber = Fiber.new do
+			hash[:a] = 1
+		end
+		
+		expect do
+			fiber.resume
+		end.to raise_exception(Utopia::Session::LazyHash::WrongFiberError)
+	end
+	
+	it "does not allow mutation after commit" do
+		hash = Utopia::Session::LazyHash.new do
+			{}
+		end
+		
+		hash.commit!
+		
+		expect do
+			hash[:a] = 1
+		end.to raise_exception(Utopia::Session::LazyHash::AlreadyCommittedError)
 	end
 end

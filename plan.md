@@ -7,8 +7,8 @@ Rack support can remain available through an adapter, but it should no longer be
 internal ABI for requests, responses, middleware, sessions, static files, or
 controllers.
 
-The main goal is to keep the HTTP boundary small while giving Utopia its own
-application request shape. Rack has been valuable because it codifies request,
+The main goal is to keep the HTTP boundary small while letting Utopia own
+application state explicitly. Rack has been valuable because it codifies request,
 response, and middleware conventions, but that same shared surface has made it hard
 to evolve and hard for application frameworks to make different performance,
 security, and usability choices.
@@ -20,14 +20,15 @@ The proposed stack is:
 ```text
 Protocol::HTTP::Request
   -> Utopia::Application
-  -> Utopia::Request
-  -> Utopia application middleware/controllers/content
+  -> Utopia middleware/controllers/content
   -> Utopia::Response or Protocol::HTTP::Response shaped value
   -> Protocol::HTTP::Response
 ```
 
-`Utopia::Application` is the adaptation boundary. Everything above it is ordinary
-`protocol-http` middleware. Everything below it is Utopia application middleware.
+`Utopia::Application` is the lifecycle boundary. It receives
+`Protocol::HTTP::Request`, installs Utopia fiber state for the request, dispatches
+ordinary protocol middleware, normalizes the response, and clears Utopia fiber
+state.
 
 ## Application
 
@@ -143,15 +144,14 @@ service "utopia" do
 end
 ```
 
-## Request
+## Request And State
 
-Introduce `Utopia::Request` as the application request shape. It should be thin,
-explicit, and lazy, not a reimplementation of `Rack::Request`.
+Do not introduce a separate `Utopia::Request` wrapper in the core stack. Utopia
+middleware should receive the normal `Protocol::HTTP::Request`.
 
 Likely shape:
 
 ```text
-request.http
 request.method
 request.path
 request.path_info
@@ -161,21 +161,18 @@ request.headers
 request.cookies
 request.body
 request.arguments
-request.session
-request.variables
-request.locale
-request.attributes
 ```
 
 Guidelines:
 
-- Keep `request.http` available for direct access to the underlying
-  `Protocol::HTTP::Request`.
 - Avoid a global magical `params` hash.
 - Prefer `arguments` over `params`.
 - Parse request data lazily.
 - Keep query, form, JSON, and multipart parsing separable where possible.
-- Use Utopia-owned request-local state rather than Rack-style `env`.
+- Add small convenience methods to `Protocol::HTTP::Request` only where they make
+  middleware substantially clearer.
+- Use Utopia-owned fiber state rather than Rack-style `env` or a Utopia request
+  attribute hash.
 
 Possible arguments shape:
 
@@ -185,6 +182,38 @@ request.arguments.form
 request.arguments.json
 request.arguments.multipart
 ```
+
+Framework state should be exposed through named Utopia APIs:
+
+```text
+Utopia::Session.current
+Utopia::Session[:user_id]
+Utopia::Session[:user_id] = 10
+Utopia::Controller.current
+Utopia::Localization.current
+```
+
+The implementation can store this directly in fiber storage:
+
+```text
+Fiber[:utopia_session]
+Fiber[:utopia_variables]
+Fiber[:utopia_current_locale]
+```
+
+`Utopia::Application` should clear Utopia fiber state before and after each
+request. Since each request is handled by an independent fiber, a separate root
+context object is not needed.
+
+Sessions are optional. If session middleware is not installed,
+`Utopia::Session.current` should return `nil` and `Utopia::Session[...]` should
+raise a clear missing-session error.
+
+Session mutation should be owned by the fiber that constructed the session and
+should be rejected after commit. Nested fibers may read the inherited session, but
+writes from non-owner fibers should fail. This makes session races visible and
+matches the fact that only the request-owning fiber can reliably commit the
+session back to the response.
 
 ## Response
 
@@ -210,19 +239,19 @@ Normalize at the `Utopia::Application` boundary.
 
 ## Middleware
 
-There should be two explicit middleware layers:
+Utopia middleware should use the protocol-http middleware shape:
 
-1. HTTP middleware, operating on `Protocol::HTTP::Request` and
-   `Protocol::HTTP::Response`.
-2. Utopia application middleware, operating on `Utopia::Request`.
+```text
+initialize(delegate, ...)
+call(Protocol::HTTP::Request) -> response-like value
+```
 
-HTTP middleware is appropriate for low-level protocol behavior, tracing,
-compression, authority policy, early routing, static transport optimizations, and
-protocol upgrades.
-
-Application middleware is appropriate for sessions, localization, arguments,
-content negotiation, controller variables, CSRF, authentication, and other
-framework-specific semantics.
+Low-level protocol behavior, tracing, compression, authority policy, early
+routing, static transport optimizations, protocol upgrades, sessions,
+localization, content negotiation, controller variables, CSRF, authentication, and
+other framework-specific semantics can all be expressed in that shape. Utopia owns
+the compatibility of its middleware APIs and the request-local state helpers they
+use.
 
 The regular Utopia DSL should compose application middleware:
 
@@ -234,18 +263,11 @@ Utopia::Application.build do
 end
 ```
 
-Utopia owns what `use` and `run` mean for application middleware. The app
-middleware contract should be:
+Utopia owns what `use` and `run` mean for middleware. Terminal apps should
+satisfy:
 
 ```text
-initialize(delegate, ...)
-call(Utopia::Request) -> response-like value
-```
-
-and terminal apps should satisfy:
-
-```text
-call(Utopia::Request) -> response-like value
+call(Protocol::HTTP::Request) -> response-like value
 ```
 
 `Utopia::Application.build` can decide compatibility details such as:
@@ -313,8 +335,8 @@ Do not extract a shared `protocol-http-application` gem initially.
 
 The generic code is likely small, and the useful pieces quickly become
 framework-specific: default root, default file name, fallback behavior, request
-wrapper, response helpers, error behavior, middleware DSL, and constant
-resolution.
+helpers, fiber state APIs, response helpers, error behavior, middleware DSL, and
+constant resolution.
 
 Keep the implementation in Utopia first. Extract later only if multiple frameworks
 end up sharing the same stable, low-opinion code.
@@ -325,6 +347,8 @@ Expected breaking changes:
 
 - Core Utopia middleware no longer receives Rack env hashes.
 - Controllers no longer receive `Rack::Request`.
+- Core Utopia middleware receives `Protocol::HTTP::Request`, not
+  `Utopia::Request`.
 - `env[...]`, `rack.session`, `rack.input`, and Rack response tuple assumptions
   need migration.
 - Static file serving should move away from `Rack::Sendfile` and Rack range

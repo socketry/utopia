@@ -37,7 +37,7 @@ describe Utopia::Controller do
 	let(:controller) {TestController.new}
 	
 	def mock_request(path, headers = {})
-		request = Utopia::Request.new(Protocol::HTTP::Request["GET", path, headers])
+		request = Protocol::HTTP::Request["GET", path, headers]
 		return request, Utopia::Path[request.path_info]
 	end
 	

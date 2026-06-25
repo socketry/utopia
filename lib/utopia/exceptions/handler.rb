@@ -6,6 +6,7 @@
 
 require "console"
 
+require_relative "../context"
 require_relative "../middleware"
 require_relative "../response"
 
@@ -38,11 +39,12 @@ module Utopia
 						# We do an internal redirection to the error location:
 						error_request = request.with(
 							method: "GET",
-							path_info: @location,
-							attributes: {"utopia.exception" => exception}
+							path_info: @location
 						)
 						
-						error_response = Response.wrap(@app.call(error_request))
+						error_response = Context.with(request: error_request, exception: exception) do
+							Response.wrap(@app.call(error_request))
+						end
 						error_response.status = 500
 						
 						return error_response
