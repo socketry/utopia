@@ -5,6 +5,7 @@
 
 require_relative "../path"
 require_relative "../middleware"
+require_relative "../request"
 
 require_relative "variables"
 require_relative "base"
@@ -82,7 +83,8 @@ module Utopia
 			
 			# Invoke the controller layer for a given request. The request path may be rewritten.
 			def invoke_controllers(request)
-				request_path = Path.from_string(request.path_info)
+				utopia_request = Utopia::Request.current!
+				request_path = Path.from_string(utopia_request.path_info)
 				
 				# The request path must be absolute. We could handle this internally but it is probably better for this to be an error:
 				raise ArgumentError.new("Invalid request path #{request_path}") unless request_path.absolute?
@@ -91,7 +93,7 @@ module Utopia
 				controller_path = Path.new
 				
 				# Controller instance variables which eventually get processed by the view:
-				variables = request.env[VARIABLES_KEY]
+				variables = Controller.current!
 				
 				while request_path.components.any?
 					# We copy one path component from the relative path to the controller path at a time. The controller, when invoked, can modify the relative path (by assigning to relative_path.components). This allows for controller-relative rewrites, but only the remaining path postfix can be modified.
@@ -111,22 +113,24 @@ module Utopia
 				end
 				
 				# Controllers can directly modify relative_path, which is copied into controller_path. The controllers may have rewriten the path so we update the path info:
-				request.env[Rack::PATH_INFO] = controller_path.to_s
+				utopia_request.path_info = controller_path.to_s
 				
 				# No controller gave a useful result:
 				return nil
 			end
 			
-			def call(env)
-				env[VARIABLES_KEY] ||= Variables.new
+			def call(request)
+				previous_variables = Controller.current
 				
-				request = Rack::Request.new(env)
+				Controller.current ||= Variables.new
 				
 				if result = invoke_controllers(request)
 					return result
 				end
 				
-				return @app.call(env)
+				return @app.call(request)
+			ensure
+				Controller.current = previous_variables
 			end
 		end
 	end

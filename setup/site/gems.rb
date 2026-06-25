@@ -17,7 +17,6 @@ gem "net-smtp"
 
 group :development do
 	gem "bake-test"
-	gem "rack-test"
 	
 	gem "sus"
 	gem "sus-fixtures-async-http"

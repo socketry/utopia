@@ -7,6 +7,8 @@ require_relative "../middleware"
 
 module Utopia
 	module Controller
+		CURRENT_KEY = :utopia_variables
+		
 		# Provides a stack-based instance variable lookup mechanism. It can flatten a stack of controllers into a single hash.
 		class Variables
 			def initialize
@@ -64,8 +66,20 @@ module Utopia
 			end
 		end
 		
-		def self.[] request
-			request.env[VARIABLES_KEY]
+		def self.current
+			Fiber[CURRENT_KEY]
+		end
+		
+		def self.current= variables
+			Fiber[CURRENT_KEY] = variables
+		end
+		
+		def self.current!
+			self.current or raise RuntimeError, "No current Utopia controller variables!"
+		end
+		
+		def self.[] request = nil
+			self.current
 		end
 	end
 end

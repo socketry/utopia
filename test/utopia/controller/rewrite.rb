@@ -3,8 +3,8 @@
 # Released under the MIT License.
 # Copyright, 2015-2025, by Samuel Williams.
 
-require "rack/mock"
 require "utopia/controller"
+require "utopia/request"
 
 describe Utopia::Controller do
 	class TestController < Utopia::Controller::Base
@@ -31,10 +31,22 @@ describe Utopia::Controller do
 	end
 	
 	let(:controller) {TestController.new}
+	let(:utopia_request) {Utopia::Request["GET", "/"]}
 	
-	def mock_request(*arguments)
-		request = Rack::Request.new(Rack::MockRequest.env_for(*arguments))
-		return request, Utopia::Path[request.path_info]
+	def around
+		previous_request = Utopia::Request.current
+		Utopia::Request.current = utopia_request
+		
+		super
+	ensure
+		Utopia::Request.current = previous_request
+	end
+	
+	def mock_request(path)
+		utopia_request = Utopia::Request["GET", path]
+		Utopia::Request.current = utopia_request
+		
+		return utopia_request.http, Utopia::Path[utopia_request.path_info]
 	end
 	
 	it "should match path prefix and extract parameters" do
@@ -54,6 +66,6 @@ describe Utopia::Controller do
 		
 		response = controller.process!(request, relative_path)
 		
-		expect(response[0]).to be == 444
+		expect(response.status).to be == 444
 	end
 end

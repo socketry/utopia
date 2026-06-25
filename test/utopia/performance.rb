@@ -3,14 +3,14 @@
 # Released under the MIT License.
 # Copyright, 2016-2025, by Samuel Williams.
 
-require "a_rack_application"
-
 require "benchmark/ips" if ENV["BENCHMARK"]
 require "ruby-prof" if ENV["PROFILE"]
 require "flamegraph" if ENV["FLAMEGRAPH"]
+require "protocol/http/request"
+require "utopia/application"
 
 describe "Utopia Performance" do
-	include_context ARackApplication, File.join(__dir__, ".performance/config.ru")
+	let(:app) {Utopia::Application.load(File.join(__dir__, ".performance/config/application.rb"))}
 	
 	if defined? Benchmark
 		def benchmark(name = nil)
@@ -52,24 +52,25 @@ describe "Utopia Performance" do
 	end
 	
 	it "should be fast to access basic page" do
-		env = Rack::MockRequest.env_for("/welcome/index")
-		status, headers, response = app.call(env)
+		request = Protocol::HTTP::Request["GET", "/welcome/index"]
+		response = app.call(request)
 		
-		expect(status).to be == 200
+		expect(response.status).to be == 200
 		
 		benchmark("/welcome/index") do |i|
-			i.times{app.call(env)}
+			i.times{app.call(request)}
 		end
 	end
 	
 	it "should be fast to invoke a controller" do
-		env = Rack::MockRequest.env_for("/api/fetch")
-		status, headers, response = app.call(env)
+		request = Protocol::HTTP::Request["GET", "/api/fetch"]
+		request.headers["accept"] = "application/json"
+		response = app.call(request)
 		
-		expect(status).to be == 200
+		expect(response.status).to be == 200
 		
 		benchmark("/api/fetch") do |i|
-			i.times{app.call(env)}
+			i.times{app.call(request)}
 		end
 	end
 end

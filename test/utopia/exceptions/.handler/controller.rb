@@ -14,7 +14,7 @@ end
 
 # The ExceptionHandler middleware will redirect here when an exception occurs. If this also fails, things get ugly.
 on 'exception' do |request|
-	if request.params['fatal']
+	if Utopia::Request.current.arguments['fatal']
 		raise TharSheBlows.new("Yarrh!")
 	else
 		succeed! :content => 'Error Will Robertson', :type => 'text/plain'

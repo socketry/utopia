@@ -7,9 +7,13 @@ require "openssl"
 require "digest/sha2"
 require "console"
 require "json"
+require "cgi"
 
 require_relative "lazy_hash"
 require_relative "serialization"
+require_relative "../middleware"
+require_relative "../request"
+require_relative "../response"
 
 module Utopia
 	module Session
@@ -22,7 +26,7 @@ module Utopia
 			
 			SECRET_KEY = "UTOPIA_SESSION_SECRET".freeze
 			
-			RACK_SESSION = "rack.session".freeze
+			SESSION_KEY = "utopia.session".freeze
 			CIPHER_ALGORITHM = "aes-256-cbc"
 			
 			# The session will expire if no requests were made within 24 hours:
@@ -35,8 +39,8 @@ module Utopia
 			# @param secret [Array] The secret text used to generate a symetric encryption key for the coookie data.
 			# @param same_site [Symbol, String] Controls how the cookie is provided to the site.
 			# @param expires_after [String] The cache-control header to set for static content.
-			# @param options [Hash<Symbol,Object>] Additional defaults used for generating the cookie by `Rack::Utils.set_cookie_header!`.
-			def initialize(app, session_name: RACK_SESSION, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, same_site: :lax, maximum_size: MAXIMUM_SIZE, **options)
+			# @param options [Hash<Symbol,Object>] Additional defaults used for generating the session cookie.
+			def initialize(app, session_name: SESSION_KEY, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, same_site: :lax, maximum_size: MAXIMUM_SIZE, **options)
 				@app = app
 				
 				@session_name = session_name
@@ -90,25 +94,31 @@ module Utopia
 				super
 			end
 			
-			def call(env)
-				session_hash = prepare_session(env)
+			def call(request)
+				session_hash = prepare_session(Utopia::Request.current!)
+				previous_session = Session.current
 				
-				status, headers, body = @app.call(env)
+				Session.current = session_hash
 				
-				update_session(env, session_hash, headers)
+				response = Response.wrap(@app.call(request))
 				
-				return [status, headers, body]
+				update_session(session_hash, response.headers)
+				
+				return response
+			ensure
+				session_hash&.commit!
+				Session.current = previous_session
 			end
 			
 			protected
 			
-			def prepare_session(env)
-				env[RACK_SESSION] = LazyHash.new do
-					self.load_session_values(env)
+			def prepare_session(request)
+				LazyHash.new do
+					self.load_session_values(request)
 				end
 			end
 			
-			def update_session(env, session_hash, headers)
+			def update_session(session_hash, headers)
 				if session_hash.needs_update?(@update_timeout)
 					values = session_hash.values
 					
@@ -131,9 +141,7 @@ module Utopia
 			
 			# Load session from user supplied cookie. If the data is invalid or otherwise fails validation, `build_iniital_session` is invoked.
 			# @return hash of values.
-			def load_session_values(env)
-				request = Rack::Request.new(env)
-				
+			def load_session_values(request)
 				# Decrypt the data from the user if possible:
 				if data = request.cookies[@cookie_name]
 					begin
@@ -177,7 +185,23 @@ module Utopia
 					expires: expires(updated_at)
 				}.merge(@cookie_defaults)
 				
-				Rack::Utils.set_cookie_header!(headers, @cookie_name, cookie)
+				headers.add("set-cookie", cookie_header(@cookie_name, cookie))
+			end
+			
+			def cookie_header(name, cookie)
+				parts = ["#{CGI.escape(name)}=#{CGI.escape(cookie.fetch(:value))}"]
+				
+				parts << "Domain=#{cookie[:domain]}" if cookie[:domain]
+				parts << "Path=#{cookie[:path]}" if cookie[:path]
+				parts << "Expires=#{cookie[:expires].httpdate}" if cookie[:expires]
+				parts << "Secure" if cookie[:secure]
+				parts << "HttpOnly" if cookie[:http_only]
+				
+				if same_site = cookie[:same_site]
+					parts << "SameSite=#{same_site.to_s.capitalize}"
+				end
+				
+				return parts.join("; ")
 			end
 			
 			def encrypt(hash)

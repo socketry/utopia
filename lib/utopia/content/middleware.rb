@@ -5,6 +5,9 @@
 
 require_relative "../middleware"
 require_relative "../localization"
+require_relative "../request"
+require_relative "../response"
+require_relative "../controller/variables"
 
 require_relative "links"
 require_relative "node"
@@ -92,17 +95,16 @@ module Utopia
 			
 			def respond(link, request)
 				if node = resolve_link(link)
-					attributes = request.env.fetch(VARIABLES_KEY, {}).to_hash
+					attributes = Controller.current&.to_hash || {}
 					
 					return node.process!(request, attributes)
 				elsif redirect_uri = link[:uri]
-					return [307, {HTTP::LOCATION => redirect_uri}, []]
+					return Utopia::Response[307, {HTTP::LOCATION => redirect_uri}, []]
 				end
 			end
 			
-			def call(env)
-				request = Rack::Request.new(env)
-				path = Path.create(request.path_info)
+			def call(request)
+				path = Path.create(Utopia::Request.current!.path_info)
 				
 				# Check if the request is to a non-specific index. This only works for requests with a given name:
 				basename = path.basename
@@ -112,17 +114,17 @@ module Utopia
 				if File.directory? directory_path
 					index_path = [basename, INDEX]
 					
-					return [307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []]
+					return Utopia::Response[307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []]
 				end
 				
-				locale = env[Localization::CURRENT_LOCALE_KEY]
+				locale = Localization.current_locale
 				if link = @links.for(path, locale)
 					if response = self.respond(link, request)
 						return response
 					end
 				end
 				
-				return @app.call(env)
+				return @app.call(request)
 			end
 			
 			private

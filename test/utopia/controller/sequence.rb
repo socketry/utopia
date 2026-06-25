@@ -3,9 +3,9 @@
 # Released under the MIT License.
 # Copyright, 2015-2025, by Samuel Williams.
 
-require "rack/mock"
-require "rack/test"
+require "protocol/http/request"
 require "utopia/controller"
+require "utopia/request"
 
 class TestController < Utopia::Controller::Base
 	prepend Utopia::Controller::Actions
@@ -57,17 +57,29 @@ end
 
 describe Utopia::Controller do
 	let(:variables) {Utopia::Controller::Variables.new}
+	let(:request) {Protocol::HTTP::Request["GET", "/"]}
+	
+	def before
+		super
+		Utopia::Controller.current = variables
+	end
+	
+	def after(error = nil)
+		Utopia::Controller.current = nil
+		super
+	end
 	
 	it "should call controller methods" do
-		request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 		controller = TestController.new
 		variables << controller
 		
 		result = controller.process!(request, Utopia::Path["success"])
-		expect(result).to be == [200, {}, []]
+		expect(result.status).to be == 200
+		expect(result.to_protocol_response.read).to be == nil
 		
 		result = controller.process!(request, Utopia::Path["foo/bar/failure"])
-		expect(result).to be == [400, {}, ["Bad Request"]]
+		expect(result.status).to be == 400
+		expect(result.to_protocol_response.read).to be == "Bad Request"
 		
 		result = controller.process!(request, Utopia::Path["variable"])
 		expect(result).to be == nil
@@ -75,7 +87,6 @@ describe Utopia::Controller do
 	end
 	
 	it "should call direct controller methods" do
-		request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 		controller = TestIndirectController.new
 		variables << controller
 		
@@ -84,7 +95,6 @@ describe Utopia::Controller do
 	end
 	
 	it "should call indirect controller methods" do
-		request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 		controller = TestIndirectController.new
 		variables << controller
 		
@@ -94,7 +104,6 @@ describe Utopia::Controller do
 	end
 	
 	it "should call multiple indirect controller methods in order" do
-		request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 		controller = TestIndirectController.new
 		variables << controller
 		
@@ -104,7 +113,6 @@ describe Utopia::Controller do
 	end
 	
 	it "should match single patterns" do
-		request = Rack::Request.new(Utopia::VARIABLES_KEY => variables)
 		controller = TestIndirectController.new
 		variables << controller
 		

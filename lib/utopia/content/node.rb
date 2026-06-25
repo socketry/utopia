@@ -107,7 +107,7 @@ module Utopia
 			end
 			
 			def process!(request, attributes = {})
-				Document.render(self, request, attributes).to_a
+				Document.render(self, request, attributes).to_protocol_response
 			end
 			
 			# This is a special context in which a limited set of well defined methods are exposed in the content view.

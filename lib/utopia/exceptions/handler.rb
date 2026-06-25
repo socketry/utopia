@@ -6,8 +6,24 @@
 
 require "console"
 
+require_relative "../middleware"
+require_relative "../request"
+require_relative "../response"
+
 module Utopia
 	module Exceptions
+		CURRENT_KEY = :utopia_exception
+		
+		# The exception currently being handled.
+		def self.current
+			Fiber[CURRENT_KEY]
+		end
+		
+		# Assign the exception currently being handled.
+		def self.current= exception
+			Fiber[CURRENT_KEY] = exception
+		end
+		
 		# A middleware which catches exceptions and performs an internal redirect.
 		class Handler
 			# @param location [String] Peform an internal redirect to this location when an exception is raised.
@@ -25,28 +41,38 @@ module Utopia
 				super
 			end
 			
-			def call(env)
+			def call(request)
 				begin
-					return @app.call(env)
+					return @app.call(request)
 				rescue Exception => exception
 					Console.warn(self, "An error occurred while processing the request.", error: exception)
 					
 					begin
 						# We do an internal redirection to the error location:
-						error_request = env.merge(
-							Rack::PATH_INFO => @location,
-							Rack::REQUEST_METHOD => Rack::GET,
-							"utopia.exception" => exception,
+						error_request = Request.current!.with(
+							method: "GET",
+							path_info: @location
 						)
 						
-						error_response = @app.call(error_request)
-						error_response[0] = 500
+						previous_request = Request.current
+						previous_exception = Exceptions.current
+						
+						begin
+							Request.current = error_request
+							Exceptions.current = exception
+							
+							error_response = Response.wrap(@app.call(error_request.http))
+						ensure
+							Request.current = previous_request
+							Exceptions.current = previous_exception
+						end
+						error_response.status = 500
 						
 						return error_response
 					rescue Exception => exception
 						# If redirection fails, we also finish with a fatal error:
 						Console.error(self, "An error occurred while invoking the error handler.", error: exception)
-						return [500, {"content-type" => "text/plain"}, ["An error occurred while processing the request."]]
+						return Response[500, {"content-type" => "text/plain"}, ["An error occurred while processing the request."]]
 					end
 				end
 			end

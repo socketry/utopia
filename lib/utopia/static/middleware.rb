@@ -5,6 +5,8 @@
 
 require_relative "../middleware"
 require_relative "../localization"
+require_relative "../request"
+require_relative "../response"
 
 require_relative "local_file"
 require_relative "mime_types"
@@ -52,11 +54,11 @@ module Utopia
 			
 			attr :extensions
 			
-			LAST_MODIFIED = "Last-Modified".freeze
+			LAST_MODIFIED = "last-modified".freeze
 			CONTENT_TYPE = HTTP::CONTENT_TYPE
 			CACHE_CONTROL = HTTP::CACHE_CONTROL
-			ETAG = "ETag".freeze
-			ACCEPT_RANGES = "Accept-Ranges".freeze
+			ETAG = "etag".freeze
+			ACCEPT_RANGES = "accept-ranges".freeze
 			
 			def response_headers_for(file, content_type)
 				if @cache_control.respond_to?(:call)
@@ -74,41 +76,41 @@ module Utopia
 				}
 			end
 			
-			def respond(env, path_info, extension)
+			def respond(request, path_info, extension)
 				path = Path[path_info].simplify
 				
-				if locale = env[Localization::CURRENT_LOCALE_KEY]
+				if locale = Localization.current_locale
 					path.last.insert(path.last.rindex(".") || -1, ".#{locale}")
 				end
 				
 				if file = fetch_file(path)
 					response_headers = self.response_headers_for(file, @extensions[extension])
 					
-					if file.modified?(env)
-						return file.serve(env, response_headers)
+					if file.modified?(request)
+						return file.serve(request, response_headers)
 					else
-						return [304, response_headers, []]
+						return Response[304, response_headers, []]
 					end
 				end
 			end
 			
-			def call(env)
-				path_info = env[Rack::PATH_INFO]
+			def call(request)
+				path_info = Utopia::Request.current!.path_info
 				extension = File.extname(path_info)
 				
 				if @extensions.key?(extension.downcase)
-					if response = self.respond(env, path_info, extension)
+					if response = self.respond(request, path_info, extension)
 						return response
 					end
 				end
 				
 				# else if no file was found:
-				return @app.call(env)
+				return @app.call(request)
 			end
 		end
 		
 		Traces::Provider(Static) do
-			def respond(env, path_info, extension)
+			def respond(request, path_info, extension)
 				attributes = {
 					path_info: path_info,
 				}

@@ -5,7 +5,6 @@
 
 require_relative "http"
 require_relative "path"
-
 module Utopia
 	# The default pages path for {Utopia::Content} middleware.
 	PAGES_PATH = "pages".freeze

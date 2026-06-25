@@ -3,14 +3,19 @@
 # Released under the MIT License.
 # Copyright, 2013-2025, by Samuel Williams.
 
-require "rack/mock"
-require "rack/test"
 require "utopia/controller"
+require_relative "../protocol_application"
 
 describe Utopia::Controller do
-	include Rack::Test::Methods
+	include ProtocolApplication
 	
-	let(:app) {Rack::Builder.parse_file(File.expand_path("middleware.ru", __dir__))}
+	let(:app) do
+		root = File.expand_path(".middleware", __dir__)
+		
+		Utopia::Application.build do
+			use Utopia::Controller, root: root
+		end
+	end
 	
 	it "should successfully call empty controller" do
 		get "/empty/index"
@@ -22,21 +27,21 @@ describe Utopia::Controller do
 		get "/controller/flat"
 		
 		expect(last_response.status).to be == 200
-		expect(last_response.body).to be == "flat"
+		expect(body).to be == "flat"
 	end
 	
 	it "should invoke controller method from the top level" do
 		get "/controller/hello-world"
 		
 		expect(last_response.status).to be == 200
-		expect(last_response.body).to be == "Hello World"
+		expect(body).to be == "Hello World"
 	end
 	
 	it "should invoke the controller method with a nested path" do
 		get "/controller/nested/hello-world"
 		
 		expect(last_response.status).to be == 200
-		expect(last_response.body).to be == "Hello World"
+		expect(body).to be == "Hello World"
 	end
 	
 	it "shouldn't call the nested controller method" do
@@ -63,6 +68,6 @@ describe Utopia::Controller do
 		
 		get "/redirect/test/foo"
 		expect(last_response.status).to be == 200
-		expect(last_response.body).to be == "/redirect"
+		expect(body).to be == "/redirect"
 	end
 end

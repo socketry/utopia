@@ -3,8 +3,6 @@
 # Released under the MIT License.
 # Copyright, 2010-2025, by Samuel Williams.
 
-require "rack"
-
 require "http/accept"
 
 module Utopia
@@ -71,7 +69,7 @@ module Utopia
 			500 => "Internal Server Error".freeze,
 			501 => "Not Implemented".freeze,
 			503 => "Service Unavailable".freeze
-		}.merge(Rack::Utils::HTTP_STATUS_CODES)
+		}
 		
 		CONTENT_TYPE = "content-type".freeze
 		LOCATION = "location".freeze
@@ -99,7 +97,6 @@ module Utopia
 				STATUS_DESCRIPTIONS[@code] || @code.to_s
 			end
 			
-			# Allow to be used for rack body:
 			def each
 				yield to_s
 			end

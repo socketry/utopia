@@ -3,26 +3,26 @@
 # Released under the MIT License.
 # Copyright, 2016-2025, by Samuel Williams.
 
-require "rack/test"
+require "protocol/http/request"
 require "sus/fixtures/async/http"
-require "protocol/rack"
+require "utopia/application"
 
 AWebsite = Sus::Shared("a website") do
-	include Rack::Test::Methods
+	let(:application_path) {File.expand_path("../config/application.rb", __dir__)}
+	let(:application_directory) {File.dirname(application_path)}
 	
-	let(:rackup_path) {File.expand_path("../config.ru", __dir__)}
-	let(:rackup_directory) {File.dirname(rackup_path)}
+	let(:app) {Utopia::Application.load(application_path)}
 	
-	let(:app) {Rack::Builder.parse_file(rackup_path)}
+	def get(path)
+		@last_response = app.call(Protocol::HTTP::Request["GET", path])
+	end
+	
+	attr :last_response
 end
 
 AValidPage = Sus::Shared("a valid page") do |path|
 	it "can access #{path}" do
 		get path
-		
-		while last_response.redirect?
-			follow_redirect!
-		end
 		
 		expect(last_response.status).to be == 200
 	end
@@ -31,9 +31,8 @@ end
 AServer = Sus::Shared("a server") do
 	include Sus::Fixtures::Async::HTTP::ServerContext
 	
-	let(:rackup_path) {File.expand_path("../config.ru", __dir__)}
-	let(:rackup_directory) {File.dirname(rackup_path)}
+	let(:application_path) {File.expand_path("../config/application.rb", __dir__)}
+	let(:application_directory) {File.dirname(application_path)}
 	
-	let(:rack_app) {Rack::Builder.parse_file(rackup_path)}
-	let(:app) {Protocol::Rack::Adapter.new(rack_app)}
+	let(:app) {Utopia::Application.load(application_path)}
 end

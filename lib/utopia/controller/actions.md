@@ -22,27 +22,29 @@ on "index" do
 end
 
 on "new" do |request|
+	utopia_request = Utopia::Request.current!
 	@user = User.new
 	
-	if request.post?
-		@user.update_attributes(request.params["user"])
+	if utopia_request.post?
+		@user.update_attributes(utopia_request.arguments["user"])
 		
 		redirect! "index"
 	end
 end
 
 on "edit" do |request|
-	@user = User.find(request.params["id"])
+	utopia_request = Utopia::Request.current!
+	@user = User.find(utopia_request.arguments["id"])
 	
-	if request.post?
-		@user.update_attributes(request.params["user"])
+	if utopia_request.post?
+		@user.update_attributes(utopia_request.arguments["user"])
 		
 		redirect! "index"
 	end
 end
 
 on "delete" do |request|
-	User.find(request.params["id"]).destroy
+	User.find(Utopia::Request.current!.arguments["id"]).destroy
 	
 	redirect! "index"
 end

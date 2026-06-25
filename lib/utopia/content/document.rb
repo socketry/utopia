@@ -7,6 +7,7 @@ require_relative "links"
 require_relative "response"
 require_relative "markup"
 require_relative "builder"
+require_relative "../request"
 
 module Utopia
 	module Content
@@ -41,7 +42,7 @@ module Utopia
 			
 			# @returns [Path] The original request path, if known.
 			def request_path
-				Path[request.env["REQUEST_PATH"]]
+				Path[Utopia::Request.current!.request_path]
 			end
 			
 			protected def current_base_uri_path
@@ -87,7 +88,7 @@ module Utopia
 				MarkupParser.parse(markup, self)
 			end
 			
-			# The Rack::Request for this document.
+			# The request for this document.
 			attr :request
 			
 			# Per-document global attributes.

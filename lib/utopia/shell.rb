@@ -3,24 +3,28 @@
 # Released under the MIT License.
 # Copyright, 2020-2025, by Samuel Williams.
 
-require "rack/builder"
-require "rack/test"
+require "protocol/http/request"
+require_relative "application"
 require "irb"
 
 module Utopia
 	# This is designed to be used with the corresponding bake task.
 	class Shell
-		include Rack::Test::Methods
-		
 		def initialize(context)
 			@context = context
 			@app = nil
 		end
 		
 		def app
-			@app ||= Rack::Builder.parse_file(
-				File.expand_path("config.ru", @context.root)
-			).first
+			@app ||= Application.load(File.expand_path(Application::CONFIGURATION_PATH, @context.root))
+		end
+		
+		def get(path, headers = nil)
+			app.call(Protocol::HTTP::Request["GET", path, headers])
+		end
+		
+		def post(path, headers = nil, body = nil)
+			app.call(Protocol::HTTP::Request["POST", path, headers, body])
 		end
 		
 		def to_s
