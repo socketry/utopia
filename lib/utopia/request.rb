@@ -8,7 +8,7 @@ require "uri"
 
 require "protocol/http/request"
 
-require_relative "context"
+require_relative "session"
 
 # Protocol namespaces extended with Utopia request helpers.
 module Protocol
@@ -61,6 +61,8 @@ module Protocol
 			
 			# Set the request path while preserving the query string.
 			def path_info=(value)
+				@utopia_request_path ||= self.path_info
+				
 				if query = self.query
 					self.path = "#{value}?#{query}"
 				else
@@ -68,6 +70,11 @@ module Protocol
 				end
 				
 				@utopia_arguments = nil
+			end
+			
+			# The original request path, before any internal request rewrites.
+			def request_path
+				@utopia_request_path || self.path_info
 			end
 			
 			# The query string without the leading question mark.
@@ -119,7 +126,7 @@ module Protocol
 			
 			# The current Utopia session, if installed.
 			def session
-				Utopia::Context.session
+				Utopia::Session.current
 			end
 			
 			# The remote peer IP address, if available.
@@ -144,12 +151,18 @@ module Protocol
 				request.method = method
 				
 				if path_info
+					request.instance_variable_set(:@utopia_request_path, self.request_path)
+					
 					if query = self.query
 						request.path = "#{path_info}?#{query}"
 					else
 						request.path = path_info
 					end
 				else
+					if path != self.path
+						request.instance_variable_set(:@utopia_request_path, self.request_path)
+					end
+					
 					request.path = path
 				end
 				

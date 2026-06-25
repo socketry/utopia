@@ -6,12 +6,23 @@
 
 require "console"
 
-require_relative "../context"
 require_relative "../middleware"
 require_relative "../response"
 
 module Utopia
 	module Exceptions
+		CURRENT_KEY = :utopia_exception
+		
+		# The exception currently being handled.
+		def self.current
+			Fiber[CURRENT_KEY]
+		end
+		
+		# Assign the exception currently being handled.
+		def self.current= exception
+			Fiber[CURRENT_KEY] = exception
+		end
+		
 		# A middleware which catches exceptions and performs an internal redirect.
 		class Handler
 			# @param location [String] Peform an internal redirect to this location when an exception is raised.
@@ -42,8 +53,14 @@ module Utopia
 							path_info: @location
 						)
 						
-						error_response = Context.with(request: error_request, exception: exception) do
-							Response.wrap(@app.call(error_request))
+						previous_exception = Exceptions.current
+						
+						begin
+							Exceptions.current = exception
+							
+							error_response = Response.wrap(@app.call(error_request))
+						ensure
+							Exceptions.current = previous_exception
 						end
 						error_response.status = 500
 						

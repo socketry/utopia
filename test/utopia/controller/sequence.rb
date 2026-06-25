@@ -5,7 +5,6 @@
 
 require "protocol/http/request"
 require "utopia/controller"
-require "utopia/context"
 require "utopia/request"
 
 class TestController < Utopia::Controller::Base
@@ -62,11 +61,11 @@ describe Utopia::Controller do
 	
 	def before
 		super
-		Utopia::Context.variables = variables
+		Utopia::Controller.current = variables
 	end
 	
 	def after(error = nil)
-		Utopia::Context.clear
+		Utopia::Controller.current = nil
 		super
 	end
 	

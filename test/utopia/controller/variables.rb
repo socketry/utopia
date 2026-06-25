@@ -6,7 +6,6 @@
 require "utopia/controller/variables"
 require "protocol/http/request"
 require "utopia/request"
-require "utopia/context"
 
 class TestController
 	attr_accessor :x, :y, :z
@@ -46,12 +45,12 @@ describe Utopia::Controller::Variables do
 	
 	describe Utopia::Controller do
 		after do
-			Utopia::Context.clear
+			Utopia::Controller.current = nil
 		end
 		
 		it "returns variables from fiber state" do
 			variables = Utopia::Controller::Variables.new
-			Utopia::Context.variables = variables
+			Utopia::Controller.current = variables
 			
 			expect(Utopia::Controller.current).to be == variables
 		end

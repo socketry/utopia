@@ -4,9 +4,9 @@
 # Copyright, 2025-2026, by Samuel Williams.
 
 require_relative "../middleware"
-require_relative "../context"
 require_relative "../localization"
 require_relative "../response"
+require_relative "../controller/variables"
 
 require_relative "links"
 require_relative "node"
@@ -94,7 +94,7 @@ module Utopia
 			
 			def respond(link, request)
 				if node = resolve_link(link)
-					attributes = Context.variables&.to_hash || {}
+					attributes = Controller.current&.to_hash || {}
 					
 					return node.process!(request, attributes)
 				elsif redirect_uri = link[:uri]
@@ -116,7 +116,7 @@ module Utopia
 					return Utopia::Response[307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []]
 				end
 				
-				locale = Context.current_locale
+				locale = Localization.current_locale
 				if link = @links.for(path, locale)
 					if response = self.respond(link, request)
 						return response

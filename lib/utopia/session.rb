@@ -4,11 +4,11 @@
 # Copyright, 2014-2025, by Samuel Williams.
 # Copyright, 2019, by Huba Nagy.
 
-require_relative "context"
-
 module Utopia
 	# Session access helpers and middleware constructor.
 	module Session
+		CURRENT_KEY = :utopia_session
+		
 		# Base class for Utopia session errors.
 		class Error < StandardError
 		end
@@ -30,7 +30,12 @@ module Utopia
 		
 		# The current session, if session middleware is installed.
 		def self.current
-			Context.session
+			Fiber[CURRENT_KEY]
+		end
+		
+		# Assign the current session.
+		def self.current= session
+			Fiber[CURRENT_KEY] = session
 		end
 		
 		# The current session, or raise a clear error if sessions are unavailable.

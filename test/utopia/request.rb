@@ -19,6 +19,7 @@ describe Protocol::HTTP::Request do
 		
 		expect(request.path).to be == "/find?q=utopia&tag=ruby&tag=async"
 		expect(request.path_info).to be == "/find"
+		expect(request.request_path).to be == "/search"
 	end
 	
 	it "provides HTTP method predicates" do
@@ -62,5 +63,14 @@ describe Protocol::HTTP::Request do
 		expect(derived).not.to be_equal(request)
 		expect(derived.method).to be == "GET"
 		expect(derived.path).to be == "/find?q=utopia&tag=ruby&tag=async"
+		expect(derived.request_path).to be == "/search"
+	end
+	
+	it "preserves the original request path across multiple derived requests" do
+		derived = request.with(path_info: "/find")
+		derived = derived.with(path_info: "/lookup")
+		
+		expect(derived.path_info).to be == "/lookup"
+		expect(derived.request_path).to be == "/search"
 	end
 end

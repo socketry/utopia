@@ -4,10 +4,11 @@
 # Copyright, 2014-2025, by Samuel Williams.
 
 require_relative "../middleware"
-require_relative "../context"
 
 module Utopia
 	module Controller
+		CURRENT_KEY = :utopia_variables
+		
 		# Provides a stack-based instance variable lookup mechanism. It can flatten a stack of controllers into a single hash.
 		class Variables
 			def initialize
@@ -66,7 +67,11 @@ module Utopia
 		end
 		
 		def self.current
-			Context.variables
+			Fiber[CURRENT_KEY]
+		end
+		
+		def self.current= variables
+			Fiber[CURRENT_KEY] = variables
 		end
 		
 		def self.[] request = nil

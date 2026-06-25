@@ -4,7 +4,6 @@
 # Copyright, 2025-2026, by Samuel Williams.
 
 require_relative "wrapper"
-require_relative "../context"
 require_relative "../middleware"
 require_relative "../response"
 
@@ -143,7 +142,7 @@ module Utopia
 				headers.add("vary", "Accept-Language")
 				
 				# Althought this header is generally not supported, we supply it anyway as it is useful for debugging:
-				if locale = Context.current_locale
+				if locale = Localization.current_locale
 					# Set the Content-Location to point to the localized URI as requested:
 					headers["content-location"] = "/#{locale}" + request.path_info
 				end
@@ -161,8 +160,17 @@ module Utopia
 				preferred_locales(request) do |localized_request, locale|
 					# puts "Trying locale: #{locale}: #{localized_request.path_info}..."
 					
-					response = Context.with(request: localized_request, localization: self, current_locale: locale) do
-						Response.wrap(@app.call(localized_request))
+					previous_localization = Localization.current
+					previous_locale = Localization.current_locale
+					
+					begin
+						Localization.current = self
+						Localization.current_locale = locale
+						
+						response = Response.wrap(@app.call(localized_request))
+					ensure
+						Localization.current = previous_localization
+						Localization.current_locale = previous_locale
 					end
 					
 					break unless response.status >= 400

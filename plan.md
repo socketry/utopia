@@ -26,9 +26,9 @@ Protocol::HTTP::Request
 ```
 
 `Utopia::Application` is the lifecycle boundary. It receives
-`Protocol::HTTP::Request`, installs Utopia fiber state for the request, dispatches
-ordinary protocol middleware, normalizes the response, and clears Utopia fiber
-state.
+`Protocol::HTTP::Request`, dispatches ordinary protocol middleware, and
+normalizes the response. The request itself flows explicitly down the middleware
+chain.
 
 ## Application
 
@@ -171,8 +171,9 @@ Guidelines:
 - Keep query, form, JSON, and multipart parsing separable where possible.
 - Add small convenience methods to `Protocol::HTTP::Request` only where they make
   middleware substantially clearer.
-- Use Utopia-owned fiber state rather than Rack-style `env` or a Utopia request
-  attribute hash.
+- Keep the request explicit. Do not expose ambient `Utopia.request` style state.
+- Use Utopia-owned fiber state for optional adjacent application state rather
+  than Rack-style `env` or a Utopia request attribute hash.
 
 Possible arguments shape:
 
@@ -201,9 +202,9 @@ Fiber[:utopia_variables]
 Fiber[:utopia_current_locale]
 ```
 
-`Utopia::Application` should clear Utopia fiber state before and after each
-request. Since each request is handled by an independent fiber, a separate root
-context object is not needed.
+Each optional subsystem should own its own `current`/`current=` API for tests and
+middleware setup. Since each request is handled by an independent fiber, a
+separate root context object is not needed.
 
 Sessions are optional. If session middleware is not installed,
 `Utopia::Session.current` should return `nil` and `Utopia::Session[...]` should

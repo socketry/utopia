@@ -6,8 +6,11 @@
 require "net/smtp"
 require "mail"
 
-require_relative "../context"
 require_relative "../middleware"
+require_relative "../session"
+require_relative "../controller/variables"
+require_relative "../localization"
+require_relative "handler"
 
 module Utopia
 	module Exceptions
@@ -130,8 +133,8 @@ module Utopia
 					io.puts "header[#{key.inspect}]: #{value.inspect}"
 				end
 				
-				Context.to_hash.each do |key, value|
-					io.puts "context.#{key}: #{value.inspect}"
+				self.current_state.each do |key, value|
+					io.puts "state.#{key}: #{value.inspect}"
 				end
 				
 				io.puts
@@ -164,7 +167,7 @@ module Utopia
 				end
 				
 				if @dump_environment
-					mail.attachments["context.yaml"] = YAML.dump(Context.to_hash)
+					mail.attachments["state.yaml"] = YAML.dump(self.current_state)
 				end
 				
 				return mail
@@ -179,6 +182,16 @@ module Utopia
 			rescue => mail_exception
 				$stderr.puts mail_exception.to_s
 				$stderr.puts mail_exception.backtrace
+			end
+			
+			def current_state
+				{
+					session: Session.current,
+					variables: Controller.current,
+					localization: Localization.current,
+					current_locale: Localization.current_locale,
+					exception: Exceptions.current,
+				}
 			end
 			
 			def extract_body(request)
