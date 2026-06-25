@@ -23,7 +23,8 @@ describe Utopia::Application do
 		
 		response = application.call(http_request)
 		
-		expect(application_request).to be_equal(http_request)
+		expect(application_request).to be_a(Utopia::Request)
+		expect(application_request.http).to be_equal(http_request)
 		expect(application_request.path_info).to be == "/hello"
 		expect(application_request.query).to be == "name=sam"
 		

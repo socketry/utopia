@@ -4,8 +4,6 @@
 # Copyright, 2016-2025, by Samuel Williams.
 
 require "json"
-require "protocol/http/request"
-
 require "utopia/content"
 require "utopia/controller"
 require "utopia/redirection"
@@ -37,7 +35,7 @@ describe Utopia::Controller do
 	let(:controller) {TestController.new}
 	
 	def mock_request(path, headers = {})
-		request = Protocol::HTTP::Request["GET", path, headers]
+		request = Utopia::Request["GET", path, headers]
 		return request, Utopia::Path[request.path_info]
 	end
 	

@@ -4,12 +4,11 @@
 # Copyright, 2017-2025, by Samuel Williams.
 
 require "utopia/content/document"
-require "protocol/http/request"
 require "utopia/request"
 
 describe Utopia::Content::Document do
 	let(:path) {"/index"}
-	let(:request) {Protocol::HTTP::Request["GET", path]}
+	let(:request) {Utopia::Request["GET", path]}
 	let(:document) {subject.new(request, {})}
 	
 	it "should generate valid self-closing markup" do

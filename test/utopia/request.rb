@@ -6,8 +6,12 @@
 require "protocol/http/request"
 require "utopia/request"
 
-describe Protocol::HTTP::Request do
+describe Utopia::Request do
 	let(:request) {subject["POST", "/search?q=utopia&tag=ruby&tag=async", {"cookie" => "a=1; b=2"}]}
+	
+	it "wraps a protocol HTTP request" do
+		expect(request.http).to be_a(Protocol::HTTP::Request)
+	end
 	
 	it "provides path information" do
 		expect(request.path_info).to be == "/search"

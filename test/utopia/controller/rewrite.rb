@@ -3,7 +3,6 @@
 # Released under the MIT License.
 # Copyright, 2015-2025, by Samuel Williams.
 
-require "protocol/http/request"
 require "utopia/controller"
 require "utopia/request"
 
@@ -34,7 +33,7 @@ describe Utopia::Controller do
 	let(:controller) {TestController.new}
 	
 	def mock_request(path)
-		request = Protocol::HTTP::Request["GET", path]
+		request = Utopia::Request["GET", path]
 		return request, Utopia::Path[request.path_info]
 	end
 	

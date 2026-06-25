@@ -30,7 +30,7 @@ describe "Utopia application middleware" do
 		
 		response = application.call(request("/hello"))
 		
-		expect(seen_request).to be_a(Protocol::HTTP::Request)
+		expect(seen_request).to be_a(Utopia::Request)
 		expect(response.status).to be == 200
 		expect(response.read).to be == "/hello"
 		

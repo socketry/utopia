@@ -20,15 +20,16 @@ The proposed stack is:
 ```text
 Protocol::HTTP::Request
   -> Utopia::Application
+  -> Utopia::Request
   -> Utopia middleware/controllers/content
   -> Utopia::Response or Protocol::HTTP::Response shaped value
   -> Protocol::HTTP::Response
 ```
 
 `Utopia::Application` is the lifecycle boundary. It receives
-`Protocol::HTTP::Request`, dispatches ordinary protocol middleware, and
-normalizes the response. The request itself flows explicitly down the middleware
-chain.
+`Protocol::HTTP::Request`, adapts it to `Utopia::Request`, dispatches ordinary
+Utopia middleware, and normalizes the response. The request itself flows
+explicitly down the middleware chain; it is not ambient fiber state.
 
 ## Application
 
@@ -146,8 +147,10 @@ end
 
 ## Request And State
 
-Do not introduce a separate `Utopia::Request` wrapper in the core stack. Utopia
-middleware should receive the normal `Protocol::HTTP::Request`.
+Introduce a separate `Utopia::Request` wrapper in the core stack. Utopia
+middleware should receive `Utopia::Request`, while the original
+`Protocol::HTTP::Request` remains available as `request.http` for integrations
+that need the transport-level object.
 
 Likely shape:
 
@@ -169,8 +172,8 @@ Guidelines:
 - Prefer `arguments` over `params`.
 - Parse request data lazily.
 - Keep query, form, JSON, and multipart parsing separable where possible.
-- Add small convenience methods to `Protocol::HTTP::Request` only where they make
-  middleware substantially clearer.
+- Do not monkey patch `Protocol::HTTP::Request`; Utopia-specific convenience
+  methods belong on `Utopia::Request`.
 - Keep the request explicit. Do not expose ambient `Utopia.request` style state.
 - Use Utopia-owned fiber state for optional adjacent application state rather
   than Rack-style `env` or a Utopia request attribute hash.
@@ -244,7 +247,7 @@ Utopia middleware should use the protocol-http middleware shape:
 
 ```text
 initialize(delegate, ...)
-call(Protocol::HTTP::Request) -> response-like value
+call(Utopia::Request) -> response-like value
 ```
 
 Low-level protocol behavior, tracing, compression, authority policy, early
@@ -268,7 +271,7 @@ Utopia owns what `use` and `run` mean for middleware. Terminal apps should
 satisfy:
 
 ```text
-call(Protocol::HTTP::Request) -> response-like value
+call(Utopia::Request) -> response-like value
 ```
 
 `Utopia::Application.build` can decide compatibility details such as:
@@ -348,8 +351,8 @@ Expected breaking changes:
 
 - Core Utopia middleware no longer receives Rack env hashes.
 - Controllers no longer receive `Rack::Request`.
-- Core Utopia middleware receives `Protocol::HTTP::Request`, not
-  `Utopia::Request`.
+- Core Utopia middleware receives `Utopia::Request`, not raw
+  `Protocol::HTTP::Request`.
 - `env[...]`, `rack.session`, `rack.input`, and Rack response tuple assumptions
   need migration.
 - Static file serving should move away from `Rack::Sendfile` and Rack range
