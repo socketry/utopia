@@ -77,6 +77,10 @@ module Utopia
 		
 		# A small HTTP status wrapper that verifies the status code within a given range.
 		class Status
+			# Initialize a validated HTTP status.
+			# @parameter code [Integer | Symbol] The numeric status or a key from {STATUS_CODES}.
+			# @parameter valid_range [Range] The accepted numeric status range.
+			# @raises [ArgumentError] If the resolved status is outside `valid_range`.
 			def initialize(code, valid_range = 100...600)
 				if code.is_a? Symbol
 					code = STATUS_CODES[code]
@@ -89,14 +93,21 @@ module Utopia
 				@code = code
 			end
 			
+			# Convert this value to an integer.
+			# @returns [Integer] The numeric status code.
 			def to_i
 				@code
 			end
 			
+			# Convert this object to a string.
+			# @returns [String] The resulting string.
 			def to_s
 				STATUS_DESCRIPTIONS[@code] || @code.to_s
 			end
 			
+			# Yield the human-readable status description.
+			# @yields {|description| ...} The status description.
+			# @returns [String] The yielded description.
 			def each
 				yield to_s
 			end

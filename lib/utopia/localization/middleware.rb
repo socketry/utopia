@@ -10,6 +10,7 @@ require_relative "../response"
 
 module Utopia
 	module Localization
+		# Selects a locale for each request and rewrites localized paths.
 		class Middleware
 			RESOURCE_NOT_FOUND = Response[400, {}, []].freeze
 			
@@ -49,6 +50,8 @@ module Utopia
 				@methods = methods
 			end
 			
+			# Freeze this object and its internal state.
+			# @returns [self] This object.
 			def freeze
 				return self if frozen?
 				
@@ -64,6 +67,10 @@ module Utopia
 			attr :all_locales
 			attr :default_locale
 			
+			# Compute the preferred locales for the request.
+			# @parameter request [Utopia::Request] The derived request.
+			# @yields {|request, locale| ...} Each unique request and locale pair in preference order.
+			# @returns [Enumerator | Array] An enumerator when no block is given, otherwise the configured default locales.
 			def preferred_locales(request)
 				return to_enum(:preferred_locales, request) unless block_given?
 				
@@ -90,6 +97,10 @@ module Utopia
 				end
 			end
 			
+			# Infer preferred locales from the request host.
+			# @parameter request [Utopia::Request] The application request.
+			# @yields {|locale| ...} Each locale whose host pattern matches the request host.
+			# @returns [Hash] The configured host mappings.
 			def host_preferred_locales(request)
 				http_host = request.host.to_s
 				
@@ -99,6 +110,10 @@ module Utopia
 				end
 			end
 			
+			# Select the preferred locale for the request.
+			# @parameter request [Utopia::Request] The application request.
+			# @yields {|locale, path| ...} The locale and path with its locale prefix removed, when present.
+			# @returns [Object | nil] The block result when a locale prefix is present.
 			def request_preferred_locale(request)
 				path = Path[request.path_info]
 				
@@ -110,6 +125,9 @@ module Utopia
 				end
 			end
 			
+			# Parse the locales preferred by the browser.
+			# @parameter request [Utopia::Request] The application request.
+			# @returns [Array(String)] Supported locales accepted by the browser, in preference order.
 			def browser_preferred_locales(request)
 				accept_languages = request.headers["accept-language"]&.to_s
 				
@@ -126,6 +144,9 @@ module Utopia
 				return []
 			end
 			
+			# Check whether the request path includes a locale.
+			# @parameter request [Utopia::Request] The application request.
+			# @returns [Boolean] Whether the path is eligible for localization.
 			def localized?(request)
 				# Ignore requests which match the ignored paths:
 				path_info = request.path_info
@@ -134,7 +155,10 @@ module Utopia
 				return true
 			end
 			
-			# Set the Vary: header on the response to indicate that this response should include the header in the cache key.
+			# Mark the response as varying by language and expose its localized content location.
+			# @parameter request [Utopia::Request] The application request.
+			# @parameter response [Protocol::HTTP::Response] The response.
+			# @returns [Protocol::HTTP::Response] The response with localization headers.
 			def vary(request, response)
 				response = Response.wrap(response)
 				headers = response.headers
@@ -151,6 +175,9 @@ module Utopia
 				return response
 			end
 			
+			# Invoke the application while making the derived request ambiently available.
+			# @parameter request [Utopia::Request] The derived request.
+			# @returns [Protocol::HTTP::Response] The application response.
 			def call_with_request(request)
 				previous_request = Request.current
 				Request.current = request
@@ -160,6 +187,9 @@ module Utopia
 				Request.current = previous_request
 			end
 			
+			# Try the request's preferred locales until the application returns a successful response.
+			# @parameter request [Protocol::HTTP::Request] The request.
+			# @returns [Protocol::HTTP::Response] The localized response with cache-variation headers.
 			def call(request)
 				utopia_request = Request.current!
 				

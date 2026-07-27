@@ -7,6 +7,9 @@ module Utopia
 	module Content
 		# A namespace which contains tags which can be rendered within a {Document}.
 		module Namespace
+			# Initialize tag mappings on an extended namespace.
+			# @parameter other [Module] The namespace being extended.
+			# @returns [Hash] The initialized tag mappings.
 			def self.extended(other)
 				other.class_exec do
 					@named = {}
@@ -15,6 +18,8 @@ module Utopia
 			
 			attr :named
 			
+			# Freeze this object and its internal state.
+			# @returns [self] This object.
 			def freeze
 				return self if frozen?
 				
@@ -24,6 +29,10 @@ module Utopia
 				super
 			end
 			
+			# Tag.
+			# @parameter name [String] The name.
+			# @parameter klass [Class] The class to configure.
+			# @returns [Class | Proc] The registered tag implementation.
 			def tag(name, klass = nil, &block)
 				@named[name] = klass || block
 			end

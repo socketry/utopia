@@ -13,6 +13,9 @@ module Utopia
 	module Static
 		# Represents a local file on disk which can be served directly, or passed upstream to sendfile.
 		class LocalFile
+			# Initialize metadata for a file beneath a static root.
+			# @parameter root [String] The root directory.
+			# @parameter path [Utopia::Path | String] The path.
 			def initialize(root, path)
 				@root = root
 				@path = path
@@ -31,14 +34,20 @@ module Utopia
 				full_path
 			end
 			
+			# Resolve this file beneath its configured root.
+			# @returns [String] The full filesystem path.
 			def full_path
 				File.join(@root, @path.components)
 			end
 			
+			# Format the file's modification time for an HTTP header.
+			# @returns [String] The HTTP-date modification time.
 			def mtime_date
 				File.mtime(full_path).httpdate
 			end
 			
+			# Measure the file's content length.
+			# @returns [Integer] The file size in bytes.
 			def bytesize
 				File.size(full_path)
 			end
@@ -50,6 +59,8 @@ module Utopia
 			
 			alias size bytesize
 			
+			# Enumerate the contained values.
+			# @returns [Enumerator] An enumerator over the resulting values.
 			def each
 				File.open(full_path, "rb") do |file|
 					file.seek(@range.begin)
@@ -65,6 +76,9 @@ module Utopia
 				end
 			end
 			
+			# Check whether the file has changed since the request validators.
+			# @parameter request [Protocol::HTTP::Request] The request.
+			# @returns [Boolean] Whether the file is newer than the request validators.
 			def modified?(request)
 				if modified_since = request.headers["if-modified-since"]
 					return false if File.mtime(full_path) <= Time.parse(modified_since)
@@ -81,6 +95,10 @@ module Utopia
 			CONTENT_LENGTH = "content-length".freeze
 			CONTENT_RANGE = "content-range".freeze
 			
+			# Serve.
+			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter response_headers [Hash] The response headers.
+			# @returns [Protocol::HTTP::Response] The response.
 			def serve(request, response_headers)
 				ranges = byte_ranges(request.headers["range"])
 				
@@ -105,6 +123,9 @@ module Utopia
 				return Response[status, response_headers, self]
 			end
 			
+			# Parse satisfiable byte ranges from the request header.
+			# @parameter header [String] The header value.
+			# @returns [Array] The resulting values.
 			def byte_ranges(header)
 				return nil unless header
 				

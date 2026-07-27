@@ -33,10 +33,14 @@ module Utopia
 		
 		# A wrapper to provide easy access to locale related data in the request.
 		class Wrapper
+			# Return the localization middleware active for the current request.
+			# @returns [Localization::Middleware | nil] The current localization middleware.
 			def localization
 				Localization.current
 			end
 			
+			# Check whether the request path includes a locale.
+			# @returns [Boolean] Whether localization is active for the current request.
 			def localized?
 				localization != nil
 			end
@@ -56,15 +60,24 @@ module Utopia
 				localization && localization.all_locales || []
 			end
 			
+			# Build a path with the selected locale.
+			# @parameter path [Utopia::Path | String] The path.
+			# @parameter locale [String] The locale.
+			# @returns [String] The locale-prefixed path.
 			def localized_path(path, locale)
 				"/#{locale}#{path}"
 			end
 		end
 		
+		# Build a localization wrapper for the request.
+		# @returns [Wrapper] A localization wrapper for the current request.
 		def self.wrapper
 			Wrapper.new
 		end
 		
+		# Return a localization wrapper for the current request context.
+		# @parameter request [Protocol::HTTP::Request | nil] The ignored request argument.
+		# @returns [Wrapper] A localization wrapper for the current request.
 		def self.[] request = nil
 			self.wrapper
 		end

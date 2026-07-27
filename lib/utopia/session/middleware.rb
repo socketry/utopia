@@ -19,6 +19,7 @@ module Utopia
 	module Session
 		# A middleware which provides a secure client-side session storage using a private symmetric encrpytion key.
 		class Middleware
+			# Raised when payload processing fails.
 			class PayloadError < StandardError
 			end
 			
@@ -82,6 +83,8 @@ module Utopia
 			
 			attr :cookie_defaults
 			
+			# Freeze this object and its internal state.
+			# @returns [self] This object.
 			def freeze
 				return self if frozen?
 				
@@ -94,6 +97,9 @@ module Utopia
 				super
 			end
 			
+			# Make a lazily loaded session current while processing the request, then persist and commit it.
+			# @parameter request [Protocol::HTTP::Request] The request.
+			# @returns [Protocol::HTTP::Response] The wrapped application response.
 			def call(request)
 				session_hash = prepare_session(Utopia::Request.current!)
 				previous_session = Session.current
