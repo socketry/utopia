@@ -82,6 +82,13 @@ describe Utopia::Controller do
 		expect(response.headers["content-type"]).to be == "application/json"
 		expect(response.read).to be == '{"user_id":10}'
 	end
+	
+	it "can register a passthrough handler" do
+		responder = Utopia::Controller::Responder.new
+		
+		expect(responder.with_passthrough).to be == responder.handlers
+		expect(responder.handlers["*/*"]).to be == Utopia::Controller::Handlers::Passthrough
+	end
 end
 
 describe Utopia::Controller do
