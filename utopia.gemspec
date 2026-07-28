@@ -35,6 +35,7 @@ Gem::Specification.new do |spec|
 	spec.add_dependency "msgpack"
 	spec.add_dependency "net-smtp"
 	spec.add_dependency "protocol-http", "~> 0.58"
+	spec.add_dependency "protocol-media", "~> 0.1"
 	spec.add_dependency "protocol-url", "~> 0.4"
 	spec.add_dependency "samovar", "~> 2.1"
 	spec.add_dependency "traces", "~> 0.10"

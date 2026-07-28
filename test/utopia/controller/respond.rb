@@ -72,6 +72,16 @@ describe Utopia::Controller do
 		expect(response.headers["content-type"]).to be == "text/plain"
 		expect(response.read).to be == {user_id: 10}.to_s
 	end
+	
+	it "should select the highest quality response" do
+		request, path = mock_request("/fetch", {"accept" => "text/plain;q=0.5, application/json;q=1.0"})
+		relative_path = path - controller.class.uri_path
+		
+		response = controller.process!(request, relative_path)
+		
+		expect(response.headers["content-type"]).to be == "application/json"
+		expect(response.read).to be == '{"user_id":10}'
+	end
 end
 
 describe Utopia::Controller do
