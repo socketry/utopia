@@ -16,7 +16,7 @@ module Utopia
 	# Utopia application stack, and normalizes the result back to a
 	# {Protocol::HTTP::Response}.
 	class Application < Protocol::HTTP::Middleware
-		CONFIGURATION_PATH = "config/application.rb".freeze
+		PATH = "config/application.rb".freeze
 		
 		# Build a Utopia application stack using the protocol HTTP middleware builder.
 		# @parameter default_app [Interface(:call)] The terminal application used when the block does not call `run`.
@@ -52,7 +52,7 @@ module Utopia
 		# @parameter path [String] The application configuration path.
 		# @parameter options [Hash] Options passed to the application constructor.
 		# @returns [Interface(:call)] The loaded protocol-facing application.
-		def self.load(path = CONFIGURATION_PATH, **options)
+		def self.load(path = PATH, **options)
 			if File.exist?(path)
 				top = Module.new
 				top.class_eval(File.read(path), path)

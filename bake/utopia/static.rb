@@ -10,7 +10,7 @@ def generate(output_path: "static")
 	require "async/container"
 	require "utopia/application"
 	
-	application_path = File.join(Dir.pwd, Utopia::Application::CONFIGURATION_PATH)
+	application_path = File.join(Dir.pwd, Utopia::Application::PATH)
 	container_class = Async::Container::Threaded
 	server_port = 9090
 	

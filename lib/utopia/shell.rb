@@ -20,7 +20,7 @@ module Utopia
 		# Load the configured application on first access.
 		# @returns [Application] The application middleware.
 		def app
-			@app ||= Application.load(File.expand_path(Application::CONFIGURATION_PATH, @context.root))
+			@app ||= Application.load(File.expand_path(Application::PATH, @context.root))
 		end
 		
 		# Perform a GET request.
