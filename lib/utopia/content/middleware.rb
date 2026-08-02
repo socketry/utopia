@@ -103,7 +103,7 @@ module Utopia
 			
 			# Respond.
 			# @parameter link [Utopia::Content::Link] The content link.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The application request.
 			# @returns [Protocol::HTTP::Response] The response.
 			def respond(link, request)
 				if node = resolve_link(link)
@@ -119,7 +119,8 @@ module Utopia
 			# @parameter request [Protocol::HTTP::Request] The request.
 			# @returns [Protocol::HTTP::Response] The content, redirect, or downstream response.
 			def call(request)
-				path = Path.create(Utopia::Request.current!.path_info)
+				utopia_request = Utopia::Request.current!
+				path = Path.create(utopia_request.path_info)
 				
 				# Check if the request is to a non-specific index. This only works for requests with a given name:
 				basename = path.basename
@@ -134,7 +135,7 @@ module Utopia
 				
 				locale = Localization.current_locale
 				if link = @links.for(path, locale)
-					if response = self.respond(link, request)
+					if response = self.respond(link, utopia_request)
 						return response
 					end
 				end

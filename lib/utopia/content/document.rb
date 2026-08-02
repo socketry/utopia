@@ -28,7 +28,7 @@ module Utopia
 		class Document < Response
 			# Render a content node into a new document.
 			# @parameter node [Utopia::Content::Node] The content node.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The application request.
 			# @parameter attributes [Hash] The attributes.
 			# @returns [Document] The rendered document.
 			def self.render(node, request, attributes)
@@ -36,7 +36,7 @@ module Utopia
 			end
 			
 			# Initialize a document for a protocol request.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The application request.
 			# @parameter attributes [Hash] The attributes.
 			def initialize(request, attributes = {})
 				@request = request
@@ -52,7 +52,7 @@ module Utopia
 			
 			# @returns [Path] The original request path, if known.
 			def request_path
-				Path[Utopia::Request.current!.request_path]
+				Path[request.request_path]
 			end
 			
 			protected def current_base_uri_path

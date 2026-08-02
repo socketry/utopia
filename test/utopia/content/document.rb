@@ -9,15 +9,17 @@ require "utopia/request"
 describe Utopia::Content::Document do
 	let(:path) {"/index"}
 	let(:request) {Utopia::Request["GET", path]}
-	let(:document) {subject.new(request.http, {})}
+	let(:document) {subject.new(request, {})}
 	
-	def around
-		previous_request = Utopia::Request.current
-		Utopia::Request.current = request
+	it "retains the application request" do
+		expect(document.request).to be == request
+		expect(document.request.http).to be == request.http
+	end
+	
+	it "uses the original request path" do
+		request.path_info = "/rewritten"
 		
-		super
-	ensure
-		Utopia::Request.current = previous_request
+		expect(document.request_path).to be == Utopia::Path["/index"]
 	end
 	
 	it "should generate valid self-closing markup" do

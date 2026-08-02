@@ -136,7 +136,7 @@ module Utopia
 			end
 			
 			# Process the request and return the resulting response.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The application request.
 			# @parameter attributes [Hash] The attributes.
 			# @returns [Protocol::HTTP::Response] The response.
 			def process!(request, attributes = {})
@@ -173,8 +173,8 @@ module Utopia
 					document.localization
 				end
 				
-				# Return the protocol request being rendered.
-				# @returns [Protocol::HTTP::Request] The request.
+				# Return the application request being rendered.
+				# @returns [Utopia::Request] The request.
 				def request
 					document.request
 				end
