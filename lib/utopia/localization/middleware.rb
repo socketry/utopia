@@ -7,6 +7,7 @@ require_relative "wrapper"
 
 module Utopia
 	module Localization
+		# Selects a locale for each request and rewrites localized paths.
 		class Middleware
 			RESOURCE_NOT_FOUND = [400, {}, []].freeze
 			
@@ -46,6 +47,8 @@ module Utopia
 				@methods = methods
 			end
 			
+			# Freeze this object and its internal state.
+			# @returns [self] This object.
 			def freeze
 				return self if frozen?
 				
@@ -61,6 +64,10 @@ module Utopia
 			attr :all_locales
 			attr :default_locale
 			
+			# Compute the preferred locales for the Rack environment.
+			# @parameter env [Hash] The Rack environment.
+			# @yields {|env| ...} Each localized environment in preference order.
+			# @returns [Enumerator | Array] An enumerator when no block is given, otherwise the configured default locales.
 			def preferred_locales(env)
 				return to_enum(:preferred_locales, env) unless block_given?
 				
@@ -87,6 +94,10 @@ module Utopia
 				end
 			end
 			
+			# Infer preferred locales from the request host.
+			# @parameter env [Hash] The Rack environment.
+			# @yields {|locale| ...} Each locale whose host pattern matches.
+			# @returns [Hash] The configured host mappings.
 			def host_preferred_locales(env)
 				http_host = env[Rack::HTTP_HOST]
 				
@@ -96,6 +107,10 @@ module Utopia
 				end
 			end
 			
+			# Select the preferred locale from the request path.
+			# @parameter env [Hash] The Rack environment.
+			# @yields {|locale, path| ...} The locale and path without its locale prefix.
+			# @returns [Object | Nil] The block result when a locale prefix is present.
 			def request_preferred_locale(env)
 				path = Path[env[Rack::PATH_INFO]]
 				
@@ -107,6 +122,9 @@ module Utopia
 				end
 			end
 			
+			# Parse the locales preferred by the browser.
+			# @parameter env [Hash] The Rack environment.
+			# @returns [Array(String)] Supported locales in preference order.
 			def browser_preferred_locales(env)
 				accept_languages = env[HTTP_ACCEPT_LANGUAGE]
 				
@@ -123,6 +141,9 @@ module Utopia
 				return []
 			end
 			
+			# Check whether the request path is eligible for localization.
+			# @parameter env [Hash] The Rack environment.
+			# @returns [Boolean] Whether the path is eligible for localization.
 			def localized?(env)
 				# Ignore requests which match the ignored paths:
 				path_info = env[Rack::PATH_INFO]
@@ -147,6 +168,9 @@ module Utopia
 				return response
 			end
 			
+			# Try the preferred locales until the application returns a successful response.
+			# @parameter env [Hash] The Rack environment.
+			# @returns [Array] The localized Rack response.
 			def call(env)
 				# Pass the request through if it shouldn't be localized:
 				return @app.call(env) unless localized?(env)

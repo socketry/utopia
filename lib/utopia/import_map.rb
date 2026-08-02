@@ -76,6 +76,11 @@ module Utopia
 		# 		end
 		# 	end
 		class Builder
+			# Configure an import map using a scoped builder.
+			# @parameter import_map [Utopia::ImportMap] The import map to render.
+			# @parameter options [Hash] The options.
+			# @yields {|builder| ...} The builder, when the block accepts an argument; otherwise the block is evaluated in the builder's context.
+			# @returns [Builder] The configured builder.
 			def self.build(import_map, **options, &block)
 				builder = self.new(import_map, **options)
 				
@@ -88,6 +93,9 @@ module Utopia
 				return builder
 			end
 			
+			# Initialize a scoped builder for an import map.
+			# @parameter import_map [Utopia::ImportMap] The import map to render.
+			# @parameter base [Object] The base.
 			def initialize(import_map, base: nil)
 				@import_map = import_map
 				@base = Protocol::URL[base]
@@ -100,7 +108,7 @@ module Utopia
 			#
 			# @parameter specifier [String] The module specifier (e.g., "react", "@myapp/utils").
 			# @parameter value [String] The URL or path to resolve to.
-			# @parameter integrity [String, nil] Optional subresource integrity hash.
+			# @parameter integrity [String | Nil] Optional subresource integrity hash.
 			# @returns [Builder] Self for method chaining.
 			#
 			# @example With base URL.
@@ -170,7 +178,7 @@ module Utopia
 		# The builder supports both block parameter and instance_eval styles.
 		# The returned import map is frozen to prevent accidental mutation.
 		#
-		# @parameter base [String, nil] The base URI for resolving relative paths.
+		# @parameter base [String | Nil] The base URI for resolving relative paths.
 		# @yields {|builder| ...} If a block is given.
 		# 	@parameter builder [Builder] The import map builder, if the block takes an argument.
 		# @returns [ImportMap] A frozen import map instance.
@@ -199,7 +207,7 @@ module Utopia
 		# @parameter imports [Hash] The imports mapping.
 		# @parameter integrity [Hash] Integrity hashes for imports.
 		# @parameter scopes [Hash] Scoped import mappings.
-		# @parameter base [String, Protocol::URL, nil] The base URI for resolving relative paths.
+		# @parameter base [String | Protocol::URL | Nil] The base URI for resolving relative paths.
 		def initialize(imports = {}, integrity = {}, scopes = {}, base: nil)
 			@imports = imports
 			@integrity = integrity
@@ -216,14 +224,14 @@ module Utopia
 		# @attribute [Hash(String, Hash)] Scoped import mappings.
 		attr :scopes
 		
-		# @attribute [Protocol::URL::Absolute | Protocol::URL::Relative | nil] The parsed base URL for efficient resolution.
+		# @attribute [Protocol::URL::Absolute | Protocol::URL::Relative | Nil] The parsed base URL for efficient resolution.
 		attr :base
 		
 		# Add an import mapping.
 		#
 		# @parameter specifier [String] The import specifier (e.g., "react", "@myapp/utils").
 		# @parameter value [String] The URL or path to resolve to.
-		# @parameter integrity [String, nil] Optional subresource integrity hash for the resource.
+		# @parameter integrity [String | Nil] Optional subresource integrity hash for the resource.
 		# @returns [ImportMap] Self for method chaining.
 		def import(specifier, value, integrity: nil)
 			@imports[specifier] = value
@@ -276,8 +284,8 @@ module Utopia
 		# Resolve a single import value considering base context.
 		#
 		# @parameter value [String] The import URL or path value.
-		# @parameter base [Protocol::URL, nil] The base URL context for resolving relative paths.
-		# @returns [Protocol::URL, String] The resolved URL object or original string.
+		# @parameter base [Protocol::URL | Nil] The base URL context for resolving relative paths.
+		# @returns [Protocol::URL | String] The resolved URL object or original string.
 		private def resolve_value(value, base)
 			if base
 				base + Protocol::URL[value]
@@ -289,7 +297,7 @@ module Utopia
 		# Resolve a hash of imports with the given base.
 		#
 		# @parameter imports [Hash] The imports hash to resolve.
-		# @parameter base [Protocol::URL, nil] The base URL context.
+		# @parameter base [Protocol::URL | Nil] The base URL context.
 		# @returns [Hash] The resolved imports with string values.
 		private def resolve_imports(imports, base)
 			result = {}

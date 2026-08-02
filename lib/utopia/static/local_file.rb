@@ -11,6 +11,9 @@ module Utopia
 	module Static
 		# Represents a local file on disk which can be served directly, or passed upstream to sendfile.
 		class LocalFile
+			# Initialize metadata for a file beneath a static root.
+			# @parameter root [String] The root directory.
+			# @parameter path [Utopia::Path | String] The path.
 			def initialize(root, path)
 				@root = root
 				@path = path
@@ -29,14 +32,20 @@ module Utopia
 				full_path
 			end
 			
+			# Resolve this file beneath its configured root.
+			# @returns [String] The full filesystem path.
 			def full_path
 				File.join(@root, @path.components)
 			end
 			
+			# Format the file's modification time for an HTTP header.
+			# @returns [String] The HTTP-date modification time.
 			def mtime_date
 				File.mtime(full_path).httpdate
 			end
 			
+			# Measure the file's content length.
+			# @returns [Integer] The file size in bytes.
 			def bytesize
 				File.size(full_path)
 			end
@@ -48,6 +57,8 @@ module Utopia
 			
 			alias size bytesize
 			
+			# Enumerate the contained values.
+			# @returns [Enumerator] An enumerator over the resulting values.
 			def each
 				File.open(full_path, "rb") do |file|
 					file.seek(@range.begin)
@@ -63,6 +74,9 @@ module Utopia
 				end
 			end
 			
+			# Check whether the file has changed since the request validators.
+			# @parameter env [Hash] The Rack environment.
+			# @returns [Boolean] Whether the file is newer than the request validators.
 			def modified?(env)
 				if modified_since = env["HTTP_IF_MODIFIED_SINCE"]
 					return false if File.mtime(full_path) <= Time.parse(modified_since)
@@ -79,6 +93,10 @@ module Utopia
 			CONTENT_LENGTH = Rack::CONTENT_LENGTH
 			CONTENT_RANGE = "Content-Range".freeze
 			
+			# Serve the file, honoring a single byte range when requested.
+			# @parameter env [Hash] The Rack environment.
+			# @parameter response_headers [Hash] The response headers.
+			# @returns [Array] The Rack response.
 			def serve(env, response_headers)
 				ranges = Rack::Utils.get_byte_ranges(env["HTTP_RANGE"], size)
 				response = [200, response_headers, self]

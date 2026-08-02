@@ -17,6 +17,8 @@ module Utopia
 				@location = location
 			end
 			
+			# Freeze this object and its internal state.
+			# @returns [self] This object.
 			def freeze
 				return self if frozen?
 				
@@ -25,6 +27,9 @@ module Utopia
 				super
 			end
 			
+			# Convert application exceptions into internal-server-error responses.
+			# @parameter env [Hash] The Rack environment.
+			# @returns [Array] The application or generated error response.
 			def call(env)
 				begin
 					return @app.call(env)
