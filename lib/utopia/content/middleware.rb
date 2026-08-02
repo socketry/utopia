@@ -46,8 +46,6 @@ module Utopia
 				@namespaces[UTOPIA_NAMESPACE] ||= Tags
 			end
 			
-			# Freeze this object and its internal state.
-			# @returns [self] This object.
 			def freeze
 				return self if frozen?
 				
@@ -65,9 +63,6 @@ module Utopia
 				@links.index(path, **options)
 			end
 			
-			# Load and cache a content template.
-			# @parameter path [Utopia::Path | String] The path.
-			# @returns [XRB::Template] The parsed template.
 			def fetch_template(path)
 				@template_cache.fetch_or_store(path.to_s) do
 					XRB::Template.load_file(path)
@@ -90,9 +85,6 @@ module Utopia
 				)
 			end
 			
-			# Resolve a link to an existing content node.
-			# @parameter link [Utopia::Content::Link] The content link.
-			# @returns [Node | nil] The content node when its backing file exists.
 			def resolve_link(link)
 				if full_path = link&.full_path(@root)
 					if File.exist?(full_path)
@@ -101,10 +93,6 @@ module Utopia
 				end
 			end
 			
-			# Respond.
-			# @parameter link [Utopia::Content::Link] The content link.
-			# @parameter request [Utopia::Request] The application request.
-			# @returns [Protocol::HTTP::Response] The response.
 			def respond(link, request)
 				if node = resolve_link(link)
 					attributes = Controller.current&.to_hash || {}
@@ -115,9 +103,6 @@ module Utopia
 				end
 			end
 			
-			# Serve or redirect filesystem-backed content, otherwise invoke the application.
-			# @parameter request [Utopia::Request] The request.
-			# @returns [Protocol::HTTP::Response] The content, redirect, or downstream response.
 			def call(request)
 				path = Path.create(request.path_info)
 				

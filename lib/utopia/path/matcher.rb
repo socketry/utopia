@@ -15,9 +15,6 @@ module Utopia
 		class Matcher
 			# The result of matching against a {Path}.
 			class MatchData
-				# Initialize the named captures and unmatched path suffix.
-				# @parameter named_parts [Hash] The named match captures.
-				# @parameter post_match [String] The unmatched path suffix.
 				def initialize(named_parts, post_match)
 					@named_parts = named_parts
 					@post_match = Path[post_match]
@@ -29,15 +26,10 @@ module Utopia
 				# Any remaining part past the end of the explicitly matched components.
 				attr :post_match
 				
-				# Fetch a named capture.
-				# @parameter key [String | Symbol] The lookup key.
-				# @returns [Object | nil] The named captured value.
 				def [] key
 					@named_parts[key]
 				end
 				
-				# Return the named captures.
-				# @returns [Array(String)] The capture names.
 				def names
 					@named_parts.keys
 				end
@@ -48,17 +40,10 @@ module Utopia
 				@patterns = patterns
 			end
 			
-			# Construct a matcher from typed named patterns.
-			# @parameter patterns [Hash] The path rewrite patterns.
-			# @returns [Matcher] The matcher.
 			def self.[](patterns)
 				self.new(patterns)
 			end
 			
-			# Coerce.
-			# @parameter klass [Class] The class to configure.
-			# @parameter value [String] The captured text.
-			# @returns [Object] The captured text coerced to `klass`.
 			def coerce(klass, value)
 				if klass == Integer
 					Integer(value)

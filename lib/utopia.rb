@@ -13,5 +13,6 @@ require_relative "utopia/exceptions"
 require_relative "utopia/redirection"
 require_relative "utopia/static"
 
+# Utopia is a web application framework.
 module Utopia
 end

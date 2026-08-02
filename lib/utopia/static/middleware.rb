@@ -31,8 +31,6 @@ module Utopia
 				@cache_control = cache_control
 			end
 			
-			# Freeze this object and its internal state.
-			# @returns [self] This object.
 			def freeze
 				return self if frozen?
 				
@@ -43,9 +41,6 @@ module Utopia
 				super
 			end
 			
-			# Open metadata for an existing file under the static root.
-			# @parameter path [Utopia::Path | String] The path.
-			# @returns [LocalFile | nil] The local file, or `nil` when it does not exist.
 			def fetch_file(path)
 				# We need file_path to be an absolute path for X-Sendfile to work correctly.
 				file_path = File.join(@root, path.components)
@@ -65,10 +60,6 @@ module Utopia
 			ETAG = "etag".freeze
 			ACCEPT_RANGES = "accept-ranges".freeze
 			
-			# Build response headers for the given file.
-			# @parameter file [LocalFile] The file.
-			# @parameter content_type [String] The content type.
-			# @returns [Hash(String, String)] The response headers.
 			def response_headers_for(file, content_type)
 				if @cache_control.respond_to?(:call)
 					cache_control = @cache_control.call(file)
@@ -85,11 +76,6 @@ module Utopia
 				}
 			end
 			
-			# Respond.
-			# @parameter request [Utopia::Request] The request.
-			# @parameter path_info [String] The request path to serve.
-			# @parameter extension [String] The file extension.
-			# @returns [Protocol::HTTP::Response] The response.
 			def respond(request, path_info, extension)
 				path = Path[path_info].simplify
 				
@@ -108,9 +94,6 @@ module Utopia
 				end
 			end
 			
-			# Serve a recognized static file or pass the request to the next middleware.
-			# @parameter request [Utopia::Request] The request.
-			# @returns [Protocol::HTTP::Response] The static-file or downstream response.
 			def call(request)
 				path_info = request.path_info
 				extension = File.extname(path_info)

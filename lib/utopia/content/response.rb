@@ -14,7 +14,6 @@ module Utopia
 		
 		# A basic content response, including useful defaults for typical HTML5 content.
 		class Response
-			# Initialize an empty successful HTML response.
 			def initialize
 				@status = 200
 				@headers = {}
@@ -28,21 +27,14 @@ module Utopia
 			attr :headers
 			attr :body
 			
-			# Join the response body into rendered content.
-			# @returns [String] The rendered content.
 			def content
 				@body.join
 			end
 			
-			# Decline tag lookup by default.
-			# @parameter tag [Object] The tag.
-			# @returns [nil] No tag is resolved.
 			def lookup(tag)
 				return nil
 			end
 			
-			# Convert this value to a protocol HTTP response.
-			# @returns [Protocol::HTTP::Response] The response.
 			def to_protocol_response
 				Utopia::Response[@status, @headers, @body]
 			end

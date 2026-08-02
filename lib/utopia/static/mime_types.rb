@@ -44,8 +44,6 @@ module Utopia
 		
 		# A class to assist with loading mime-type metadata.
 		class MimeTypeLoader
-			# Initialize an empty extension map backed by named MIME type groups.
-			# @parameter library [Object] The library.
 			def initialize(library)
 				@extensions = {}
 				@library = library
@@ -53,19 +51,12 @@ module Utopia
 			
 			attr :extensions
 			
-			# Find extensions associated with the given MIME types.
-			# @parameter types [Array] The MIME type definitions to expand.
-			# @parameter library [Hash] The named MIME type groups.
-			# @returns [Hash(String, String)] A mapping from file extensions to content types.
 			def self.extensions_for(types, library = MIME_TYPES)
 				loader = self.new(library)
 				loader.expand(types)
 				return loader.extensions
 			end
 			
-			# Add extensions from non-obsolete MIME type records.
-			# @parameter mime_types [Array(MIME::Type)] The MIME type records.
-			# @returns [Array(MIME::Type)] The supplied MIME type records.
 			def extract_extensions(mime_types)
 				mime_types.select{|mime_type| !mime_type.obsolete?}.each do |mime_type|
 					mime_type.extensions.each do |ext|
@@ -74,14 +65,9 @@ module Utopia
 				end
 			end
 			
-			# Raised when expansion processing fails.
 			class ExpansionError < ArgumentError
 			end
 			
-			# Expand named groups, extension pairs, file names, patterns, and MIME records into extension mappings.
-			# @parameter types [Array] The MIME type definitions.
-			# @returns [Array] The supplied definitions.
-			# @raises [ExpansionError] If a definition cannot be expanded.
 			def expand(types)
 				types.each do |type|
 					case type

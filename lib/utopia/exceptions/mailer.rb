@@ -41,8 +41,6 @@ module Utopia
 				@dump_environment = dump_environment
 			end
 			
-			# Freeze this object and its internal state.
-			# @returns [self] This object.
 			def freeze
 				return self if frozen?
 				
@@ -55,9 +53,6 @@ module Utopia
 				super
 			end
 			
-			# Report application exceptions by email before returning an error response.
-			# @parameter request [Utopia::Request] The request.
-			# @returns [Protocol::HTTP::Response] The application response or a generated error response.
 			def call(request)
 				begin
 					return @app.call(request)

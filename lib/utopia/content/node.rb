@@ -15,11 +15,6 @@ module Utopia
 	module Content
 		# Represents an immutable node within the content hierarchy.
 		class Node
-			# Initialize a node within the filesystem-backed content hierarchy.
-			# @parameter controller [Utopia::Controller::Base] The controller instance.
-			# @parameter uri_path [Utopia::Path | String] The uri path.
-			# @parameter request_path [Utopia::Path | String] The request path.
-			# @parameter file_path [String] The filesystem path.
 			def initialize(controller, uri_path, request_path, file_path)
 				@controller = controller
 				
@@ -32,22 +27,14 @@ module Utopia
 			attr :uri_path
 			attr :file_path
 			
-			# Return the node's URI basename.
-			# @returns [String] The node name.
 			def name
 				@uri_path.basename
 			end
 			
-			# Resolve another node relative to this node's parent.
-			# @parameter path [Utopia::Path | String] The path.
-			# @returns [Node | nil] The resolved node.
 			def lookup_node(path)
 				@controller.lookup_node(parent_path + Path[path])
 			end
 			
-			# Resolve a content path beneath the controller root.
-			# @parameter path [Utopia::Path | String] The path.
-			# @returns [Pathname] The local filesystem path.
 			def local_path(path = ".", base = nil)
 				path = Path[path]
 				
@@ -61,9 +48,6 @@ module Utopia
 				end
 			end
 			
-			# Resolve a path relative to this node's containing URI path.
-			# @parameter path [Utopia::Path | String] The path.
-			# @returns [Path] The resolved content path.
 			def relative_path(path = ".")
 				path = Path[path]
 				base = uri_path.dirname
@@ -71,16 +55,10 @@ module Utopia
 				return base + path
 			end
 			
-			# Return this node's containing URI path.
-			# @returns [Path] The parent URI path.
 			def parent_path
 				@uri_path.dirname
 			end
 			
-			# Enumerate or return links relative to this node.
-			# @parameter path [Utopia::Path | String] The path.
-			# @yields {|link| ...} Each matching link when a block is given.
-			# @returns [Array(Link)] The matching links.
 			def links(path = ".", **options, &block)
 				path = uri_path.dirname + Path[path]
 				
@@ -93,14 +71,10 @@ module Utopia
 				end
 			end
 			
-			# Return localized and indexed variants related to this node.
-			# @returns [Array(Link)] The related links.
 			def related_links
 				@controller.links(@uri_path.dirname, name: @uri_path.basename, indices: true)
 			end
 			
-			# Return the directory whose links are siblings of this node.
-			# @returns [Path] The sibling directory path.
 			def siblings_path
 				if @uri_path.basename == INDEX
 					@uri_path.dirname(2)
@@ -109,9 +83,6 @@ module Utopia
 				end
 			end
 			
-			# Return links that are siblings of this node.
-			# @parameter options [Hash] The options.
-			# @returns [Array(Link)] The sibling links.
 			def sibling_links(**options)
 				return @controller.links(siblings_path, **options)
 			end
@@ -135,20 +106,12 @@ module Utopia
 				document.parse_markup(markup)
 			end
 			
-			# Process the request and return the resulting response.
-			# @parameter request [Utopia::Request] The application request.
-			# @parameter attributes [Hash] The attributes.
-			# @returns [Protocol::HTTP::Response] The response.
 			def process!(request, attributes = {})
 				Document.render(self, request, attributes).to_protocol_response
 			end
 			
 			# This is a special context in which a limited set of well defined methods are exposed in the content view.
 			Context = Struct.new(:document, :state) do
-				# Render or defer a partial content block.
-				# @parameter arguments [Array] The arguments.
-				# @yields {|document| ...} Deferred content, when a block is given.
-				# @returns [String] The deferred-content marker.
 				def partial(*arguments, &block)
 					if block_given?
 						state.defer(&block)
@@ -161,68 +124,44 @@ module Utopia
 				
 				alias deferred_tag partial
 				
-				# Return the controller associated with the document.
-				# @returns [Controller::Variables | nil] The current controller variables.
 				def controller
 					document.controller
 				end
 				
-				# Return the document's localization wrapper.
-				# @returns [Localization::Wrapper] The localization wrapper.
 				def localization
 					document.localization
 				end
 				
-				# Return the application request being rendered.
-				# @returns [Utopia::Request] The request.
 				def request
 					document.request
 				end
 				
-				# Return the document response being rendered.
-				# @returns [Document] The document response.
 				def response
 					document
 				end
 				
-				# Return attributes for the current rendering state.
-				# @returns [Hash] The current attributes.
 				def attributes
 					state.attributes
 				end
 				
-				# Fetch an attribute from the current state or document defaults.
-				# @parameter key [String | Symbol] The lookup key.
-				# @returns [Object | nil] The state attribute, falling back to the document attribute.
 				def [] key
 					state.attributes.fetch(key){document.attributes[key]}
 				end
 				
 				alias current state
 				
-				# Return the captured content of the current node.
-				# @returns [String] The captured content.
 				def content
 					document.content
 				end
 				
-				# Return the enclosing rendering state.
-				# @returns [Builder | nil] The parent rendering state.
 				def parent
 					document.parent
 				end
 				
-				# Return the first rendering state in the document.
-				# @returns [Builder | nil] The first rendering state.
 				def first
 					document.first
 				end
 				
-				# Return or enumerate links relative to the current node.
-				# @parameter arguments [Array] The arguments.
-				# @parameter options [Hash] The options.
-				# @yields {|link| ...} Each matching link when a block is given.
-				# @returns [Array(Link)] The matching links.
 				def links(*arguments, **options, &block)
 					state.node.links(*arguments, **options, &block)
 				end

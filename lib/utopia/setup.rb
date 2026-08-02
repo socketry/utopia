@@ -13,54 +13,36 @@ require "console"
 module Utopia
 	# Used for setting up a Utopia web application, typically via `config/environment.rb`
 	class Setup
-		# Initialize application setup for the given root.
-		# @parameter root [String] The root directory.
-		# @parameter options [Hash] Reserved setup options.
 		def initialize(root, **options)
 			@root = root
 		end
 		
 		attr :root
 		
-		# Resolve the application's configuration directory.
-		# @returns [String] The absolute configuration path.
 		def config_root
 			File.expand_path("config", @root)
 		end
 		
-		# Return the application root.
-		# @returns [String] The application root path.
 		def site_root
 			@root
 		end
 		
-		# Check whether the application is running in production.
-		# @returns [Boolean] Whether the active Utopia variant is `production`.
 		def production?
 			Variant.for(:utopia) == :production
 		end
 		
-		# Check whether the application is running in staging.
-		# @returns [Boolean] Whether the active Utopia variant is `staging`.
 		def staging?
 			Variant.for(:utopia) == :staging
 		end
 		
-		# Check whether the application is running in development.
-		# @returns [Boolean] Whether the active Utopia variant is `development`.
 		def development?
 			Variant.for(:utopia) == :development
 		end
 		
-		# Check whether the application is running in testing.
-		# @returns [Boolean] Whether the active Utopia variant is `testing`.
 		def testing?
 			Variant.for(:utopia) == :testing
 		end
 		
-		# Fetch the configured secret for the given key.
-		# @parameter key [String | Symbol] The lookup key.
-		# @returns [String] The configured secret, or a newly generated transient secret when none is configured.
 		def secret_for(key)
 			secret = ENV["UTOPIA_#{key.upcase}_SECRET"]
 			
@@ -75,8 +57,6 @@ module Utopia
 			return secret
 		end
 		
-		# Apply.
-		# @returns [self] This object.
 		def apply!
 			add_load_path("lib")
 			

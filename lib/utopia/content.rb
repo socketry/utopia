@@ -6,10 +6,7 @@
 require_relative "content/middleware"
 
 module Utopia
-	# Builds middleware for serving filesystem-backed dynamic content.
 	module Content
-		# Construct content middleware.
-		# @returns [Content::Middleware] The content middleware.
 		def self.new(...)
 			Middleware.new(...)
 		end
