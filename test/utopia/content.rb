@@ -3,24 +3,30 @@
 # Released under the MIT License.
 # Copyright, 2012-2025, by Samuel Williams.
 
-require "rack/test"
 require "utopia/content"
+require_relative "protocol_application"
 
 describe Utopia::Content do
-	include Rack::Test::Methods
+	include ProtocolApplication
 	
-	let(:app) {Rack::Builder.parse_file(File.expand_path("content.ru", __dir__))}
+	let(:app) do
+		root = File.expand_path(".content", __dir__)
+		
+		Utopia::Application.build do
+			use Utopia::Content, root: root
+		end
+	end
 	
 	it "should generate identical html" do
 		get "/test"
 		
-		expect(last_response.body).to be == File.read(File.expand_path(".content/test.xnode", __dir__))
+		expect(body).to be == File.read(File.expand_path(".content/test.xnode", __dir__))
 	end
 	
 	it "should get a local path" do
 		get "/node/index"
 		
-		expect(last_response.body).to be == File.expand_path(".content/node", __dir__)
+		expect(body).to be == File.expand_path(".content/node", __dir__)
 	end
 	
 	it "should successfully redirect to the index page" do
@@ -38,19 +44,19 @@ describe Utopia::Content do
 	it "should successfully render the index page" do
 		get "/index"
 		
-		expect(last_response.body).to be == "<h1>Hello World</h1>"
+		expect(body).to be == "<h1>Hello World</h1>"
 	end
 	
 	it "should render partials correctly" do
 		get "/content/test-partial"
 		
-		expect(last_response.body).to be == "10"
+		expect(body).to be == "10"
 	end
 	
 	it "should generate valid importmap" do
 		get "/script/importmap"
 		
-		expect(last_response.body).to be == <<~IMPORTMAP.chomp
+		expect(body).to be == <<~IMPORTMAP.chomp
 			<script type="importmap">
 			{
 				"imports": {
@@ -66,7 +72,7 @@ describe Utopia::Content do
 		get "/script/cdata"
 		
 		# We are expected to generate HTML... there is no good convention for "escaping javascript" in HTML. So we just plonk it in, verbatim. Yay.
-		expect(last_response.body).to be == <<~JAVASCRIPT.chomp
+		expect(body).to be == <<~JAVASCRIPT.chomp
 		<script type="text/javascript">
 		console.log("Hello World!");
 		</script>
@@ -90,8 +96,8 @@ describe Utopia::Content do
 		node = content.lookup_node(path)
 		expect(node).to be_a Utopia::Content::Node
 		
-		status, headers, body = node.process!({}, {})
-		expect(body.join).to be == "<h1>Hello World</h1>"
+		response = node.process!(nil, {})
+		expect(response.read).to be == "<h1>Hello World</h1>"
 	end
 	
 	it "should fetch template and use cache" do

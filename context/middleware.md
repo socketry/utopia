@@ -1,10 +1,10 @@
 # Middleware
 
-This guide gives an overview of the different Rack middleware used by Utopia.
+This guide gives an overview of the different middleware used by Utopia.
 
 ## Static
 
-The {ruby Utopia::Static} middleware services static files efficiently. By default, it works with `Rack::Sendfile` and supports `ETag` based caching. Normally, you'd prefer to put static files into `public/_static` but it's also acceptable to put static content into `pages/` if it makes sense.
+The {ruby Utopia::Static} middleware services static files efficiently and supports `ETag` based caching. Normally, you'd prefer to put static files into `public/_static` but it's also acceptable to put static content into `pages/` if it makes sense.
 
 ~~~ ruby
 use Utopia::Static,
@@ -90,7 +90,7 @@ def passthrough(request, path)
 	
 	# Succeed the request and immediately respond.
 	# def succeed!(status: 200, headers: {}, **options)
-	# options may include content: string or body: Enumerable (as per Rack specifications
+	# options may include content: String or body: Enumerable.
 	
 	suceed!
 end
@@ -108,7 +108,7 @@ end
 
 on "edit" do |request, path|
 	if request.post?
-		@user.update_attributes(request[:user])
+		@user.update_attributes(request.arguments["user"])
 	end
 end
 
@@ -155,3 +155,9 @@ use Utopia::Session,
 ```
 
 All session data is stored on the client, but it's encrypted with a salt and the secret key. It is impossible for the client to decrypt the data without the secret stored on the server.
+
+When the middleware is installed, the session is available on the request:
+
+```ruby
+request.session[:user_id] = user.id
+```

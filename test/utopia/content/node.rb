@@ -45,7 +45,11 @@ describe Utopia::Content::Node do
 	it "should look up node by path" do
 		node = content.lookup_node(Utopia::Path["/lookup/index"])
 		
-		expect(node.process!(nil)).to be == [200, {"content-type"=>"text/html; charset=utf-8"}, ["<p>Hello World</p>"]]
+		response = node.process!(nil)
+		
+		expect(response.status).to be == 200
+		expect(response.headers["content-type"]).to be == "text/html; charset=utf-8"
+		expect(response.read).to be == "<p>Hello World</p>"
 	end
 	
 	with "#local_path" do

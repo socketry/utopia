@@ -8,21 +8,18 @@ require_relative "middleware"
 module Utopia
 	# A middleware which attempts to find localized content.
 	module Localization
-		LOCALIZATION_KEY = "utopia.localization".freeze
-		CURRENT_LOCALE_KEY = "utopia.localization.current_locale".freeze
-		
 		# A wrapper to provide easy access to locale related data in the request.
 		class Wrapper
-			# Initialize a localization wrapper for a Rack environment.
-			# @parameter env [Hash] The Rack environment.
-			def initialize(env)
-				@env = env
+			# Initialize a localization wrapper for the request.
+			# @parameter request [Utopia::Request] The application request.
+			def initialize(request)
+				@request = request
 			end
 			
-			# Fetch the localization middleware associated with this request.
-			# @returns [Middleware | Nil] The localization middleware, when active.
+			# Return the localization middleware associated with the request.
+			# @returns [Localization::Middleware | Nil] The current localization middleware.
 			def localization
-				@env[LOCALIZATION_KEY]
+				@request.localization
 			end
 			
 			# Check whether the request path includes a locale.
@@ -33,7 +30,7 @@ module Utopia
 			
 			# Returns the current locale or nil if not localized.
 			def current_locale
-				@env[CURRENT_LOCALE_KEY]
+				@request.locale
 			end
 			
 			# Returns the default locale or nil if not localized.
@@ -55,11 +52,18 @@ module Utopia
 			end
 		end
 		
-		# Build a localization wrapper for a request.
-		# @parameter request [Rack::Request] The request.
-		# @returns [Wrapper] The localization wrapper.
+		# Build a localization wrapper for the request.
+		# @parameter request [Utopia::Request] The application request.
+		# @returns [Wrapper] A localization wrapper for the current request.
+		def self.wrapper(request)
+			Wrapper.new(request)
+		end
+		
+		# Return a localization wrapper for the current request context.
+		# @parameter request [Utopia::Request] The application request.
+		# @returns [Wrapper] A localization wrapper for the current request.
 		def self.[] request
-			Wrapper.new(request.env)
+			self.wrapper(request)
 		end
 	end
 end

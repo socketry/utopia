@@ -6,6 +6,11 @@
 require "time"
 require "digest/sha1"
 
+require "protocol/http/body/file"
+require "protocol/http/header/range"
+
+require_relative "../response"
+
 module Utopia
 	# A middleware which serves static files from the specified root directory.
 	module Static
@@ -27,7 +32,7 @@ module Utopia
 			attr :etag
 			attr :range
 			
-			# Fit in with Rack::Sendfile
+			# Expose the filesystem path for upstream sendfile support.
 			def to_path
 				full_path
 			end
@@ -75,14 +80,14 @@ module Utopia
 			end
 			
 			# Check whether the file has changed since the request validators.
-			# @parameter env [Hash] The Rack environment.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Boolean] Whether the file is newer than the request validators.
-			def modified?(env)
-				if modified_since = env["HTTP_IF_MODIFIED_SINCE"]
+			def modified?(request)
+				if modified_since = request.headers["if-modified-since"]
 					return false if File.mtime(full_path) <= Time.parse(modified_since)
 				end
 				
-				if etags = env["HTTP_IF_NONE_MATCH"]
+				if etags = request.headers["if-none-match"]
 					etags = etags.split(/\s*,\s*/)
 					return false if etags.include?(etag) || etags.include?("*")
 				end
@@ -90,36 +95,46 @@ module Utopia
 				return true
 			end
 			
-			CONTENT_LENGTH = Rack::CONTENT_LENGTH
-			CONTENT_RANGE = "Content-Range".freeze
+			CONTENT_LENGTH = "content-length".freeze
+			CONTENT_RANGE = "content-range".freeze
 			
-			# Serve the file, honoring a single byte range when requested.
-			# @parameter env [Hash] The Rack environment.
+			# Serve.
+			# @parameter request [Utopia::Request] The request.
 			# @parameter response_headers [Hash] The response headers.
-			# @returns [Array] The Rack response.
-			def serve(env, response_headers)
-				ranges = Rack::Utils.get_byte_ranges(env["HTTP_RANGE"], size)
-				response = [200, response_headers, self]
+			# @returns [Protocol::HTTP::Response] The response.
+			def serve(request, response_headers)
+				ranges = byte_ranges(request.headers["range"])
 				
 				# puts "Requesting ranges: #{ranges.inspect} (#{size})"
 				
 				if ranges == nil or ranges.size != 1
 					# No ranges, or multiple ranges (which we don't support).
 					# TODO: Support multiple byte-ranges, for now just send entire file:
-					response[0] = 200
-					response[1][CONTENT_LENGTH] = size.to_s
+					status = 200
+					response_headers[CONTENT_LENGTH] = size.to_s
 					@range = 0...size
 				else
 					# Partial content:
 					@range = ranges[0]
 					partial_size = @range.size
 					
-					response[0] = 206
-					response[1][CONTENT_LENGTH] = partial_size.to_s
-					response[1][CONTENT_RANGE] = "bytes #{@range.min}-#{@range.max}/#{size}"
+					status = 206
+					response_headers[CONTENT_LENGTH] = partial_size.to_s
+					response_headers[CONTENT_RANGE] = "bytes #{@range.min}-#{@range.max}/#{size}"
 				end
 				
-				return response
+				body = Protocol::HTTP::Body::File.open(full_path, status == 206 ? @range : nil, size: size)
+				
+				return Response[status, response_headers, body]
+			end
+			
+			# Resolve satisfiable byte ranges from the parsed range header.
+			# @parameter range [Protocol::HTTP::Header::Range | Nil] The parsed range header.
+			# @returns [Array | Nil] The resulting values, or `nil` if the range is not applicable.
+			def byte_ranges(range)
+				return nil unless range&.bytes?
+				
+				return range.resolve(size)
 			end
 		end
 	end

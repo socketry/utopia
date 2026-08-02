@@ -13,7 +13,7 @@ files:
     and deployment.
 - path: middleware.md
   title: Middleware
-  description: This guide gives an overview of the different Rack middleware used
+  description: This guide gives an overview of the different middleware used
     by Utopia.
 - path: server-setup.md
   title: Server Setup

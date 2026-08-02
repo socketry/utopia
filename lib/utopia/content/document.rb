@@ -7,6 +7,7 @@ require_relative "links"
 require_relative "response"
 require_relative "markup"
 require_relative "builder"
+require_relative "../request"
 
 module Utopia
 	module Content
@@ -27,7 +28,7 @@ module Utopia
 		class Document < Response
 			# Render a content node into a new document.
 			# @parameter node [Utopia::Content::Node] The content node.
-			# @parameter request [Rack::Request] The request.
+			# @parameter request [Utopia::Request] The application request.
 			# @parameter attributes [Hash] The attributes.
 			# @returns [Document] The rendered document.
 			def self.render(node, request, attributes)
@@ -35,7 +36,7 @@ module Utopia
 			end
 			
 			# Initialize a document for a protocol request.
-			# @parameter request [Rack::Request] The request.
+			# @parameter request [Utopia::Request] The application request.
 			# @parameter attributes [Hash] The attributes.
 			def initialize(request, attributes = {})
 				@request = request
@@ -51,7 +52,7 @@ module Utopia
 			
 			# @returns [Path] The original request path, if known.
 			def request_path
-				Path[request.env["REQUEST_PATH"]]
+				Path[request.request_path]
 			end
 			
 			protected def current_base_uri_path
@@ -113,7 +114,7 @@ module Utopia
 				MarkupParser.parse(markup, self)
 			end
 			
-			# The Rack::Request for this document.
+			# The request for this document.
 			attr :request
 			
 			# Per-document global attributes.

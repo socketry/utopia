@@ -8,8 +8,13 @@ require "digest/sha2"
 require "console"
 require "json"
 
+require "protocol/http/cookie"
+
 require_relative "lazy_hash"
 require_relative "serialization"
+require_relative "../middleware"
+require_relative "../request"
+require_relative "../response"
 
 module Utopia
 	module Session
@@ -23,7 +28,7 @@ module Utopia
 			
 			SECRET_KEY = "UTOPIA_SESSION_SECRET".freeze
 			
-			RACK_SESSION = "rack.session".freeze
+			SESSION_KEY = "utopia.session".freeze
 			CIPHER_ALGORITHM = "aes-256-cbc"
 			
 			# The session will expire if no requests were made within 24 hours:
@@ -36,8 +41,8 @@ module Utopia
 			# @param secret [Array] The secret text used to generate a symetric encryption key for the coookie data.
 			# @param same_site [Symbol, String] Controls how the cookie is provided to the site.
 			# @param expires_after [String] The cache-control header to set for static content.
-			# @param options [Hash<Symbol,Object>] Additional defaults used for generating the cookie by `Rack::Utils.set_cookie_header!`.
-			def initialize(app, session_name: RACK_SESSION, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, same_site: :lax, maximum_size: MAXIMUM_SIZE, **options)
+			# @param options [Hash<Symbol,Object>] Additional defaults used for generating the session cookie.
+			def initialize(app, session_name: SESSION_KEY, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, same_site: :lax, maximum_size: MAXIMUM_SIZE, **options)
 				@app = app
 				
 				@session_name = session_name
@@ -93,28 +98,28 @@ module Utopia
 				super
 			end
 			
-			# Attach a lazily loaded session to the Rack environment and persist it after the request.
-			# @parameter env [Hash] The Rack environment.
-			# @returns [Array] The Rack response.
-			def call(env)
-				session_hash = prepare_session(env)
+			# Attach a lazily loaded session to the request, then persist it.
+			# @parameter request [Utopia::Request] The request.
+			# @returns [Protocol::HTTP::Response] The wrapped application response.
+			def call(request)
+				request.session = prepare_session(request)
 				
-				status, headers, body = @app.call(env)
+				response = Response.wrap(@app.call(request))
 				
-				update_session(env, session_hash, headers)
+				update_session(request.session, response.headers)
 				
-				return [status, headers, body]
+				return response
 			end
 			
 			protected
 			
-			def prepare_session(env)
-				env[RACK_SESSION] = LazyHash.new do
-					self.load_session_values(env)
+			def prepare_session(request)
+				LazyHash.new do
+					self.load_session_values(request)
 				end
 			end
 			
-			def update_session(env, session_hash, headers)
+			def update_session(session_hash, headers)
 				if session_hash.needs_update?(@update_timeout)
 					values = session_hash.values
 					
@@ -137,9 +142,7 @@ module Utopia
 			
 			# Load session from user supplied cookie. If the data is invalid or otherwise fails validation, `build_iniital_session` is invoked.
 			# @return hash of values.
-			def load_session_values(env)
-				request = Rack::Request.new(env)
-				
+			def load_session_values(request)
 				# Decrypt the data from the user if possible:
 				if data = request.cookies[@cookie_name]
 					begin
@@ -183,7 +186,23 @@ module Utopia
 					expires: expires(updated_at)
 				}.merge(@cookie_defaults)
 				
-				Rack::Utils.set_cookie_header!(headers, @cookie_name, cookie)
+				headers.add("set-cookie", cookie_header(@cookie_name, cookie))
+			end
+			
+			def cookie_header(name, cookie)
+				directives = {}
+				
+				directives["Domain"] = cookie[:domain] if cookie[:domain]
+				directives["Path"] = cookie[:path] if cookie[:path]
+				directives["Expires"] = cookie[:expires].httpdate if cookie[:expires]
+				directives["Secure"] = true if cookie[:secure]
+				directives["HttpOnly"] = true if cookie[:http_only]
+				
+				if same_site = cookie[:same_site]
+					directives["SameSite"] = same_site.to_s.capitalize
+				end
+				
+				return Protocol::HTTP::Cookie.new(name, cookie.fetch(:value), directives).to_s
 			end
 			
 			def encrypt(hash)
@@ -197,7 +216,7 @@ module Utopia
 				e = c.update(@serialization.dump(hash))
 				e << c.final
 				
-				return [iv, e].pack("m16m*")
+				return [iv + e].pack("m0")
 			end
 			
 			def decrypt(data)
@@ -205,7 +224,9 @@ module Utopia
 					raise PayloadError, "Session payload size #{data.bytesize}bytes exceeds maximum allowed size #{@maximum_size}bytes!"
 				end
 				
-				iv, e = data.unpack("m16m*")
+				payload = data.unpack1("m0")
+				iv = payload.byteslice(0, 16)
+				e = payload.byteslice(16..)
 				
 				c = OpenSSL::Cipher.new(CIPHER_ALGORITHM)
 				c.decrypt

@@ -22,7 +22,7 @@ module Utopia
 				
 				# Serialize an object as a successful JSON response.
 				# @parameter context [Object] The context.
-				# @parameter request [Rack::Request] The request.
+				# @parameter request [Utopia::Request] The request.
 				# @parameter media_range [HTTP::Accept::MediaTypes::MediaRange] The negotiated media range.
 				# @parameter object [Object] The object.
 				# @parameter options [Hash] The options.
@@ -49,7 +49,7 @@ module Utopia
 				
 				# Accept an object without producing a response.
 				# @parameter context [Object] The context.
-				# @parameter request [Rack::Request] The request.
+				# @parameter request [Utopia::Request] The request.
 				# @parameter media_range [HTTP::Accept::MediaTypes::MediaRange] The negotiated media range.
 				# @parameter object [Object] The object.
 				# @parameter options [Hash] The options.
@@ -73,7 +73,7 @@ module Utopia
 				
 				# Invoke this handler's block in the controller context.
 				# @parameter context [Object] The context.
-				# @parameter request [Rack::Request] The request.
+				# @parameter request [Utopia::Request] The request.
 				# @parameter media_range [HTTP::Accept::MediaTypes::MediaRange] The negotiated media range.
 				# @parameter arguments [Array] The arguments.
 				# @parameter options [Hash] The options.
@@ -108,13 +108,15 @@ module Utopia
 			
 			# Negotiate the request's accepted media types and invoke the best handler.
 			# @parameter context [Object] The context.
-			# @parameter request [Rack::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @parameter arguments [Array] The arguments.
 			# @parameter options [Hash] The options.
 			# @returns [Object | Nil] The selected handler's result, or `nil` if none matches.
 			def call(context, request, *arguments, **options)
 				# Parse the list of browser preferred content types and return ordered by priority:
-				media_types = HTTP::Accept::MediaTypes.browser_preferred_media_types(request.env)
+				media_types = HTTP::Accept::MediaTypes.browser_preferred_media_types(
+					HTTP::Accept::MediaTypes::HTTP_ACCEPT => Array(request.headers["accept"]).join(",")
+				)
 				
 				handler, media_range = @handlers.for(media_types)
 				
@@ -130,7 +132,7 @@ module Utopia
 			
 			# Bind this responder to a context and request.
 			# @parameter context [Controller::Base] The controller context.
-			# @parameter request [Rack::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Responds] The bound responder.
 			def respond_to(context, request)
 				Responds.new(self, context, request)

@@ -176,7 +176,7 @@ module Utopia
 				
 				# Dispatch the request to the first matching action.
 				# @parameter controller [Utopia::Controller::Base] The controller instance.
-				# @parameter request [Rack::Request] The request.
+				# @parameter request [Utopia::Request] The request.
 				# @parameter path [Utopia::Path | String] The path.
 				# @returns [Object | Nil] The result of the final matching action or fallback action.
 				def dispatch(controller, request, path)

@@ -4,12 +4,23 @@
 # Copyright, 2017-2025, by Samuel Williams.
 
 require "utopia/content/document"
-require "rack/request"
+require "utopia/request"
 
 describe Utopia::Content::Document do
-	let(:env) {Hash["REQUEST_PATH" => "/index"]}
-	let(:request) {Rack::Request.new(env)}
+	let(:path) {"/index"}
+	let(:request) {Utopia::Request["GET", path]}
 	let(:document) {subject.new(request, {})}
+	
+	it "retains the application request" do
+		expect(document.request).to be == request
+		expect(document.request.delegate).to be == request.delegate
+	end
+	
+	it "uses the original request path" do
+		request.path_info = "/rewritten"
+		
+		expect(document.request_path).to be == Utopia::Path["/index"]
+	end
 	
 	it "should generate valid self-closing markup" do
 		node = proc do |document, state|
@@ -50,7 +61,7 @@ describe Utopia::Content::Document do
 	end
 	
 	with "nested request path" do
-		let(:env) {Hash["REQUEST_PATH" => "/nested/index"]}
+		let(:path) {"/nested/index"}
 		
 		it "generates a relative base uri" do
 			relative_to = Utopia::Path["/page"]

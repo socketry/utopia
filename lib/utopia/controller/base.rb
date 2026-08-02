@@ -4,10 +4,20 @@
 # Copyright, 2014-2025, by Samuel Williams.
 
 require_relative "../http"
+require_relative "../response"
 
 module Utopia
 	module Controller
 		CONTENT_TYPE = HTTP::CONTENT_TYPE
+		
+		# A controller response that can be converted to a protocol HTTP response.
+		Response = Struct.new(:status, :headers, :body) do
+			# Convert this value to a protocol HTTP response.
+			# @returns [Protocol::HTTP::Response] The response.
+			def to_response
+				Utopia::Response[status, headers, body || []]
+			end
+		end
 		
 		# The base implementation of a controller class.
 		class Base
@@ -76,14 +86,14 @@ module Utopia
 			
 			# Catch and return a response thrown while executing the block.
 			# @yields The controller operation that may throw a response.
-			# @returns [Array | Nil] The thrown response, or `nil` if the block completes.
+			# @returns [Protocol::HTTP::Response | Nil] The thrown response, or `nil` if the block completes.
 			def catch_response
 				catch(:response) do
 					yield and nil
 				end
 			end
 			
-			# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid rack response if the controller can do so.
+			# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid response if the controller can do so.
 			def process!(request, relative_path)
 				return nil
 			end
@@ -95,9 +105,9 @@ module Utopia
 				end
 			end
 			
-			# Call into the next app as defined by rack.
-			def call(env)
-				self.class.controller.app.call(env)
+			# Call into the next application.
+			def call(request)
+				self.class.controller.app.call(request)
 			end
 			
 			# This will cause the middleware to generate a response.
@@ -120,7 +130,7 @@ module Utopia
 				status = HTTP::Status.new(status, 300...400)
 				location = target.to_s
 				
-				respond! [status.to_i, {HTTP::LOCATION => location}, [status.to_s]]
+				respond! Response.new(status.to_i, {HTTP::LOCATION => location}, [status.to_s])
 			end
 			
 			# Controller relative redirect.
@@ -133,7 +143,7 @@ module Utopia
 				status = HTTP::Status.new(error, 400...600)
 				
 				message ||= status.to_s
-				respond! [status.to_i, {}, [message]]
+				respond! Response.new(status.to_i, {}, [message])
 			end
 			
 			# Succeed the request and immediately respond.
@@ -145,7 +155,7 @@ module Utopia
 				end
 				
 				body = body_for(status, headers, options)
-				respond! [status.to_i, headers, body || []]
+				respond! Response.new(status.to_i, headers, body || [])
 			end
 			
 			# Generate the body for the given status, headers and options.

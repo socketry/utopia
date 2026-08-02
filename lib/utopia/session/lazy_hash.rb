@@ -16,6 +16,8 @@ module Utopia
 				@loader = block
 			end
 			
+			# The loaded session values, if already loaded.
+			# @returns [Hash | Nil] The loaded values.
 			attr :values
 			
 			# Fetch a value by key, loading the hash if necessary.

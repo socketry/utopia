@@ -14,9 +14,9 @@ end
 
 # The ExceptionHandler middleware will redirect here when an exception occurs. If this also fails, things get ugly.
 on 'exception' do |request|
-	if request.params['fatal']
+	if request.arguments['fatal']
 		raise TharSheBlows.new("Yarrh!")
 	else
-		succeed! :content => 'Error Will Robertson', :type => 'text/plain'
+		succeed! :content => "Error: #{request.exception.message}", :type => 'text/plain'
 	end
 end

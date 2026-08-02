@@ -3,8 +3,6 @@
 # Released under the MIT License.
 # Copyright, 2014-2025, by Samuel Williams.
 
-require_relative "../middleware"
-
 module Utopia
 	module Controller
 		# Provides a stack-based instance variable lookup mechanism. It can flatten a stack of controllers into a single hash.
@@ -75,11 +73,11 @@ module Utopia
 			end
 		end
 		
-		# Fetch the controller variables associated with a request.
-		# @parameter request [Rack::Request] The request.
-		# @returns [Variables | Nil] The controller variables, when available.
+		# Return the controller variables associated with the request.
+		# @parameter request [Utopia::Request] The application request.
+		# @returns [Variables | Nil] The current variables.
 		def self.[] request
-			request.env[VARIABLES_KEY]
+			request.variables
 		end
 	end
 end

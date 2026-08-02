@@ -21,6 +21,13 @@ describe Utopia::HTTP::Status.new(:found) do
 end
 
 describe Utopia::HTTP::Status do
+	it "provides descriptions for standard status codes" do
+		expect(Utopia::HTTP::Status.new(103).to_s).to be == "Early Hints"
+		expect(Utopia::HTTP::Status.new(418).to_s).to be == "I'm a Teapot"
+		expect(Utopia::HTTP::Status.new(429).to_s).to be == "Too Many Requests"
+		expect(Utopia::HTTP::Status.new(502).to_s).to be == "Bad Gateway"
+	end
+	
 	it "should fail when given invalid code" do
 		expect{Utopia::HTTP::Status.new(1000)}.to raise_exception(ArgumentError)
 	end

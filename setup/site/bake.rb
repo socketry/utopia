@@ -9,7 +9,7 @@ end
 
 # Restart the application server.
 def restart
-	call "falcon:supervisor:restart"
+	puts "Restart the Falcon service using your process manager."
 end
 
 # Start the development server.

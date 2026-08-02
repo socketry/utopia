@@ -4,6 +4,7 @@
 # Copyright, 2016-2025, by Samuel Williams.
 
 require_relative "../http"
+require_relative "../response"
 require_relative "responder"
 
 module Utopia
@@ -29,7 +30,7 @@ module Utopia
 				
 				# Bind this controller's responder to a context and request.
 				# @parameter context [Controller::Base] The controller context.
-				# @parameter request [Rack::Request] The request.
+				# @parameter request [Utopia::Request] The request.
 				# @returns [Responder::Responds | Nil] The bound responder, if one has been configured.
 				def respond_to(context, request)
 					@responder&.respond_to(context, request)
@@ -37,25 +38,25 @@ module Utopia
 				
 				# Build a response for the negotiated content type.
 				# @parameter context [Object] The context.
-				# @parameter request [Rack::Request] The request.
-				# @parameter response [Array] The response.
-				# @returns [Array] The response.
+				# @parameter request [Utopia::Request] The request.
+				# @parameter response [Protocol::HTTP::Response] The response.
+				# @returns [Protocol::HTTP::Response] The response.
 				def response_for(context, request, response)
-					@responder&.respond_to(context, request).with(*response[2])
+					@responder&.respond_to(context, request).with(*response.body)
 				end
 			end
 			
 			# Bind this controller's responder to the request.
-			# @parameter request [Rack::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Responder::Responds | Nil] The bound responder, if one has been configured.
 			def respond_to(request)
 				self.class.respond_to(self, request)
 			end
 			
 			# Build a response for the negotiated content type.
-			# @parameter request [Rack::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @parameter original_response [Object] The original response.
-			# @returns [Array] The response.
+			# @returns [Protocol::HTTP::Response] The response.
 			def response_for(request, original_response)
 				response = catch(:response) do
 					self.class.response_for(self, request, original_response)
@@ -67,14 +68,17 @@ module Utopia
 				# If the user called {Base#ignore!}, it's possible response is nil:
 				if response
 					# There was an updated response so merge it:
-					return [original_response[0], original_response[1].merge(response[1]), response[2] || original_response[2]]
+					headers = original_response.headers.dup
+					headers.update(response.headers)
+					
+					return Utopia::Response[original_response.status, headers, response.body || original_response.body]
 				end
 			end
 			
 			# Invokes super. If a response is generated, format it based on the Accept: header, unless the content type was already specified.
 			def process!(request, path)
 				if response = super
-					headers = response[1]
+					headers = response.headers
 					
 					# Don't try to convert the response if a content type was explicitly specified.
 					if headers[HTTP::CONTENT_TYPE]
