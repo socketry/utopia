@@ -7,6 +7,8 @@ module Utopia
 	module Session
 		# A simple hash table which fetches it's values only when required.
 		class LazyHash
+			# Initialize a lazily loaded hash.
+			# @yields The block which loads the initial values.
 			def initialize(&block)
 				@changed = false
 				@values = nil
@@ -16,10 +18,17 @@ module Utopia
 			
 			attr :values
 			
+			# Fetch a value by key, loading the hash if necessary.
+			# @parameter key [Object] The key.
+			# @returns [Object | Nil] The value.
 			def [] key
 				load![key]
 			end
 			
+			# Store a value by key.
+			# @parameter key [Object] The key.
+			# @parameter value [Object] The value.
+			# @returns [Object] The stored value.
 			def []= key, value
 				values = load!
 				
@@ -31,10 +40,16 @@ module Utopia
 				return value
 			end
 			
+			# Check whether the hash contains a key.
+			# @parameter key [Object] The key.
+			# @returns [Boolean] Whether the key exists.
 			def include?(key)
 				load!.include?(key)
 			end
 			
+			# Delete a value by key.
+			# @parameter key [Object] The key.
+			# @returns [Object | Nil] The deleted value.
 			def delete(key)
 				load!
 				
@@ -43,18 +58,27 @@ module Utopia
 				@values.delete(key)
 			end
 			
+			# Check whether any value has changed.
+			# @returns [Boolean] Whether the hash has changed.
 			def changed?
 				@changed
 			end
 			
+			# Load and return the underlying values.
+			# @returns [Hash] The loaded values.
 			def load!
 				@values ||= @loader.call
 			end
 			
+			# Check whether the underlying values have been loaded.
+			# @returns [Boolean] Whether the values are loaded.
 			def loaded?
 				!@values.nil?
 			end
 			
+			# Check whether the values should be persisted.
+			# @parameter timeout [Numeric | Nil] The maximum age before an update is required.
+			# @returns [Boolean] Whether an update is required.
 			def needs_update?(timeout = nil)
 				# If data has changed, we need update:
 				return true if @changed

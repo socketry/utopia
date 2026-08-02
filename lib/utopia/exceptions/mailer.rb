@@ -35,6 +35,8 @@ module Utopia
 				@dump_environment = dump_environment
 			end
 			
+			# Freeze this object and its internal state.
+			# @returns [self] This object.
 			def freeze
 				return self if frozen?
 				
@@ -47,6 +49,9 @@ module Utopia
 				super
 			end
 			
+			# Report application exceptions by email before reraising them.
+			# @parameter env [Hash] The Rack environment.
+			# @returns [Array] The application response.
 			def call(env)
 				begin
 					return @app.call(env)

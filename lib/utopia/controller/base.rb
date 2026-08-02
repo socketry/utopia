@@ -30,24 +30,34 @@ module Utopia
 				self.const_get(:CONTROLLER)
 			end
 			
+			# Generate a debug representation of this object.
+			# @returns [String] The resulting string.
 			def self.inspect
 				"#{super}#{self.uri_path}"
 			end
 			
+			# Convert this object to a string.
+			# @returns [String] The resulting string.
 			def self.to_s
 				self.inspect
 			end
 			
+			# Convert this object to a string.
+			# @returns [String] The resulting string.
 			def to_s
 				"\#<#{self.class}>"
 			end
 			
+			# Generate a debug representation of this object.
+			# @returns [String] The resulting string.
 			def inspect
 				details = self.instance_variables.map{|name| " #{name}=#{self.instance_variable_get(name)}"}
 				
 				"\#<#{self.class}#{details.join}>"
 			end
 			
+			# Freeze this object and its internal state.
+			# @returns [self] This object.
 			def self.freeze
 				# This ensures that all class variables are frozen.
 				self.instance_variables.each do |name|
@@ -57,10 +67,16 @@ module Utopia
 				super
 			end
 			
+			# Check whether the path refers directly to this controller.
+			# @parameter path [Utopia::Path | String] The path.
+			# @returns [Boolean] Whether the path is directly contained by this controller's URI path.
 			def self.direct?(path)
 				path.dirname == uri_path
 			end
 			
+			# Catch and return a response thrown while executing the block.
+			# @yields The controller operation that may throw a response.
+			# @returns [Array | Nil] The thrown response, or `nil` if the block completes.
 			def catch_response
 				catch(:response) do
 					yield and nil

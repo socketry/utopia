@@ -10,7 +10,9 @@ require "date"
 
 module Utopia
 	module Session
+		# Encodes and decodes session values using MessagePack.
 		class Serialization
+			# Initialize a MessagePack factory with session-specific scalar types.
 			def initialize
 				@factory = MessagePack::Factory.new
 				
@@ -23,10 +25,16 @@ module Utopia
 			
 			attr :factory
 			
+			# Decode a MessagePack session value.
+			# @parameter data [String] The serialized data.
+			# @returns [Object] The decoded value.
 			def load(data)
 				@factory.unpack(data)
 			end
 			
+			# Encode a session value using MessagePack.
+			# @parameter object [Object] The value to encode.
+			# @returns [String] The encoded value.
 			def dump(object)
 				@factory.pack(object)
 			end

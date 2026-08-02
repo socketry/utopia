@@ -3,6 +3,7 @@
 # Released under the MIT License.
 # Copyright, 2009-2026, by Samuel Williams.
 
+# @namespace
 module Utopia
 	VERSION = "2.32.1"
 end
