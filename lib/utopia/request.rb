@@ -49,7 +49,10 @@ module Utopia
 		
 		# Assign the request path including query string.
 		def path= value
-			@request_path ||= self.path_info if value != @delegate.path
+			if value != @delegate.path
+				@request_path ||= self.path_info
+			end
+			
 			@delegate.path = value
 			@arguments = nil
 		end
@@ -82,7 +85,11 @@ module Utopia
 		
 		# The query string without the leading question mark.
 		def query
-			self.path&.split("?", 2)&.last if self.path&.include?("?")
+			path = self.path
+			
+			if path&.include?("?")
+				return path.split("?", 2).last
+			end
 		end
 		
 		# Decoded query arguments.

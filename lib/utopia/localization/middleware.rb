@@ -76,22 +76,30 @@ module Utopia
 				locales = Set.new
 				
 				host_preferred_locales(request) do |locale|
-					yield request, locale if locales.add? locale
+					if locales.add? locale
+						yield request, locale
+					end
 				end
 				
 				request_preferred_locale(request) do |locale, path|
 					# We have extracted a locale from the path, so from this point on we should use the updated path:
 					request = request.with(path_info: path.to_s)
 					
-					yield request, locale if locales.add? locale
+					if locales.add? locale
+						yield request, locale
+					end
 				end
 				
 				browser_preferred_locales(request).each do |locale|
-					yield request, locale if locales.add? locale
+					if locales.add? locale
+						yield request, locale
+					end
 				end
 				
 				@default_locales.each do |locale|
-					yield request, locale if locales.add? locale
+					if locales.add? locale
+						yield request, locale
+					end
 				end
 			end
 			
@@ -104,7 +112,9 @@ module Utopia
 				
 				# Yield all hosts which match the incoming http_host:
 				@hosts.each do |pattern, locale|
-					yield locale if http_host[pattern]
+					if http_host[pattern]
+						yield locale
+					end
 				end
 			end
 			

@@ -192,11 +192,25 @@ module Utopia
 			def cookie_header(name, cookie)
 				directives = {}
 				
-				directives["Domain"] = cookie[:domain] if cookie[:domain]
-				directives["Path"] = cookie[:path] if cookie[:path]
-				directives["Expires"] = cookie[:expires].httpdate if cookie[:expires]
-				directives["Secure"] = true if cookie[:secure]
-				directives["HttpOnly"] = true if cookie[:http_only]
+				if domain = cookie[:domain]
+					directives["Domain"] = domain
+				end
+				
+				if path = cookie[:path]
+					directives["Path"] = path
+				end
+				
+				if expires = cookie[:expires]
+					directives["Expires"] = expires.httpdate
+				end
+				
+				if cookie[:secure]
+					directives["Secure"] = true
+				end
+				
+				if cookie[:http_only]
+					directives["HttpOnly"] = true
+				end
 				
 				if same_site = cookie[:same_site]
 					directives["SameSite"] = same_site.to_s.capitalize
