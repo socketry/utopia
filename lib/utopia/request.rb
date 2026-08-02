@@ -3,9 +3,11 @@
 # Released under the MIT License.
 # Copyright, 2026, by Samuel Williams.
 
-require "uri"
+require "tempfile"
 
 require "protocol/http/request"
+require "protocol/multipart/parser"
+require "protocol/url/encoding"
 
 module Utopia
 	# Utopia's application-facing request wrapper.
@@ -13,6 +15,102 @@ module Utopia
 	# Protocol request methods are delegated to the underlying request; parsing
 	# and application conveniences live here rather than on protocol-http itself.
 	class Request
+		# The content type used by URL-encoded HTML forms.
+		FORM_URL_ENCODED = "application/x-www-form-urlencoded"
+		
+		# The content type used by multipart HTML forms.
+		MULTIPART_FORM_DATA = "multipart/form-data"
+		
+		# The maximum nesting depth accepted for structured arguments.
+		MAXIMUM_ARGUMENT_DEPTH = 8
+		
+		# A file uploaded as part of a multipart form.
+		class Upload
+			# Initialize an uploaded file.
+			# @parameter headers [Hash] The multipart part headers.
+			# @parameter filename [String] The submitted filename.
+			# @parameter tempfile [Tempfile] The temporary file containing the uploaded data.
+			# @parameter size [Integer] The size of the uploaded data in bytes.
+			def initialize(headers, filename, tempfile, size)
+				@headers = headers
+				@filename = filename
+				@tempfile = tempfile
+				@size = size
+			end
+			
+			# The multipart part headers.
+			attr :headers
+			
+			# The submitted filename.
+			attr :filename
+			
+			# The temporary file containing the uploaded data.
+			attr :tempfile
+			
+			# The size of the uploaded data in bytes.
+			attr :size
+			
+			# The submitted content type, if present.
+			def content_type
+				@headers["content-type"]
+			end
+		end
+		
+		# Adapts a chunk-readable protocol body to the IO interface used by the multipart parser.
+		class BodyIO
+			# Initialize the adapter.
+			# @parameter body [Protocol::HTTP::Body::Readable] The chunk-readable request body.
+			def initialize(body)
+				@body = body
+				@buffer = String.new.b
+				@closed = false
+			end
+			
+			# Read up to the requested number of bytes without blocking the current fiber.
+			# @parameter size [Integer] The maximum number of bytes to read.
+			# @parameter output [String | Nil] An optional output buffer.
+			# @parameter exception [Boolean] Included for compatibility with IO.
+			# @returns [String | Nil] The next bytes, or nil at the end of the body.
+			def read_nonblock(size, output = nil, exception: true)
+				if @buffer.empty?
+					if chunk = @body.read
+						@buffer << chunk
+					else
+						return nil
+					end
+				end
+				
+				chunk = @buffer.slice!(0, size)
+				
+				if output
+					output.replace(chunk)
+					return output
+				else
+					return chunk
+				end
+			end
+			
+			# Whether the adapter can still be read.
+			def readable?
+				!@closed
+			end
+			
+			# Whether the adapter has been closed.
+			def closed?
+				@closed
+			end
+			
+			# Close the adapter and underlying request body.
+			def close
+				return if @closed
+				
+				@closed = true
+				@body.close
+			end
+		end
+		
+		private_constant :BodyIO
+		
 		# Build a Utopia request from the given protocol request arguments.
 		def self.[](*arguments)
 			self.new(Protocol::HTTP::Request[*arguments])
@@ -30,6 +128,8 @@ module Utopia
 			@localization = nil
 			@exception = nil
 			
+			@query_arguments = nil
+			@form_arguments = nil
 			@arguments = nil
 			@cookies = nil
 		end
@@ -43,6 +143,8 @@ module Utopia
 			super
 			
 			@delegate = other.delegate.dup
+			@query_arguments = nil
+			@form_arguments = nil
 			@arguments = nil
 			@cookies = nil
 		end
@@ -54,6 +156,15 @@ module Utopia
 			end
 			
 			@delegate.path = value
+			@query_arguments = nil
+			@arguments = nil
+		end
+		
+		# Assign the request body and clear any decoded form arguments.
+		# @parameter value [Protocol::HTTP::Body::Readable | Nil] The new request body.
+		def body= value
+			@delegate.body = value
+			@form_arguments = nil
 			@arguments = nil
 		end
 		
@@ -93,8 +204,18 @@ module Utopia
 		end
 		
 		# Decoded query arguments.
+		def query_arguments
+			@query_arguments ||= decode_arguments(self.query)
+		end
+		
+		# Decoded form arguments, when the request has a supported form content type.
+		def form_arguments
+			@form_arguments ||= decode_form_arguments
+		end
+		
+		# Decoded query and form arguments. Form arguments take precedence on collision.
 		def arguments
-			@arguments ||= decode_arguments(self.query)
+			@arguments ||= self.query_arguments.merge(self.form_arguments)
 		end
 		
 		# Decoded request cookies.
@@ -189,24 +310,122 @@ module Utopia
 		end
 		
 		def decode_arguments(query)
-			arguments = {}
+			return {} unless query
 			
-			return arguments unless query
+			# HTML form encoding represents spaces using `+`, while Protocol::URL uses percent encoding.
+			return Protocol::URL::Encoding.decode(query.gsub("+", "%20"), MAXIMUM_ARGUMENT_DEPTH)
+		end
+		
+		def decode_form_arguments
+			content_type, parameters = parse_header(self.headers["content-type"])
 			
-			URI.decode_www_form(query).each do |key, value|
-				values = arguments.fetch(key){arguments[key] = []}
-				values << value
+			case content_type
+			when FORM_URL_ENCODED
+				return decode_arguments(read_body)
+			when MULTIPART_FORM_DATA
+				boundary = parameters["boundary"]
+				
+				unless boundary
+					raise ArgumentError, "Multipart form data is missing a boundary!"
+				end
+				
+				return decode_multipart_form(boundary)
+			else
+				return {}
+			end
+		end
+		
+		def read_body
+			if body = self.body
+				return body.join || String.new
 			end
 			
-			arguments.transform_values! do |values|
-				if values.size == 1
-					values.first
-				else
-					values
+			return String.new
+		end
+		
+		def decode_multipart_form(boundary)
+			arguments = {}
+			body = self.body
+			
+			return arguments unless body
+			
+			io = BodyIO.new(body)
+			parser = Protocol::Multipart::Parser.new(io, boundary)
+			
+			begin
+				parser.each do |part|
+					disposition, parameters = parse_header(part.headers["content-disposition"])
+					
+					unless disposition == "form-data" and name = parameters["name"]
+						raise ArgumentError, "Multipart form part is missing a form-data name!"
+					end
+					
+					if filename = parameters["filename"]
+						value = create_upload(part, filename)
+					else
+						value = read_part(part)
+					end
+					
+					assign_argument(arguments, name, value)
 				end
+			ensure
+				io.close
 			end
 			
 			return arguments
+		end
+		
+		def read_part(part)
+			content = String.new.b
+			part.each{|chunk| content << chunk}
+			return content
+		end
+		
+		def create_upload(part, filename)
+			tempfile = Tempfile.new("utopia-upload", binmode: true)
+			size = 0
+			
+			begin
+				part.each do |chunk|
+					tempfile.write(chunk)
+					size += chunk.bytesize
+				end
+				
+				tempfile.rewind
+				return Upload.new(part.headers, filename, tempfile, size)
+			rescue
+				tempfile.close!
+				raise
+			end
+		end
+		
+		def assign_argument(arguments, name, value)
+			keys = Protocol::URL::Encoding.split(name)
+			
+			if keys.empty?
+				raise ArgumentError, "Invalid argument name: #{name.inspect}!"
+			end
+			
+			if keys.size > MAXIMUM_ARGUMENT_DEPTH
+				raise ArgumentError, "Argument depth exceeded limit!"
+			end
+			
+			Protocol::URL::Encoding.assign(keys, value, arguments)
+		end
+		
+		PARAMETER = /;\s*([!#$%&'*+\-.^_`|~0-9A-Za-z]+)\s*=\s*(?:"((?:\\.|[^"])*)"|([^;\s]*))/.freeze
+		
+		def parse_header(value)
+			return [nil, {}] unless value
+			
+			value = value.first if value.is_a?(Array)
+			parameters = {}
+			
+			value.scan(PARAMETER) do |name, quoted, token|
+				parameters[name.downcase] = quoted ? quoted.gsub(/\\(.)/, "\\1") : token
+			end
+			
+			return [value.split(";", 2).first.strip.downcase, parameters]
 		end
 		
 		def parse_cookies(cookie_header)
