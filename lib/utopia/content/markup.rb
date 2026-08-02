@@ -142,7 +142,7 @@ module Utopia
 				@stack = []
 			end
 			
-			# Parse.
+			# Parse the markup buffer into delegate callbacks and validate balanced tags.
 			# @returns [nil] Parsing completes through delegate callbacks.
 			def parse!
 				XRB::Parsers.parse_markup(@buffer, self, @entities)
