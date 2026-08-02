@@ -54,24 +54,23 @@ module Utopia
 			end
 			
 			# Replace an unhandled error response with its configured error document.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Protocol::HTTP::Response] The original or error-document response.
 			# @raises [RequestFailure] If the configured error document also fails.
 			def call(request)
 				response = Response.wrap(@app.call(request))
 				
 				if unhandled_error?(response) && location = @codes[response.status]
-					utopia_request = Request.current!
-					error_request = utopia_request.with(method: "GET", path_info: location)
+					error_request = request.with(method: "GET", path_info: location)
 					
 					previous_request = Request.current
 					Request.current = error_request
 					
 					begin
-						error_response = Response.wrap(@app.call(error_request.http))
+						error_response = Response.wrap(@app.call(error_request))
 						
 						if error_response.status >= 400
-							raise RequestFailure.new(utopia_request.path_info, response.status, location, error_response.status)
+							raise RequestFailure.new(request.path_info, response.status, location, error_response.status)
 						else
 							# Feed the error code back with the error document:
 							error_response.status = response.status
@@ -147,13 +146,13 @@ module Utopia
 			end
 			
 			# Redirect a normalized request path when it matches, otherwise invoke the application.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Protocol::HTTP::Response] The redirect or downstream response.
 			def call(request)
 				# Normalize the path to remove redundant slashes, `.` and `..` segments.
 				# This prevents protocol-relative redirect URLs (e.g. //evil.com/index)
 				# from being generated when PATH_INFO contains a double leading slash.
-				path = Path.create(Request.current!.path_info).simplify.to_s
+				path = Path.create(request.path_info).simplify.to_s
 				
 				if redirection = self[path]
 					return redirection

@@ -116,11 +116,10 @@ module Utopia
 			end
 			
 			# Serve or redirect filesystem-backed content, otherwise invoke the application.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Protocol::HTTP::Response] The content, redirect, or downstream response.
 			def call(request)
-				utopia_request = Utopia::Request.current!
-				path = Path.create(utopia_request.path_info)
+				path = Path.create(request.path_info)
 				
 				# Check if the request is to a non-specific index. This only works for requests with a given name:
 				basename = path.basename
@@ -135,7 +134,7 @@ module Utopia
 				
 				locale = Localization.current_locale
 				if link = @links.for(path, locale)
-					if response = self.respond(link, utopia_request)
+					if response = self.respond(link, request)
 						return response
 					end
 				end

@@ -44,7 +44,7 @@ module Utopia
 			end
 			
 			# Convert application exceptions into internal-server-error responses.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Protocol::HTTP::Response] The application response or a generated error response.
 			def call(request)
 				begin
@@ -54,7 +54,7 @@ module Utopia
 					
 					begin
 						# We do an internal redirection to the error location:
-						error_request = Request.current!.with(
+						error_request = request.with(
 							method: "GET",
 							path_info: @location
 						)
@@ -66,7 +66,7 @@ module Utopia
 							Request.current = error_request
 							Exceptions.current = exception
 							
-							error_response = Response.wrap(@app.call(error_request.http))
+							error_response = Response.wrap(@app.call(error_request))
 						ensure
 							Request.current = previous_request
 							Exceptions.current = previous_exception

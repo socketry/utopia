@@ -86,7 +86,7 @@ module Utopia
 			end
 			
 			# Respond.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @parameter path_info [String] The request path to serve.
 			# @parameter extension [String] The file extension.
 			# @returns [Protocol::HTTP::Response] The response.
@@ -109,10 +109,10 @@ module Utopia
 			end
 			
 			# Serve a recognized static file or pass the request to the next middleware.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Protocol::HTTP::Response] The static-file or downstream response.
 			def call(request)
-				path_info = Utopia::Request.current!.path_info
+				path_info = request.path_info
 				extension = File.extname(path_info)
 				
 				if @extensions.key?(extension.downcase)

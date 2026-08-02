@@ -9,8 +9,16 @@ require "utopia/request"
 describe Utopia::Request do
 	let(:request) {subject["POST", "/search?q=utopia&tag=ruby&tag=async", {"cookie" => "a=1; b=2"}]}
 	
-	it "wraps a protocol HTTP request" do
-		expect(request.http).to be_a(Protocol::HTTP::Request)
+	it "proxies a protocol HTTP request" do
+		expect(request.delegate).to be_a(Protocol::HTTP::Request)
+		expect(request.headers).to be_equal(request.delegate.headers)
+		expect(request).to be(:respond_to?, :headers)
+		expect(request).to be(:respond_to?, :scheme=)
+	end
+	
+	it "does not proxy unknown methods" do
+		expect(request).not.to be(:respond_to?, :unknown_request_method)
+		expect{request.unknown_request_method}.to raise_exception(NoMethodError)
 	end
 	
 	it "provides ambient request state" do
@@ -97,6 +105,7 @@ describe Utopia::Request do
 		expect(derived.method).to be == "GET"
 		expect(derived.path).to be == "/find?q=utopia&tag=ruby&tag=async"
 		expect(derived.request_path).to be == "/search"
+		expect(derived.delegate).not.to be_equal(request.delegate)
 	end
 	
 	it "preserves the original request path across multiple derived requests" do

@@ -13,7 +13,7 @@ describe Utopia::Content::Document do
 	
 	it "retains the application request" do
 		expect(document.request).to be == request
-		expect(document.request.http).to be == request.http
+		expect(document.request.delegate).to be == request.delegate
 	end
 	
 	it "uses the original request path" do

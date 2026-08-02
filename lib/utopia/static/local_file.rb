@@ -77,7 +77,7 @@ module Utopia
 			end
 			
 			# Check whether the file has changed since the request validators.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Boolean] Whether the file is newer than the request validators.
 			def modified?(request)
 				if modified_since = request.headers["if-modified-since"]
@@ -96,7 +96,7 @@ module Utopia
 			CONTENT_RANGE = "content-range".freeze
 			
 			# Serve.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @parameter response_headers [Hash] The response headers.
 			# @returns [Protocol::HTTP::Response] The response.
 			def serve(request, response_headers)

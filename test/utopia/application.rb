@@ -10,7 +10,7 @@ require "utopia/application"
 describe Utopia::Application do
 	let(:http_request) {Protocol::HTTP::Request["GET", "/hello?name=sam"]}
 	
-	it "passes protocol requests through the application stack" do
+	it "passes request proxies through the application stack" do
 		application_request = nil
 		
 		application = subject.build do
@@ -23,7 +23,9 @@ describe Utopia::Application do
 		
 		response = application.call(http_request)
 		
-		expect(application_request).to be_equal(http_request)
+		expect(application_request).to be_a(Utopia::Request)
+		expect(application_request.delegate).to be_equal(http_request)
+		expect(application_request.path).to be == http_request.path
 		
 		expect(response).to be_a(Protocol::HTTP::Response)
 		expect(response.status).to be == 200
@@ -48,7 +50,7 @@ describe Utopia::Application do
 			response = application.call(http_request)
 			
 			expect(utopia_request).to be_a(Utopia::Request)
-			expect(utopia_request.http).to be_equal(http_request)
+			expect(utopia_request.delegate).to be_equal(http_request)
 			expect(utopia_request.query).to be == "name=sam"
 			expect(response.read).to be == "/hello"
 			expect(Utopia::Request.current).to be_equal(previous_request)

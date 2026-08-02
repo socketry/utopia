@@ -86,8 +86,7 @@ module Utopia
 			
 			# Invoke the controller layer for a given request. The request path may be rewritten.
 			def invoke_controllers(request)
-				utopia_request = Utopia::Request.current!
-				request_path = Path.from_string(utopia_request.path_info)
+				request_path = Path.from_string(request.path_info)
 				
 				# The request path must be absolute. We could handle this internally but it is probably better for this to be an error:
 				raise ArgumentError.new("Invalid request path #{request_path}") unless request_path.absolute?
@@ -116,14 +115,14 @@ module Utopia
 				end
 				
 				# Controllers can directly modify relative_path, which is copied into controller_path. The controllers may have rewriten the path so we update the path info:
-				utopia_request.path_info = controller_path.to_s
+				request.path_info = controller_path.to_s
 				
 				# No controller gave a useful result:
 				return nil
 			end
 			
 			# Make controller variables ambiently available while processing the request.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Protocol::HTTP::Response] The controller or downstream response.
 			def call(request)
 				previous_variables = Controller.current

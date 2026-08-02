@@ -13,8 +13,8 @@ require_relative "session"
 module Utopia
 	# Utopia's application-facing request wrapper.
 	#
-	# The underlying protocol request is available via {#http}; parsing and
-	# application conveniences live here rather than on protocol-http itself.
+	# Protocol request methods are delegated to the underlying request; parsing
+	# and application conveniences live here rather than on protocol-http itself.
 	class Request
 		CURRENT_KEY = :utopia_request
 		
@@ -38,11 +38,11 @@ module Utopia
 			self.new(Protocol::HTTP::Request[*arguments])
 		end
 		
-		# Initialize the request wrapper.
-		# @parameter http [Protocol::HTTP::Request] The underlying protocol request.
+		# Initialize the request proxy.
+		# @parameter delegate [Protocol::HTTP::Request] The underlying protocol request.
 		# @parameter request_path [String | Nil] The original path before internal rewrites.
-		def initialize(http, request_path: nil)
-			@http = http
+		def initialize(delegate, request_path: nil)
+			@delegate = delegate
 			@request_path = request_path
 			
 			@arguments = nil
@@ -50,70 +50,43 @@ module Utopia
 		end
 		
 		# The underlying protocol request.
-		attr :http
+		attr :delegate
+		
+		# Duplicate the underlying protocol request when duplicating this proxy.
+		# @parameter other [Request] The request being copied.
+		def initialize_copy(other)
+			super
+			
+			@delegate = other.delegate.dup
+			@arguments = nil
+			@cookies = nil
+		end
 		
 		# The HTTP request method.
 		def method
-			@http.method
+			@delegate.method
 		end
 		
 		# Assign the HTTP request method.
 		def method= value
-			@http.method = value
+			@delegate.method = value
 		end
 		
-		alias request_method method
+		# The HTTP request method.
+		def request_method
+			self.method
+		end
 		
-		# The request path including query string.
-		def path
-			@http.path
+		# Convert the underlying protocol request to a string.
+		def to_s
+			@delegate.to_s
 		end
 		
 		# Assign the request path including query string.
 		def path= value
-			@request_path ||= self.path_info if value != @http.path
-			@http.path = value
+			@request_path ||= self.path_info if value != @delegate.path
+			@delegate.path = value
 			@arguments = nil
-		end
-		
-		# The protocol request headers.
-		def headers
-			@http.headers
-		end
-		
-		# The protocol request body.
-		def body
-			@http.body
-		end
-		
-		# Assign the protocol request body.
-		def body= value
-			@http.body = value
-		end
-		
-		# The request scheme.
-		def scheme
-			@http.scheme
-		end
-		
-		# Assign the request scheme.
-		def scheme= value
-			@http.scheme = value
-		end
-		
-		# The request authority.
-		def authority
-			@http.authority
-		end
-		
-		# Assign the request authority.
-		def authority= value
-			@http.authority = value
-		end
-		
-		# The remote peer, if available.
-		def peer
-			@http.peer
 		end
 		
 		# Whether the request method is GET.
@@ -245,10 +218,10 @@ module Utopia
 		
 		# Build a derived request with updated protocol fields.
 		def with(method: self.method, path: self.path, path_info: nil)
-			http = @http.dup
-			http.method = method
+			delegate = @delegate.dup
+			delegate.method = method
 			
-			request = self.class.new(http, request_path: self.request_path)
+			request = self.class.new(delegate, request_path: self.request_path)
 			
 			if path_info
 				if query = self.query
@@ -294,6 +267,18 @@ module Utopia
 		end
 		
 		private
+		
+		def method_missing(name, ...)
+			if @delegate.respond_to?(name)
+				@delegate.public_send(name, ...)
+			else
+				super
+			end
+		end
+		
+		def respond_to_missing?(name, include_private = false)
+			@delegate.respond_to?(name) || super(name, include_private)
+		end
 		
 		def decode_arguments(query)
 			arguments = {}

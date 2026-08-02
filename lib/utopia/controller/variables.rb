@@ -98,7 +98,7 @@ module Utopia
 		end
 		
 		# Return the variables for the current request context.
-		# @parameter request [Protocol::HTTP::Request | nil] The ignored request argument.
+		# @parameter request [Utopia::Request | nil] The ignored request argument.
 		# @returns [Variables | nil] The current variables.
 		def self.[] request = nil
 			self.current

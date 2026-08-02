@@ -16,7 +16,7 @@ describe "Utopia application middleware" do
 		Protocol::HTTP::Request["GET", path, headers]
 	end
 	
-	it "passes protocol requests through first-party middleware" do
+	it "passes request proxies through first-party middleware" do
 		seen_request = nil
 		
 		application = Utopia::Application.build do
@@ -30,7 +30,8 @@ describe "Utopia application middleware" do
 		
 		response = application.call(request("/hello"))
 		
-		expect(seen_request).to be_a(Protocol::HTTP::Request)
+		expect(seen_request).to be_a(Utopia::Request)
+		expect(seen_request).to be(:respond_to?, :headers)
 		expect(response.status).to be == 200
 		expect(response.read).to be == "/hello"
 		

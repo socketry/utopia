@@ -182,24 +182,22 @@ module Utopia
 				previous_request = Request.current
 				Request.current = request
 				
-				return @app.call(request.http)
+				return @app.call(request)
 			ensure
 				Request.current = previous_request
 			end
 			
 			# Try the request's preferred locales until the application returns a successful response.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Protocol::HTTP::Response] The localized response with cache-variation headers.
 			def call(request)
-				utopia_request = Request.current!
-				
 				# Pass the request through if it shouldn't be localized:
-				return @app.call(request) unless localized?(utopia_request)
+				return @app.call(request) unless localized?(request)
 				
 				response = nil
 				
 				# We have a non-localized request, but there might be a localized resource. We return the best localization possible:
-				preferred_locales(utopia_request) do |localized_request, locale|
+				preferred_locales(request) do |localized_request, locale|
 					# puts "Trying locale: #{locale}: #{localized_request.path_info}..."
 					
 					previous_localization = Localization.current
@@ -220,7 +218,7 @@ module Utopia
 					response.close if response.respond_to?(:close)
 				end
 				
-				return vary(utopia_request, response)
+				return vary(request, response)
 			end
 		end
 	end

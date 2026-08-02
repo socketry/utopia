@@ -46,7 +46,7 @@ describe Utopia::Controller do
 		utopia_request = Utopia::Request["GET", path]
 		Utopia::Request.current = utopia_request
 		
-		return utopia_request.http, Utopia::Path[utopia_request.path_info]
+		return utopia_request, Utopia::Path[utopia_request.path_info]
 	end
 	
 	it "should match path prefix and extract parameters" do

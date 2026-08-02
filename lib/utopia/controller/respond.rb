@@ -30,7 +30,7 @@ module Utopia
 				
 				# Bind this controller's responder to a context and request.
 				# @parameter context [Controller::Base] The controller context.
-				# @parameter request [Protocol::HTTP::Request] The request.
+				# @parameter request [Utopia::Request] The request.
 				# @returns [Responder::Responds | nil] The bound responder, if one has been configured.
 				def respond_to(context, request)
 					@responder&.respond_to(context, request)
@@ -38,7 +38,7 @@ module Utopia
 				
 				# Build a response for the negotiated content type.
 				# @parameter context [Object] The context.
-				# @parameter request [Protocol::HTTP::Request] The request.
+				# @parameter request [Utopia::Request] The request.
 				# @parameter response [Protocol::HTTP::Response] The response.
 				# @returns [Protocol::HTTP::Response] The response.
 				def response_for(context, request, response)
@@ -47,14 +47,14 @@ module Utopia
 			end
 			
 			# Bind this controller's responder to the request.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Responder::Responds | nil] The bound responder, if one has been configured.
 			def respond_to(request)
 				self.class.respond_to(self, request)
 			end
 			
 			# Build a response for the negotiated content type.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @parameter original_response [Object] The original response.
 			# @returns [Protocol::HTTP::Response] The response.
 			def response_for(request, original_response)

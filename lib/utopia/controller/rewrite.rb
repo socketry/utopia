@@ -56,7 +56,7 @@ module Utopia
 				
 				# Apply this prefix rule and execute its callback when it matches.
 				# @parameter context [Object] The context.
-				# @parameter request [Protocol::HTTP::Request] The request.
+				# @parameter request [Utopia::Request] The request.
 				# @parameter path [Utopia::Path | String] The path.
 				# @returns [Path] The unmatched suffix, or the original path when the rule does not match.
 				def apply(context, request, path)
@@ -93,7 +93,7 @@ module Utopia
 				
 				# Apply every rewrite rule in order.
 				# @parameter context [Object] The context.
-				# @parameter request [Protocol::HTTP::Request] The request.
+				# @parameter request [Utopia::Request] The request.
 				# @parameter path [Utopia::Path | String] The path.
 				# @returns [Path] The rewritten path.
 				def apply(context, request, path)
@@ -106,7 +106,7 @@ module Utopia
 				
 				# Rewrite a path's components in place.
 				# @parameter context [Object] The context.
-				# @parameter request [Protocol::HTTP::Request] The request.
+				# @parameter request [Utopia::Request] The request.
 				# @parameter path [Utopia::Path | String] The path.
 				# @returns [Array(String)] The rewritten components.
 				def call(context, request, path)
@@ -124,7 +124,7 @@ module Utopia
 				
 				# Apply configured rewrite rules to the request path.
 				# @parameter controller [Utopia::Controller::Base] The controller instance.
-				# @parameter request [Protocol::HTTP::Request] The request.
+				# @parameter request [Utopia::Request] The request.
 				# @parameter path [Utopia::Path | String] The path.
 				# @returns [Array(String) | nil] The rewritten components, or `nil` when no rewriter is configured.
 				def rewrite_request(controller, request, path)

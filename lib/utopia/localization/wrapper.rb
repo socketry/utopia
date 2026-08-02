@@ -76,7 +76,7 @@ module Utopia
 		end
 		
 		# Return a localization wrapper for the current request context.
-		# @parameter request [Protocol::HTTP::Request | nil] The ignored request argument.
+		# @parameter request [Utopia::Request | nil] The ignored request argument.
 		# @returns [Wrapper] A localization wrapper for the current request.
 		def self.[] request = nil
 			self.wrapper

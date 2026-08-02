@@ -57,13 +57,13 @@ module Utopia
 			end
 			
 			# Report application exceptions by email before returning an error response.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Protocol::HTTP::Response] The application response or a generated error response.
 			def call(request)
 				begin
 					return @app.call(request)
 				rescue => exception
-					send_notification exception, Request.current!
+					send_notification exception, request
 					
 					raise
 				end

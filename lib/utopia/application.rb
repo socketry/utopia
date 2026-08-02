@@ -82,9 +82,10 @@ module Utopia
 		# @returns [Protocol::HTTP::Response] The normalized protocol response.
 		def call(http_request)
 			previous_request = Request.current
-			Request.current = Request.new(http_request)
+			request = Request.new(http_request)
+			Request.current = request
 			
-			return Response.wrap(super(http_request))
+			return Response.wrap(super(request))
 		ensure
 			Request.current = previous_request
 		end

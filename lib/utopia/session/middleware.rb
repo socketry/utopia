@@ -98,10 +98,10 @@ module Utopia
 			end
 			
 			# Make a lazily loaded session current while processing the request, then persist and commit it.
-			# @parameter request [Protocol::HTTP::Request] The request.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Protocol::HTTP::Response] The wrapped application response.
 			def call(request)
-				session_hash = prepare_session(Utopia::Request.current!)
+				session_hash = prepare_session(request)
 				previous_session = Session.current
 				
 				Session.current = session_hash
