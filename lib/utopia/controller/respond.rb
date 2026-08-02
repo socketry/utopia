@@ -26,8 +26,6 @@ module Utopia
 					@responder ||= Responder.new
 				end
 				
-				alias respond responds
-				
 				# Serialize a semantic value according to the request's accepted media types.
 				# @parameter context [Controller::Base] The controller context.
 				# @parameter request [Utopia::Request] The request.

@@ -5,7 +5,7 @@
 
 prepend Respond, Actions
 
-respond.with_passthrough
+responds.with_passthrough
 
 on 'events' do |request|
 	upgrade = Async::WebSocket::Adapters::HTTP.open(request) do |connection|

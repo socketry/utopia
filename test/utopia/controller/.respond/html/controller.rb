@@ -6,7 +6,7 @@
 prepend Respond, Actions
 
 # Respond with json:
-respond.with_json
+responds.with_json
 
 # This method should return HTML, even thought this controller responds with JSON.
 on 'hello-world' do
