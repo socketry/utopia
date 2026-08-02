@@ -12,8 +12,18 @@ describe Utopia::Request do
 	it "proxies a protocol HTTP request" do
 		expect(request.delegate).to be_a(Protocol::HTTP::Request)
 		expect(request.headers).to be_equal(request.delegate.headers)
+		expect(request.to_s).to be == request.delegate.to_s
 		expect(request).to be(:respond_to?, :headers)
 		expect(request).to be(:respond_to?, :scheme=)
+	end
+	
+	it "duplicates the underlying protocol request" do
+		copy = request.dup
+		copy.path = "/copy"
+		
+		expect(copy.delegate).not.to be_equal(request.delegate)
+		expect(copy.path).to be == "/copy"
+		expect(request.path).to be == "/search?q=utopia&tag=ruby&tag=async"
 	end
 	
 	it "does not proxy unknown methods" do
@@ -68,6 +78,9 @@ describe Utopia::Request do
 		expect(request.post?).to be == true
 		expect(request.get?).to be == false
 		expect(request.options?).to be == false
+		
+		request.method = "GET"
+		expect(request.get?).to be == true
 	end
 	
 	it "provides decoded query arguments" do
