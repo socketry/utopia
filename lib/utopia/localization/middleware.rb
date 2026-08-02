@@ -14,13 +14,11 @@ module Utopia
 		class Middleware
 			RESOURCE_NOT_FOUND = Response[400, {}, []].freeze
 			
-			HTTP_ACCEPT_LANGUAGE = "HTTP_ACCEPT_LANGUAGE".freeze
-			
 			# @param locales [Array<String>] An array of all supported locales.
 			# @param default_locale [String] The default locale if none is provided.
 			# @param default_locales [String] The locales to try in order if none is provided.
-			# @param hosts [Hash<Pattern, String>] Specify a mapping of the HTTP_HOST header to a given locale.
-			# @param ignore [Array<Pattern>] A list of patterns matched against PATH_INFO which will not be localized.
+			# @param hosts [Hash<Pattern, String>] Specify a mapping of request hosts to locales.
+			# @param ignore [Array<Pattern>] A list of patterns matched against request paths which will not be localized.
 			def initialize(app, locales:, default_locale: nil, default_locales: nil, hosts: {}, ignore: [])
 				@app = app
 				

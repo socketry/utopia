@@ -15,7 +15,7 @@ require_relative "handler"
 
 module Utopia
 	module Exceptions
-		# A middleware which catches all exceptions raised from the app it wraps and sends a useful email with the exception, stacktrace, and contents of the environment.
+		# A middleware which catches application exceptions and sends an email containing the exception, backtrace, request, and application state.
 		class Mailer
 			# A basic local non-authenticated SMTP server.
 			LOCAL_SMTP = [:smtp, {
@@ -71,26 +71,19 @@ module Utopia
 			
 			private
 			
-			REQUEST_KEYS = [
+			REQUEST_ATTRIBUTES = [
+				:method,
+				:scheme,
+				:authority,
+				:protocol,
+				:version,
 				:ip,
 				:referrer,
 				:path,
+				:request_path,
+				:path_info,
+				:query,
 				:user_agent,
-			]
-			
-			ENV_KEYS = [
-				"PATH_INFO",
-				"REQUEST_METHOD",
-				"REQUEST_PATH",
-				"REQUEST_URI",
-				"SCRIPT_NAME",
-				"QUERY_STRING",
-				"SERVER_PROTOCOL",
-				"SERVER_NAME",
-				"SERVER_PORT",
-				"REMOTE_ADDR",
-				"CONTENT_TYPE",
-				"CONTENT_LENGTH",
 			]
 			
 			def generate_backtrace(io, exception, prefix: "Exception")
@@ -117,20 +110,13 @@ module Utopia
 				
 				io.puts
 				
-				REQUEST_KEYS.each do |key|
+				REQUEST_ATTRIBUTES.each do |key|
 					value = request.send(key)
 					io.puts "request.#{key}: #{value.inspect}"
 				end
 				
 				request.arguments.each do |key, value|
 					io.puts "request.arguments.#{key}: #{value.inspect}"
-				end
-				
-				io.puts
-				
-				ENV_KEYS.each do |key|
-					value = request[key]
-					io.puts "request[#{key.inspect}]: #{value.inspect}"
 				end
 				
 				io.puts

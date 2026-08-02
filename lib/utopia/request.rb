@@ -140,8 +140,6 @@ module Utopia
 			@arguments ||= decode_arguments(self.query)
 		end
 		
-		alias params arguments
-		
 		# Decoded request cookies.
 		def cookies
 			@cookies ||= parse_cookies(self.headers["cookie"])
@@ -219,36 +217,6 @@ module Utopia
 			end
 			
 			return request
-		end
-		
-		# Fetch a Rack-style compatibility value or query argument.
-		def [] key
-			case key
-			when "REQUEST_METHOD"
-				self.method
-			when "PATH_INFO", "REQUEST_PATH"
-				self.path_info
-			when "QUERY_STRING"
-				self.query.to_s
-			when "HTTP_HOST"
-				self.host
-			when "HTTP_USER_AGENT"
-				self.user_agent
-			when "HTTP_ACCEPT_LANGUAGE"
-				self.headers["accept-language"]
-			when "HTTP_IF_MODIFIED_SINCE"
-				self.headers["if-modified-since"]
-			when "HTTP_IF_NONE_MATCH"
-				self.headers["if-none-match"]
-			when "HTTP_RANGE"
-				self.headers["range"]
-			else
-				if key.is_a?(String) && key.start_with?("HTTP_")
-					self.headers[key[5..].downcase.tr("_", "-")]
-				else
-					self.arguments[key.to_s]
-				end
-			end
 		end
 		
 		private

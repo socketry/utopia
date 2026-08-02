@@ -8,7 +8,7 @@ Utopia is a website generation framework which provides a robust set of tools to
 
   - Designed for both content-based websites and applications. Does not depend on a database.
   - Supports flexible content localization based on industry recommendations.
-  - Rack middleware compatible with all major Ruby application servers. Small memory footprint by default.
+  - Built directly on `protocol-http` with a small application and middleware interface.
   - Low latency and high throughput. Capable of 10,000+ requests/second out of the box.
 
 ## Usage
@@ -17,7 +17,7 @@ Please see the [project documentation](https://socketry.github.io/utopia/) for m
 
   - [Getting Started](https://socketry.github.io/utopia/guides/getting-started/index) - This guide explains how to set up a `utopia` website for local development and deployment.
 
-  - [Middleware](https://socketry.github.io/utopia/guides/middleware/index) - This guide gives an overview of the different Rack middleware used by Utopia.
+  - [Middleware](https://socketry.github.io/utopia/guides/middleware/index) - This guide gives an overview of Utopia application middleware.
 
   - [Server Setup](https://socketry.github.io/utopia/guides/server-setup/index) - This guide explains how to deploy a `utopia` web application.
 
@@ -60,7 +60,6 @@ Please see the [project releases](https://socketry.github.io/utopia/releases/ind
   - [HTTP::Accept](https://github.com/ioquatix/http-accept) — RFC compliant header parser.
   - [Samovar](https://github.com/ioquatix/samovar) — Command line parser used by Utopia.
   - [Mapping](https://github.com/ioquatix/mapping) — Provide structured conversions for web interfaces.
-  - [Rack::Test::Body](https://github.com/ioquatix/rack-test-body) — Provide convenient helpers for testing web interfaces.
 
 ### Examples
 

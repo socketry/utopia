@@ -90,7 +90,7 @@ def passthrough(request, path)
 	
 	# Succeed the request and immediately respond.
 	# def succeed!(status: 200, headers: {}, **options)
-	# options may include content: string or body: Enumerable (as per Rack specifications
+	# options may include content: String or body: Enumerable.
 	
 	suceed!
 end
@@ -108,7 +108,7 @@ end
 
 on "edit" do |request, path|
 	if request.post?
-		@user.update_attributes(request[:user])
+		@user.update_attributes(request.arguments["user"])
 	end
 end
 

@@ -401,19 +401,19 @@ Useful preparatory work before the v3 transport change:
 
 ## Remaining Cleanup.
 
-Before landing the v3 application boundary:
+Completed before landing the v3 application boundary:
 
-- Remove the `Utopia::Request#params` alias. `arguments` is the intentional
+- [x] Remove the `Utopia::Request#params` alias. `arguments` is the intentional
   application-facing name.
-- Remove the Rack-style `Utopia::Request#[]` mappings for `REQUEST_METHOD`,
+- [x] Remove the Rack-style `Utopia::Request#[]` mappings for `REQUEST_METHOD`,
   `PATH_INFO`, `QUERY_STRING`, `HTTP_*`, and related environment keys. Callers
   should use request methods, headers, and `arguments` directly.
-- Update the exception mailer to collect named request methods and headers rather
+- [x] Update the exception mailer to collect named request methods and headers rather
   than iterating Rack environment key names.
-- Update README and guide text that still describes Utopia middleware or response
+- [x] Update README and guide text that still describes Utopia middleware or response
   bodies in terms of Rack.
-- Keep the protocol-facing `Utopia::Application#call` boundary documented as
+- [x] Keep the protocol-facing `Utopia::Application#call` boundary documented as
   accepting `Protocol::HTTP::Request`; document internal middleware as accepting
   `Utopia::Request`.
-- Retain focused proxy tests for delegation, introspection, unknown methods,
+- [x] Retain focused proxy tests for delegation, introspection, unknown methods,
   setters, duplication, and the known `method`/`to_s` Ruby collisions.

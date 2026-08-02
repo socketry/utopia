@@ -88,9 +88,11 @@ describe Utopia::Request do
 			"q" => "utopia",
 			"tag" => ["ruby", "async"]
 		}
-		
-		expect(request["q"]).to be == "utopia"
-		expect(request[:q]).to be == "utopia"
+	end
+	
+	it "does not expose ambiguous Rack request accessors" do
+		expect(request).not.to be(:respond_to?, :params)
+		expect(request).not.to be(:respond_to?, :[])
 	end
 	
 	it "provides decoded cookies" do
