@@ -13,17 +13,31 @@ module Utopia
 		XNODE_EXTENSION = ".xnode"
 		INDEX = "index"
 		
+		# A collection of links resolved from the filesystem content hierarchy.
 		class Links
+			# Build links for the given root and path.
+			# @parameter root [String] The root directory.
+			# @parameter path [Utopia::Path | String] The path.
+			# @parameter locale [String] The locale.
+			# @returns [Link | nil] The resolved link.
 			def self.for(root, path, locale = nil)
 				warn "Using uncached links metadata!"
 				self.new(root).for(path, locale)
 			end
 			
+			# Build an index of links for the given path.
+			# @parameter root [String] The root directory.
+			# @parameter path [Utopia::Path | String] The path.
+			# @parameter options [Hash] The options.
+			# @returns [Array(Link)] The indexed links.
 			def self.index(root, path, **options)
 				warn "Using uncached links metadata!"
 				self.new(root).index(path, **options)
 			end
 			
+			# Initialize cached link resolution beneath a content root.
+			# @parameter root [String] The root directory.
+			# @parameter extension [String] The file extension.
 			def initialize(root, extension: XNODE_EXTENSION)
 				@root = root
 				
@@ -97,12 +111,18 @@ module Utopia
 			
 			attr :root
 			
+			# Load and cache metadata for a content directory.
+			# @parameter path [Utopia::Path | String] The path.
+			# @returns [Hash] The content metadata.
 			def metadata(path)
 				@metadata_cache.fetch_or_store(path.to_s) do
 					load_metadata(path)
 				end
 			end
 			
+			# Load and cache the link resolver for a content directory.
+			# @parameter path [Utopia::Path | String] The path.
+			# @returns [Resolver] The link resolver.
 			def links(path)
 				@links_cache.fetch_or_store(path.to_s) do
 					load_links(path)
@@ -136,6 +156,9 @@ module Utopia
 			
 			# Represents a list of {Link} instances relating to the structure of the content. They are formed from the `links.yaml` file and the actual directory structure on disk.
 			class Resolver
+				# Resolve and order links from a content directory and its metadata.
+				# @parameter links [Object] The links.
+				# @parameter top [Object] The top.
 				def initialize(links, top = Path.root)
 					raise ArgumentError.new("top path must be absolute") unless top.absolute?
 					
@@ -165,10 +188,15 @@ module Utopia
 				attr :ordered
 				attr :named
 				
+				# Select index-document links.
+				# @returns [Array(Link)] The index-document links.
 				def indices
 					return @ordered.select{|link| link.index?}
 				end
 				
+				# Enumerate the contained values.
+				# @parameter locale [String] The locale.
+				# @returns [Enumerator] An enumerator over the resulting values.
 				def each(locale)
 					return to_enum(:each, locale) unless block_given?
 					
@@ -177,6 +205,10 @@ module Utopia
 					end
 				end
 				
+				# Lookup.
+				# @parameter name [String] The name.
+				# @parameter locale [String] The locale.
+				# @returns [Link | nil] The exact locale match, or the unlocalized link as a fallback.
 				def lookup(name, locale = nil)
 					# This allows generic links to serve any locale requested.
 					if links = @named[name]

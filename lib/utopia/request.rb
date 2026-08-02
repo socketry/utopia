@@ -219,6 +219,7 @@ module Utopia
 		
 		private
 		
+		# These inherited methods conflict with the protocol request interface, so remove them to allow delegation.
 		undef_method :method, :to_s
 		
 		def method_missing(name, ...)

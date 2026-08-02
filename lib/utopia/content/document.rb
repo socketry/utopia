@@ -13,6 +13,8 @@ module Utopia
 	module Content
 		# This error is raised if a tag doesn't match up when parsing.
 		class UnbalancedTagError < StandardError
+			# Initialize an error for a mismatched rendering tag.
+			# @parameter tag [Object] The tag.
 			def initialize(tag)
 				@tag = tag
 				
@@ -24,10 +26,18 @@ module Utopia
 		
 		# A single request through content middleware. We use a struct to hide instance varibles since we instance_exec within this context.
 		class Document < Response
+			# Render a content node into a new document.
+			# @parameter node [Utopia::Content::Node] The content node.
+			# @parameter request [Utopia::Request] The application request.
+			# @parameter attributes [Hash] The attributes.
+			# @returns [Document] The rendered document.
 			def self.render(node, request, attributes)
 				self.new(request, attributes).render!(node, attributes)
 			end
 			
+			# Initialize a document for a protocol request.
+			# @parameter request [Utopia::Request] The application request.
+			# @parameter attributes [Hash] The attributes.
 			def initialize(request, attributes = {})
 				@request = request
 				
@@ -61,14 +71,25 @@ module Utopia
 				Path[relative_to].dirname.shortest_path(request_path)
 			end
 			
+			# Fetch a document-global attribute.
+			# @parameter key [String | Symbol] The lookup key.
+			# @returns [Object | nil] The document attribute.
 			def [] key
 				@attributes[key]
 			end
 			
+			# Assign a document-global attribute.
+			# @parameter key [String | Symbol] The lookup key.
+			# @parameter value [Object] The value to assign.
+			# @returns [Object] The assigned value.
 			def []= key, value
 				@attributes[key] = value
 			end
 			
+			# Render.
+			# @parameter node [Utopia::Content::Node] The content node.
+			# @parameter attributes [Hash] The attributes.
+			# @returns [self] This object.
 			def render!(node, attributes)
 				@body << render_node(node, attributes)
 				
@@ -80,10 +101,15 @@ module Utopia
 				@controller ||= Utopia::Controller[request]
 			end
 			
+			# Return a localization wrapper for the current request.
+			# @returns [Localization::Wrapper] The localization wrapper.
 			def localization
 				@localization ||= Utopia::Localization[request]
 			end
 			
+			# Parse markup into this document.
+			# @parameter markup [String] The markup.
+			# @returns [nil] Parsing completes through document callbacks.
 			def parse_markup(markup)
 				MarkupParser.parse(markup, self)
 			end
@@ -107,6 +133,11 @@ module Utopia
 			# have appeared when evaluating nodes.
 			attr :end_tags
 			
+			# Render a complete or block-delimited tag.
+			# @parameter name [String] The name.
+			# @parameter attributes [Hash] The attributes.
+			# @yields {|node| ...} The node selected to render a block-delimited tag.
+			# @returns [Object | nil] The completed tag result.
 			def tag(name, attributes = {})
 				# If we provide a block which can give inner data, we are not self-closing.
 				tag = Tag.new(name, !block_given?, attributes)
@@ -120,6 +151,10 @@ module Utopia
 				end
 			end
 			
+			# Render a complete tag through a matching content node or the current builder.
+			# @parameter tag [XRB::Tag] The tag.
+			# @parameter node [Utopia::Content::Node] The content node.
+			# @returns [Object] The builder's completion result.
 			def tag_complete(tag, node = nil)
 				node ||= lookup_tag(tag)
 				
@@ -131,6 +166,10 @@ module Utopia
 				end
 			end
 			
+			# Begin a tag through a matching content node or the current builder.
+			# @parameter tag [XRB::Tag] The tag.
+			# @parameter node [Utopia::Content::Node] The content node.
+			# @returns [Node | nil] The content node selected for the tag.
 			def tag_begin(tag, node = nil)
 				node ||= lookup_tag(tag)
 				
@@ -149,16 +188,25 @@ module Utopia
 				return nil
 			end
 			
+			# Append raw content to the current builder.
+			# @parameter string [String] The string.
+			# @returns [String] The current output buffer.
 			def write(string)
 				@current.write(string)
 			end
 			
 			alias cdata write
 			
+			# Process text content.
+			# @parameter string [String] The string.
+			# @returns [Object | nil] The builder's text result.
 			def text(string)
 				@current.text(string)
 			end
 			
+			# Complete the current content node or close a nested markup tag.
+			# @parameter tag [XRB::Tag | nil] The nested tag to close.
+			# @returns [String | nil] The completed node output, or `nil` after closing a nested tag.
 			def tag_end(tag = nil)
 				# Determine if the current state contains tags that need to be completed, or if the state itself is finished.
 				if @current.empty?
@@ -183,6 +231,10 @@ module Utopia
 				return nil
 			end
 			
+			# Render a content node within the current builder state.
+			# @parameter node [Utopia::Content::Node] The content node.
+			# @parameter attributes [Hash] The attributes.
+			# @returns [String] The rendered node output.
 			def render_node(node, attributes = {})
 				@current = Builder.new(@current, nil, node, attributes, indent: false)
 				
@@ -226,6 +278,8 @@ module Utopia
 				@end_tags.last.content
 			end
 			
+			# Return the enclosing rendering state.
+			# @returns [Builder | nil] The parent rendering state.
 			def parent
 				@end_tags[-2]
 			end

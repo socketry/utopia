@@ -7,6 +7,8 @@ require_relative "localization/middleware"
 
 module Utopia
 	module Localization
+		# Construct localization middleware.
+		# @returns [Localization::Middleware] The localization middleware.
 		def self.new(...)
 			Middleware.new(...)
 		end

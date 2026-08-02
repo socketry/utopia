@@ -76,6 +76,11 @@ module Utopia
 		# 		end
 		# 	end
 		class Builder
+			# Configure an import map using a scoped builder.
+			# @parameter import_map [Utopia::ImportMap] The import map to render.
+			# @parameter options [Hash] The options.
+			# @yields {|builder| ...} The builder, when the block accepts an argument; otherwise the block is evaluated in the builder's context.
+			# @returns [Builder] The configured builder.
 			def self.build(import_map, **options, &block)
 				builder = self.new(import_map, **options)
 				
@@ -88,6 +93,9 @@ module Utopia
 				return builder
 			end
 			
+			# Initialize a scoped builder for an import map.
+			# @parameter import_map [Utopia::ImportMap] The import map to render.
+			# @parameter base [Object] The base.
 			def initialize(import_map, base: nil)
 				@import_map = import_map
 				@base = Protocol::URL[base]

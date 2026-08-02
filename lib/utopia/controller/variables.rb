@@ -11,14 +11,20 @@ module Utopia
 		
 		# Provides a stack-based instance variable lookup mechanism. It can flatten a stack of controllers into a single hash.
 		class Variables
+			# Initialize an empty controller stack.
 			def initialize
 				@controllers = []
 			end
 			
+			# Return the innermost controller.
+			# @returns [Controller::Base | nil] The current controller.
 			def top
 				@controllers.last
 			end
 			
+			# Push a controller after copying variables from the previous controller.
+			# @parameter controller [Utopia::Controller::Base] The controller instance.
+			# @returns [self] This variables stack.
 			def << controller
 				if top = self.top
 					# This ensures that most variables will be at the top and controllers can naturally interactive with instance variables:
@@ -47,6 +53,8 @@ module Utopia
 				end
 			end
 			
+			# Convert the current controller's instance variables to attributes.
+			# @returns [Hash(Symbol, Object)] The current controller attributes.
 			def to_hash
 				attributes = {}
 				
@@ -61,23 +69,37 @@ module Utopia
 				return attributes
 			end
 			
+			# Fetch a variable from the innermost controller.
+			# @parameter key [String | Symbol] The lookup key.
+			# @returns [Object | nil] The variable value, or `nil` when it is undefined.
 			def [] key
 				fetch("@#{key}".to_sym, nil)
 			end
 		end
 		
+		# Return the variables associated with the current fiber context.
+		# @returns [Variables | nil] The current variables.
 		def self.current
 			Fiber[CURRENT_KEY]
 		end
 		
+		# Assign the current value.
+		# @parameter variables [Variables | nil] The variables to associate with the current fiber context.
+		# @returns [Variables | nil] The assigned variables.
 		def self.current= variables
 			Fiber[CURRENT_KEY] = variables
 		end
 		
+		# Return the variables associated with the current fiber context.
+		# @returns [Variables] The current variables.
+		# @raises [RuntimeError] If no variables are associated with the current context.
 		def self.current!
 			self.current or raise RuntimeError, "No current Utopia controller variables!"
 		end
 		
+		# Return the variables for the current request context.
+		# @parameter request [Utopia::Request | nil] The ignored request argument.
+		# @returns [Variables | nil] The current variables.
 		def self.[] request = nil
 			self.current
 		end

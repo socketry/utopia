@@ -18,6 +18,7 @@ require "concurrent/map"
 module Utopia
 	# A middleware which loads controller classes and invokes functionality based on the requested path.
 	module Controller
+		# Dispatches requests to filesystem-backed controller classes.
 		class Middleware
 			# The controller filename.
 			CONTROLLER_RB = "controller.rb".freeze
@@ -35,6 +36,8 @@ module Utopia
 			
 			attr :app
 			
+			# Freeze this object and its internal state.
+			# @returns [self] This object.
 			def freeze
 				return self if frozen?
 				
@@ -118,6 +121,9 @@ module Utopia
 				return nil
 			end
 			
+			# Make controller variables ambiently available while processing the request.
+			# @parameter request [Utopia::Request] The request.
+			# @returns [Protocol::HTTP::Response] The controller or downstream response.
 			def call(request)
 				previous_variables = Controller.current
 				
