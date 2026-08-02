@@ -63,23 +63,8 @@ module Utopia
 		end
 		
 		# The HTTP request method.
-		def method
-			@delegate.method
-		end
-		
-		# Assign the HTTP request method.
-		def method= value
-			@delegate.method = value
-		end
-		
-		# The HTTP request method.
 		def request_method
 			self.method
-		end
-		
-		# Convert the underlying protocol request to a string.
-		def to_s
-			@delegate.to_s
 		end
 		
 		# Assign the request path including query string.
@@ -267,6 +252,8 @@ module Utopia
 		end
 		
 		private
+		
+		undef_method :method, :to_s
 		
 		def method_missing(name, ...)
 			if @delegate.respond_to?(name)
