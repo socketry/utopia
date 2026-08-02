@@ -8,7 +8,6 @@ require "mail"
 
 require_relative "../middleware"
 require_relative "../request"
-require_relative "../session"
 require_relative "../controller/variables"
 require_relative "../localization"
 require_relative "handler"
@@ -125,7 +124,7 @@ module Utopia
 					io.puts "header[#{key.inspect}]: #{value.inspect}"
 				end
 				
-				self.current_state.each do |key, value|
+				self.current_state(request).each do |key, value|
 					io.puts "state.#{key}: #{value.inspect}"
 				end
 				
@@ -159,7 +158,7 @@ module Utopia
 				end
 				
 				if @dump_environment
-					mail.attachments["state.yaml"] = YAML.dump(self.current_state)
+					mail.attachments["state.yaml"] = YAML.dump(self.current_state(request))
 				end
 				
 				return mail
@@ -176,9 +175,9 @@ module Utopia
 				$stderr.puts mail_exception.backtrace
 			end
 			
-			def current_state
+			def current_state(request)
 				{
-					session: Session.current,
+					session: request.session,
 					variables: Controller.current,
 					localization: Localization.current,
 					current_locale: Localization.current_locale,

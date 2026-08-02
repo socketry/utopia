@@ -12,19 +12,17 @@ describe Utopia::Session do
 	
 	let(:app) do
 		Utopia::Application.build(lambda{|request|
-			utopia_request = Utopia::Request.current!
-			
-			case utopia_request.path_info
+			case request.path_info
 			when "/login"
-				Utopia::Session["login"] = "true"
+				request.session["login"] = "true"
 				
 				Utopia::Response[200, {}, []]
 			when "/session-set"
-				Utopia::Session[utopia_request.arguments["key"].to_sym] = utopia_request.arguments["value"]
+				request.session[request.arguments["key"].to_sym] = request.arguments["value"]
 				
 				Utopia::Response[200, {}, []]
 			when "/session-get"
-				Utopia::Response[200, {}, [Utopia::Session[utopia_request.arguments["key"].to_sym]]]
+				Utopia::Response[200, {}, [request.session[request.arguments["key"].to_sym]]]
 			else
 				Utopia::Response[404, {}, []]
 			end
@@ -82,11 +80,6 @@ describe Utopia::Session do
 		expect(last_response.headers).to have_keys("set-cookie")
 	end
 	
-	it "raises when the session is required but unavailable" do
-		expect do
-			Utopia::Session.current!
-		end.to raise_exception(Utopia::Session::MissingError, message: be =~ /No current Utopia session/)
-	end
 end
 
 describe Utopia::Session do
@@ -94,15 +87,13 @@ describe Utopia::Session do
 	
 	let(:app) do
 		Utopia::Application.build(lambda{|request|
-			utopia_request = Utopia::Request.current!
-			
-			case utopia_request.path_info
+			case request.path_info
 			when "/session-set"
-				Utopia::Session[utopia_request.arguments["key"].to_sym] = utopia_request.arguments["value"]
+				request.session[request.arguments["key"].to_sym] = request.arguments["value"]
 				
 				Utopia::Response[200, {}, []]
 			when "/session-get"
-				Utopia::Response[200, {}, [Utopia::Session[utopia_request.arguments["key"].to_sym]]]
+				Utopia::Response[200, {}, [request.session[request.arguments["key"].to_sym]]]
 			else
 				Utopia::Response[404, {}, []]
 			end

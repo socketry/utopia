@@ -58,11 +58,14 @@ describe "Utopia application middleware" do
 	end
 	
 	it "provides request-local session state" do
+		session = nil
+		
 		application = Utopia::Application.build do
 			use Utopia::Session, session_name: Utopia::Session::Middleware::SESSION_KEY, secret: "test-secret"
 			
 			run lambda{|request|
-				Utopia::Session[:value] = "Hello"
+				session = request.session
+				session[:value] = "Hello"
 				Utopia::Response.text("OK")
 			}
 		end
@@ -71,5 +74,6 @@ describe "Utopia application middleware" do
 		
 		expect(response.status).to be == 200
 		expect(response.headers["set-cookie"].any?{|value| value.start_with?("utopia.session.encrypted=")}).to be == true
+		expect(session).to be(:committed?)
 	end
 end

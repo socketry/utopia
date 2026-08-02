@@ -8,8 +8,6 @@ require "uri"
 
 require "protocol/http/request"
 
-require_relative "session"
-
 module Utopia
 	# Utopia's application-facing request wrapper.
 	#
@@ -44,6 +42,7 @@ module Utopia
 		def initialize(delegate, request_path: nil)
 			@delegate = delegate
 			@request_path = request_path
+			@session = nil
 			
 			@arguments = nil
 			@cookies = nil
@@ -178,10 +177,8 @@ module Utopia
 		
 		alias referer referrer
 		
-		# The current Utopia session, if installed.
-		def session
-			Utopia::Session.current
-		end
+		# The session associated with this request, if installed.
+		attr_accessor :session
 		
 		# The remote peer IP address, if available.
 		def ip
@@ -205,6 +202,7 @@ module Utopia
 			delegate.method = method
 			
 			request = self.class.new(delegate, request_path: self.request_path)
+			request.session = @session
 			
 			if path_info
 				if query = self.query

@@ -99,6 +99,10 @@ describe Utopia::Request do
 		expect(request.cookies).to be == {"a" => "1", "b" => "2"}
 	end
 	
+	it "has no session by default" do
+		expect(request.session).to be_nil
+	end
+	
 	it "provides common request conveniences" do
 		request.scheme = "https"
 		request.authority = "example.com"
@@ -114,6 +118,9 @@ describe Utopia::Request do
 	end
 	
 	it "builds derived requests" do
+		session = Object.new
+		request.session = session
+		
 		derived = request.with(method: "GET", path_info: "/find")
 		
 		expect(derived).not.to be_equal(request)
@@ -121,6 +128,7 @@ describe Utopia::Request do
 		expect(derived.path).to be == "/find?q=utopia&tag=ruby&tag=async"
 		expect(derived.request_path).to be == "/search"
 		expect(derived.delegate).not.to be_equal(request.delegate)
+		expect(derived.session).to be_equal(session)
 	end
 	
 	it "preserves the original request path across multiple derived requests" do

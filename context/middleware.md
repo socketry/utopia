@@ -155,3 +155,9 @@ use Utopia::Session,
 ```
 
 All session data is stored on the client, but it's encrypted with a salt and the secret key. It is impossible for the client to decrypt the data without the secret stored on the server.
+
+When the middleware is installed, the session is available on the request:
+
+```ruby
+request.session[:user_id] = user.id
+```

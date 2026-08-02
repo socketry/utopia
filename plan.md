@@ -194,8 +194,8 @@ Guidelines:
   which specifically require the concrete protocol object.
 - Do not expose generic ambient `Utopia.request` style state; use
   `Utopia::Request.current` for request-adjacent ambient access.
-- Use Utopia-owned fiber state for optional adjacent application state rather
-  than Rack-style `env` or a Utopia request attribute hash.
+- Store request-scoped state such as sessions on `Utopia::Request` rather than
+  in Rack-style `env` or generic ambient state.
 - Derived requests should duplicate the protocol delegate, preserve the original
   request path, be passed explicitly downstream, and temporarily replace
   `Utopia::Request.current` for the derived invocation.
@@ -212,10 +212,8 @@ utopia_request.arguments.multipart
 Framework state should be exposed through named Utopia APIs:
 
 ```text
-Utopia::Session.current
-Utopia::Session.current!
-Utopia::Session[:user_id]
-Utopia::Session[:user_id] = 10
+request.session[:user_id]
+request.session[:user_id] = 10
 Utopia::Request.current
 Utopia::Controller.current
 Utopia::Controller.current!
@@ -225,25 +223,22 @@ Utopia::Localization.current
 The implementation can store this directly in fiber storage:
 
 ```text
-Fiber[:utopia_session]
 Fiber[:utopia_request]
 Fiber[:utopia_variables]
 Fiber[:utopia_current_locale]
 ```
 
-Each optional subsystem should own its own `current`/`current=` API for tests and
+Ambient subsystems should own their own `current`/`current=` API for tests and
 middleware setup. Since each request is handled by an independent fiber, a
-separate root context object is not needed.
-
-Sessions are optional. If session middleware is not installed,
-`Utopia::Session.current` should return `nil` and `Utopia::Session[...]` should
-raise a clear missing-session error.
+separate root context object is not needed. Sessions are not ambient: session
+middleware attaches the session directly to `Utopia::Request`, where it remains
+`nil` when the middleware is not installed.
 
 Session mutation should be owned by the fiber that constructed the session and
-should be rejected after commit. Nested fibers may read the inherited session, but
-writes from non-owner fibers should fail. This makes session races visible and
-matches the fact that only the request-owning fiber can reliably commit the
-session back to the response.
+should be rejected after commit. Other fibers may receive the request and read its
+session, but writes from non-owner fibers should fail. This makes session races
+visible and matches the fact that only the request-owning fiber can reliably
+commit the session back to the response.
 
 ## Response.
 
@@ -281,9 +276,9 @@ routing, static transport optimizations, and protocol upgrades can use the
 delegated protocol interface on the request argument. Framework-specific
 semantics such as path parsing, localization, content negotiation, controllers,
 CSRF, and authentication can use the richer `Utopia::Request` interface.
-Sessions, controller variables, and other optional adjacent state remain
-available through their named ambient APIs. Utopia owns the compatibility of its
-middleware APIs and request-local state helpers.
+Sessions are available through the request argument. Controller variables and
+other optional adjacent state remain available through their named ambient APIs.
+Utopia owns the compatibility of its middleware APIs and request-local state helpers.
 
 The regular Utopia DSL should compose application middleware:
 
