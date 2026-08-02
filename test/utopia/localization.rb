@@ -78,4 +78,32 @@ describe Utopia::Localization do
 		get "/current_locale", {"host" => "foobar.de"}
 		expect(body).to be == "de"
 	end
+	
+	it "preserves the final failure response" do
+		closed = false
+		first_body = Protocol::HTTP::Body::Buffered.wrap(["First failure"])
+		first_body.define_singleton_method(:close) do |error = nil|
+			closed = true
+			super(error)
+		end
+		
+		calls = 0
+		application = Utopia::Application.build(lambda do |_request|
+			calls += 1
+			
+			if calls == 1
+				Utopia::Response[404, {}, first_body]
+			else
+				Utopia::Response.text("Final failure", 404)
+			end
+		end) do
+			use Utopia::Localization, locales: ["en"], default_locale: "en"
+		end
+		
+		response = application.call(Protocol::HTTP::Request["GET", "/missing"])
+		
+		expect(closed).to be == true
+		expect(response.status).to be == 404
+		expect(response.read).to be == "Final failure"
+	end
 end

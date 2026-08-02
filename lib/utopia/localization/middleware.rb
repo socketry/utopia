@@ -186,6 +186,7 @@ module Utopia
 				# We have a non-localized request, but there might be a localized resource. We return the best localization possible:
 				preferred_locales(request) do |candidate, locale|
 					# puts "Trying locale: #{locale}: #{localized_request.path_info}..."
+					response&.close
 					
 					localized_request = candidate.with
 					localized_request.variables = nil
@@ -195,8 +196,6 @@ module Utopia
 					response = Response.wrap(@app.call(localized_request))
 					
 					break unless response.status >= 400
-					
-					response.close if response.respond_to?(:close)
 				end
 				
 				return vary(localized_request, response)
