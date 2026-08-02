@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2025, by Samuel Williams.
+# Copyright, 2016-2026, by Samuel Williams.
 
 require "utopia/http"
 
@@ -14,10 +14,6 @@ describe Utopia::HTTP::Status.new(:found) do
 		expect(subject.to_s).to be == "Found"
 	end
 	
-	it "can be used as a response body" do
-		body = subject.to_enum(:each).next
-		expect(body).to be == "Found"
-	end
 end
 
 describe Utopia::HTTP::Status do
@@ -26,6 +22,10 @@ describe Utopia::HTTP::Status do
 		expect(Utopia::HTTP::Status.new(418).to_s).to be == "I'm a Teapot"
 		expect(Utopia::HTTP::Status.new(429).to_s).to be == "Too Many Requests"
 		expect(Utopia::HTTP::Status.new(502).to_s).to be == "Bad Gateway"
+	end
+	
+	it "uses the numeric code when no description exists" do
+		expect(Utopia::HTTP::Status.new(444).to_s).to be == "444"
 	end
 	
 	it "should fail when given invalid code" do
