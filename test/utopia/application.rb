@@ -74,7 +74,7 @@ describe Utopia::Application do
 			Protocol::HTTP::Body::Buffered.wrap("value=large")
 		]
 		
-		expect{application.call(request)}.to raise_exception(RangeError, message: be =~ /form_size exceeded/)
+		expect{application.call(request)}.to raise_exception(RangeError, message: be =~ /total_size exceeded/)
 	end
 	
 	it "loads a top-level application constant" do

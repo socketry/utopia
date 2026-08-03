@@ -4,10 +4,11 @@
 # Copyright, 2026, by Samuel Williams.
 
 require "tempfile"
+require "stringio"
 
 require "protocol/http/request"
 require "protocol/multipart/form_data"
-require "protocol/url/encoding"
+require "protocol/url/form_data/parser"
 
 module Utopia
 	# Utopia's application-facing request wrapper.
@@ -15,18 +16,6 @@ module Utopia
 	# Protocol request methods are delegated to the underlying request; parsing
 	# and application conveniences live here rather than on protocol-http itself.
 	class Request
-		# The content type used by URL-encoded HTML forms.
-		FORM_URL_ENCODED = "application/x-www-form-urlencoded"
-		
-		# The content type used by multipart HTML forms.
-		MULTIPART_FORM_DATA = "multipart/form-data"
-		
-		# The maximum nesting depth accepted for structured arguments.
-		MAXIMUM_ARGUMENT_DEPTH = 8
-		
-		# The default maximum size of a URL-encoded form body.
-		MAXIMUM_URL_ENCODED_SIZE = Protocol::Multipart::FormData::MAXIMUM_FIELD_SIZE
-		
 		FORM_DATA_UNDEFINED = Object.new.freeze
 		private_constant :FORM_DATA_UNDEFINED
 		
@@ -331,8 +320,8 @@ module Utopia
 		def decode_arguments(query)
 			return {} unless query
 			
-			# HTML form encoding represents spaces using `+`, while Protocol::URL uses percent encoding.
-			return Protocol::URL::Encoding.decode(query.gsub("+", "%20"), MAXIMUM_ARGUMENT_DEPTH)
+			parser = Protocol::URL::FormData::Parser.new
+			return parser.parse(StringIO.new(query))
 		end
 		
 		def decode_form_data(options)
@@ -342,10 +331,9 @@ module Utopia
 			content_type = Protocol::Multipart::Header::ContentType.coerce(value)
 			
 			case content_type.type
-			when FORM_URL_ENCODED
-				maximum_size = options.fetch(:maximum_total_size, MAXIMUM_URL_ENCODED_SIZE)
-				return decode_arguments(read_body(maximum_size))
-			when MULTIPART_FORM_DATA
+			when Protocol::URL::FormData::Parser::CONTENT_TYPE
+				return decode_url_encoded_form(options)
+			when Protocol::Multipart::FormData::Parser::CONTENT_TYPE
 				boundary = content_type["boundary"]
 				
 				unless boundary
@@ -358,41 +346,35 @@ module Utopia
 			end
 		end
 		
-		def read_body(maximum_size)
-			content = String.new.b
-			limit = Protocol::Multipart::ByteLimit.new(maximum_size, name: :form_size)
+		def decode_url_encoded_form(options)
+			body = self.body
+			return {} unless body
 			
-			if body = self.body
-				while chunk = body.read
-					limit.consume(chunk.bytesize)
-					content << chunk
-				end
-			end
-			
-			return content
+			parser = Protocol::URL::FormData::Parser.new(**options)
+			return parser.parse(body)
 		end
 		
 		def decode_multipart_form(boundary, **options)
-			arguments = {}
 			body = self.body
 			
-			return arguments unless body
+			return {} unless body
 			
 			io = BodyIO.new(body)
+			parser = Protocol::Multipart::FormData::Parser.new(**options)
 			
 			begin
-				Protocol::Multipart::FormData.parse(io, boundary, **options) do |name, value|
+				result = parser.parse(io, boundary:) do |_name, value|
 					if value.is_a?(Protocol::Multipart::FormData::Upload)
-						value = create_upload(value)
+						create_upload(value)
+					else
+						value
 					end
-					
-					assign_argument(arguments, name, value)
 				end
 			ensure
 				io.close
 			end
 			
-			return arguments
+			return result
 		end
 		
 		def create_upload(upload)
@@ -409,20 +391,6 @@ module Utopia
 				tempfile.close!
 				raise
 			end
-		end
-		
-		def assign_argument(arguments, name, value)
-			keys = Protocol::URL::Encoding.split(name)
-			
-			if keys.empty?
-				raise ArgumentError, "Invalid argument name: #{name.inspect}!"
-			end
-			
-			if keys.size > MAXIMUM_ARGUMENT_DEPTH
-				raise ArgumentError, "Argument depth exceeded limit!"
-			end
-			
-			Protocol::URL::Encoding.assign(keys, value, arguments)
 		end
 		
 		def parse_cookies(cookie_header)

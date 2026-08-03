@@ -70,6 +70,12 @@ describe Utopia::Request do
 		}
 	end
 	
+	it "distinguishes absent and empty query values" do
+		request.path = "/search?absent&empty="
+		
+		expect(request.query_arguments).to be == {"absent" => nil, "empty" => ""}
+	end
+	
 	it "decodes URL encoded form data" do
 		request.headers["content-type"] = "application/x-www-form-urlencoded"
 		request.body = Protocol::HTTP::Body::Buffered.wrap("user[name]=Samuel&query=hello+world")
@@ -111,7 +117,16 @@ describe Utopia::Request do
 		
 		expect do
 			request.form_data(maximum_total_size: 4)
-		end.to raise_exception(RangeError, message: be =~ /form_size exceeded/)
+		end.to raise_exception(RangeError, message: be =~ /total_size exceeded/)
+	end
+	
+	it "limits URL encoded form pairs" do
+		request.headers["content-type"] = "application/x-www-form-urlencoded"
+		request.body = Protocol::HTTP::Body::Buffered.wrap("a=1&b=2")
+		
+		expect do
+			request.form_data(maximum_pair_count: 1)
+		end.to raise_exception(RangeError, message: be =~ /pair_count exceeded/)
 	end
 	
 	it "allows endpoint-specific limits on the first form decode" do
@@ -250,7 +265,7 @@ describe Utopia::Request do
 		derived.headers["content-type"] = "application/x-www-form-urlencoded"
 		derived.body = Protocol::HTTP::Body::Buffered.wrap("value=large")
 		
-		expect{derived.form_data}.to raise_exception(RangeError, message: be =~ /form_size exceeded/)
+		expect{derived.form_data}.to raise_exception(RangeError, message: be =~ /total_size exceeded/)
 	end
 	
 	it "preserves the original request path across multiple derived requests" do
