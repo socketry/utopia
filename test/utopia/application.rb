@@ -59,6 +59,24 @@ describe Utopia::Application do
 		expect(response.status).to be == 404
 	end
 	
+	it "provides default form data options to requests" do
+		application = subject.build(form_data_options: {maximum_total_size: 4}) do
+			run lambda{|request|
+				request.form_data
+				Utopia::Response.text("Parsed")
+			}
+		end
+		
+		request = Protocol::HTTP::Request[
+			"POST",
+			"/submit",
+			{"content-type" => "application/x-www-form-urlencoded"},
+			Protocol::HTTP::Body::Buffered.wrap("value=large")
+		]
+		
+		expect{application.call(request)}.to raise_exception(RangeError, message: be =~ /form_size exceeded/)
+	end
+	
 	it "loads a top-level application constant" do
 		Dir.mktmpdir do |directory|
 			path = File.join(directory, "application.rb")

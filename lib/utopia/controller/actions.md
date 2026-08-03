@@ -25,24 +25,24 @@ on "new" do |request|
 	@user = User.new
 	
 	if request.post?
-		@user.update_attributes(request.arguments["user"])
+		@user.update_attributes(request.form_data["user"])
 		
 		redirect! "index"
 	end
 end
 
 on "edit" do |request|
-	@user = User.find(request.arguments["id"])
+	@user = User.find(request.query_arguments["id"])
 	
 	if request.post?
-		@user.update_attributes(request.arguments["user"])
+		@user.update_attributes(request.form_data["user"])
 		
 		redirect! "index"
 	end
 end
 
 on "delete" do |request|
-	User.find(request.arguments["id"]).destroy
+	User.find(request.query_arguments["id"]).destroy
 	
 	redirect! "index"
 end

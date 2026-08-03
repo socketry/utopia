@@ -113,8 +113,8 @@ module Utopia
 					io.puts "request.#{key}: #{value.inspect}"
 				end
 				
-				request.arguments.each do |key, value|
-					io.puts "request.arguments.#{key}: #{value.inspect}"
+				request.query_arguments.each do |key, value|
+					io.puts "request.query_arguments.#{key}: #{value.inspect}"
 				end
 				
 				io.puts

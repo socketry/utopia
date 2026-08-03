@@ -70,42 +70,58 @@ describe Utopia::Request do
 		}
 	end
 	
-	it "decodes URL encoded form arguments" do
+	it "decodes URL encoded form data" do
 		request.headers["content-type"] = "application/x-www-form-urlencoded"
 		request.body = Protocol::HTTP::Body::Buffered.wrap("user[name]=Samuel&query=hello+world")
 		
-		expect(request.form_arguments).to be == {
+		expect(request.form_data).to be == {
 			"user" => {"name" => "Samuel"},
 			"query" => "hello world"
 		}
 	end
 	
-	it "combines query and form arguments" do
+	it "keeps query arguments separate from form data" do
 		request.headers["content-type"] = "application/x-www-form-urlencoded"
 		request.body = Protocol::HTTP::Body::Buffered.wrap("q=form&token=abc")
 		
-		expect(request.arguments).to be == {
-			"q" => "form",
-			"tag" => ["ruby", "async"],
-			"token" => "abc"
-		}
+		expect(request.query_arguments["q"]).to be == "utopia"
+		expect(request.form_data).to be == {"q" => "form", "token" => "abc"}
 	end
 	
-	it "clears decoded form arguments when assigning a new body" do
+	it "clears decoded form data when assigning a new body" do
 		request.headers["content-type"] = "application/x-www-form-urlencoded"
 		request.body = Protocol::HTTP::Body::Buffered.wrap("value=one")
-		expect(request.form_arguments).to be == {"value" => "one"}
+		expect(request.form_data).to be == {"value" => "one"}
 		
 		request.body = Protocol::HTTP::Body::Buffered.wrap("value=two")
-		expect(request.form_arguments).to be == {"value" => "two"}
+		expect(request.form_data).to be == {"value" => "two"}
 	end
 	
 	it "leaves unsupported request bodies untouched" do
 		request.headers["content-type"] = "application/json"
 		request.body = Protocol::HTTP::Body::Buffered.wrap('{"name":"Samuel"}')
 		
-		expect(request.form_arguments).to be(:empty?)
+		expect(request.form_data).to be(:empty?)
 		expect(request.body.read).to be == '{"name":"Samuel"}'
+	end
+	
+	it "limits URL encoded form bodies" do
+		request.headers["content-type"] = "application/x-www-form-urlencoded"
+		request.body = Protocol::HTTP::Body::Buffered.wrap("value=large")
+		
+		expect do
+			request.form_data(maximum_total_size: 4)
+		end.to raise_exception(RangeError, message: be =~ /form_size exceeded/)
+	end
+	
+	it "allows endpoint-specific limits on the first form decode" do
+		request.headers["content-type"] = "application/x-www-form-urlencoded"
+		request.body = Protocol::HTTP::Body::Buffered.wrap("value=large")
+		
+		form_data = request.form_data(maximum_total_size: 64)
+		expect(form_data).to be == {"value" => "large"}
+		expect(request.form_data).to be_equal(form_data)
+		expect{request.form_data(maximum_total_size: 32)}.to raise_exception(ArgumentError, message: be =~ /already been decoded/)
 	end
 	
 	it "decodes multipart form arguments and uploads" do
@@ -124,7 +140,7 @@ describe Utopia::Request do
 		request.headers["content-type"] = form.headers["content-type"]
 		request.body = Protocol::HTTP::Body::Buffered.wrap(body.string)
 		
-		arguments = request.form_arguments
+		arguments = request.form_data
 		upload = arguments["avatar"]
 		
 		expect(arguments["user"]).to be == {"name" => "Samuel"}
@@ -150,7 +166,7 @@ describe Utopia::Request do
 		
 		request.headers["content-type"] = %(multipart/form-data; boundary="#{boundary}")
 		request.body = Protocol::HTTP::Body::Buffered.wrap(body)
-		upload = request.form_arguments["file"]
+		upload = request.form_data["file"]
 		
 		expect(upload.filename).to be == 'a"b.txt'
 	ensure
@@ -161,12 +177,21 @@ describe Utopia::Request do
 		request.headers["content-type"] = "multipart/form-data"
 		request.body = Protocol::HTTP::Body::Buffered.wrap("")
 		
-		expect{request.form_arguments}.to raise_exception(ArgumentError, message: be =~ /missing a boundary/)
+		expect{request.form_data}.to raise_exception(ArgumentError, message: be =~ /missing a boundary/)
+	end
+	
+	it "rejects duplicate multipart boundaries" do
+		request.headers["content-type"] = "multipart/form-data; boundary=first; boundary=second"
+		request.body = Protocol::HTTP::Body::Buffered.wrap("")
+		
+		expect{request.form_data}.to raise_exception(ArgumentError, message: be =~ /Duplicate header parameter/)
 	end
 	
 	it "does not expose ambiguous Rack request accessors" do
 		expect(request).not.to be(:respond_to?, :params)
 		expect(request).not.to be(:respond_to?, :[])
+		expect(request).not.to be(:respond_to?, :arguments)
+		expect(request).not.to be(:respond_to?, :form_arguments)
 	end
 	
 	it "provides decoded cookies" do
@@ -217,6 +242,15 @@ describe Utopia::Request do
 		expect(derived.variables).to be_equal(variables)
 		expect(derived.locale).to be == "en"
 		expect(derived.exception).to be_equal(exception)
+	end
+	
+	it "preserves form data defaults on derived requests" do
+		configured = subject.new(request.delegate, form_data_options: {maximum_total_size: 4})
+		derived = configured.with
+		derived.headers["content-type"] = "application/x-www-form-urlencoded"
+		derived.body = Protocol::HTTP::Body::Buffered.wrap("value=large")
+		
+		expect{derived.form_data}.to raise_exception(RangeError, message: be =~ /form_size exceeded/)
 	end
 	
 	it "preserves the original request path across multiple derived requests" do

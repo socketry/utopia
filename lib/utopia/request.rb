@@ -6,7 +6,7 @@
 require "tempfile"
 
 require "protocol/http/request"
-require "protocol/multipart/parser"
+require "protocol/multipart/form_data"
 require "protocol/url/encoding"
 
 module Utopia
@@ -23,6 +23,12 @@ module Utopia
 		
 		# The maximum nesting depth accepted for structured arguments.
 		MAXIMUM_ARGUMENT_DEPTH = 8
+		
+		# The default maximum size of a URL-encoded form body.
+		MAXIMUM_URL_ENCODED_SIZE = Protocol::Multipart::FormData::MAXIMUM_FIELD_SIZE
+		
+		FORM_DATA_UNDEFINED = Object.new.freeze
+		private_constant :FORM_DATA_UNDEFINED
 		
 		# A file uploaded as part of a multipart form.
 		class Upload
@@ -52,7 +58,7 @@ module Utopia
 			
 			# The submitted content type, if present.
 			def content_type
-				@headers["content-type"]
+				@headers["content-type"]&.type
 			end
 		end
 		
@@ -119,9 +125,11 @@ module Utopia
 		# Initialize the request proxy.
 		# @parameter delegate [Protocol::HTTP::Request] The underlying protocol request.
 		# @parameter request_path [String | Nil] The original path before internal rewrites.
-		def initialize(delegate, request_path: nil)
+		# @parameter form_data_options [Hash | Nil] Default options for parsing form data.
+		def initialize(delegate, request_path: nil, form_data_options: nil)
 			@delegate = delegate
 			@request_path = request_path
+			@form_data_options = form_data_options&.dup&.freeze || {}.freeze
 			@session = nil
 			@variables = nil
 			@locale = nil
@@ -129,8 +137,8 @@ module Utopia
 			@exception = nil
 			
 			@query_arguments = nil
-			@form_arguments = nil
-			@arguments = nil
+			@form_data = FORM_DATA_UNDEFINED
+			@form_data_effective_options = nil
 			@cookies = nil
 		end
 		
@@ -144,8 +152,8 @@ module Utopia
 			
 			@delegate = other.delegate.dup
 			@query_arguments = nil
-			@form_arguments = nil
-			@arguments = nil
+			@form_data = FORM_DATA_UNDEFINED
+			@form_data_effective_options = nil
 			@cookies = nil
 		end
 		
@@ -157,15 +165,14 @@ module Utopia
 			
 			@delegate.path = value
 			@query_arguments = nil
-			@arguments = nil
 		end
 		
-		# Assign the request body and clear any decoded form arguments.
+		# Assign the request body and clear any decoded form data.
 		# @parameter value [Protocol::HTTP::Body::Readable | Nil] The new request body.
 		def body= value
 			@delegate.body = value
-			@form_arguments = nil
-			@arguments = nil
+			@form_data = FORM_DATA_UNDEFINED
+			@form_data_effective_options = nil
 		end
 		
 		# Whether the request method is POST.
@@ -208,14 +215,26 @@ module Utopia
 			@query_arguments ||= decode_arguments(self.query)
 		end
 		
-		# Decoded form arguments, when the request has a supported form content type.
-		def form_arguments
-			@form_arguments ||= decode_form_arguments
-		end
-		
-		# Decoded query and form arguments. Form arguments take precedence on collision.
-		def arguments
-			@arguments ||= self.query_arguments.merge(self.form_arguments)
+		# Decode form data using the request defaults and any endpoint-specific overrides.
+		#
+		# @parameter options [Hash] Endpoint-specific form-data parsing options.
+		# @returns [Hash] The decoded fields and uploads, or an empty hash for an unsupported content type.
+		def form_data(**options)
+			effective_options = @form_data_options.merge(options)
+			
+			unless @form_data.equal?(FORM_DATA_UNDEFINED)
+				if options.any? and effective_options != @form_data_effective_options
+					raise ArgumentError, "Form data has already been decoded with different options!"
+				end
+				
+				return @form_data
+			end
+			
+			form_data = decode_form_data(effective_options)
+			@form_data_effective_options = effective_options.freeze
+			@form_data = form_data
+			
+			return form_data
 		end
 		
 		# Decoded request cookies.
@@ -272,7 +291,7 @@ module Utopia
 			delegate = @delegate.dup
 			delegate.method = method
 			
-			request = self.class.new(delegate, request_path: self.request_path)
+			request = self.class.new(delegate, request_path: self.request_path, form_data_options: @form_data_options)
 			request.session = @session
 			request.variables = @variables
 			request.locale = @locale
@@ -316,54 +335,55 @@ module Utopia
 			return Protocol::URL::Encoding.decode(query.gsub("+", "%20"), MAXIMUM_ARGUMENT_DEPTH)
 		end
 		
-		def decode_form_arguments
-			content_type, parameters = parse_header(self.headers["content-type"])
+		def decode_form_data(options)
+			value = self.headers["content-type"]
+			return {} unless value
 			
-			case content_type
+			content_type = Protocol::Multipart::Header::ContentType.coerce(value)
+			
+			case content_type.type
 			when FORM_URL_ENCODED
-				return decode_arguments(read_body)
+				maximum_size = options.fetch(:maximum_total_size, MAXIMUM_URL_ENCODED_SIZE)
+				return decode_arguments(read_body(maximum_size))
 			when MULTIPART_FORM_DATA
-				boundary = parameters["boundary"]
+				boundary = content_type["boundary"]
 				
 				unless boundary
 					raise ArgumentError, "Multipart form data is missing a boundary!"
 				end
 				
-				return decode_multipart_form(boundary)
+				return decode_multipart_form(boundary, **options)
 			else
 				return {}
 			end
 		end
 		
-		def read_body
+		def read_body(maximum_size)
+			content = String.new.b
+			limit = Protocol::Multipart::ByteLimit.new(maximum_size, name: :form_size)
+			
 			if body = self.body
-				return body.join || String.new
+				while chunk = body.read
+					limit.consume(chunk.bytesize)
+					content << chunk
+				end
 			end
 			
-			return String.new
+			return content
 		end
 		
-		def decode_multipart_form(boundary)
+		def decode_multipart_form(boundary, **options)
 			arguments = {}
 			body = self.body
 			
 			return arguments unless body
 			
 			io = BodyIO.new(body)
-			parser = Protocol::Multipart::Parser.new(io, boundary)
 			
 			begin
-				parser.each do |part|
-					disposition, parameters = parse_header(part.headers["content-disposition"])
-					
-					unless disposition == "form-data" and name = parameters["name"]
-						raise ArgumentError, "Multipart form part is missing a form-data name!"
-					end
-					
-					if filename = parameters["filename"]
-						value = create_upload(part, filename)
-					else
-						value = read_part(part)
+				Protocol::Multipart::FormData.parse(io, boundary, **options) do |name, value|
+					if value.is_a?(Protocol::Multipart::FormData::Upload)
+						value = create_upload(value)
 					end
 					
 					assign_argument(arguments, name, value)
@@ -375,24 +395,16 @@ module Utopia
 			return arguments
 		end
 		
-		def read_part(part)
-			content = String.new.b
-			part.each{|chunk| content << chunk}
-			return content
-		end
-		
-		def create_upload(part, filename)
+		def create_upload(upload)
 			tempfile = Tempfile.new("utopia-upload", binmode: true)
-			size = 0
 			
 			begin
-				part.each do |chunk|
+				upload.each do |chunk|
 					tempfile.write(chunk)
-					size += chunk.bytesize
 				end
 				
 				tempfile.rewind
-				return Upload.new(part.headers, filename, tempfile, size)
+				return Upload.new(upload.headers, upload.filename, tempfile, upload.size)
 			rescue
 				tempfile.close!
 				raise
@@ -411,21 +423,6 @@ module Utopia
 			end
 			
 			Protocol::URL::Encoding.assign(keys, value, arguments)
-		end
-		
-		PARAMETER = /;\s*([!#$%&'*+\-.^_`|~0-9A-Za-z]+)\s*=\s*(?:"((?:\\.|[^"])*)"|([^;\s]*))/.freeze
-		
-		def parse_header(value)
-			return [nil, {}] unless value
-			
-			value = value.first if value.is_a?(Array)
-			parameters = {}
-			
-			value.scan(PARAMETER) do |name, quoted, token|
-				parameters[name.downcase] = quoted ? quoted.gsub(/\\(.)/, "\\1") : token
-			end
-			
-			return [value.split(";", 2).first.strip.downcase, parameters]
 		end
 		
 		def parse_cookies(cookie_header)

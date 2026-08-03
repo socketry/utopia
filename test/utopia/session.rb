@@ -18,11 +18,11 @@ describe Utopia::Session do
 				
 				Utopia::Response[200, {}, []]
 			when "/session-set"
-				request.session[request.arguments["key"].to_sym] = request.arguments["value"]
+				request.session[request.query_arguments["key"].to_sym] = request.query_arguments["value"]
 				
 				Utopia::Response[200, {}, []]
 			when "/session-get"
-				Utopia::Response[200, {}, [request.session[request.arguments["key"].to_sym]]]
+				Utopia::Response[200, {}, [request.session[request.query_arguments["key"].to_sym]]]
 			else
 				Utopia::Response[404, {}, []]
 			end
@@ -90,11 +90,11 @@ describe Utopia::Session do
 		Utopia::Application.build(lambda{|request|
 			case request.path_info
 			when "/session-set"
-				request.session[request.arguments["key"].to_sym] = request.arguments["value"]
+				request.session[request.query_arguments["key"].to_sym] = request.query_arguments["value"]
 				
 				Utopia::Response[200, {}, []]
 			when "/session-get"
-				Utopia::Response[200, {}, [request.session[request.arguments["key"].to_sym]]]
+				Utopia::Response[200, {}, [request.session[request.query_arguments["key"].to_sym]]]
 			else
 				Utopia::Response[404, {}, []]
 			end

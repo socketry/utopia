@@ -22,7 +22,8 @@ module Utopia
 		# @parameter default_app [Interface(:call)] The terminal application used when the block does not call `run`.
 		# @parameter block [Proc] The middleware builder block.
 		# @returns [Application] The protocol-facing Utopia application.
-		def self.build(default_app = Response::NotFound, &block)
+		# @parameter form_data_options [Hash | Nil] Default form-data parsing options for each request.
+		def self.build(default_app = Response::NotFound, form_data_options: nil, &block)
 			builder = Protocol::HTTP::Middleware::Builder.new(default_app)
 			
 			if block
@@ -33,13 +34,14 @@ module Utopia
 				end
 			end
 			
-			return self.new(builder.to_app)
+			return self.new(builder.to_app, form_data_options: form_data_options)
 		end
 		
 		# Build the default Utopia application.
+		# @parameter options [Hash] Options passed to the application constructor.
 		# @returns [Application] The default protocol-facing Utopia application.
-		def self.default
-			self.build
+		def self.default(**options)
+			self.build(**options)
 		end
 		
 		# Load a Utopia application from a conventional configuration file.
@@ -68,20 +70,23 @@ module Utopia
 				end
 			end
 			
-			return self.default
+			return self.default(**options)
 		end
 		
 		# Initialize the protocol-facing application boundary.
 		# @parameter delegate [Interface(:call)] The Utopia application stack.
-		def initialize(delegate)
+		# @parameter form_data_options [Hash | Nil] Default form-data parsing options for each request.
+		def initialize(delegate, form_data_options: nil)
 			super(delegate)
+			
+			@form_data_options = form_data_options&.dup&.freeze
 		end
 		
 		# Process a protocol HTTP request.
 		# @parameter request [Protocol::HTTP::Request] The incoming protocol request.
 		# @returns [Protocol::HTTP::Response] The normalized protocol response.
 		def call(request)
-			request = Request.new(request)
+			request = Request.new(request, form_data_options: @form_data_options)
 			
 			return Response.wrap(super(request))
 		end
