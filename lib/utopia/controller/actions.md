@@ -25,7 +25,7 @@ on "new" do |request|
 	@user = User.new
 	
 	if request.post?
-		@user.update_attributes(request.form_data["user"])
+		@user.update_attributes(parse_body(request)["user"])
 		
 		redirect! "index"
 	end
@@ -35,7 +35,7 @@ on "edit" do |request|
 	@user = User.find(request.query_arguments["id"])
 	
 	if request.post?
-		@user.update_attributes(request.form_data["user"])
+		@user.update_attributes(parse_body(request)["user"])
 		
 		redirect! "index"
 	end

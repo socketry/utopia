@@ -6,6 +6,8 @@
 require_relative "../http"
 require_relative "../response"
 
+require "protocol/content/default"
+
 module Utopia
 	module Controller
 		CONTENT_TYPE = HTTP::CONTENT_TYPE
@@ -108,6 +110,27 @@ module Utopia
 			# Call into the next application.
 			def call(request)
 				self.class.controller.app.call(request)
+			end
+			
+			# Parse the request body according to its media type.
+			# @parameter request [Utopia::Request] The request containing the body.
+			# @parameter parser [Protocol::Content::Parser] The content parser.
+			# @yields {|name, value| ...} Form entries, including streaming uploads.
+			# @returns [Object | Nil] The parsed body, or nil when there is no body.
+			def parse_body(request, parser: Protocol::Content::Parser.default, &block)
+				body = request.body
+				return unless body
+				
+				input = body.to_io
+				error = nil
+				
+				begin
+					return parser.parse(request.headers["content-type"], input, &block)
+				rescue => error
+					raise
+				ensure
+					input.close_read(error)
+				end
 			end
 			
 			# This will cause the middleware to generate a response.
