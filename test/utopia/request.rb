@@ -116,8 +116,8 @@ describe Utopia::Request do
 		request.body = Protocol::HTTP::Body::Buffered.wrap("value=large")
 		
 		expect do
-			request.form_data(maximum_total_size: 4)
-		end.to raise_exception(RangeError, message: be =~ /total_size exceeded/)
+			request.form_data(size_limit: 4)
+		end.to raise_exception(Protocol::URL::LimitError, message: be =~ /size exceeded/)
 	end
 	
 	it "limits URL encoded form pairs" do
@@ -125,18 +125,18 @@ describe Utopia::Request do
 		request.body = Protocol::HTTP::Body::Buffered.wrap("a=1&b=2")
 		
 		expect do
-			request.form_data(maximum_pair_count: 1)
-		end.to raise_exception(RangeError, message: be =~ /pair_count exceeded/)
+			request.form_data(pair_count_limit: 1)
+		end.to raise_exception(Protocol::URL::LimitError, message: be =~ /pair_count exceeded/)
 	end
 	
 	it "allows endpoint-specific limits on the first form decode" do
 		request.headers["content-type"] = "application/x-www-form-urlencoded"
 		request.body = Protocol::HTTP::Body::Buffered.wrap("value=large")
 		
-		form_data = request.form_data(maximum_total_size: 64)
+		form_data = request.form_data(size_limit: 64)
 		expect(form_data).to be == {"value" => "large"}
 		expect(request.form_data).to be_equal(form_data)
-		expect{request.form_data(maximum_total_size: 32)}.to raise_exception(ArgumentError, message: be =~ /already been decoded/)
+		expect{request.form_data(size_limit: 32)}.to raise_exception(ArgumentError, message: be =~ /already been decoded/)
 	end
 	
 	it "decodes multipart form arguments and uploads" do
@@ -260,12 +260,12 @@ describe Utopia::Request do
 	end
 	
 	it "preserves form data defaults on derived requests" do
-		configured = subject.new(request.delegate, form_data_options: {maximum_total_size: 4})
+		configured = subject.new(request.delegate, form_data_options: {size_limit: 4})
 		derived = configured.with
 		derived.headers["content-type"] = "application/x-www-form-urlencoded"
 		derived.body = Protocol::HTTP::Body::Buffered.wrap("value=large")
 		
-		expect{derived.form_data}.to raise_exception(RangeError, message: be =~ /total_size exceeded/)
+		expect{derived.form_data}.to raise_exception(Protocol::URL::LimitError, message: be =~ /size exceeded/)
 	end
 	
 	it "preserves the original request path across multiple derived requests" do

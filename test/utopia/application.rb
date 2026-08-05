@@ -60,7 +60,7 @@ describe Utopia::Application do
 	end
 	
 	it "provides default form data options to requests" do
-		application = subject.build(form_data_options: {maximum_total_size: 4}) do
+		application = subject.build(form_data_options: {size_limit: 4}) do
 			run lambda{|request|
 				request.form_data
 				Utopia::Response.text("Parsed")
@@ -74,7 +74,7 @@ describe Utopia::Application do
 			Protocol::HTTP::Body::Buffered.wrap("value=large")
 		]
 		
-		expect{application.call(request)}.to raise_exception(RangeError, message: be =~ /total_size exceeded/)
+		expect{application.call(request)}.to raise_exception(Protocol::URL::LimitError, message: be =~ /size exceeded/)
 	end
 	
 	it "loads a top-level application constant" do

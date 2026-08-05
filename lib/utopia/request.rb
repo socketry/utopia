@@ -331,9 +331,9 @@ module Utopia
 			content_type = Protocol::Multipart::Header::ContentType.coerce(value)
 			
 			case content_type.type
-			when Protocol::URL::FormData::Parser::CONTENT_TYPE
+			when Protocol::URL::FormData::Parser::MEDIA_TYPE
 				return decode_url_encoded_form(options)
-			when Protocol::Multipart::FormData::Parser::CONTENT_TYPE
+			when Protocol::Multipart::FormData::Parser::MEDIA_TYPE
 				boundary = content_type["boundary"]
 				
 				unless boundary
