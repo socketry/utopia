@@ -1,0 +1,12 @@
+{
+	"request": {
+		"method": "POST",
+		"path": "/api/parse",
+		"headers": {"content-type": "application/x-www-form-urlencoded"},
+		"body": "user[name]=Samuel&user[age]=42"
+	},
+	"response": {
+		"status": 200,
+		"body": {"value": {"user": {"name": "Samuel", "age": 42}}}
+	}
+}

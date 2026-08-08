@@ -1,0 +1,20 @@
+{
+	"request": {
+		"method": "POST",
+		"path": "/api/parse",
+		"headers": {"content-type": "multipart/form-data; boundary=utopia-parameters"},
+		"body_path": "multipart-upload.body"
+	},
+	"response": {
+		"status": 200,
+		"body": {
+			"value": {
+				"user": {
+					"name": "Samuel",
+					"age": 42,
+					"avatar": {"filename": "avatar.txt", "content": "Hello!"}
+				}
+			}
+		}
+	}
+}

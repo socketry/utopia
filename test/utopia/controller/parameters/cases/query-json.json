@@ -1,0 +1,12 @@
+{
+	"request": {
+		"method": "QUERY",
+		"path": "/api/parse",
+		"headers": {"content-type": "application/json"},
+		"body": "{\"user\":{\"name\":\"Samuel\",\"age\":\"42\",\"role\":\"member\"}}"
+	},
+	"response": {
+		"status": 200,
+		"body": {"value": {"user": {"name": "Samuel", "age": 42, "role": "member"}}}
+	}
+}

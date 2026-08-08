@@ -4,6 +4,7 @@
 # Copyright, 2026, by Samuel Williams.
 
 require "protocol/http/request"
+require "protocol/http/body/buffered"
 require "utopia/application"
 
 module ProtocolApplication
@@ -22,18 +23,22 @@ module ProtocolApplication
 		self.request("GET", path, headers)
 	end
 	
-	def post(path, headers = {})
-		self.request("POST", path, headers)
+	def post(path, headers = {}, body = nil)
+		self.request("POST", path, headers, body)
 	end
 	
-	def request(method, path, headers = {})
+	def request(method, path, headers = {}, body = nil)
 		request_headers = self.headers.merge(headers)
 		
 		unless cookies.empty?
 			request_headers["cookie"] = cookies.map{|key, value| "#{key}=#{value}"}.join("; ")
 		end
 		
-		@last_request = Protocol::HTTP::Request[method, path, request_headers]
+		if body
+			body = Protocol::HTTP::Body::Buffered.wrap(body)
+		end
+		
+		@last_request = Protocol::HTTP::Request[method, path, request_headers, body]
 		@last_response = app.call(@last_request)
 		@body_read = false
 		@body = nil

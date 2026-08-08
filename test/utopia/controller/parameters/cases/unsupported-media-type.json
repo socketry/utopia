@@ -1,0 +1,12 @@
+{
+	"request": {
+		"method": "POST",
+		"path": "/api/parse",
+		"headers": {"content-type": "application/octet-stream"},
+		"body": "content"
+	},
+	"response": {
+		"status": 415,
+		"body": {"error": "unsupported_media_type"}
+	}
+}

@@ -1,0 +1,14 @@
+--utopia-parameters
+Content-Disposition: form-data; name="user[name]"
+
+Samuel
+--utopia-parameters
+Content-Disposition: form-data; name="user[age]"
+
+42
+--utopia-parameters
+Content-Disposition: form-data; name="user[avatar]"; filename="avatar.txt"
+Content-Type: text/plain
+
+Hello!
+--utopia-parameters--
