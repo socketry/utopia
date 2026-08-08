@@ -108,7 +108,7 @@ end
 
 on "edit" do |request, path|
 	if request.post?
-		@user.update_attributes(request.arguments["user"])
+		@user.update_attributes(parse_body(request)["user"])
 	end
 end
 
