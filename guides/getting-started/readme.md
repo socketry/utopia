@@ -34,8 +34,10 @@ Utopia includes a redirection middleware to redirect all root-level requests to 
 ```ruby
 # in config/application.rb
 
-use Utopia::Redirection::Rewrite,
-	"/" => "/welcome/index"
+Application = Utopia::Application.build do
+	use Utopia::Redirection::Rewrite,
+		"/" => "/welcome/index"
+end
 ```
 
 The content for this page is stored in `pages/welcome/index.xnode`. The format of this page is a subset of HTML5 - open and close tags are strictly enforced.
