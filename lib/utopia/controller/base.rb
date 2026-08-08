@@ -109,7 +109,7 @@ module Utopia
 			
 			# Call into the next application.
 			def call(request)
-				self.class.controller.app.call(request)
+				self.class.controller.delegate.call(request)
 			end
 			
 			# Parse the request body according to its media type.

@@ -41,6 +41,24 @@ describe "Utopia application middleware" do
 		expect(response.headers["location"]).to be == "/new"
 	end
 	
+	it "closes first-party middleware stacks" do
+		closed = 0
+		terminal = lambda{|request| Utopia::Response.text("OK")}
+		terminal.define_singleton_method(:close) do
+			closed += 1
+		end
+		
+		application = Utopia::Application.build do
+			use Utopia::Redirection::Rewrite, {"/old" => "/new"}
+			use Utopia::Static
+			run terminal
+		end
+		
+		application.close
+		
+		expect(closed).to be == 1
+	end
+	
 	it "serves static files from protocol requests" do
 		Dir.mktmpdir do |directory|
 			File.write(File.join(directory, "hello.txt"), "Hello")

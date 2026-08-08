@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2025, by Samuel Williams.
+# Copyright, 2009-2026, by Samuel Williams.
+
+require "protocol/http/middleware"
 
 require_relative "http"
 require_relative "path"

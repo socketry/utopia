@@ -17,12 +17,13 @@ module Utopia
 		DEFAULT_CACHE_CONTROL = "public, max-age=3600".freeze
 		
 		# A middleware which serves static files from the specified root directory.
-		class Middleware
+		class Middleware < Protocol::HTTP::Middleware
 			# @param root [String] The root directory to serve files from.
 			# @param types [Array] The mime-types (and file extensions) to recognize/serve.
 			# @param cache_control [String] The cache-control header to set for static content.
 			def initialize(app, root: Utopia::default_root, types: MIME_TYPES[:default], cache_control: DEFAULT_CACHE_CONTROL)
-				@app = app
+				super(app)
+				
 				@root = root
 				
 				@extensions = MimeTypeLoader.extensions_for(types)
@@ -121,7 +122,7 @@ module Utopia
 				end
 				
 				# else if no file was found:
-				return @app.call(request)
+				return @delegate.call(request)
 			end
 		end
 		

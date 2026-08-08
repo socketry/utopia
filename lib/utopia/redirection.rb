@@ -29,10 +29,11 @@ module Utopia
 		end
 		
 		# A middleware which performs internal redirects based on error status codes.
-		class Errors
+		class Errors < Protocol::HTTP::Middleware
 			# @param codes [Hash<Integer,String>] The redirection path for a given error code.
 			def initialize(app, codes = {})
-				@app = app
+				super(app)
+				
 				@codes = codes
 			end
 			
@@ -58,12 +59,12 @@ module Utopia
 			# @returns [Protocol::HTTP::Response] The original or error-document response.
 			# @raises [RequestFailure] If the configured error document also fails.
 			def call(request)
-				response = Response.wrap(@app.call(request))
+				response = Response.wrap(@delegate.call(request))
 				
 				if unhandled_error?(response) && location = @codes[response.status]
 					error_request = request.with(method: "GET", path_info: location)
 					
-					error_response = Response.wrap(@app.call(error_request))
+					error_response = Response.wrap(@delegate.call(error_request))
 					
 					if error_response.status >= 400
 						raise RequestFailure.new(request.path_info, response.status, location, error_response.status)
@@ -82,13 +83,14 @@ module Utopia
 		DEFAULT_MAX_AGE = 3600*24
 		
 		# A basic client-side redirect.
-		class ClientRedirect
+		class ClientRedirect < Protocol::HTTP::Middleware
 			# Initialize client-side redirection behavior.
 			# @parameter app [Interface(:call)] The downstream application.
 			# @parameter status [Integer] The status.
 			# @parameter max_age [Integer] The maximum cache age in seconds.
 			def initialize(app, status: 307, max_age: DEFAULT_MAX_AGE)
-				@app = app
+				super(app)
+				
 				@status = status
 				@max_age = max_age
 			end
@@ -151,7 +153,7 @@ module Utopia
 					return redirection
 				end
 				
-				return @app.call(request)
+				return @delegate.call(request)
 			end
 		end
 		
@@ -161,7 +163,6 @@ module Utopia
 			# @parameter app [Interface(:call)] The downstream application.
 			# @parameter index [Integer] The index.
 			def initialize(app, index: "index")
-				@app = app
 				@index = index
 				
 				super(app)
@@ -208,8 +209,6 @@ module Utopia
 			# @parameter status [Integer] The status.
 			# @parameter flatten [bool] Whether to flatten the rewritten path.
 			def initialize(app, pattern, prefix, status: 301, flatten: false)
-				@app = app
-				
 				@pattern = pattern
 				@prefix = prefix
 				@flatten = flatten

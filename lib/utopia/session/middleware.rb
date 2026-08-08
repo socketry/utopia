@@ -19,7 +19,7 @@ require_relative "../response"
 module Utopia
 	module Session
 		# A middleware which provides a secure client-side session storage using a private symmetric encrpytion key.
-		class Middleware
+		class Middleware < Protocol::HTTP::Middleware
 			# Raised when payload processing fails.
 			class PayloadError < StandardError
 			end
@@ -43,7 +43,7 @@ module Utopia
 			# @param expires_after [String] The cache-control header to set for static content.
 			# @param options [Hash<Symbol,Object>] Additional defaults used for generating the session cookie.
 			def initialize(app, session_name: SESSION_KEY, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, same_site: :lax, maximum_size: MAXIMUM_SIZE, **options)
-				@app = app
+				super(app)
 				
 				@session_name = session_name
 				@cookie_name = @session_name + ".encrypted"
@@ -104,7 +104,7 @@ module Utopia
 			def call(request)
 				request.session = prepare_session(request)
 				
-				response = Response.wrap(@app.call(request))
+				response = Response.wrap(@delegate.call(request))
 				
 				update_session(request.session, response.headers)
 				

@@ -13,10 +13,10 @@ require_relative "../response"
 module Utopia
 	module Exceptions
 		# A middleware which catches exceptions and performs an internal redirect.
-		class Handler
+		class Handler < Protocol::HTTP::Middleware
 			# @param location [String] Peform an internal redirect to this location when an exception is raised.
 			def initialize(app, location = "/errors/exception")
-				@app = app
+				super(app)
 				
 				@location = location
 			end
@@ -36,7 +36,7 @@ module Utopia
 			# @returns [Protocol::HTTP::Response] The application response or a generated error response.
 			def call(request)
 				begin
-					return @app.call(request)
+					return @delegate.call(request)
 				rescue Exception => exception
 					Console.warn(self, "An error occurred while processing the request.", error: exception)
 					
@@ -48,7 +48,7 @@ module Utopia
 						)
 						error_request.exception = exception
 						
-						error_response = Response.wrap(@app.call(error_request))
+						error_response = Response.wrap(@delegate.call(error_request))
 						error_response.status = 500
 						
 						return error_response

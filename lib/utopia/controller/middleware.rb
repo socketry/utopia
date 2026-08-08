@@ -19,22 +19,21 @@ module Utopia
 	# A middleware which loads controller classes and invokes functionality based on the requested path.
 	module Controller
 		# Dispatches requests to filesystem-backed controller classes.
-		class Middleware
+		class Middleware < Protocol::HTTP::Middleware
 			# The controller filename.
 			CONTROLLER_RB = "controller.rb".freeze
 			
 			# @param root [String] The content root where controllers will be loaded from.
 			# @param base [Class] The base class for controllers.
 			def initialize(app, root: Utopia::default_root, base: Controller::Base)
-				@app = app
+				super(app)
+				
 				@root = root
 				
 				@controller_cache = Concurrent::Map.new
 				
 				@base = base
 			end
-			
-			attr :app
 			
 			# Freeze this object and its internal state.
 			# @returns [self] This object.
@@ -131,7 +130,7 @@ module Utopia
 					return result
 				end
 				
-				return @app.call(request)
+				return @delegate.call(request)
 			end
 		end
 	end

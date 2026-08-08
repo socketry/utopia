@@ -13,7 +13,7 @@ require_relative "handler"
 module Utopia
 	module Exceptions
 		# A middleware which catches application exceptions and sends an email containing the exception, backtrace, request, and application state.
-		class Mailer
+		class Mailer < Protocol::HTTP::Middleware
 			# A basic local non-authenticated SMTP server.
 			LOCAL_SMTP = [:smtp, {
 				:address => "localhost",
@@ -30,7 +30,7 @@ module Utopia
 			# @param delivery_method [Object] The delivery method as required by the mail gem.
 			# @param dump_environment [Boolean] Attach request attributes as `attributes.yaml` to the error report.
 			def initialize(app, to: "postmaster", from: DEFAULT_FROM, subject: DEFAULT_SUBJECT, delivery_method: LOCAL_SMTP, dump_environment: false)
-				@app = app
+				super(app)
 				
 				@to = to
 				@from = from
@@ -58,7 +58,7 @@ module Utopia
 			# @returns [Protocol::HTTP::Response] The application response or a generated error response.
 			def call(request)
 				begin
-					return @app.call(request)
+					return @delegate.call(request)
 				rescue => exception
 					request.exception = exception
 					send_notification exception, request

@@ -11,7 +11,7 @@ require_relative "../response"
 module Utopia
 	module Localization
 		# Selects a locale for each request and rewrites localized paths.
-		class Middleware
+		class Middleware < Protocol::HTTP::Middleware
 			RESOURCE_NOT_FOUND = Response[400, {}, []].freeze
 			
 			# @param locales [Array<String>] An array of all supported locales.
@@ -20,7 +20,7 @@ module Utopia
 			# @param hosts [Hash<Pattern, String>] Specify a mapping of request hosts to locales.
 			# @param ignore [Array<Pattern>] A list of patterns matched against request paths which will not be localized.
 			def initialize(app, locales:, default_locale: nil, default_locales: nil, hosts: {}, ignore: [])
-				@app = app
+				super(app)
 				
 				@all_locales = HTTP::Accept::Languages::Locales.new(locales)
 				
@@ -188,7 +188,7 @@ module Utopia
 			# @returns [Protocol::HTTP::Response] The localized response with cache-variation headers.
 			def call(request)
 				# Pass the request through if it shouldn't be localized:
-				return @app.call(request) unless localized?(request)
+				return @delegate.call(request) unless localized?(request)
 				
 				response = nil
 				localized_request = request
@@ -203,7 +203,7 @@ module Utopia
 					localized_request.localization = self
 					localized_request.locale = locale
 					
-					response = Response.wrap(@app.call(localized_request))
+					response = Response.wrap(@delegate.call(localized_request))
 					
 					break unless response.status >= 400
 				end

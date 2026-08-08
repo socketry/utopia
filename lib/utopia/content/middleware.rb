@@ -21,7 +21,7 @@ require "traces/provider"
 module Utopia
 	module Content
 		# A middleware which serves dynamically generated content based on markup files.
-		class Middleware
+		class Middleware < Protocol::HTTP::Middleware
 			CONTENT_NAMESPACE = "content".freeze
 			UTOPIA_NAMESPACE = "utopia".freeze
 			CONTENT_TAG_NAME = "utopia:content".freeze
@@ -29,7 +29,8 @@ module Utopia
 			# @param root [String] The content root where pages will be generated from.
 			# @param namespaces [Hash<String,Library>] Tag namespaces for dynamic tag lookup.
 			def initialize(app, root: Utopia::default_root, namespaces: {})
-				@app = app
+				super(app)
+				
 				@root = root
 				
 				@template_cache = Concurrent::Map.new
@@ -139,7 +140,7 @@ module Utopia
 					end
 				end
 				
-				return @app.call(request)
+				return @delegate.call(request)
 			end
 			
 			private
