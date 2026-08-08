@@ -37,10 +37,9 @@ module Utopia
 		end
 		
 		# Build the default Utopia application.
-		# @parameter options [Hash] Options passed to the application constructor.
 		# @returns [Application] The default protocol-facing Utopia application.
-		def self.default(**options)
-			self.build(**options)
+		def self.default
+			self.build
 		end
 		
 		# Load a Utopia application from a conventional configuration file.
@@ -69,7 +68,7 @@ module Utopia
 				end
 			end
 			
-			return self.default(**options)
+			return self.default
 		end
 		
 		# Process a protocol HTTP request.

@@ -59,6 +59,12 @@ describe Utopia::Application do
 		expect(response.status).to be == 404
 	end
 	
+	it "rejects options for the default application" do
+		expect do
+			subject.default(unexpected: true)
+		end.to raise_exception(ArgumentError)
+	end
+	
 	it "loads a top-level application constant" do
 		Dir.mktmpdir do |directory|
 			path = File.join(directory, "application.rb")
@@ -80,6 +86,42 @@ describe Utopia::Application do
 		end
 	end
 	
+	it "passes options to application classes" do
+		Dir.mktmpdir do |directory|
+			path = File.join(directory, "application.rb")
+			
+			File.write(path, <<~RUBY)
+				require "utopia/application"
+				
+				class Application < Utopia::Application
+					def initialize(message:)
+						delegate = Protocol::HTTP::Middleware.for do |request|
+							Utopia::Response.text(message)
+						end
+						
+						super(delegate)
+					end
+				end
+			RUBY
+			
+			application = subject.load(path, message: "Hello")
+			response = application.call(http_request)
+			
+			expect(response.status).to be == 200
+			expect(response.read).to be == "Hello"
+		end
+	end
+	
+	it "uses the default application if the configuration file does not exist" do
+		Dir.mktmpdir do |directory|
+			path = File.join(directory, "missing.rb")
+			application = subject.load(path, ignored: true)
+			response = application.call(http_request)
+			
+			expect(response.status).to be == 404
+		end
+	end
+	
 	it "uses the default application if no application constant is defined" do
 		Dir.mktmpdir do |directory|
 			path = File.join(directory, "application.rb")
@@ -88,7 +130,7 @@ describe Utopia::Application do
 				require "utopia/application"
 			RUBY
 			
-			application = subject.load(path)
+			application = subject.load(path, ignored: true)
 			response = application.call(http_request)
 			
 			expect(response.status).to be == 404
