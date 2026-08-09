@@ -4,13 +4,14 @@
 # Copyright, 2014-2025, by Samuel Williams.
 # Copyright, 2019, by Huba Nagy.
 
+require "sus/fixtures/protocol/http/middleware_context"
+require "utopia/application"
 require "utopia/session"
-require_relative "protocol_application"
 
 describe Utopia::Session do
-	include ProtocolApplication
+	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
-	let(:app) do
+	let(:middleware) do
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
 			case request.path_info
 			when "/login"
@@ -36,48 +37,48 @@ describe Utopia::Session do
 	
 	it "shouldn't commit session values unless required" do
 		# This URL doesn't update the session:
-		get "/"
+		client.get "/"
 		expect(last_response.headers).not.to have_keys("set-cookie")
 		
 		# This URL updates the session:
-		get "/login"
+		client.get "/login"
 		expect(last_response.headers).to have_keys("set-cookie")
 	end
 	
 	it "should set and get values correctly" do
-		get "/session-set?key=foo&value=bar"
+		client.get "/session-set?key=foo&value=bar"
 		expect(last_response.headers).to have_keys("set-cookie")
 		expect(last_response.headers["set-cookie"].first).not.to be(:include?, "%")
 		
-		get "/session-get?key=foo"
-		expect(cookies).to be(:include?, "utopia.session.encrypted")
-		expect(body).to be == "bar"
+		client.get "/session-get?key=foo"
+		expect(client.cookies).to be(:include?, "utopia.session.encrypted")
+		expect(last_response.read).to be == "bar"
 	end
 	
 	it "should ignore session if cookie value is invalid" do
-		set_cookie "utopia.session.encrypted=junk"
+		client.set_cookie "utopia.session.encrypted=junk"
 		
-		get "/session-get?key=foo"
+		client.get "/session-get?key=foo"
 		
-		expect(body).to be == nil
+		expect(last_response.read).to be == nil
 	end
 	
 	it "shouldn't update the session if there are no changes" do
-		get "/session-set?key=foo&value=bar"
+		client.get "/session-set?key=foo&value=bar"
 		expect(last_response.headers).to have_keys("set-cookie")
 		
-		get "/session-set?key=foo&value=bar"
+		client.get "/session-set?key=foo&value=bar"
 		expect(last_response.headers).not.to have_keys("set-cookie")
 	end
 	
 	it "should update the session if time has passed" do
-		get "/session-set?key=foo&value=bar"
+		client.get "/session-set?key=foo&value=bar"
 		expect(last_response.headers).to have_keys("set-cookie")
 		
 		# Sleep more than update_timeout
 		sleep 2
 		
-		get "/session-set?key=foo&value=bar"
+		client.get "/session-set?key=foo&value=bar"
 		expect(last_response.headers).to have_keys("set-cookie")
 	end
 	
@@ -107,7 +108,7 @@ describe Utopia::Session::Middleware do
 	end
 	
 	it "emits the supported cookie directives" do
-		app = middleware(
+		instance = middleware(
 			domain: "example.com",
 			path: "/session",
 			max_age: 60,
@@ -117,7 +118,7 @@ describe Utopia::Session::Middleware do
 			partitioned: true,
 		)
 		
-		response = app.call(Utopia::Request["GET", "/"])
+		response = instance.call(Utopia::Request["GET", "/"])
 		cookie = response.headers["set-cookie"].first
 		
 		expect(cookie).to be(:include?, ";Domain=example.com")
@@ -156,9 +157,9 @@ describe Utopia::Session::Middleware do
 end
 
 describe Utopia::Session do
-	include ProtocolApplication
+	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
-	let(:app) do
+	let(:middleware) do
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
 			case request.path_info
 			when "/session-set"
@@ -180,41 +181,41 @@ describe Utopia::Session do
 	
 	def before
 		# Initial user agent:
-		header "User-Agent", "A"
+		client.headers["user-agent"] = "A"
 		
-		get "/session-set?key=foo&value=bar"
+		client.get "/session-set?key=foo&value=bar"
 		
 		super
 	end
 	
 	it "should be able to retrive the value if there are no changes" do
-		get "/session-get?key=foo"
-		expect(body).to be == "bar"
+		client.get "/session-get?key=foo"
+		expect(last_response.read).to be == "bar"
 	end
 	
 	it "should fail if user agent is changed" do
 		# Change user agent:
-		header "User-Agent", "B"
+		client.headers["user-agent"] = "B"
 		
-		get "/session-get?key=foo"
-		expect(body).to be == nil
+		client.get "/session-get?key=foo"
+		expect(last_response.read).to be == nil
 	end
 	
 	it "should fail if expired cookie is sent with the request" do
 		session_cookie = last_response.headers["set-cookie"].first.split(";")[0]
 		sleep 6 # sleep longer than the session timeout
-		set_cookie session_cookie
+		client.set_cookie session_cookie
 		
-		get "/session-get?key=foo"
-		expect(body).to be == nil
+		client.get "/session-get?key=foo"
+		expect(last_response.read).to be == nil
 	end
 	
 	it "shouldn't fail if ip address is changed" do
 		# Change user agent:
-		header "X-Forwarded-For", "127.0.0.10"
+		client.headers["x-forwarded-for"] = "127.0.0.10"
 		
-		get "/session-get?key=foo"
-		expect(body).to be == "bar"
+		client.get "/session-get?key=foo"
+		expect(last_response.read).to be == "bar"
 	end
 end
 

@@ -3,16 +3,17 @@
 # Released under the MIT License.
 # Copyright, 2014-2025, by Samuel Williams.
 
+require "sus/fixtures/protocol/http/middleware_context"
+require "utopia/application"
 require "utopia/static"
 require "utopia/content"
 require "utopia/controller"
 require "utopia/localization"
-require_relative "protocol_application"
 
 describe Utopia::Localization do
-	include ProtocolApplication
+	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
-	let(:app) do
+	let(:middleware) do
 		root = File.expand_path(".localization", __dir__)
 		
 		Utopia::Application.build do
@@ -27,72 +28,72 @@ describe Utopia::Localization do
 	end
 	
 	it "should respond with default localization" do
-		get "/localized.txt"
+		client.get "/localized.txt"
 		
-		expect(body).to be == "localized.en.txt"
+		expect(last_response.read).to be == "localized.en.txt"
 	end
 	
 	it "should localize request based on path" do
-		get "/en/localized.txt"
-		expect(body).to be == "localized.en.txt"
+		client.get "/en/localized.txt"
+		expect(last_response.read).to be == "localized.en.txt"
 		
-		get "/de/localized.txt"
-		expect(body).to be == "localized.de.txt"
+		client.get "/de/localized.txt"
+		expect(last_response.read).to be == "localized.de.txt"
 		
-		get "/ja/localized.txt"
-		expect(body).to be == "localized.ja.txt"
+		client.get "/ja/localized.txt"
+		expect(last_response.read).to be == "localized.ja.txt"
 	end
 	
 	it "prefers an explicit path locale" do
-		get "/ja/localized.txt", {"host" => "foobar.de", "accept-language" => "en"}
+		client.get "/ja/localized.txt", {"accept-language" => "en"}, authority: "foobar.de"
 		
-		expect(body).to be == "localized.ja.txt"
+		expect(last_response.read).to be == "localized.ja.txt"
 		expect(last_response.headers["content-language"].to_s).to be == "ja"
 		expect(last_response.headers["content-location"].to_s).to be == "/ja/localized.txt"
 	end
 	
 	it "should localize request based on domain name" do
-		get "/localized.txt", {"host" => "foobar.com"}
-		expect(body).to be == "localized.en.txt"
+		client.get "/localized.txt", nil, authority: "foobar.com"
+		expect(last_response.read).to be == "localized.en.txt"
 		
-		get "/localized.txt", {"host" => "foobar.de"}
-		expect(body).to be == "localized.de.txt"
+		client.get "/localized.txt", nil, authority: "foobar.de"
+		expect(last_response.read).to be == "localized.de.txt"
 		
-		get "/localized.txt", {"host" => "foobar.co.jp"}
-		expect(body).to be == "localized.ja.txt"
+		client.get "/localized.txt", nil, authority: "foobar.co.jp"
+		expect(last_response.read).to be == "localized.ja.txt"
 	end
 	
 	it "should get a non-localized resource" do
-		get "/en/test.txt"
-		expect(body).to be == "Hello World!"
+		client.get "/en/test.txt"
+		expect(last_response.read).to be == "Hello World!"
 	end
 	
 	it "should respond with accepted language localization" do
-		get "/localized.txt", {"accept-language" => "ja,en"}
+		client.get "/localized.txt", {"accept-language" => "ja,en"}
 		
-		expect(body).to be == "localized.ja.txt"
+		expect(last_response.read).to be == "localized.ja.txt"
 		expect(last_response.headers["content-language"].to_s).to be == "ja"
 		expect(last_response.headers["content-location"].to_s).to be == "/ja/localized.txt"
 	end
 	
 	it "resolves localized content templates" do
-		get "/page", {"accept-language" => "ja,en"}
+		client.get "/page", {"accept-language" => "ja,en"}
 		
-		expect(body).to be == "localized.ja.content\n"
+		expect(last_response.read).to be == "localized.ja.content\n"
 		expect(last_response.headers["content-language"].to_s).to be == "ja"
 	end
 	
 	it "falls back to the next available localized content template" do
-		get "/page", {"accept-language" => "de"}
+		client.get "/page", {"accept-language" => "de"}
 		
-		expect(body).to be == "localized.en.content\n"
+		expect(last_response.read).to be == "localized.en.content\n"
 		expect(last_response.headers["content-language"].to_s).to be == "en"
 	end
 	
 	it "resolves unlocalized content as the final fallback" do
-		get "/fallback", {"accept-language" => "ja,en"}
+		client.get "/fallback", {"accept-language" => "ja,en"}
 		
-		expect(body).to be == "unlocalized.content\n"
+		expect(last_response.read).to be == "unlocalized.content\n"
 		expect(last_response.headers["content-language"]).to be_nil
 	end
 	
@@ -116,18 +117,18 @@ describe Utopia::Localization do
 	end
 	
 	it "should get a list of all localizations" do
-		get "/all_locales"
-		expect(body).to be == "en,ja,de"
+		client.get "/all_locales"
+		expect(last_response.read).to be == "en,ja,de"
 	end
 	
 	it "should get the default locale" do
-		get "/default_locale"
-		expect(body).to be == "en"
+		client.get "/default_locale"
+		expect(last_response.read).to be == "en"
 	end
 	
 	it "should get the selected locale (german)" do
-		get "/locale", {"host" => "foobar.de"}
-		expect(body).to be == "de"
+		client.get "/locale", nil, authority: "foobar.de"
+		expect(last_response.read).to be == "de"
 	end
 	
 	it "invokes the application once" do

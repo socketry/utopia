@@ -3,16 +3,17 @@
 # Released under the MIT License.
 # Copyright, 2021-2025, by Samuel Williams.
 
+require "sus/fixtures/protocol/http/middleware_context"
+require "utopia/application"
 require "utopia/content"
-require_relative "protocol_application"
 
 describe Utopia::Content do
-	include ProtocolApplication
+	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
-	let(:app) {Utopia::Application.default}
+	let(:middleware) {Utopia::Application.default}
 	
 	it "should report 404 missing" do
-		get "/index"
+		client.get "/index"
 		
 		expect(last_response.status).to be == 404
 	end

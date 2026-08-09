@@ -3,13 +3,14 @@
 # Released under the MIT License.
 # Copyright, 2012-2025, by Samuel Williams.
 
+require "sus/fixtures/protocol/http/middleware_context"
+require "utopia/application"
 require "utopia/content"
-require_relative "protocol_application"
 
 describe Utopia::Content do
-	include ProtocolApplication
+	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
-	let(:app) do
+	let(:middleware) do
 		root = File.expand_path(".content", __dir__)
 		
 		Utopia::Application.build do
@@ -18,45 +19,45 @@ describe Utopia::Content do
 	end
 	
 	it "should generate identical html" do
-		get "/test"
+		client.get "/test"
 		
-		expect(body).to be == File.read(File.expand_path(".content/test.xnode", __dir__))
+		expect(last_response.read).to be == File.read(File.expand_path(".content/test.xnode", __dir__))
 	end
 	
 	it "should get a local path" do
-		get "/node/index"
+		client.get "/node/index"
 		
-		expect(body).to be == File.expand_path(".content/node", __dir__)
+		expect(last_response.read).to be == File.expand_path(".content/node", __dir__)
 	end
 	
 	it "should successfully redirect to the index page" do
-		get "/"
+		client.get "/"
 		
 		expect(last_response.status).to be == 307
 		expect(last_response.headers["location"]).to be == "/index"
 		
-		get "/content"
+		client.get "/content"
 		
 		expect(last_response.status).to be == 307
 		expect(last_response.headers["location"]).to be == "/content/index"
 	end
 	
 	it "should successfully render the index page" do
-		get "/index"
+		client.get "/index"
 		
-		expect(body).to be == "<h1>Hello World</h1>"
+		expect(last_response.read).to be == "<h1>Hello World</h1>"
 	end
 	
 	it "should render partials correctly" do
-		get "/content/test-partial"
+		client.get "/content/test-partial"
 		
-		expect(body).to be == "10"
+		expect(last_response.read).to be == "10"
 	end
 	
 	it "should generate valid importmap" do
-		get "/script/importmap"
+		client.get "/script/importmap"
 		
-		expect(body).to be == <<~IMPORTMAP.chomp
+		expect(last_response.read).to be == <<~IMPORTMAP.chomp
 			<script type="importmap">
 			{
 				"imports": {
@@ -69,10 +70,10 @@ describe Utopia::Content do
 	end
 	
 	it "should generate valid javascript" do
-		get "/script/cdata"
+		client.get "/script/cdata"
 		
 		# We are expected to generate HTML... there is no good convention for "escaping javascript" in HTML. So we just plonk it in, verbatim. Yay.
-		expect(body).to be == <<~JAVASCRIPT.chomp
+		expect(last_response.read).to be == <<~JAVASCRIPT.chomp
 		<script type="text/javascript">
 		console.log("Hello World!");
 		</script>
@@ -80,7 +81,7 @@ describe Utopia::Content do
 	end
 	
 	it "should successfully redirect to the foo page" do
-		get "/content/redirect"
+		client.get "/content/redirect"
 		
 		expect(last_response.status).to be == 307
 		expect(last_response.headers["location"]).to be == "foo"

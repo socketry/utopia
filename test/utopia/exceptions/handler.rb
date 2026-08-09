@@ -3,14 +3,15 @@
 # Released under the MIT License.
 # Copyright, 2015-2025, by Samuel Williams.
 
+require "sus/fixtures/protocol/http/middleware_context"
+require "utopia/application"
 require "utopia/exceptions"
 require "utopia/controller"
-require_relative "../protocol_application"
 
 describe Utopia::Exceptions::Handler do
-	include ProtocolApplication
+	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
-	let(:app) do
+	let(:middleware) do
 		root = File.expand_path(".handler", __dir__)
 		
 		Utopia::Application.build do
@@ -21,17 +22,17 @@ describe Utopia::Exceptions::Handler do
 	
 	it "should successfully call the controller method" do
 		# This request will raise an exception, and then redirect to the /exception url which will fail again, and cause a fatal error.
-		get "/blow?fatal=true"
+		client.get "/blow?fatal=true"
 		
 		expect(last_response.status).to be == 500
 		expect(last_response.headers["content-type"]).to be == "text/plain"
-		expect(body).to be(:include?, "error")
+		expect(last_response.read).to be(:include?, "error")
 	end
 	
 	it "should fail with a 500 error" do
-		get "/blow"
+		client.get "/blow"
 		
 		expect(last_response.status).to be == 500
-		expect(body).to be(:include?, "Error: Arrrh!")
+		expect(last_response.read).to be(:include?, "Error: Arrrh!")
 	end
 end

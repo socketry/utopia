@@ -4,13 +4,14 @@
 # Copyright, 2026, by Samuel Williams.
 
 require "json"
+require "sus/fixtures/protocol/http/middleware_context"
+require "utopia/application"
 require "utopia/controller"
-require_relative "../protocol_application"
 
 describe Utopia::Controller do
-	include ProtocolApplication
+	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
-	let(:app) do
+	let(:middleware) do
 		root = File.expand_path(".parameters", __dir__)
 		
 		Utopia::Application.build do
@@ -34,7 +35,7 @@ describe Utopia::Controller do
 				request_body = request_data["body"]
 			end
 			
-			request(
+			client.request(
 				request_data.fetch("method"),
 				request_data.fetch("path"),
 				request_data.fetch("headers"),
@@ -43,7 +44,7 @@ describe Utopia::Controller do
 			
 			expect(last_response.status).to be == response_data.fetch("status")
 			expect(last_response.headers["content-type"]).to be == "application/json"
-			expect(JSON.parse(body)).to be == response_data.fetch("body")
+			expect(JSON.parse(last_response.read)).to be == response_data.fetch("body")
 		end
 	end
 end

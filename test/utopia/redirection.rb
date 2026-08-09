@@ -3,11 +3,12 @@
 # Released under the MIT License.
 # Copyright, 2016-2026, by Samuel Williams.
 
+require "sus/fixtures/protocol/http/middleware_context"
+require "utopia/application"
 require "utopia/redirection"
-require_relative "protocol_application"
 
 describe Utopia::Redirection do
-	include ProtocolApplication
+	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
 	def tracked_body(name, events)
 		body = Protocol::HTTP::Body::Buffered.wrap([name.to_s])
@@ -20,7 +21,7 @@ describe Utopia::Redirection do
 		return body
 	end
 	
-	let(:app) do
+	let(:middleware) do
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
 			case request.path_info
 			when "/error"
@@ -44,7 +45,7 @@ describe Utopia::Redirection do
 	end
 	
 	it "should redirect directory to index" do
-		get "/welcome/"
+		client.get "/welcome/"
 		
 		expect(last_response.status).to be == 307
 		expect(last_response.headers["location"]).to be == "/welcome/index"
@@ -52,7 +53,7 @@ describe Utopia::Redirection do
 	end
 	
 	it "should not allow open redirect via protocol-relative URL" do
-		get "//evil.com/"
+		client.get "//evil.com/"
 		
 		# Must not redirect to //evil.com/index (external host)
 		if last_response.status == 307
@@ -61,7 +62,7 @@ describe Utopia::Redirection do
 	end
 	
 	it "should be permanently moved" do
-		get "/a"
+		client.get "/a"
 		
 		expect(last_response.status).to be == 301
 		expect(last_response.headers["location"]).to be == "/b"
@@ -69,7 +70,7 @@ describe Utopia::Redirection do
 	end
 	
 	it "should be permanently moved" do
-		get "/"
+		client.get "/"
 		
 		expect(last_response.status).to be == 301
 		expect(last_response.headers["location"]).to be == "/welcome/index"
@@ -77,10 +78,10 @@ describe Utopia::Redirection do
 	end
 	
 	it "should redirect on 404" do
-		get "/foo"
+		client.get "/foo"
 		
 		expect(last_response.status).to be == 404
-		expect(body).to be == "File not found :("
+		expect(last_response.read).to be == "File not found :("
 	end
 	
 	it "closes the response replaced by an error document" do
@@ -103,7 +104,7 @@ describe Utopia::Redirection do
 	end
 	
 	it "should blow up if internal error redirect also fails" do
-		expect{get "/teapot"}.to raise_exception Utopia::Redirection::RequestFailure
+		expect{client.get "/teapot"}.to raise_exception Utopia::Redirection::RequestFailure
 	end
 	
 	it "closes both responses when the error document fails" do
@@ -129,14 +130,14 @@ describe Utopia::Redirection do
 	end
 	
 	it "should redirect deep url to top" do
-		get "/hierarchy/a/b/c/d/e"
+		client.get "/hierarchy/a/b/c/d/e"
 		
 		expect(last_response.status).to be == 301
 		expect(last_response.headers["location"]).to be == "/hierarchy"
 	end
 	
 	it "should get a weird status" do
-		get "/weird"
+		client.get "/weird"
 		
 		expect(last_response.status).to be == 333
 		expect(last_response.headers["location"]).to be == "/status"

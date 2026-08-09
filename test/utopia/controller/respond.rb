@@ -5,11 +5,12 @@
 
 require "json"
 require "protocol/http/body/readable"
+require "sus/fixtures/protocol/http/middleware_context"
+require "utopia/application"
 require "utopia/content"
 require "utopia/controller"
 require "utopia/redirection"
 require "utopia/request"
-require_relative "../protocol_application"
 
 describe Utopia::Controller do
 	class TestController < Utopia::Controller::Base
@@ -119,9 +120,9 @@ describe Utopia::Controller do
 end
 
 describe Utopia::Controller do
-	include ProtocolApplication
+	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
-	let(:app) do
+	let(:middleware) do
 		root = File.expand_path(".respond", __dir__)
 		
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request| Utopia::Response[404, {}, []]}) do
@@ -133,71 +134,71 @@ describe Utopia::Controller do
 	
 	it "should get html error page" do
 		# Standard web browser header:
-		header "accept", "text/html, text/*, */*"
+		client.headers["accept"] = "text/html, text/*, */*"
 		
-		get "/errors/file-not-found"
+		client.get "/errors/file-not-found"
 		
 		expect(last_response.status).to be == 200
 		expect(last_response.headers["content-type"]).to be(:include?, "text/html")
-		expect(body).to be(:include?, "<h1>File Not Found</h1>")
+		expect(last_response.read).to be(:include?, "<h1>File Not Found</h1>")
 	end
 	
 	it "should get html response" do
-		header "accept", "*/*"
+		client.headers["accept"] = "*/*"
 		
-		get "/html/hello-world"
+		client.get "/html/hello-world"
 		
 		expect(last_response.status).to be == 200
 		expect(last_response.headers["content-type"]).to be == "text/html"
-		expect(body).to be == "<p>Hello World</p>"
+		expect(last_response.read).to be == "<p>Hello World</p>"
 	end
 	
 	it "should get version 1 response" do
-		header "accept", "application/json;version=1"
+		client.headers["accept"] = "application/json;version=1"
 		
-		get "/api/fetch"
+		client.get "/api/fetch"
 		
 		expect(last_response.status).to be == 200
 		expect(last_response.headers["content-type"]).to be == "application/json"
-		expect(body).to be == '{"message":"Hello World"}'
+		expect(last_response.read).to be == '{"message":"Hello World"}'
 	end
 	
 	it "should get version 2 response" do
-		header "accept", "application/json;version=2"
+		client.headers["accept"] = "application/json;version=2"
 		
-		get "/api/fetch"
+		client.get "/api/fetch"
 		
 		expect(last_response.status).to be == 200
 		expect(last_response.headers["content-type"]).to be == "application/json"
-		expect(body).to be == '{"message":"Goodbye World"}'
+		expect(last_response.read).to be == '{"message":"Goodbye World"}'
 	end
 	
 	
 	it "should work even if no accept header specified" do
-		get "/api/fetch"
+		client.get "/api/fetch"
 		
 		expect(last_response.status).to be == 200
 		expect(last_response.headers["content-type"]).to be == "application/json"
-		expect(body).to be == "{}"
+		expect(last_response.read).to be == "{}"
 	end
 	
 	it "should give record as JSON" do
-		header "accept", "application/json"
+		client.headers["accept"] = "application/json"
 		
-		get "/rewrite/2/show"
+		client.get "/rewrite/2/show"
 		
 		expect(last_response.status).to be == 200
 		expect(last_response.headers["content-type"]).to be == "application/json"
-		expect(body).to be == '{"id":2,"foo":"bar"}'
+		expect(last_response.read).to be == '{"id":2,"foo":"bar"}'
 	end
 	
 	it "should give error as JSON" do
-		header "accept", "application/json"
+		client.headers["accept"] = "application/json"
 		
-		get "/rewrite/1/show"
+		client.get "/rewrite/1/show"
 		
 		expect(last_response.status).to be == 404
 		expect(last_response.headers["content-type"]).to be == "application/json"
-		expect(body).to be == '{"message":"Could not find record"}'
+		expect(last_response.read).to be == '{"message":"Could not find record"}'
 	end
 end

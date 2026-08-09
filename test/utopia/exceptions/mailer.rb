@@ -3,14 +3,15 @@
 # Released under the MIT License.
 # Copyright, 2016-2025, by Samuel Williams.
 
+require "sus/fixtures/protocol/http/middleware_context"
+require "utopia/application"
 require "utopia/exceptions"
 require "utopia/controller"
-require_relative "../protocol_application"
 
 describe Utopia::Exceptions::Mailer do
-	include ProtocolApplication
+	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
-	let(:app) do
+	let(:middleware) do
 		root = File.expand_path(".handler", __dir__)
 		
 		Utopia::Application.build do
@@ -29,9 +30,9 @@ describe Utopia::Exceptions::Mailer do
 	end
 	
 	it "should send an email to report the failure" do
-		header "Accept", "text/plain"
+		client.headers["accept"] = "text/plain"
 		
-		expect{get "/blow"}.to raise_exception(StandardError, message: be =~ /Arrrh/)
+		expect{client.get "/blow"}.to raise_exception(StandardError, message: be =~ /Arrrh/)
 		
 		last_mail = Mail::TestMailer.deliveries.last
 		
