@@ -6,13 +6,13 @@
 prepend Actions
 
 on "all_locales" do |request, path|
-	succeed! content: request.localization.all_locales.join(",")
+	respond! Utopia::Response[200, {}, [request.localization.all_locales.join(",")]]
 end
 
 on "default_locale" do |request, path|
-	succeed! content: request.localization.default_locale
+	respond! Utopia::Response[200, {}, [request.localization.default_locale]]
 end
 
 on "locale" do |request, path|
-	succeed! content: request.localization.locale
+	respond! Utopia::Response[200, {}, [request.localization.locale]]
 end

@@ -5,22 +5,12 @@
 
 require_relative "../http"
 require_relative "../response"
+require_relative "result"
 
 require "protocol/content/default"
 
 module Utopia
 	module Controller
-		CONTENT_TYPE = HTTP::CONTENT_TYPE
-		
-		# A controller response that can be converted to a protocol HTTP response.
-		Response = Struct.new(:status, :headers, :body) do
-			# Convert this value to a protocol HTTP response.
-			# @returns [Protocol::HTTP::Response] The response.
-			def to_response
-				Utopia::Response[status, headers, body || []]
-			end
-		end
-		
 		# The base implementation of a controller class.
 		class Base
 			URI_PATH = nil
@@ -133,14 +123,22 @@ module Utopia
 				end
 			end
 			
-			# This will cause the middleware to generate a response.
+			# Immediately respond with a complete protocol response.
+			# @parameter response [Protocol::HTTP::Response] The response.
+			# @returns [Object] This method does not return normally.
 			def respond!(response)
-				throw :response, response
+				throw :response, Utopia::Response.wrap(response)
 			end
 			
 			# Respond with the response, but only if it's not nil.
+			# @parameter response [Protocol::HTTP::Response | Nil] The optional response.
+			# @returns [Nil] This method returns `nil` when no response is provided.
 			def respond?(response)
-				respond!(response) if response
+				if response
+					return respond!(response)
+				end
+				
+				return nil
 			end
 			
 			# This will cause the controller middleware to pass on the request.
@@ -153,7 +151,7 @@ module Utopia
 				status = HTTP::Status.new(status, 300...400)
 				location = target.to_s
 				
-				respond! Response.new(status.to_i, {HTTP::LOCATION => location}, [status.to_s])
+				respond! Utopia::Response[status.to_i, {HTTP::LOCATION => location}, [status.to_s]]
 			end
 			
 			# Controller relative redirect.
@@ -166,28 +164,18 @@ module Utopia
 				status = HTTP::Status.new(error, 400...600)
 				
 				message ||= status.to_s
-				respond! Response.new(status.to_i, {}, [message])
+				throw :response, Result.new(status.to_i, {}, message)
 			end
 			
-			# Succeed the request and immediately respond.
-			def succeed!(status: 200, headers: {}, type: nil, **options)
+			# Succeed the request with a semantic value awaiting response negotiation.
+			# @parameter value [Object] The semantic result value.
+			# @parameter status [Integer | Symbol] The successful response status.
+			# @parameter headers [Hash] Additional response headers.
+			# @returns [Object] This method does not return normally.
+			def succeed!(value = nil, status: 200, headers: {})
 				status = HTTP::Status.new(status, 200...300)
 				
-				if type
-					headers[CONTENT_TYPE] = type.to_s
-				end
-				
-				body = body_for(status, headers, options)
-				respond! Response.new(status.to_i, headers, body || [])
-			end
-			
-			# Generate the body for the given status, headers and options.
-			def body_for(status, headers, options)
-				if body = options[:body]
-					return body
-				elsif content = options[:content]
-					return [content]
-				end
+				throw :response, Result.new(status.to_i, headers, value)
 			end
 		end
 	end

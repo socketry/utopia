@@ -10,7 +10,7 @@ module Utopia
 		# A controller layer which invokes functinality based on the request path.
 		# @example
 		# 	on '*' do |request, path|
-		# 		succeed! content: 'Hello World'
+		# 		succeed! 'Hello World'
 		# 	end
 		module Actions
 			# Extend a controller class with the action-definition DSL.

@@ -4,6 +4,7 @@
 # Copyright, 2016-2025, by Samuel Williams.
 
 require "json"
+require "protocol/http/body/readable"
 require "utopia/content"
 require "utopia/controller"
 require "utopia/redirection"
@@ -16,15 +17,27 @@ describe Utopia::Controller do
 		prepend Utopia::Controller::Respond, Utopia::Controller::Actions
 		
 		responds.with("application/json") do |media_range, object|
-			succeed! content: JSON.dump(object), type: "application/json"
+			JSON.dump(object)
 		end
 		
 		responds.with("text/plain") do |media_range, object|
-			succeed! content: object.inspect,	type: "text/plain"
+			object.inspect
+		end
+		
+		responds.with("application/octet-stream") do |media_range, object|
+			object
 		end
 		
 		on "fetch" do |request, path|
-			succeed! content: {user_id: 10}
+			succeed!({user_id: 10})
+		end
+		
+		on "stream" do |request, path|
+			succeed! @stream
+		end
+		
+		on "explicit" do |request, path|
+			respond! Utopia::Response[202, {"content-type" => "application/example"}, ["Explicit"]]
 		end
 		
 		def self.uri_path
@@ -70,6 +83,37 @@ describe Utopia::Controller do
 		
 		expect(response.headers["content-type"]).to be == "application/json"
 		expect(response.read).to be == '{"user_id":10}'
+	end
+	
+	it "preserves readable response bodies" do
+		body = Protocol::HTTP::Body::Readable.new
+		controller.instance_variable_set(:@stream, body)
+		request, path = mock_request("/stream", {"accept" => "application/octet-stream"})
+		relative_path = path - controller.class.uri_path
+		
+		response = controller.process!(request, relative_path)
+		
+		expect(response.body).to be == body
+	end
+	
+	it "raises when no response representation is acceptable" do
+		request, path = mock_request("/fetch", {"accept" => "application/xml"})
+		relative_path = path - controller.class.uri_path
+		
+		expect do
+			controller.process!(request, relative_path)
+		end.to raise_exception(TypeError)
+	end
+	
+	it "passes complete responses through without negotiation" do
+		request, path = mock_request("/explicit", {"accept" => "application/xml"})
+		relative_path = path - controller.class.uri_path
+		
+		response = controller.process!(request, relative_path)
+		
+		expect(response.status).to be == 202
+		expect(response.headers["content-type"]).to be == "application/example"
+		expect(response.read).to be == "Explicit"
 	end
 	
 end

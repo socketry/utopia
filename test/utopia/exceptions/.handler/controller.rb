@@ -17,6 +17,6 @@ on 'exception' do |request|
 	if request.query_arguments["fatal"]
 		raise TharSheBlows.new("Yarrh!")
 	else
-		succeed! :content => "Error: #{request.exception.message}", :type => 'text/plain'
+		respond! Utopia::Response[200, {"content-type" => "text/plain"}, ["Error: #{request.exception.message}"]]
 	end
 end

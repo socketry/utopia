@@ -13,6 +13,27 @@ require "stringio"
 describe Utopia::Controller::Base do
 	let(:controller) {subject.new}
 	
+	it "produces semantic results for negotiated responses" do
+		result = controller.catch_response do
+			controller.succeed!({"name" => "Samuel"}, status: 201, headers: {"vary" => "accept"})
+		end
+		
+		expect(result).to be_a(Utopia::Controller::Result)
+		expect(result.status).to be == 201
+		expect(result.headers).to be == {"vary" => "accept"}
+		expect(result.value).to be == {"name" => "Samuel"}
+	end
+	
+	it "produces complete protocol responses explicitly" do
+		response = Utopia::Response[204, {}, []]
+		
+		result = controller.catch_response do
+			controller.respond!(response)
+		end
+		
+		expect(result).to be == response
+	end
+	
 	it "parses request bodies independently of the request method" do
 		request = Utopia::Request[
 			"QUERY",

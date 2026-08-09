@@ -20,19 +20,25 @@ module Utopia
 					APPLICATION_JSON.split(*arguments)
 				end
 				
-				# Serialize an object as a successful JSON response.
+				# Serialize an object as JSON.
 				# @parameter context [Object] The context.
 				# @parameter request [Utopia::Request] The request.
 				# @parameter media_range [HTTP::Accept::MediaTypes::MediaRange] The negotiated media range.
 				# @parameter object [Object] The object.
 				# @parameter options [Hash] The options.
-				# @returns [Object] The result of {Controller::Base#succeed!}.
+				# @returns [String] The serialized JSON body.
 				def self.call(context, request, media_range, object, **options)
 					if version = media_range.parameters["version"]
 						options[:version] = version.to_s
 					end
 					
-					context.succeed! content: object.to_json(options), type: APPLICATION_JSON
+					return object.to_json(options)
+				end
+				
+				# The media type produced by this handler.
+				# @returns [HTTP::Accept::ContentType] The JSON media type.
+				def self.content_type
+					APPLICATION_JSON
 				end
 			end
 			
@@ -47,15 +53,21 @@ module Utopia
 					WILDCARD.split(*arguments)
 				end
 				
-				# Accept an object without producing a response.
+				# Pass an object through without transformation.
 				# @parameter context [Object] The context.
 				# @parameter request [Utopia::Request] The request.
 				# @parameter media_range [HTTP::Accept::MediaTypes::MediaRange] The negotiated media range.
 				# @parameter object [Object] The object.
 				# @parameter options [Hash] The options.
-				# @returns [Nil] No response is produced.
+				# @returns [Object] The original body.
 				def self.call(context, request, media_range, object, **options)
-					# Do nothing.
+					return object
+				end
+				
+				# The passthrough handler does not specify a response media type.
+				# @returns [Nil] No media type.
+				def self.content_type
+					return nil
 				end
 			end
 		end
@@ -83,14 +95,6 @@ module Utopia
 				end
 			end
 			
-			# A response invocation bound to its responder, context, and request.
-			Responds = Struct.new(:responder, :context, :request) do
-				# @todo Refactor `object` -> `*arguments`...
-				def with(object, **options)
-					responder.call(context, request, object, **options)
-				end
-			end
-			
 			# Initialize an empty content-type handler map.
 			def initialize
 				@handlers = HTTP::Accept::MediaTypes::Map.new
@@ -107,11 +111,11 @@ module Utopia
 			end
 			
 			# Negotiate the request's accepted media types and invoke the best handler.
-			# @parameter context [Object] The context.
+			# @parameter context [Object] The controller context.
 			# @parameter request [Utopia::Request] The request.
 			# @parameter arguments [Array] The arguments.
 			# @parameter options [Hash] The options.
-			# @returns [Object | Nil] The selected handler's result, or `nil` if none matches.
+			# @returns [Array(Object, Object) | Nil] The selected content type and body, or `nil` if none matches.
 			def call(context, request, *arguments, **options)
 				# Parse the list of browser preferred content types and return ordered by priority:
 				media_types = HTTP::Accept::MediaTypes.browser_preferred_media_types(
@@ -121,21 +125,15 @@ module Utopia
 				handler, media_range = @handlers.for(media_types)
 				
 				if handler
-					handler.call(context, request, media_range, *arguments, **options)
+					return handler.content_type, handler.call(context, request, media_range, *arguments, **options)
 				end
+				
+				return nil
 			end
 			
-			# Add a converter for the specified content type. Call the block with the response content if the request accepts the specified content_type.
+			# Add a serializer for the specified content type.
 			def handle(content_type, &block)
 				@handlers << Handler.new(content_type, block)
-			end
-			
-			# Bind this responder to a context and request.
-			# @parameter context [Controller::Base] The controller context.
-			# @parameter request [Utopia::Request] The request.
-			# @returns [Responds] The bound responder.
-			def respond_to(context, request)
-				Responds.new(self, context, request)
 			end
 			
 			# Register the default JSON handler.

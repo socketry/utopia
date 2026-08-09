@@ -12,5 +12,5 @@ rewrite.extract_prefix id: Integer do |request|
 end
 
 on 'show' do
-	succeed! content: {id: @id, foo: 'bar'}
+	succeed!({id: @id, foo: 'bar'})
 end

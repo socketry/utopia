@@ -73,7 +73,7 @@ A controller is a file within the specified root directory (typically `pages`) w
 def passthrough(request, path)
 	# Call one of:
 	
-	# This will cause the middleware to generate a response.
+	# Respond immediately with a complete Protocol::HTTP::Response.
 	# def respond!(response)
 	
 	# This will cause the controller to skip the request.
@@ -85,15 +85,34 @@ def passthrough(request, path)
 	# Controller relative redirect.
 	# def goto!(target, status = 302)
 	
-	# Respond with an error which indiciates some kind of failure.
+	# Respond with an error which indicates some kind of failure.
 	# def fail!(error = 400, message = nil)
 	
-	# Succeed the request and immediately respond.
-	# def succeed!(status: 200, headers: {}, **options)
-	# options may include content: String or body: Enumerable.
+	# Succeed with a semantic value which the Respond layer serializes.
+	# def succeed!(value = nil, status: 200, headers: {})
 	
-	suceed!
+	succeed!
 end
+```
+
+Controllers which return semantic values should prepend {ruby Utopia::Controller::Respond} and configure serializers. Serializer blocks return wire-ready response bodies, so they can return streaming {ruby Protocol::HTTP::Body::Readable} objects without buffering them.
+
+```ruby
+prepend Utopia::Controller::Respond, Utopia::Controller::Actions
+
+responds.with("application/json") do |media_range, value|
+	JSON.dump(value)
+end
+
+on "show" do
+	succeed!({"name" => "Samuel"})
+end
+```
+
+Use `respond!` when a controller has already constructed a complete response and no content negotiation is required:
+
+```ruby
+respond! Utopia::Response[200, {"content-type" => "text/plain"}, ["Hello World"]]
 ```
 
 The controller layer can do more complex operations by prepending modules into it.

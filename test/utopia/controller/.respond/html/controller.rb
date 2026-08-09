@@ -10,5 +10,5 @@ respond.with_json
 
 # This method should return HTML, even thought this controller responds with JSON.
 on 'hello-world' do
-	succeed! content: "<p>Hello World</p>", :type => 'text/html'
+	respond! Utopia::Response[200, {"content-type" => "text/html"}, ["<p>Hello World</p>"]]
 end

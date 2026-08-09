@@ -64,12 +64,14 @@ describe Utopia::Controller do
 		variables << controller
 		
 		result = controller.process!(request, Utopia::Path["success"])
+		expect(result).to be_a(Utopia::Controller::Result)
 		expect(result.status).to be == 200
-		expect(result.to_response.read).to be == nil
+		expect(result.value).to be == nil
 		
 		result = controller.process!(request, Utopia::Path["foo/bar/failure"])
+		expect(result).to be_a(Utopia::Controller::Result)
 		expect(result.status).to be == 400
-		expect(result.to_response.read).to be == "Bad Request"
+		expect(result.value).to be == "Bad Request"
 		
 		result = controller.process!(request, Utopia::Path["variable"])
 		expect(result).to be == nil
