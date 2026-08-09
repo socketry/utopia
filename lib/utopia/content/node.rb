@@ -138,9 +138,10 @@ module Utopia
 			# Process the request and return the resulting response.
 			# @parameter request [Utopia::Request] The application request.
 			# @parameter attributes [Hash] The attributes.
+			# @parameter localization [Utopia::Localization::Preferences | Nil] The selected localization.
 			# @returns [Protocol::HTTP::Response] The response.
-			def process!(request, attributes = {})
-				Document.render(self, request, attributes).to_response
+			def process!(request, attributes = {}, localization: request&.localization)
+				Document.render(self, request, attributes, localization: localization).to_response
 			end
 			
 			# This is a special context in which a limited set of well defined methods are exposed in the content view.
@@ -167,8 +168,8 @@ module Utopia
 					document.controller
 				end
 				
-				# Return the document's localization wrapper.
-				# @returns [Localization::Wrapper] The localization wrapper.
+				# Return the document's localization preferences.
+				# @returns [Localization::Preferences | Nil] The localization preferences.
 				def localization
 					document.localization
 				end

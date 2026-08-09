@@ -36,7 +36,7 @@ use Utopia::Redirection::Errors,
 
 ## Localization
 
-The {ruby Utopia::Localization} middleware provides non-intrusive localization on top of the controller and view layers. The middleware uses the `accept-language` header to guess the preferred locale out of the given options. If a request path maps to a resource, that resource is returned. Otherwise, a non-localized request is made.
+The {ruby Utopia::Localization} middleware computes immutable localization preferences from the request path, host, and `accept-language` header. Localization-aware resource middleware, including {ruby Utopia::Static} and {ruby Utopia::Content}, resolves those preferences without invoking controllers more than once. Place the localization middleware before those resources in the middleware stack.
 
 ~~~ ruby
 use Utopia::Localization,
@@ -53,7 +53,7 @@ pages/index.ja.xnode
 pages/index.zh.xnode
 ~~~
 
-You can also access the current locale in the view via {ruby Utopia::Content::Node::Context#localization}.
+You can access the selected locale in a view using `localization.locale`. Controllers can inspect the request preferences using `request.localization`.
 
 ## Controller
 

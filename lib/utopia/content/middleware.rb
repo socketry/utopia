@@ -4,7 +4,7 @@
 # Copyright, 2025-2026, by Samuel Williams.
 
 require_relative "../middleware"
-require_relative "../localization"
+require_relative "../localization/resolver"
 require_relative "../request"
 require_relative "../response"
 require_relative "../controller/variables"
@@ -22,6 +22,8 @@ module Utopia
 	module Content
 		# A middleware which serves dynamically generated content based on markup files.
 		class Middleware < Protocol::HTTP::Middleware
+			include Localization::Resolver
+			
 			CONTENT_NAMESPACE = "content".freeze
 			UTOPIA_NAMESPACE = "utopia".freeze
 			CONTENT_TAG_NAME = "utopia:content".freeze
@@ -105,12 +107,13 @@ module Utopia
 			# Respond.
 			# @parameter link [Utopia::Content::Link] The content link.
 			# @parameter request [Utopia::Request] The application request.
+			# @parameter localization [Utopia::Localization::Preferences | Nil] The selected localization.
 			# @returns [Protocol::HTTP::Response] The response.
-			def respond(link, request)
+			def respond(link, request, localization: request.localization)
 				if node = resolve_link(link)
 					attributes = request.variables&.to_hash || {}
 					
-					return node.process!(request, attributes)
+					return node.process!(request, attributes, localization: localization)
 				elsif redirect_uri = link[:uri]
 					return Utopia::Response[307, {HTTP::LOCATION => redirect_uri}, []]
 				end
@@ -133,11 +136,16 @@ module Utopia
 					return Utopia::Response[307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []]
 				end
 				
-				locale = request.locale
-				if link = @links.for(path, locale)
-					if response = self.respond(link, request)
-						return response
+				response = resolve_localized(request) do |localization|
+					locale = localization&.locale
+					
+					if link = @links.for(path, locale, fallback: false)
+						self.respond(link, request, localization: localization)
 					end
+				end
+				
+				if response
+					return response
 				end
 				
 				return @delegate.call(request)
@@ -200,10 +208,11 @@ module Utopia
 		end
 		
 		Traces::Provider(Middleware) do
-			def respond(link, request)
+			def respond(link, request, localization: request.localization)
 				attributes = {
 					"link.key" => link.key,
-					"link.href" => link.href
+					"link.href" => link.href,
+					"link.locale" => localization&.locale,
 				}
 				
 				Traces.trace("utopia.content.middleware.respond", attributes: attributes){super}

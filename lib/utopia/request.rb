@@ -27,7 +27,6 @@ module Utopia
 			@request_path = request_path
 			@session = nil
 			@variables = nil
-			@locale = nil
 			@localization = nil
 			@exception = nil
 			
@@ -124,10 +123,7 @@ module Utopia
 		# The controller variables associated with this request, if installed.
 		attr_accessor :variables
 		
-		# The locale selected for this request, if any.
-		attr_accessor :locale
-		
-		# The localization middleware associated with this request, if any.
+		# The immutable localization preferences associated with this request, if installed.
 		attr_accessor :localization
 		
 		# The exception associated with this request, if any.
@@ -155,7 +151,6 @@ module Utopia
 			request = self.class.new(delegate, request_path: self.request_path)
 			request.session = @session
 			request.variables = @variables
-			request.locale = @locale
 			request.localization = @localization
 			request.exception = @exception
 			

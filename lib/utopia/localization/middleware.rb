@@ -3,20 +3,20 @@
 # Released under the MIT License.
 # Copyright, 2025-2026, by Samuel Williams.
 
-require_relative "wrapper"
+require_relative "preferences"
 require_relative "../middleware"
 require_relative "../request"
 require_relative "../response"
 
+require "set"
+
 module Utopia
 	module Localization
-		# Selects a locale for each request and rewrites localized paths.
+		# Computes localization preferences and rewrites locale-prefixed paths.
 		class Middleware < Protocol::HTTP::Middleware
-			RESOURCE_NOT_FOUND = Response[400, {}, []].freeze
-			
 			# @param locales [Array<String>] An array of all supported locales.
 			# @param default_locale [String] The default locale if none is provided.
-			# @param default_locales [String] The locales to try in order if none is provided.
+			# @param default_locales [Array<String | Nil>] The locales to try in order if none is provided.
 			# @param hosts [Hash<Pattern, String>] Specify a mapping of request hosts to locales.
 			# @param ignore [Array<Pattern>] A list of patterns matched against request paths which will not be localized.
 			def initialize(app, locales:, default_locale: nil, default_locales: nil, hosts: {}, ignore: [])
@@ -43,9 +43,7 @@ module Utopia
 				# Select a localization based on a request host name:
 				@hosts = hosts
 				
-				@ignore = ignore || options[:nonlocalized]
-				
-				@methods = methods
+				@ignore = ignore
 			end
 			
 			# Freeze this object and its internal state.
@@ -65,42 +63,31 @@ module Utopia
 			attr :all_locales
 			attr :default_locale
 			
-			# Compute the preferred locales for the request.
-			# @parameter request [Utopia::Request] The derived request.
-			# @yields {|request, locale| ...} Each unique request and locale pair in preference order.
-			# @returns [Enumerator | Array] An enumerator when no block is given, otherwise the configured default locales.
-			def preferred_locales(request)
-				return to_enum(:preferred_locales, request) unless block_given?
-				
+			# Compute the preferred locales for a request.
+			# @parameter request [Utopia::Request] The application request.
+			# @parameter path_locale [String | Nil] The locale extracted from the request path.
+			# @returns [Array(String | Nil)] The unique locales in preference order.
+			def preferred_locales(request, path_locale = nil)
 				# Keep track of what locales have been tried:
 				locales = Set.new
 				
-				host_preferred_locales(request) do |locale|
-					if locales.add? locale
-						yield request, locale
-					end
+				if path_locale
+					locales.add(path_locale)
 				end
 				
-				request_preferred_locale(request) do |locale, path|
-					# We have extracted a locale from the path, so from this point on we should use the updated path:
-					request = request.with(path_info: path.to_s)
-					
-					if locales.add? locale
-						yield request, locale
-					end
+				host_preferred_locales(request) do |locale|
+					locales.add(locale)
 				end
 				
 				browser_preferred_locales(request).each do |locale|
-					if locales.add? locale
-						yield request, locale
-					end
+					locales.add(locale)
 				end
 				
 				@default_locales.each do |locale|
-					if locales.add? locale
-						yield request, locale
-					end
+					locales.add(locale)
 				end
+				
+				return locales.to_a
 			end
 			
 			# Infer preferred locales from the request host.
@@ -118,18 +105,19 @@ module Utopia
 				end
 			end
 			
-			# Select the preferred locale for the request.
+			# Extract a locale prefix from the request path.
 			# @parameter request [Utopia::Request] The application request.
-			# @yields {|locale, path| ...} The locale and path with its locale prefix removed, when present.
-			# @returns [Object | Nil] The block result when a locale prefix is present.
-			def request_preferred_locale(request)
+			# @returns [Array(Utopia::Request, String | Nil)] The request and extracted locale.
+			def extract_path_locale(request)
 				path = Path[request.path_info]
 				
 				if request_locale = @all_locales.patterns[path.first]
 					# Remove the localization prefix:
 					path.delete_at(0)
 					
-					yield request_locale, path
+					return request.with(path_info: path.to_s), request_locale
+				else
+					return request, nil
 				end
 			end
 			
@@ -163,52 +151,36 @@ module Utopia
 				return true
 			end
 			
-			# Mark the response as varying by language and expose its localized content location.
-			# @parameter request [Utopia::Request] The application request.
+			# Mark the response as varying by language.
 			# @parameter response [Protocol::HTTP::Response] The response.
 			# @returns [Protocol::HTTP::Response] The response with localization headers.
-			def vary(request, response)
+			def vary(response)
 				response = Response.wrap(response)
 				headers = response.headers
 				
 				# This response was based on the Accept-Language header:
 				headers.add("vary", "Accept-Language")
 				
-				# Althought this header is generally not supported, we supply it anyway as it is useful for debugging:
-				if locale = request.locale
-					# Set the Content-Location to point to the localized URI as requested:
-					headers["content-location"] = "/#{locale}" + request.path_info
-				end
-				
 				return response
 			end
 			
-			# Try the request's preferred locales until the application returns a successful response.
+			# Attach localization preferences and invoke the application once.
 			# @parameter request [Utopia::Request] The request.
-			# @returns [Protocol::HTTP::Response] The localized response with cache-variation headers.
+			# @returns [Protocol::HTTP::Response] The response with cache-variation headers.
 			def call(request)
 				# Pass the request through if it shouldn't be localized:
 				return @delegate.call(request) unless localized?(request)
 				
-				response = nil
-				localized_request = request
+				request, path_locale = extract_path_locale(request)
+				locales = preferred_locales(request, path_locale)
 				
-				# We have a non-localized request, but there might be a localized resource. We return the best localization possible:
-				preferred_locales(request) do |candidate, locale|
-					# puts "Trying locale: #{locale}: #{localized_request.path_info}..."
-					response&.close
-					
-					localized_request = candidate.with
-					localized_request.variables = nil
-					localized_request.localization = self
-					localized_request.locale = locale
-					
-					response = Response.wrap(@delegate.call(localized_request))
-					
-					break unless response.status >= 400
-				end
+				request.localization = Preferences.new(
+					all_locales: @all_locales.names,
+					preferred_locales: locales,
+					default_locale: @default_locale,
+				)
 				
-				return vary(localized_request, response)
+				return vary(@delegate.call(request))
 			end
 		end
 	end

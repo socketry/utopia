@@ -94,7 +94,7 @@ describe Utopia::Request do
 	it "has no application state by default" do
 		expect(request.session).to be_nil
 		expect(request.variables).to be_nil
-		expect(request.locale).to be_nil
+		expect(request.localization).to be_nil
 		expect(request.exception).to be_nil
 	end
 	
@@ -112,9 +112,10 @@ describe Utopia::Request do
 	it "builds derived requests" do
 		session = Object.new
 		variables = Object.new
+		localization = Object.new
 		request.session = session
 		request.variables = variables
-		request.locale = "en"
+		request.localization = localization
 		exception = StandardError.new("Boom")
 		request.exception = exception
 		
@@ -127,7 +128,7 @@ describe Utopia::Request do
 		expect(derived.delegate).not.to be_equal(request.delegate)
 		expect(derived.session).to be_equal(session)
 		expect(derived.variables).to be_equal(variables)
-		expect(derived.locale).to be == "en"
+		expect(derived.localization).to be_equal(localization)
 		expect(derived.exception).to be_equal(exception)
 	end
 	

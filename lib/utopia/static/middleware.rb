@@ -9,6 +9,7 @@ require_relative "../response"
 
 require_relative "local_file"
 require_relative "mime_types"
+require_relative "../localization/resolver"
 
 require "traces/provider"
 
@@ -18,6 +19,8 @@ module Utopia
 		
 		# A middleware which serves static files from the specified root directory.
 		class Middleware < Protocol::HTTP::Middleware
+			include Localization::Resolver
+			
 			# @param root [String] The root directory to serve files from.
 			# @param types [Array] The mime-types (and file extensions) to recognize/serve.
 			# @param cache_control [String] The cache-control header to set for static content.
@@ -88,11 +91,12 @@ module Utopia
 			# @parameter request [Utopia::Request] The request.
 			# @parameter path_info [String] The request path to serve.
 			# @parameter extension [String] The file extension.
+			# @parameter localization [Utopia::Localization::Preferences | Nil] The selected localization.
 			# @returns [Protocol::HTTP::Response] The response.
-			def respond(request, path_info, extension)
+			def respond(request, path_info, extension, localization: request.localization)
 				path = Path[path_info].simplify
 				
-				if locale = request.locale
+				if locale = localization&.locale
 					path.last.insert(path.last.rindex(".") || -1, ".#{locale}")
 				end
 				
@@ -115,7 +119,11 @@ module Utopia
 				extension = File.extname(path_info)
 				
 				if @extensions.key?(extension.downcase)
-					if response = self.respond(request, path_info, extension)
+					response = resolve_localized(request) do |localization|
+						self.respond(request, path_info, extension, localization: localization)
+					end
+					
+					if response
 						return response
 					end
 				end
@@ -126,9 +134,10 @@ module Utopia
 		end
 		
 		Traces::Provider(Static) do
-			def respond(request, path_info, extension)
+			def respond(request, path_info, extension, localization: request.localization)
 				attributes = {
 					path_info: path_info,
+					locale: localization&.locale,
 				}
 				
 				Traces.trace("utopia.static.respond", attributes: attributes){super}

@@ -18,6 +18,10 @@ Application = Utopia::Application.build do
 		use Utopia::Exceptions::Mailer
 	end
 	
+	use Utopia::Localization,
+		default_locale: "en",
+		locales: ["en", "de", "ja", "zh"]
+	
 	# Serve static files from "public" directory:
 	use Utopia::Static, root: "public"
 	
@@ -30,10 +34,6 @@ Application = Utopia::Application.build do
 	use Utopia::Redirection::Errors, {
 		404 => "/errors/file-not-found"
 	}
-	
-	use Utopia::Localization,
-		default_locale: "en",
-		locales: ["en", "de", "ja", "zh"]
 	
 	use Utopia::Session,
 		expires_after: 3600 * 24,

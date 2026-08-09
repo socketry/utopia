@@ -179,7 +179,6 @@ module Utopia
 					session: request.session,
 					variables: request.variables,
 					localization: request.localization,
-					current_locale: request.locale,
 					exception: request.exception,
 				}
 			end
