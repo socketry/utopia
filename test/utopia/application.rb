@@ -136,4 +136,17 @@ describe Utopia::Application do
 			expect(response.status).to be == 404
 		end
 	end
+	
+	it "loads the generated serve configuration" do
+		path = File.expand_path("../../setup/site/config/serve.rb", __dir__)
+		application = Protocol::HTTP::Middleware.load(path)
+		response = application.call(Protocol::HTTP::Request["GET", "/"])
+		
+		expect(application).to be_a(Utopia::Application)
+		expect(response.status).to be == 301
+		expect(response.headers["location"]).to be == "/welcome/index"
+	ensure
+		response&.close
+		application&.close
+	end
 end

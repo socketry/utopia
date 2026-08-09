@@ -31,7 +31,7 @@ group :test do
 	gem "rubocop-md"
 	gem "rubocop-socketry"
 	
-	gem "falcon"
+	gem "falcon", "~> 0.57"
 	gem "async-websocket"
 	gem "sus-fixtures-async-http"
 	

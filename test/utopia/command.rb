@@ -57,6 +57,8 @@ describe "utopia command" do
 			expect(site_files).to be(:include?, file)
 		end
 		
+		expect(File.file?(File.join(root, "config/serve.rb"))).to be == true
+		
 		expect(
 			system("bundle", "exec", "bake", "test", chdir: root)
 		).to be == true
