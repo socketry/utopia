@@ -9,6 +9,17 @@ require_relative "protocol_application"
 describe Utopia::Redirection do
 	include ProtocolApplication
 	
+	def tracked_body(name, events)
+		body = Protocol::HTTP::Body::Buffered.wrap([name.to_s])
+		
+		body.define_singleton_method(:close) do |error = nil|
+			events << [name, error]
+			super(error)
+		end
+		
+		return body
+	end
+	
 	let(:app) do
 		Utopia::Application.build(lambda{|request|
 			case request.path_info
@@ -72,8 +83,49 @@ describe Utopia::Redirection do
 		expect(body).to be == "File not found :("
 	end
 	
+	it "closes the response replaced by an error document" do
+		events = []
+		application = Utopia::Application.build(lambda do |request|
+			if request.path_info == "/error"
+				Utopia::Response[200, {}, tracked_body(:error, events)]
+			else
+				Utopia::Response[404, {}, tracked_body(:original, events)]
+			end
+		end) do
+			use Utopia::Redirection::Errors, 404 => "/error"
+		end
+		
+		response = application.call(Protocol::HTTP::Request["GET", "/missing"])
+		
+		expect(response.status).to be == 404
+		expect(events).to be == [[:original, nil]]
+		expect(response.read).to be == "error"
+	end
+	
 	it "should blow up if internal error redirect also fails" do
 		expect{get "/teapot"}.to raise_exception Utopia::Redirection::RequestFailure
+	end
+	
+	it "closes both responses when the error document fails" do
+		events = []
+		application = Utopia::Application.build(lambda do |request|
+			if request.path_info == "/error"
+				Utopia::Response[500, {}, tracked_body(:error, events)]
+			else
+				Utopia::Response[404, {}, tracked_body(:original, events)]
+			end
+		end) do
+			use Utopia::Redirection::Errors, 404 => "/error"
+		end
+		
+		expect do
+			application.call(Protocol::HTTP::Request["GET", "/missing"])
+		end.to raise_exception(Utopia::Redirection::RequestFailure)
+		
+		expect(events.size).to be == 2
+		expect(events[0]).to be == [:original, nil]
+		expect(events[1][0]).to be == :error
+		expect(events[1][1]).to be_a(Utopia::Redirection::RequestFailure)
 	end
 	
 	it "should redirect deep url to top" do

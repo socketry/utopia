@@ -62,15 +62,25 @@ module Utopia
 				response = Response.wrap(@delegate.call(request))
 				
 				if unhandled_error?(response) && location = @codes[response.status]
+					resource_status = response.status
+					
+					# The original response is replaced by the configured error document:
+					response.close
+					
 					error_request = request.with(method: "GET", path_info: location)
 					
 					error_response = Response.wrap(@delegate.call(error_request))
 					
 					if error_response.status >= 400
-						raise RequestFailure.new(request.path_info, response.status, location, error_response.status)
+						error = RequestFailure.new(request.path_info, resource_status, location, error_response.status)
+						
+						# The failed error document will not be returned to the server:
+						error_response.close(error)
+						
+						raise error
 					else
 						# Feed the error code back with the error document:
-						error_response.status = response.status
+						error_response.status = resource_status
 						return error_response
 					end
 				else
