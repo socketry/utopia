@@ -28,13 +28,12 @@ describe Utopia::Static do
 		get "/test.txt"
 		etag = last_response.headers["etag"]
 		
-		expect(etag).to be(:start_with?, '"')
-		expect(etag).to be(:end_with?, '"')
+		expect(etag).to be(:match?, /\AW\/"[0-9a-f]{40}"\z/)
 		
 		get "/test.txt", {"if-none-match" => etag}
 		expect(last_response.status).to be == 304
 		
-		get "/test.txt", {"if-none-match" => "W/#{etag}"}
+		get "/test.txt", {"if-none-match" => etag.delete_prefix("W/")}
 		expect(last_response.status).to be == 304
 		
 		get "/test.txt", {"if-none-match" => "*"}

@@ -23,7 +23,7 @@ module Utopia
 				@root = root
 				@path = path
 				fingerprint = Digest::SHA1.hexdigest("#{File.size(full_path)}#{mtime_date}")
-				@etag = %Q{"#{fingerprint}"}
+				@etag = %Q{W/"#{fingerprint}"}
 			end
 			
 			attr :root
