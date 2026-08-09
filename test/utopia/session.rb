@@ -83,6 +83,78 @@ describe Utopia::Session do
 	
 end
 
+describe Utopia::Session::Middleware do
+	let(:delegate) do
+		Protocol::HTTP::Middleware.for do |request|
+			request.session[:updated] = true
+			
+			Utopia::Response[200, {}, []]
+		end
+	end
+	
+	def middleware(**options)
+		return subject.new(delegate, secret: "test-secret", **options)
+	end
+	
+	it "emits the default cookie directives" do
+		response = middleware.call(Utopia::Request["GET", "/"])
+		cookie = response.headers["set-cookie"].first
+		
+		expect(cookie).to be(:include?, ";Path=/")
+		expect(cookie).to be(:include?, ";Expires=")
+		expect(cookie).to be(:include?, ";HttpOnly")
+		expect(cookie).to be(:include?, ";SameSite=Lax")
+	end
+	
+	it "emits the supported cookie directives" do
+		app = middleware(
+			domain: "example.com",
+			path: "/session",
+			max_age: 60,
+			secure: true,
+			http_only: false,
+			same_site: :none,
+			partitioned: true,
+		)
+		
+		response = app.call(Utopia::Request["GET", "/"])
+		cookie = response.headers["set-cookie"].first
+		
+		expect(cookie).to be(:include?, ";Domain=example.com")
+		expect(cookie).to be(:include?, ";Path=/session")
+		expect(cookie).to be(:include?, ";Max-Age=60")
+		expect(cookie).to be(:include?, ";Secure")
+		expect(cookie).not.to be(:include?, ";HttpOnly")
+		expect(cookie).to be(:include?, ";SameSite=None")
+		expect(cookie).to be(:include?, ";Partitioned")
+	end
+	
+	it "normalizes SameSite options" do
+		{
+			false => nil,
+			nil => nil,
+			true => "Strict",
+			strict: "Strict",
+			lax: "Lax",
+			none: "None",
+		}.each do |option, expected|
+			expect(middleware(same_site: option).cookie_defaults[:same_site]).to be == expected
+		end
+	end
+	
+	it "rejects invalid SameSite values" do
+		expect do
+			middleware(same_site: :invalid)
+		end.to raise_exception(ArgumentError)
+	end
+	
+	it "rejects unknown cookie options" do
+		expect do
+			middleware(unknown: true)
+		end.to raise_exception(ArgumentError)
+	end
+end
+
 describe Utopia::Session do
 	include ProtocolApplication
 	
