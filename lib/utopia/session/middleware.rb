@@ -8,13 +8,18 @@ require "digest/sha2"
 require "console"
 require "json"
 
+require "protocol/http/cookie"
+
 require_relative "lazy_hash"
 require_relative "serialization"
+require_relative "../middleware"
+require_relative "../request"
+require_relative "../response"
 
 module Utopia
 	module Session
 		# A middleware which provides a secure client-side session storage using a private symmetric encrpytion key.
-		class Middleware
+		class Middleware < Protocol::HTTP::Middleware
 			# Raised when payload processing fails.
 			class PayloadError < StandardError
 			end
@@ -23,7 +28,7 @@ module Utopia
 			
 			SECRET_KEY = "UTOPIA_SESSION_SECRET".freeze
 			
-			RACK_SESSION = "rack.session".freeze
+			SESSION_KEY = "utopia.session".freeze
 			CIPHER_ALGORITHM = "aes-256-cbc"
 			
 			# The session will expire if no requests were made within 24 hours:
@@ -33,12 +38,19 @@ module Utopia
 			DEFAULT_UPDATE_TIMEOUT = 3600
 			
 			# @param session_name [String] The name of the session cookie.
-			# @param secret [Array] The secret text used to generate a symetric encryption key for the coookie data.
-			# @param same_site [Symbol, String] Controls how the cookie is provided to the site.
-			# @param expires_after [String] The cache-control header to set for static content.
-			# @param options [Hash<Symbol,Object>] Additional defaults used for generating the cookie by `Rack::Utils.set_cookie_header!`.
-			def initialize(app, session_name: RACK_SESSION, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, secure: false, same_site: :lax, maximum_size: MAXIMUM_SIZE, **options)
-				@app = app
+			# @param secret [String] The secret text used to generate a symmetric encryption key for the cookie data.
+			# @param expires_after [Numeric | Nil] The maximum session inactivity in seconds.
+			# @param update_timeout [Numeric | Nil] The maximum interval between session cookie updates.
+			# @param domain [String | Nil] The domain for which the cookie is valid.
+			# @param path [String | Nil] The path for which the cookie is valid.
+			# @param max_age [Integer | Nil] The browser cookie lifetime in seconds.
+			# @param secure [Boolean] Whether the cookie requires a secure connection.
+			# @param http_only [Boolean] Whether client-side scripts may access the cookie.
+			# @param same_site [Symbol | String | Boolean | Nil] Controls whether the cookie is sent with cross-site requests.
+			# @param partitioned [Boolean] Whether the cookie uses partitioned storage.
+			# @param maximum_size [Integer | Nil] The maximum encoded session payload size.
+			def initialize(app, session_name: SESSION_KEY, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, domain: nil, path: "/", max_age: nil, secure: false, http_only: true, same_site: :lax, partitioned: false, maximum_size: MAXIMUM_SIZE)
+				super(app)
 				
 				@session_name = session_name
 				@cookie_name = @session_name + ".encrypted"
@@ -54,18 +66,20 @@ module Utopia
 				@update_timeout = update_timeout
 				
 				@cookie_defaults = {
-					domain: nil,
-					path: "/",
+					domain: domain,
+					path: path,
+					max_age: max_age,
 					
 					# The SameSite attribute controls when the cookie is sent to the server, from 3rd parties (None), from requests with external referrers (Lax) or from within the site itself (Strict).
-					same_site: same_site,
+					same_site: normalize_same_site(same_site),
 					
 					# The Secure attribute is meant to keep cookie communication limited to encrypted transmission, directing browsers to use cookies only via secure/encrypted connections. However, if a web server sets a cookie with a secure attribute from a non-secure connection, the cookie can still be intercepted when it is sent to the user by man-in-the-middle attacks. Therefore, for maximum security, cookies with the Secure attribute should only be set over a secure connection.
 					secure: secure,
 					
 					# The HttpOnly attribute directs browsers not to expose cookies through channels other than HTTP (and HTTPS) requests. This means that the cookie cannot be accessed via client-side scripting languages (notably JavaScript), and therefore cannot be stolen easily via cross-site scripting (a pervasive attack technique).
-					http_only: true,
-				}.merge(options)
+					http_only: http_only,
+					partitioned: partitioned,
+				}
 				
 				@serialization = Serialization.new
 				@maximum_size = maximum_size
@@ -93,28 +107,44 @@ module Utopia
 				super
 			end
 			
-			# Attach a lazily loaded session to the Rack environment and persist it after the request.
-			# @parameter env [Hash] The Rack environment.
-			# @returns [Array] The Rack response.
-			def call(env)
-				session_hash = prepare_session(env)
+			# Attach a lazily loaded session to the request, then persist it.
+			# @parameter request [Utopia::Request] The request.
+			# @returns [Protocol::HTTP::Response] The wrapped application response.
+			def call(request)
+				request.session = prepare_session(request)
 				
-				status, headers, body = @app.call(env)
+				response = Response.wrap(@delegate.call(request))
 				
-				update_session(env, session_hash, headers)
+				update_session(request.session, response.headers)
 				
-				return [status, headers, body]
+				return response
 			end
 			
 			protected
 			
-			def prepare_session(env)
-				env[RACK_SESSION] = LazyHash.new do
-					self.load_session_values(env)
+			# Normalize a SameSite option to its cookie directive value:
+			def normalize_same_site(same_site)
+				case same_site
+				when false, nil
+					return nil
+				when :none, "None", :None
+					return "None"
+				when :lax, "Lax", :Lax
+					return "Lax"
+				when true, :strict, "Strict", :Strict
+					return "Strict"
+				else
+					raise ArgumentError, "Invalid same_site value: #{same_site.inspect}!"
 				end
 			end
 			
-			def update_session(env, session_hash, headers)
+			def prepare_session(request)
+				LazyHash.new do
+					self.load_session_values(request)
+				end
+			end
+			
+			def update_session(session_hash, headers)
 				if session_hash.needs_update?(@update_timeout)
 					values = session_hash.values
 					
@@ -137,9 +167,7 @@ module Utopia
 			
 			# Load session from user supplied cookie. If the data is invalid or otherwise fails validation, `build_iniital_session` is invoked.
 			# @return hash of values.
-			def load_session_values(env)
-				request = Rack::Request.new(env)
-				
+			def load_session_values(request)
 				# Decrypt the data from the user if possible:
 				if data = request.cookies[@cookie_name]
 					begin
@@ -183,7 +211,45 @@ module Utopia
 					expires: expires(updated_at)
 				}.merge(@cookie_defaults)
 				
-				Rack::Utils.set_cookie_header!(headers, @cookie_name, cookie)
+				headers.add("set-cookie", cookie_header(@cookie_name, cookie))
+			end
+			
+			def cookie_header(name, cookie)
+				directives = {}
+				
+				if domain = cookie[:domain]
+					directives["Domain"] = domain
+				end
+				
+				if path = cookie[:path]
+					directives["Path"] = path
+				end
+				
+				if max_age = cookie[:max_age]
+					directives["Max-Age"] = max_age
+				end
+				
+				if expires = cookie[:expires]
+					directives["Expires"] = expires.httpdate
+				end
+				
+				if cookie[:secure]
+					directives["Secure"] = true
+				end
+				
+				if cookie[:http_only]
+					directives["HttpOnly"] = true
+				end
+				
+				if same_site = cookie[:same_site]
+					directives["SameSite"] = same_site
+				end
+				
+				if cookie[:partitioned]
+					directives["Partitioned"] = true
+				end
+				
+				return Protocol::HTTP::Cookie.new(name, cookie.fetch(:value), directives).to_s
 			end
 			
 			def encrypt(hash)
@@ -197,7 +263,7 @@ module Utopia
 				e = c.update(@serialization.dump(hash))
 				e << c.final
 				
-				return [iv, e].pack("m16m*")
+				return [iv + e].pack("m0")
 			end
 			
 			def decrypt(data)
@@ -205,7 +271,9 @@ module Utopia
 					raise PayloadError, "Session payload size #{data.bytesize}bytes exceeds maximum allowed size #{@maximum_size}bytes!"
 				end
 				
-				iv, e = data.unpack("m16m*")
+				payload = data.unpack1("m0")
+				iv = payload.byteslice(0, 16)
+				e = payload.byteslice(16..)
 				
 				c = OpenSSL::Cipher.new(CIPHER_ALGORITHM)
 				c.decrypt

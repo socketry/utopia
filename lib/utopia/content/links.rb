@@ -19,10 +19,11 @@ module Utopia
 			# @parameter root [String] The root directory.
 			# @parameter path [Utopia::Path | String] The path.
 			# @parameter locale [String] The locale.
+			# @parameter fallback [Boolean] Whether to return an unlocalized link as a fallback.
 			# @returns [Link | Nil] The resolved link.
-			def self.for(root, path, locale = nil)
+			def self.for(root, path, locale = nil, fallback: true)
 				warn "Using uncached links metadata!"
-				self.new(root).for(path, locale)
+				self.new(root).for(path, locale, fallback: fallback)
 			end
 			
 			# Build an index of links for the given path.
@@ -54,9 +55,12 @@ module Utopia
 			attr :index_filter
 			
 			# Resolve a link for the specified path, which must be a path to a specific link.
-			# 	for(Path["/index"])
-			def for(path, locale = nil)
-				links(path.dirname).lookup(path.last, locale)
+			# @parameter path [Utopia::Path | String] The path.
+			# @parameter locale [String | Nil] The locale.
+			# @parameter fallback [Boolean] Whether to return an unlocalized link as a fallback.
+			# @returns [Link | Nil] The resolved link.
+			def for(path, locale = nil, fallback: true)
+				links(path.dirname).lookup(path.last, locale, fallback: fallback)
 			end
 			
 			# Give an index of all links that can be reached from the given path.
@@ -208,8 +212,9 @@ module Utopia
 				# Lookup.
 				# @parameter name [String] The name.
 				# @parameter locale [String] The locale.
-				# @returns [Link | Nil] The exact locale match, or the unlocalized link as a fallback.
-				def lookup(name, locale = nil)
+				# @parameter fallback [Boolean] Whether to return an unlocalized link as a fallback.
+				# @returns [Link | Nil] The exact locale match, or the unlocalized link when fallback is enabled.
+				def lookup(name, locale = nil, fallback: true)
 					# This allows generic links to serve any locale requested.
 					if links = @named[name]
 						generic_link = nil
@@ -217,7 +222,7 @@ module Utopia
 						links.each do |link|
 							if link.locale == locale
 								return link
-							elsif link.locale.nil?
+							elsif fallback && link.locale.nil?
 								generic_link = link
 							end
 						end

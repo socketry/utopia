@@ -4,11 +4,13 @@
 # Copyright, 2014-2025, by Samuel Williams.
 
 require_relative "../http"
+require_relative "../response"
+require_relative "result"
+
+require "protocol/content/default"
 
 module Utopia
 	module Controller
-		CONTENT_TYPE = HTTP::CONTENT_TYPE
-		
 		# The base implementation of a controller class.
 		class Base
 			URI_PATH = nil
@@ -76,14 +78,14 @@ module Utopia
 			
 			# Catch and return a response thrown while executing the block.
 			# @yields The controller operation that may throw a response.
-			# @returns [Array | Nil] The thrown response, or `nil` if the block completes.
+			# @returns [Protocol::HTTP::Response | Nil] The thrown response, or `nil` if the block completes.
 			def catch_response
 				catch(:response) do
 					yield and nil
 				end
 			end
 			
-			# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid rack response if the controller can do so.
+			# Return nil if this controller didn't do anything. Request will keep on processing. Return a valid response if the controller can do so.
 			def process!(request, relative_path)
 				return nil
 			end
@@ -95,19 +97,48 @@ module Utopia
 				end
 			end
 			
-			# Call into the next app as defined by rack.
-			def call(env)
-				self.class.controller.app.call(env)
+			# Call into the next application.
+			def call(request)
+				self.class.controller.delegate.call(request)
 			end
 			
-			# This will cause the middleware to generate a response.
+			# Parse the request body according to its media type.
+			# @parameter request [Utopia::Request] The request containing the body.
+			# @parameter parser [Protocol::Content::Parser] The content parser.
+			# @yields {|name, value| ...} Form entries, including streaming uploads.
+			# @returns [Object | Nil] The parsed body, or nil when there is no body.
+			def parse_body(request, parser: Protocol::Content::Parser.default, &block)
+				body = request.body
+				return unless body
+				
+				input = body.to_io
+				error = nil
+				
+				begin
+					return parser.parse(request.headers["content-type"], input, &block)
+				rescue => error
+					raise
+				ensure
+					input.close_read(error)
+				end
+			end
+			
+			# Immediately respond with a complete protocol response.
+			# @parameter response [Protocol::HTTP::Response] The response.
+			# @returns [Object] This method does not return normally.
 			def respond!(response)
-				throw :response, response
+				throw :response, Utopia::Response.wrap(response)
 			end
 			
 			# Respond with the response, but only if it's not nil.
+			# @parameter response [Protocol::HTTP::Response | Nil] The optional response.
+			# @returns [Nil] This method returns `nil` when no response is provided.
 			def respond?(response)
-				respond!(response) if response
+				if response
+					return respond!(response)
+				end
+				
+				return nil
 			end
 			
 			# This will cause the controller middleware to pass on the request.
@@ -120,7 +151,7 @@ module Utopia
 				status = HTTP::Status.new(status, 300...400)
 				location = target.to_s
 				
-				respond! [status.to_i, {HTTP::LOCATION => location}, [status.to_s]]
+				respond! Utopia::Response[status.to_i, {HTTP::LOCATION => location}, [status.to_s]]
 			end
 			
 			# Controller relative redirect.
@@ -133,28 +164,18 @@ module Utopia
 				status = HTTP::Status.new(error, 400...600)
 				
 				message ||= status.to_s
-				respond! [status.to_i, {}, [message]]
+				throw :response, Result.new(status.to_i, {}, message)
 			end
 			
-			# Succeed the request and immediately respond.
-			def succeed!(status: 200, headers: {}, type: nil, **options)
+			# Succeed the request with a semantic value awaiting response negotiation.
+			# @parameter value [Object] The semantic result value.
+			# @parameter status [Integer | Symbol] The successful response status.
+			# @parameter headers [Hash] Additional response headers.
+			# @returns [Object] This method does not return normally.
+			def succeed!(value = nil, status: 200, headers: {})
 				status = HTTP::Status.new(status, 200...300)
 				
-				if type
-					headers[CONTENT_TYPE] = type.to_s
-				end
-				
-				body = body_for(status, headers, options)
-				respond! [status.to_i, headers, body || []]
-			end
-			
-			# Generate the body for the given status, headers and options.
-			def body_for(status, headers, options)
-				if body = options[:body]
-					return body
-				elsif content = options[:content]
-					return [content]
-				end
+				throw :response, Result.new(status.to_i, headers, value)
 			end
 		end
 	end

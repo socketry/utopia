@@ -3,15 +3,13 @@
 # Released under the MIT License.
 # Copyright, 2020-2025, by Samuel Williams.
 
-require "rack/builder"
-require "rack/test"
+require "protocol/http/request"
+require_relative "application"
 require "irb"
 
 module Utopia
 	# This is designed to be used with the corresponding bake task.
 	class Shell
-		include Rack::Test::Methods
-		
 		# Initialize a shell for a Bake context.
 		# @parameter context [Bake::Context] The context that provides the application root.
 		def initialize(context)
@@ -22,9 +20,24 @@ module Utopia
 		# Load the configured application on first access.
 		# @returns [Application] The application middleware.
 		def app
-			@app ||= Rack::Builder.parse_file(
-				File.expand_path("config.ru", @context.root)
-			).first
+			@app ||= Application.load(File.expand_path(Application::PATH, @context.root))
+		end
+		
+		# Perform a GET request.
+		# @parameter path [Utopia::Path | String] The path.
+		# @parameter headers [Hash] The headers.
+		# @returns [Protocol::HTTP::Response] The application response.
+		def get(path, headers = nil)
+			app.call(Protocol::HTTP::Request["GET", path, headers])
+		end
+		
+		# Perform a POST request.
+		# @parameter path [Utopia::Path | String] The path.
+		# @parameter headers [Hash] The headers.
+		# @parameter body [Protocol::HTTP::Body::Readable | Nil] The request body.
+		# @returns [Protocol::HTTP::Response] The application response.
+		def post(path, headers = nil, body = nil)
+			app.call(Protocol::HTTP::Request["POST", path, headers, body])
 		end
 		
 		# Convert this object to a string.

@@ -3,13 +3,14 @@
 # Released under the MIT License.
 # Copyright, 2016-2025, by Samuel Williams.
 
-require "rack/test"
-require "rack/mock"
 require "json"
-
+require "protocol/http/body/readable"
+require "sus/fixtures/protocol/http/middleware_context"
+require "utopia/application"
 require "utopia/content"
 require "utopia/controller"
 require "utopia/redirection"
+require "utopia/request"
 
 describe Utopia::Controller do
 	class TestController < Utopia::Controller::Base
@@ -17,15 +18,27 @@ describe Utopia::Controller do
 		prepend Utopia::Controller::Respond, Utopia::Controller::Actions
 		
 		responds.with("application/json") do |media_range, object|
-			succeed! content: JSON.dump(object), type: "application/json"
+			JSON.dump(object)
 		end
 		
 		responds.with("text/plain") do |media_range, object|
-			succeed! content: object.inspect,	type: "text/plain"
+			object.inspect
+		end
+		
+		responds.with("application/octet-stream") do |media_range, object|
+			object
 		end
 		
 		on "fetch" do |request, path|
-			succeed! content: {user_id: 10}
+			succeed!({user_id: 10})
+		end
+		
+		on "stream" do |request, path|
+			succeed! @stream
+		end
+		
+		on "explicit" do |request, path|
+			respond! Utopia::Response[202, {"content-type" => "application/example"}, ["Explicit"]]
 		end
 		
 		def self.uri_path
@@ -35,110 +48,157 @@ describe Utopia::Controller do
 	
 	let(:controller) {TestController.new}
 	
-	def mock_request(*arguments)
-		request = Rack::Request.new(Rack::MockRequest.env_for(*arguments))
+	def mock_request(path, headers = {})
+		request = Utopia::Request["GET", path, headers]
+		
 		return request, Utopia::Path[request.path_info]
 	end
 	
 	it "should serialize response as JSON" do
-		request, path = mock_request("/fetch")
+		request, path = mock_request("/fetch", {"accept" => "application/json"})
 		relative_path = path - controller.class.uri_path
 		
-		request.env["HTTP_ACCEPT"] = "application/json"
+		response = controller.process!(request, relative_path)
 		
-		status, headers, body = controller.process!(request, relative_path)
-		
-		expect(status).to be == 200
-		expect(headers["content-type"]).to be == "application/json"
-		expect(body.join).to be == '{"user_id":10}'
+		expect(response.status).to be == 200
+		expect(response.headers["content-type"]).to be == "application/json"
+		expect(response.read).to be == '{"user_id":10}'
 	end
 	
 	it "should serialize response as text" do
-		request, path = mock_request("/fetch")
+		request, path = mock_request("/fetch", {"accept" => "text/*"})
 		relative_path = path - controller.class.uri_path
 		
-		request.env["HTTP_ACCEPT"] = "text/*"
+		response = controller.process!(request, relative_path)
 		
-		status, headers, body = controller.process!(request, relative_path)
-		
-		expect(status).to be == 200
-		expect(headers["content-type"]).to be == "text/plain"
-		expect(body.join).to be == {user_id: 10}.to_s
+		expect(response.status).to be == 200
+		expect(response.headers["content-type"]).to be == "text/plain"
+		expect(response.read).to be == {user_id: 10}.to_s
 	end
+	
+	it "should select the highest quality response" do
+		request, path = mock_request("/fetch", {"accept" => "text/plain;q=0.5, application/json;q=1.0"})
+		relative_path = path - controller.class.uri_path
+		
+		response = controller.process!(request, relative_path)
+		
+		expect(response.headers["content-type"]).to be == "application/json"
+		expect(response.read).to be == '{"user_id":10}'
+	end
+	
+	it "preserves readable response bodies" do
+		body = Protocol::HTTP::Body::Readable.new
+		controller.instance_variable_set(:@stream, body)
+		request, path = mock_request("/stream", {"accept" => "application/octet-stream"})
+		relative_path = path - controller.class.uri_path
+		
+		response = controller.process!(request, relative_path)
+		
+		expect(response.body).to be == body
+	end
+	
+	it "raises when no response representation is acceptable" do
+		request, path = mock_request("/fetch", {"accept" => "application/xml"})
+		relative_path = path - controller.class.uri_path
+		
+		expect do
+			controller.process!(request, relative_path)
+		end.to raise_exception(TypeError)
+	end
+	
+	it "passes complete responses through without negotiation" do
+		request, path = mock_request("/explicit", {"accept" => "application/xml"})
+		relative_path = path - controller.class.uri_path
+		
+		response = controller.process!(request, relative_path)
+		
+		expect(response.status).to be == 202
+		expect(response.headers["content-type"]).to be == "application/example"
+		expect(response.read).to be == "Explicit"
+	end
+	
 end
 
 describe Utopia::Controller do
-	include Rack::Test::Methods
+	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
-	let(:app) {Rack::Builder.parse_file(File.expand_path("respond.ru", __dir__))}
+	let(:middleware) do
+		root = File.expand_path(".respond", __dir__)
+		
+		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request| Utopia::Response[404, {}, []]}) do
+			use Utopia::Redirection::Errors, 404 => "/fail"
+			use Utopia::Controller, root: root
+			use Utopia::Content, root: root
+		end
+	end
 	
 	it "should get html error page" do
 		# Standard web browser header:
-		header "accept", "text/html, text/*, */*"
+		client.headers["accept"] = "text/html, text/*, */*"
 		
-		get "/errors/file-not-found"
+		client.get "/errors/file-not-found"
 		
 		expect(last_response.status).to be == 200
 		expect(last_response.headers["content-type"]).to be(:include?, "text/html")
-		expect(last_response.body).to be(:include?, "<h1>File Not Found</h1>")
+		expect(last_response.read).to be(:include?, "<h1>File Not Found</h1>")
 	end
 	
 	it "should get html response" do
-		header "accept", "*/*"
+		client.headers["accept"] = "*/*"
 		
-		get "/html/hello-world"
+		client.get "/html/hello-world"
 		
 		expect(last_response.status).to be == 200
 		expect(last_response.headers["content-type"]).to be == "text/html"
-		expect(last_response.body).to be == "<p>Hello World</p>"
+		expect(last_response.read).to be == "<p>Hello World</p>"
 	end
 	
 	it "should get version 1 response" do
-		header "accept", "application/json;version=1"
+		client.headers["accept"] = "application/json;version=1"
 		
-		get "/api/fetch"
+		client.get "/api/fetch"
 		
 		expect(last_response.status).to be == 200
 		expect(last_response.headers["content-type"]).to be == "application/json"
-		expect(last_response.body).to be == '{"message":"Hello World"}'
+		expect(last_response.read).to be == '{"message":"Hello World"}'
 	end
 	
 	it "should get version 2 response" do
-		header "accept", "application/json;version=2"
+		client.headers["accept"] = "application/json;version=2"
 		
-		get "/api/fetch"
+		client.get "/api/fetch"
 		
 		expect(last_response.status).to be == 200
 		expect(last_response.headers["content-type"]).to be == "application/json"
-		expect(last_response.body).to be == '{"message":"Goodbye World"}'
+		expect(last_response.read).to be == '{"message":"Goodbye World"}'
 	end
 	
 	
 	it "should work even if no accept header specified" do
-		get "/api/fetch"
+		client.get "/api/fetch"
 		
 		expect(last_response.status).to be == 200
 		expect(last_response.headers["content-type"]).to be == "application/json"
-		expect(last_response.body).to be == "{}"
+		expect(last_response.read).to be == "{}"
 	end
 	
 	it "should give record as JSON" do
-		header "accept", "application/json"
+		client.headers["accept"] = "application/json"
 		
-		get "/rewrite/2/show"
+		client.get "/rewrite/2/show"
 		
 		expect(last_response.status).to be == 200
 		expect(last_response.headers["content-type"]).to be == "application/json"
-		expect(last_response.body).to be == '{"id":2,"foo":"bar"}'
+		expect(last_response.read).to be == '{"id":2,"foo":"bar"}'
 	end
 	
 	it "should give error as JSON" do
-		header "accept", "application/json"
+		client.headers["accept"] = "application/json"
 		
-		get "/rewrite/1/show"
+		client.get "/rewrite/1/show"
 		
 		expect(last_response.status).to be == 404
 		expect(last_response.headers["content-type"]).to be == "application/json"
-		expect(last_response.body).to be == '{"message":"Could not find record"}'
+		expect(last_response.read).to be == '{"message":"Could not find record"}'
 	end
 end

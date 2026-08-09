@@ -6,5 +6,5 @@
 prepend Actions
 
 on 'foobar' do
-	succeed! content: "Foobar"
+	respond! Utopia::Response[200, {}, ["Foobar"]]
 end

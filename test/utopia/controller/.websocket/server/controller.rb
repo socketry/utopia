@@ -3,10 +3,12 @@
 # Released under the MIT License.
 # Copyright, 2019-2023, by Samuel Williams.
 
-prepend Actions
+prepend Respond, Actions
+
+respond.with_passthrough
 
 on 'events' do |request|
-	upgrade = Async::WebSocket::Adapters::Rack.open(request.env) do |connection|
+	upgrade = Async::WebSocket::Adapters::HTTP.open(request) do |connection|
 		connection.write({type: "test", data: "Hello World"}.to_json)
 	end
 	

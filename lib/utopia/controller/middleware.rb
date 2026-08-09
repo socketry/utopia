@@ -5,6 +5,8 @@
 
 require_relative "../path"
 require_relative "../middleware"
+require_relative "../request"
+require_relative "../response"
 
 require_relative "variables"
 require_relative "base"
@@ -18,22 +20,21 @@ module Utopia
 	# A middleware which loads controller classes and invokes functionality based on the requested path.
 	module Controller
 		# Dispatches requests to filesystem-backed controller classes.
-		class Middleware
+		class Middleware < Protocol::HTTP::Middleware
 			# The controller filename.
 			CONTROLLER_RB = "controller.rb".freeze
 			
 			# @param root [String] The content root where controllers will be loaded from.
 			# @param base [Class] The base class for controllers.
 			def initialize(app, root: Utopia::default_root, base: Controller::Base)
-				@app = app
+				super(app)
+				
 				@root = root
 				
 				@controller_cache = Concurrent::Map.new
 				
 				@base = base
 			end
-			
-			attr :app
 			
 			# Freeze this object and its internal state.
 			# @returns [self] This object.
@@ -94,7 +95,7 @@ module Utopia
 				controller_path = Path.new
 				
 				# Controller instance variables which eventually get processed by the view:
-				variables = request.env[VARIABLES_KEY]
+				variables = request.variables
 				
 				while request_path.components.any?
 					# We copy one path component from the relative path to the controller path at a time. The controller, when invoked, can modify the relative path (by assigning to relative_path.components). This allows for controller-relative rewrites, but only the remaining path postfix can be modified.
@@ -114,25 +115,23 @@ module Utopia
 				end
 				
 				# Controllers can directly modify relative_path, which is copied into controller_path. The controllers may have rewriten the path so we update the path info:
-				request.env[Rack::PATH_INFO] = controller_path.to_s
+				request.path_info = controller_path.to_s
 				
 				# No controller gave a useful result:
 				return nil
 			end
 			
-			# Invoke matching controllers before passing the request downstream.
-			# @parameter env [Hash] The Rack environment.
-			# @returns [Array] The controller or downstream Rack response.
-			def call(env)
-				env[VARIABLES_KEY] ||= Variables.new
-				
-				request = Rack::Request.new(env)
+			# Attach controller variables while processing the request.
+			# @parameter request [Utopia::Request] The request.
+			# @returns [Protocol::HTTP::Response] The controller or downstream response.
+			def call(request)
+				request.variables ||= Variables.new
 				
 				if result = invoke_controllers(request)
-					return result
+					return Utopia::Response.wrap(result)
 				end
 				
-				return @app.call(env)
+				return @delegate.call(request)
 			end
 		end
 	end

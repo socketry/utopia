@@ -5,20 +5,14 @@
 
 prepend Actions
 
-on 'all_locales' do |request, path|
-	wrapper = Utopia::Localization[request]
-	
-	succeed! content: wrapper.all_locales.join(',')
+on "all_locales" do |request, path|
+	respond! Utopia::Response[200, {}, [request.localization.all_locales.join(",")]]
 end
 
-on 'default_locale' do |request, path|
-	wrapper = Utopia::Localization[request]
-	
-	succeed! content: wrapper.default_locale
+on "default_locale" do |request, path|
+	respond! Utopia::Response[200, {}, [request.localization.default_locale]]
 end
 
-on 'current_locale' do |request, path|
-	wrapper = Utopia::Localization[request]
-	
-	succeed! content: wrapper.current_locale
+on "locale" do |request, path|
+	respond! Utopia::Response[200, {}, [request.localization.locale]]
 end

@@ -3,9 +3,10 @@
 # Released under the MIT License.
 # Copyright, 2010-2025, by Samuel Williams.
 
+require_relative "../response"
+
 module Utopia
 	module Content
-		# Compatibility with older versions of rack:
 		EXPIRES = "expires".freeze
 		CACHE_CONTROL = "cache-control".freeze
 		CONTENT_TYPE = "content-type".freeze
@@ -40,10 +41,10 @@ module Utopia
 				return nil
 			end
 			
-			# Convert this value to a Rack response tuple.
-			# @returns [Array] The status, headers, and body.
-			def to_a
-				[@status, @headers, @body]
+			# Convert this value to a protocol HTTP response.
+			# @returns [Protocol::HTTP::Response] The response.
+			def to_response
+				Utopia::Response[@status, @headers, @body]
 			end
 			
 			# Specifies that the content shouldn't be cached. Overrides `cache!` if already called.

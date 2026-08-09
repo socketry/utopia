@@ -6,11 +6,11 @@
 prepend Actions
 
 on 'flat' do
-	succeed! content: "flat"
+	respond! Utopia::Response[200, {}, ["flat"]]
 end
 
 on '**/hello-world' do
-	succeed! content: @hello_world
+	respond! Utopia::Response[200, {}, [@hello_world]]
 end
 
 on '**' do
@@ -26,5 +26,5 @@ on 'redirect' do
 end
 
 on 'index' do
-	succeed! content: 'Hello World'
+	respond! Utopia::Response[200, {}, ['Hello World']]
 end

@@ -4,105 +4,218 @@
 # Copyright, 2014-2025, by Samuel Williams.
 # Copyright, 2019, by Huba Nagy.
 
-require "rack"
-require "rack/test"
-
+require "sus/fixtures/protocol/http/middleware_context"
+require "utopia/application"
 require "utopia/session"
 
 describe Utopia::Session do
-	include Rack::Test::Methods
+	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
-	let(:app) {Rack::Builder.parse_file(File.expand_path("session_spec.ru", __dir__))}
+	let(:middleware) do
+		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
+			case request.path_info
+			when "/login"
+				request.session["login"] = "true"
+				
+				Utopia::Response[200, {}, []]
+			when "/session-set"
+				request.session[request.query_arguments["key"].to_sym] = request.query_arguments["value"]
+				
+				Utopia::Response[200, {}, []]
+			when "/session-get"
+				Utopia::Response[200, {}, [request.session[request.query_arguments["key"].to_sym]]]
+			else
+				Utopia::Response[404, {}, []]
+			end
+		}) do
+			use Utopia::Session,
+				secret: "97111cabf4c1a5e85b8029cf7c61aa44424fc24a",
+				expires_after: 5,
+				update_timeout: 1
+		end
+	end
 	
 	it "shouldn't commit session values unless required" do
 		# This URL doesn't update the session:
-		get "/"
+		client.get "/"
 		expect(last_response.headers).not.to have_keys("set-cookie")
 		
 		# This URL updates the session:
-		get "/login"
+		client.get "/login"
 		expect(last_response.headers).to have_keys("set-cookie")
 	end
 	
 	it "should set and get values correctly" do
-		get "/session-set?key=foo&value=bar"
-		expect(last_response.headers).to be(:include?, "Set-Cookie")
+		client.get "/session-set?key=foo&value=bar"
+		expect(last_response.headers).to have_keys("set-cookie")
+		expect(last_response.headers["set-cookie"].first).not.to be(:include?, "%")
 		
-		get "/session-get?key=foo"
-		expect(last_request.cookies).to be(:include?, "rack.session.encrypted")
-		expect(last_response.body).to be == "bar"
+		client.get "/session-get?key=foo"
+		expect(client.cookies).to be(:include?, "utopia.session.encrypted")
+		expect(last_response.read).to be == "bar"
 	end
 	
 	it "should ignore session if cookie value is invalid" do
-		set_cookie "rack.session.encrypted=junk"
+		client.set_cookie "utopia.session.encrypted=junk"
 		
-		get "/session-get?key=foo"
+		client.get "/session-get?key=foo"
 		
-		expect(last_response.body).to be == ""
+		expect(last_response.read).to be == nil
 	end
 	
 	it "shouldn't update the session if there are no changes" do
-		get "/session-set?key=foo&value=bar"
-		expect(last_response.headers).to be(:include?, "Set-Cookie")
+		client.get "/session-set?key=foo&value=bar"
+		expect(last_response.headers).to have_keys("set-cookie")
 		
-		get "/session-set?key=foo&value=bar"
-		expect(last_response.headers).not.to be(:include?, "Set-Cookie")
+		client.get "/session-set?key=foo&value=bar"
+		expect(last_response.headers).not.to have_keys("set-cookie")
 	end
 	
 	it "should update the session if time has passed" do
-		get "/session-set?key=foo&value=bar"
-		expect(last_response.headers).to be(:include?, "Set-Cookie")
+		client.get "/session-set?key=foo&value=bar"
+		expect(last_response.headers).to have_keys("set-cookie")
 		
 		# Sleep more than update_timeout
 		sleep 2
 		
-		get "/session-set?key=foo&value=bar"
-		expect(last_response.headers).to be(:include?, "Set-Cookie")
+		client.get "/session-set?key=foo&value=bar"
+		expect(last_response.headers).to have_keys("set-cookie")
+	end
+	
+end
+
+describe Utopia::Session::Middleware do
+	let(:delegate) do
+		Protocol::HTTP::Middleware.for do |request|
+			request.session[:updated] = true
+			
+			Utopia::Response[200, {}, []]
+		end
+	end
+	
+	def middleware(**options)
+		return subject.new(delegate, secret: "test-secret", **options)
+	end
+	
+	it "emits the default cookie directives" do
+		response = middleware.call(Utopia::Request["GET", "/"])
+		cookie = response.headers["set-cookie"].first
+		
+		expect(cookie).to be(:include?, ";Path=/")
+		expect(cookie).to be(:include?, ";Expires=")
+		expect(cookie).to be(:include?, ";HttpOnly")
+		expect(cookie).to be(:include?, ";SameSite=Lax")
+	end
+	
+	it "emits the supported cookie directives" do
+		instance = middleware(
+			domain: "example.com",
+			path: "/session",
+			max_age: 60,
+			secure: true,
+			http_only: false,
+			same_site: :none,
+			partitioned: true,
+		)
+		
+		response = instance.call(Utopia::Request["GET", "/"])
+		cookie = response.headers["set-cookie"].first
+		
+		expect(cookie).to be(:include?, ";Domain=example.com")
+		expect(cookie).to be(:include?, ";Path=/session")
+		expect(cookie).to be(:include?, ";Max-Age=60")
+		expect(cookie).to be(:include?, ";Secure")
+		expect(cookie).not.to be(:include?, ";HttpOnly")
+		expect(cookie).to be(:include?, ";SameSite=None")
+		expect(cookie).to be(:include?, ";Partitioned")
+	end
+	
+	it "normalizes SameSite options" do
+		{
+			false => nil,
+			nil => nil,
+			true => "Strict",
+			strict: "Strict",
+			lax: "Lax",
+			none: "None",
+		}.each do |option, expected|
+			expect(middleware(same_site: option).cookie_defaults[:same_site]).to be == expected
+		end
+	end
+	
+	it "rejects invalid SameSite values" do
+		expect do
+			middleware(same_site: :invalid)
+		end.to raise_exception(ArgumentError)
+	end
+	
+	it "rejects unknown cookie options" do
+		expect do
+			middleware(unknown: true)
+		end.to raise_exception(ArgumentError)
 	end
 end
 
 describe Utopia::Session do
-	include Rack::Test::Methods
+	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
-	let(:app) {Rack::Builder.parse_file(File.expand_path("session_spec.ru", __dir__))}
+	let(:middleware) do
+		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
+			case request.path_info
+			when "/session-set"
+				request.session[request.query_arguments["key"].to_sym] = request.query_arguments["value"]
+				
+				Utopia::Response[200, {}, []]
+			when "/session-get"
+				Utopia::Response[200, {}, [request.session[request.query_arguments["key"].to_sym]]]
+			else
+				Utopia::Response[404, {}, []]
+			end
+		}) do
+			use Utopia::Session,
+				secret: "97111cabf4c1a5e85b8029cf7c61aa44424fc24a",
+				expires_after: 5,
+				update_timeout: 1
+		end
+	end
 	
 	def before
 		# Initial user agent:
-		header "User-Agent", "A"
+		client.headers["user-agent"] = "A"
 		
-		get "/session-set?key=foo&value=bar"
+		client.get "/session-set?key=foo&value=bar"
 		
 		super
 	end
 	
 	it "should be able to retrive the value if there are no changes" do
-		get "/session-get?key=foo"
-		expect(last_response.body).to be == "bar"
+		client.get "/session-get?key=foo"
+		expect(last_response.read).to be == "bar"
 	end
 	
 	it "should fail if user agent is changed" do
 		# Change user agent:
-		header "User-Agent", "B"
+		client.headers["user-agent"] = "B"
 		
-		get "/session-get?key=foo"
-		expect(last_response.body).to be == ""
+		client.get "/session-get?key=foo"
+		expect(last_response.read).to be == nil
 	end
 	
 	it "should fail if expired cookie is sent with the request" do
-		session_cookie = last_response["Set-Cookie"].split(";")[0]
+		session_cookie = last_response.headers["set-cookie"].first.split(";")[0]
 		sleep 6 # sleep longer than the session timeout
-		header "Cookie", session_cookie
+		client.set_cookie session_cookie
 		
-		get "/session-get?key=foo"
-		expect(last_response.body).to be == ""
+		client.get "/session-get?key=foo"
+		expect(last_response.read).to be == nil
 	end
 	
 	it "shouldn't fail if ip address is changed" do
 		# Change user agent:
-		header "X-Forwarded-For", "127.0.0.10"
+		client.headers["x-forwarded-for"] = "127.0.0.10"
 		
-		get "/session-get?key=foo"
-		expect(last_response.body).to be == "bar"
+		client.get "/session-get?key=foo"
+		expect(last_response.read).to be == "bar"
 	end
 end
 

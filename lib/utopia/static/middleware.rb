@@ -4,10 +4,12 @@
 # Copyright, 2025-2026, by Samuel Williams.
 
 require_relative "../middleware"
-require_relative "../localization"
+require_relative "../request"
+require_relative "../response"
 
 require_relative "local_file"
 require_relative "mime_types"
+require_relative "../localization/resolver"
 
 require "traces/provider"
 
@@ -16,12 +18,15 @@ module Utopia
 		DEFAULT_CACHE_CONTROL = "public, max-age=3600".freeze
 		
 		# A middleware which serves static files from the specified root directory.
-		class Middleware
+		class Middleware < Protocol::HTTP::Middleware
+			include Localization::Resolver
+			
 			# @param root [String] The root directory to serve files from.
 			# @param types [Array] The mime-types (and file extensions) to recognize/serve.
 			# @param cache_control [String] The cache-control header to set for static content.
 			def initialize(app, root: Utopia::default_root, types: MIME_TYPES[:default], cache_control: DEFAULT_CACHE_CONTROL)
-				@app = app
+				super(app)
+				
 				@root = root
 				
 				@extensions = MimeTypeLoader.extensions_for(types)
@@ -45,7 +50,6 @@ module Utopia
 			# @parameter path [Utopia::Path | String] The path.
 			# @returns [LocalFile | Nil] The local file, or `nil` when it does not exist.
 			def fetch_file(path)
-				# We need file_path to be an absolute path for X-Sendfile to work correctly.
 				file_path = File.join(@root, path.components)
 				
 				if File.exist?(file_path)
@@ -57,11 +61,11 @@ module Utopia
 			
 			attr :extensions
 			
-			LAST_MODIFIED = "Last-Modified".freeze
+			LAST_MODIFIED = "last-modified".freeze
 			CONTENT_TYPE = HTTP::CONTENT_TYPE
 			CACHE_CONTROL = HTTP::CACHE_CONTROL
-			ETAG = "ETag".freeze
-			ACCEPT_RANGES = "Accept-Ranges".freeze
+			ETAG = "etag".freeze
+			ACCEPT_RANGES = "accept-ranges".freeze
 			
 			# Build response headers for the given file.
 			# @parameter file [LocalFile] The file.
@@ -83,51 +87,57 @@ module Utopia
 				}
 			end
 			
-			# Serve a static file for the requested path and extension.
-			# @parameter env [Hash] The Rack environment.
-			# @parameter path_info [String] The request path.
+			# Respond.
+			# @parameter request [Utopia::Request] The request.
+			# @parameter path_info [String] The request path to serve.
 			# @parameter extension [String] The file extension.
-			# @returns [Array | Nil] The Rack response when a file is found.
-			def respond(env, path_info, extension)
+			# @parameter localization [Utopia::Localization::Preferences | Nil] The selected localization.
+			# @returns [Protocol::HTTP::Response] The response.
+			def respond(request, path_info, extension, localization: request.localization)
 				path = Path[path_info].simplify
 				
-				if locale = env[Localization::CURRENT_LOCALE_KEY]
+				if locale = localization&.locale
 					path.last.insert(path.last.rindex(".") || -1, ".#{locale}")
 				end
 				
 				if file = fetch_file(path)
 					response_headers = self.response_headers_for(file, @extensions[extension])
 					
-					if file.modified?(env)
-						return file.serve(env, response_headers)
+					if file.modified?(request)
+						return file.serve(request, response_headers)
 					else
-						return [304, response_headers, []]
+						return Response[304, response_headers, []]
 					end
 				end
 			end
 			
-			# Serve a recognized static file or pass the request downstream.
-			# @parameter env [Hash] The Rack environment.
-			# @returns [Array] The static-file or downstream Rack response.
-			def call(env)
-				path_info = env[Rack::PATH_INFO]
+			# Serve a recognized static file or pass the request to the next middleware.
+			# @parameter request [Utopia::Request] The request.
+			# @returns [Protocol::HTTP::Response] The static-file or downstream response.
+			def call(request)
+				path_info = request.path_info
 				extension = File.extname(path_info)
 				
 				if @extensions.key?(extension.downcase)
-					if response = self.respond(env, path_info, extension)
+					response = resolve_localized(request) do |localization|
+						self.respond(request, path_info, extension, localization: localization)
+					end
+					
+					if response
 						return response
 					end
 				end
 				
 				# else if no file was found:
-				return @app.call(env)
+				return @delegate.call(request)
 			end
 		end
 		
 		Traces::Provider(Static) do
-			def respond(env, path_info, extension)
+			def respond(request, path_info, extension, localization: request.localization)
 				attributes = {
 					path_info: path_info,
+					locale: localization&.locale,
 				}
 				
 				Traces.trace("utopia.static.respond", attributes: attributes){super}

@@ -4,7 +4,10 @@
 # Copyright, 2025-2026, by Samuel Williams.
 
 require_relative "../middleware"
-require_relative "../localization"
+require_relative "../localization/resolver"
+require_relative "../request"
+require_relative "../response"
+require_relative "../controller/variables"
 
 require_relative "links"
 require_relative "node"
@@ -18,7 +21,9 @@ require "traces/provider"
 module Utopia
 	module Content
 		# A middleware which serves dynamically generated content based on markup files.
-		class Middleware
+		class Middleware < Protocol::HTTP::Middleware
+			include Localization::Resolver
+			
 			CONTENT_NAMESPACE = "content".freeze
 			UTOPIA_NAMESPACE = "utopia".freeze
 			CONTENT_TAG_NAME = "utopia:content".freeze
@@ -26,7 +31,8 @@ module Utopia
 			# @param root [String] The content root where pages will be generated from.
 			# @param namespaces [Hash<String,Library>] Tag namespaces for dynamic tag lookup.
 			def initialize(app, root: Utopia::default_root, namespaces: {})
-				@app = app
+				super(app)
+				
 				@root = root
 				
 				@template_cache = Concurrent::Map.new
@@ -100,23 +106,23 @@ module Utopia
 			
 			# Respond.
 			# @parameter link [Utopia::Content::Link] The content link.
-			# @parameter request [Rack::Request] The request.
-			# @returns [Array] The response.
-			def respond(link, request)
+			# @parameter request [Utopia::Request] The application request.
+			# @parameter localization [Utopia::Localization::Preferences | Nil] The selected localization.
+			# @returns [Protocol::HTTP::Response] The response.
+			def respond(link, request, localization: request.localization)
 				if node = resolve_link(link)
-					attributes = request.env.fetch(VARIABLES_KEY, {}).to_hash
+					attributes = request.variables&.to_hash || {}
 					
-					return node.process!(request, attributes)
+					return node.process!(request, attributes, localization: localization)
 				elsif redirect_uri = link[:uri]
-					return [307, {HTTP::LOCATION => redirect_uri}, []]
+					return Utopia::Response[307, {HTTP::LOCATION => redirect_uri}, []]
 				end
 			end
 			
 			# Serve or redirect filesystem-backed content, otherwise invoke the application.
-			# @parameter env [Hash] The Rack environment.
-			# @returns [Array] The Rack response.
-			def call(env)
-				request = Rack::Request.new(env)
+			# @parameter request [Utopia::Request] The request.
+			# @returns [Protocol::HTTP::Response] The content, redirect, or downstream response.
+			def call(request)
 				path = Path.create(request.path_info)
 				
 				# Check if the request is to a non-specific index. This only works for requests with a given name:
@@ -127,17 +133,22 @@ module Utopia
 				if File.directory? directory_path
 					index_path = [basename, INDEX]
 					
-					return [307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []]
+					return Utopia::Response[307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []]
 				end
 				
-				locale = env[Localization::CURRENT_LOCALE_KEY]
-				if link = @links.for(path, locale)
-					if response = self.respond(link, request)
-						return response
+				response = resolve_localized(request) do |localization|
+					locale = localization&.locale
+					
+					if link = @links.for(path, locale, fallback: false)
+						self.respond(link, request, localization: localization)
 					end
 				end
 				
-				return @app.call(env)
+				if response
+					return response
+				end
+				
+				return @delegate.call(request)
 			end
 			
 			private
@@ -197,10 +208,11 @@ module Utopia
 		end
 		
 		Traces::Provider(Middleware) do
-			def respond(link, request)
+			def respond(link, request, localization: request.localization)
 				attributes = {
 					"link.key" => link.key,
-					"link.href" => link.href
+					"link.href" => link.href,
+					"link.locale" => localization&.locale,
 				}
 				
 				Traces.trace("utopia.content.middleware.respond", attributes: attributes){super}

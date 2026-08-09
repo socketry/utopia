@@ -4,6 +4,7 @@
 # Copyright, 2016-2025, by Samuel Williams.
 
 require_relative "../http"
+require_relative "../response"
 require_relative "responder"
 
 module Utopia
@@ -27,61 +28,44 @@ module Utopia
 				
 				alias respond responds
 				
-				# Bind this controller's responder to a context and request.
+				# Serialize a semantic value according to the request's accepted media types.
 				# @parameter context [Controller::Base] The controller context.
-				# @parameter request [Rack::Request] The request.
-				# @returns [Responder::Responds | Nil] The bound responder, if one has been configured.
-				def respond_to(context, request)
-					@responder&.respond_to(context, request)
-				end
-				
-				# Build a response for the negotiated content type.
-				# @parameter context [Object] The context.
-				# @parameter request [Rack::Request] The request.
-				# @parameter response [Array] The response.
-				# @returns [Array] The response.
-				def response_for(context, request, response)
-					@responder&.respond_to(context, request).with(*response[2])
+				# @parameter request [Utopia::Request] The request.
+				# @parameter value [Object] The semantic value.
+				# @returns [Array(Object, Object) | Nil] The selected content type and body.
+				def response_for(context, request, value)
+					@responder&.call(context, request, value)
 				end
 			end
 			
-			# Bind this controller's responder to the request.
-			# @parameter request [Rack::Request] The request.
-			# @returns [Responder::Responds | Nil] The bound responder, if one has been configured.
-			def respond_to(request)
-				self.class.respond_to(self, request)
-			end
-			
-			# Build a response for the negotiated content type.
-			# @parameter request [Rack::Request] The request.
-			# @parameter original_response [Object] The original response.
-			# @returns [Array] The response.
-			def response_for(request, original_response)
-				response = catch(:response) do
-					self.class.response_for(self, request, original_response)
+			# Build a protocol response for a semantic controller result.
+			# @parameter request [Utopia::Request] The request.
+			# @parameter result [Controller::Result] The semantic controller result.
+			# @returns [Protocol::HTTP::Response] The response.
+			def response_for(request, result)
+				if response = self.class.response_for(self, request, result.value)
+					content_type, body = response
+					headers = result.headers.dup
 					
-					# If the above code did not throw a new response, we return the original:
-					return original_response
-				end
-				
-				# If the user called {Base#ignore!}, it's possible response is nil:
-				if response
-					# There was an updated response so merge it:
-					return [original_response[0], original_response[1].merge(response[1]), response[2] || original_response[2]]
-				end
-			end
-			
-			# Invokes super. If a response is generated, format it based on the Accept: header, unless the content type was already specified.
-			def process!(request, path)
-				if response = super
-					headers = response[1]
-					
-					# Don't try to convert the response if a content type was explicitly specified.
-					if headers[HTTP::CONTENT_TYPE]
-						return response
-					else
-						return self.response_for(request, response)
+					if content_type
+						headers[HTTP::CONTENT_TYPE] = content_type.to_s
 					end
+					
+					return Utopia::Response[result.status, headers, body]
+				end
+				
+				raise TypeError, "Could not negotiate a response for #{result.value.class}!"
+			end
+			
+			# Serialize semantic controller results, while passing complete protocol responses through unchanged.
+			def process!(request, path)
+				result = super
+				
+				case result
+				when Result
+					return self.response_for(request, result)
+				else
+					return result
 				end
 			end
 		end

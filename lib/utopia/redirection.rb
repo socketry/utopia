@@ -4,6 +4,8 @@
 # Copyright, 2009-2026, by Samuel Williams.
 
 require_relative "middleware"
+require_relative "request"
+require_relative "response"
 
 module Utopia
 	# A middleware which assists with redirecting from one path to another.
@@ -27,10 +29,11 @@ module Utopia
 		end
 		
 		# A middleware which performs internal redirects based on error status codes.
-		class Errors
+		class Errors < Protocol::HTTP::Middleware
 			# @param codes [Hash<Integer,String>] The redirection path for a given error code.
 			def initialize(app, codes = {})
-				@app = app
+				super(app)
+				
 				@codes = codes
 			end
 			
@@ -45,28 +48,39 @@ module Utopia
 			end
 			
 			# Check whether the response status requires error handling.
-			# @parameter response [Array] The response.
+			# @parameter response [Protocol::HTTP::Response] The response.
 			# @returns [Boolean] Whether the response is an error without handler-provided headers.
 			def unhandled_error?(response)
-				response[0] >= 400 && response[1].empty?
+				response.status >= 400 && response.headers.empty?
 			end
 			
 			# Replace an unhandled error response with its configured error document.
-			# @parameter env [Hash] The Rack environment.
-			# @returns [Array] The original or error-document response.
+			# @parameter request [Utopia::Request] The request.
+			# @returns [Protocol::HTTP::Response] The original or error-document response.
 			# @raises [RequestFailure] If the configured error document also fails.
-			def call(env)
-				response = @app.call(env)
+			def call(request)
+				response = Response.wrap(@delegate.call(request))
 				
-				if unhandled_error?(response) && location = @codes[response[0]]
-					error_request = env.merge(Rack::PATH_INFO => location, Rack::REQUEST_METHOD => Rack::GET)
-					error_response = @app.call(error_request)
+				if unhandled_error?(response) && location = @codes[response.status]
+					resource_status = response.status
 					
-					if error_response[0] >= 400
-						raise RequestFailure.new(env[Rack::PATH_INFO], response[0], location, error_response[0])
+					# The original response is replaced by the configured error document:
+					response.close
+					
+					error_request = request.with(method: "GET", path_info: location)
+					
+					error_response = Response.wrap(@delegate.call(error_request))
+					
+					if error_response.status >= 400
+						error = RequestFailure.new(request.path_info, resource_status, location, error_response.status)
+						
+						# The failed error document will not be returned to the server:
+						error_response.close(error)
+						
+						raise error
 					else
 						# Feed the error code back with the error document:
-						error_response[0] = response[0]
+						error_response.status = resource_status
 						return error_response
 					end
 				else
@@ -79,13 +93,14 @@ module Utopia
 		DEFAULT_MAX_AGE = 3600*24
 		
 		# A basic client-side redirect.
-		class ClientRedirect
+		class ClientRedirect < Protocol::HTTP::Middleware
 			# Initialize client-side redirection behavior.
 			# @parameter app [Interface(:call)] The downstream application.
 			# @parameter status [Integer] The status.
 			# @parameter max_age [Integer] The maximum cache age in seconds.
 			def initialize(app, status: 307, max_age: DEFAULT_MAX_AGE)
-				@app = app
+				super(app)
+				
 				@status = status
 				@max_age = max_age
 			end
@@ -123,32 +138,32 @@ module Utopia
 			
 			# Build a redirect response for the given location.
 			# @parameter location [String] The redirect location.
-			# @returns [Array] The redirect response.
+			# @returns [Protocol::HTTP::Response] The redirect response.
 			def redirect(location)
-				return [self.status, self.make_headers(location), []]
+				return Response[self.status, self.make_headers(location), []]
 			end
 			
 			# Resolve a normalized request path to a redirect response.
 			# @parameter path [String] The normalized request path.
-			# @returns [Array | false] The redirect response, or `false` by default.
+			# @returns [Protocol::HTTP::Response | false] The redirect response, or `false` by default.
 			def [] path
 				false
 			end
 			
 			# Redirect a normalized request path when it matches, otherwise invoke the application.
-			# @parameter env [Hash] The Rack environment.
-			# @returns [Array] The redirect or downstream Rack response.
-			def call(env)
+			# @parameter request [Utopia::Request] The request.
+			# @returns [Protocol::HTTP::Response] The redirect or downstream response.
+			def call(request)
 				# Normalize the path to remove redundant slashes, `.` and `..` segments.
 				# This prevents protocol-relative redirect URLs (e.g. //evil.com/index)
 				# from being generated when PATH_INFO contains a double leading slash.
-				path = Path.create(env[Rack::PATH_INFO]).simplify.to_s
+				path = Path.create(request.path_info).simplify.to_s
 				
 				if redirection = self[path]
 					return redirection
 				end
 				
-				return @app.call(env)
+				return @delegate.call(request)
 			end
 		end
 		
@@ -158,7 +173,6 @@ module Utopia
 			# @parameter app [Interface(:call)] The downstream application.
 			# @parameter index [Integer] The index.
 			def initialize(app, index: "index")
-				@app = app
 				@index = index
 				
 				super(app)
@@ -166,7 +180,7 @@ module Utopia
 			
 			# Redirect a directory path to its index path.
 			# @parameter path [String] The normalized request path.
-			# @returns [Array | Nil] The redirect response when the path ends with `/`.
+			# @returns [Protocol::HTTP::Response | Nil] The redirect response when the path ends with `/`.
 			def [] path
 				if path.end_with?("/")
 					return redirect(path + @index)
@@ -188,7 +202,7 @@ module Utopia
 			
 			# Redirect a path found in the rewrite map.
 			# @parameter path [String] The normalized request path.
-			# @returns [Array | Nil] The redirect response when the path is mapped.
+			# @returns [Protocol::HTTP::Response | Nil] The redirect response when the path is mapped.
 			def [] path
 				if location = @patterns[path]
 					return redirect(location)
@@ -205,8 +219,6 @@ module Utopia
 			# @parameter status [Integer] The status.
 			# @parameter flatten [bool] Whether to flatten the rewritten path.
 			def initialize(app, pattern, prefix, status: 301, flatten: false)
-				@app = app
-				
 				@pattern = pattern
 				@prefix = prefix
 				@flatten = flatten
@@ -216,7 +228,7 @@ module Utopia
 			
 			# Redirect a matching path to the configured prefix.
 			# @parameter path [String] The normalized request path.
-			# @returns [Array | Nil] The redirect response when the pattern matches.
+			# @returns [Protocol::HTTP::Response | Nil] The redirect response when the pattern matches.
 			def [] path
 				if path.start_with?(@pattern)
 					if @flatten

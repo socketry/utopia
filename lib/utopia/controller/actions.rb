@@ -10,7 +10,7 @@ module Utopia
 		# A controller layer which invokes functinality based on the request path.
 		# @example
 		# 	on '*' do |request, path|
-		# 		succeed! content: 'Hello World'
+		# 		succeed! 'Hello World'
 		# 	end
 		module Actions
 			# Extend a controller class with the action-definition DSL.
@@ -176,7 +176,7 @@ module Utopia
 				
 				# Dispatch the request to the first matching action.
 				# @parameter controller [Utopia::Controller::Base] The controller instance.
-				# @parameter request [Rack::Request] The request.
+				# @parameter request [Utopia::Request] The request.
 				# @parameter path [Utopia::Path | String] The path.
 				# @returns [Object | Nil] The result of the final matching action or fallback action.
 				def dispatch(controller, request, path)

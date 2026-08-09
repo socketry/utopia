@@ -3,27 +3,36 @@
 # Released under the MIT License.
 # Copyright, 2015-2025, by Samuel Williams.
 
-require "a_rack_application"
-
+require "sus/fixtures/protocol/http/middleware_context"
+require "utopia/application"
 require "utopia/exceptions"
 require "utopia/controller"
 
 describe Utopia::Exceptions::Handler do
-	include_context ARackApplication, File.expand_path("handler.ru", __dir__)
+	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
+	
+	let(:middleware) do
+		root = File.expand_path(".handler", __dir__)
+		
+		Utopia::Application.build do
+			use Utopia::Exceptions::Handler, "/exception"
+			use Utopia::Controller, root: root
+		end
+	end
 	
 	it "should successfully call the controller method" do
 		# This request will raise an exception, and then redirect to the /exception url which will fail again, and cause a fatal error.
-		get "/blow?fatal=true"
+		client.get "/blow?fatal=true"
 		
 		expect(last_response.status).to be == 500
 		expect(last_response.headers["content-type"]).to be == "text/plain"
-		expect(last_response.body).to be(:include?, "error")
+		expect(last_response.read).to be(:include?, "error")
 	end
 	
 	it "should fail with a 500 error" do
-		get "/blow"
+		client.get "/blow"
 		
 		expect(last_response.status).to be == 500
-		expect(last_response.body).to be(:include?, "Error Will Robertson")
+		expect(last_response.read).to be(:include?, "Error: Arrrh!")
 	end
 end

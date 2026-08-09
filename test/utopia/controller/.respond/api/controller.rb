@@ -27,5 +27,5 @@ end
 # Accept: application/json;version=1
 # Accept: application/json;version=2
 on 'fetch' do
-	succeed! content: VersionedResponse.new
+	succeed! VersionedResponse.new
 end

@@ -4,7 +4,7 @@ This guide explains how to set up a `utopia` website for local development and d
 
 ## Installation
 
-Utopia is built on Ruby and Rack. Therefore, Ruby (suggested 2.0+) should be installed and working. Then, to install `utopia` and all required dependencies, run:
+Utopia is built on Ruby. Therefore, Ruby should be installed and working. Then, to install `utopia` and all required dependencies, run:
 
 ~~~ bash
 $ gem install utopia
@@ -32,10 +32,12 @@ You will now have a basic template site running on `https://localhost:9292`.
 Utopia includes a redirection middleware to redirect all root-level requests to a given URI. The default being `/welcome/index`:
 
 ```ruby
-# in config.ru
+# in config/application.rb
 
-use Utopia::Redirection::Rewrite,
-	"/" => "/welcome/index"
+Application = Utopia::Application.build do
+	use Utopia::Redirection::Rewrite,
+		"/" => "/welcome/index"
+end
 ```
 
 The content for this page is stored in `pages/welcome/index.xnode`. The format of this page is a subset of HTML5 - open and close tags are strictly enforced.
@@ -84,7 +86,7 @@ website
 
 Least Coverage:
 pages/_page.xnode: 6 lines not executed!
-config.ru: 4 lines not executed!
+config/application.rb: 4 lines not executed!
 pages/welcome/index.xnode: 2 lines not executed!
 pages/_heading.xnode: 1 lines not executed!
 

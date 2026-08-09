@@ -21,7 +21,6 @@ end
 
 group :development do
 	gem "json"
-	gem "rackula"
 end
 
 group :test do
@@ -32,14 +31,13 @@ group :test do
 	gem "rubocop-md"
 	gem "rubocop-socketry"
 	
-	gem "falcon"
+	gem "falcon", "~> 0.57"
 	gem "async-websocket"
 	gem "sus-fixtures-async-http"
+	gem "sus-fixtures-protocol-http", "~> 0.1"
 	
 	gem "bake-test"
 	gem "bake-test-external"
 	
 	gem "benchmark-ips"
-	
-	gem "rack-test"
 end

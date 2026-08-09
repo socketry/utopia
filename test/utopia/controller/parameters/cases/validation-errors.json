@@ -1,0 +1,19 @@
+{
+	"request": {
+		"method": "POST",
+		"path": "/api/parse",
+		"headers": {"content-type": "application/json"},
+		"body": "{\"user\":{\"age\":\"old\",\"role\":\"owner\",\"extra\":true}}"
+	},
+	"response": {
+		"status": 422,
+		"body": {
+			"errors": [
+				{"path": ["user", "name"], "code": "required"},
+				{"path": ["user", "age"], "code": "invalid_type"},
+				{"path": ["user", "role"], "code": "invalid_type"},
+				{"path": ["user", "extra"], "code": "unknown"}
+			]
+		}
+	}
+}

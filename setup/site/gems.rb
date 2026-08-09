@@ -17,7 +17,6 @@ gem "net-smtp"
 
 group :development do
 	gem "bake-test"
-	gem "rack-test"
 	
 	gem "sus"
 	gem "sus-fixtures-async-http"
@@ -28,5 +27,5 @@ group :development do
 end
 
 group :production do
-	gem "falcon"
+	gem "falcon", "~> 0.57"
 end

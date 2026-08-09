@@ -1,10 +1,10 @@
 # Middleware
 
-This guide gives an overview of the different Rack middleware used by Utopia.
+This guide gives an overview of the different middleware used by Utopia.
 
 ## Static
 
-The {ruby Utopia::Static} middleware services static files efficiently. By default, it works with `Rack::Sendfile` and supports `ETag` based caching. Normally, you'd prefer to put static files into `public/_static` but it's also acceptable to put static content into `pages/` if it makes sense.
+The {ruby Utopia::Static} middleware services static files efficiently and supports `ETag` based caching. Normally, you'd prefer to put static files into `public/_static` but it's also acceptable to put static content into `pages/` if it makes sense.
 
 ~~~ ruby
 use Utopia::Static,
@@ -36,7 +36,7 @@ use Utopia::Redirection::Errors,
 
 ## Localization
 
-The {ruby Utopia::Localization} middleware provides non-intrusive localization on top of the controller and view layers. The middleware uses the `accept-language` header to guess the preferred locale out of the given options. If a request path maps to a resource, that resource is returned. Otherwise, a non-localized request is made.
+The {ruby Utopia::Localization} middleware computes immutable localization preferences from the request path, host, and `accept-language` header. Localization-aware resource middleware, including {ruby Utopia::Static} and {ruby Utopia::Content}, resolves those preferences without invoking controllers more than once. Place the localization middleware before those resources in the middleware stack.
 
 ~~~ ruby
 use Utopia::Localization,
@@ -53,7 +53,7 @@ pages/index.ja.xnode
 pages/index.zh.xnode
 ~~~
 
-You can also access the current locale in the view via {ruby Utopia::Content::Node::Context#localization}.
+You can access the selected locale in a view using `localization.locale`. Controllers can inspect the request preferences using `request.localization`.
 
 ## Controller
 
@@ -90,7 +90,7 @@ def passthrough(request, path)
 	
 	# Succeed the request and immediately respond.
 	# def succeed!(status: 200, headers: {}, **options)
-	# options may include content: string or body: Enumerable (as per Rack specifications
+	# options may include content: String or body: Enumerable.
 	
 	suceed!
 end
@@ -108,7 +108,7 @@ end
 
 on "edit" do |request, path|
 	if request.post?
-		@user.update_attributes(request[:user])
+		@user.update_attributes(parse_body(request)["user"])
 	end
 end
 
@@ -155,3 +155,9 @@ use Utopia::Session,
 ```
 
 All session data is stored on the client, but it's encrypted with a salt and the secret key. It is impossible for the client to decrypt the data without the secret stored on the server.
+
+When the middleware is installed, the session is available on the request:
+
+```ruby
+request.session[:user_id] = user.id
+```
