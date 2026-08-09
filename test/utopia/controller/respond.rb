@@ -80,7 +80,7 @@ describe Utopia::Controller do
 	let(:app) do
 		root = File.expand_path(".respond", __dir__)
 		
-		Utopia::Application.build(lambda{|request| Utopia::Response[404, {}, []]}) do
+		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request| Utopia::Response[404, {}, []]}) do
 			use Utopia::Redirection::Errors, 404 => "/fail"
 			use Utopia::Controller, root: root
 			use Utopia::Content, root: root

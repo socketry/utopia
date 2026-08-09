@@ -7,7 +7,7 @@ require "utopia/content"
 
 describe Utopia::Content::Node do
 	let(:root) {File.expand_path("node", __dir__)}
-	let(:content) {Utopia::Content.new(lambda{}, root: root)}
+	let(:content) {Utopia::Content.new(Protocol::HTTP::Middleware::NotFound, root: root)}
 	
 	it "should list siblings in correct order" do
 		node = content.lookup_node(Utopia::Path["/ordered/first"])

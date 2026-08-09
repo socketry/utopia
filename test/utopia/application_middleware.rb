@@ -24,7 +24,7 @@ describe "Utopia application middleware" do
 		application = Utopia::Application.build do
 			use Utopia::Redirection::Rewrite, {"/old" => "/new"}
 			
-			run lambda{|request|
+			run Protocol::HTTP::Middleware.for{|request|
 				seen_request = request
 				Utopia::Response.text(request.path_info)
 			}
@@ -65,7 +65,7 @@ describe "Utopia application middleware" do
 	
 	it "closes first-party middleware stacks" do
 		closed = 0
-		application = lambda{|request| Utopia::Response.text("OK")}
+		application = Protocol::HTTP::Middleware.for{|request| Utopia::Response.text("OK")}
 		application.define_singleton_method(:close) do
 			closed += 1
 		end
@@ -101,7 +101,7 @@ describe "Utopia application middleware" do
 		application = Utopia::Application.build do
 			use Utopia::Session, session_name: Utopia::Session::Middleware::SESSION_KEY, secret: "test-secret"
 			
-			run lambda{|request|
+			run Protocol::HTTP::Middleware.for{|request|
 				request.session[:value] = "Hello"
 				Utopia::Response.text("OK")
 			}

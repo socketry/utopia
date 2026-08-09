@@ -89,7 +89,7 @@ end
 
 describe Utopia::Content do
 	let(:root) {File.expand_path(".content", __dir__)}
-	let(:content) {Utopia::Content.new(lambda{}, root: root)}
+	let(:content) {Utopia::Content.new(Protocol::HTTP::Middleware::NotFound, root: root)}
 	
 	it "should parse file and expand variables" do
 		path = Utopia::Path.create("/index")

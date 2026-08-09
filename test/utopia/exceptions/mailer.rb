@@ -45,7 +45,7 @@ describe Utopia::Exceptions::Mailer do
 	it "extracts rewindable request bodies" do
 		request = Utopia::Request["POST", "/", {}, ["Hello", " World!"]]
 		request.body.read
-		mailer = subject.new(->(_request){}, delivery_method: nil)
+		mailer = subject.new(Protocol::HTTP::Middleware::NotFound, delivery_method: nil)
 		
 		expect(mailer.send(:extract_body, request)).to be == "Hello World!"
 	end
@@ -54,7 +54,7 @@ describe Utopia::Exceptions::Mailer do
 		body = Object.new
 		def body.rewindable? = false
 		request = Struct.new(:body).new(body)
-		mailer = subject.new(->(_request){}, delivery_method: nil)
+		mailer = subject.new(Protocol::HTTP::Middleware::NotFound, delivery_method: nil)
 		
 		expect(mailer.send(:extract_body, request)).to be_nil
 	end

@@ -98,7 +98,7 @@ describe Utopia::Localization do
 	
 	it "keeps request preferences immutable while resolving content" do
 		observed = nil
-		application = Utopia::Application.build(lambda do |request|
+		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |request|
 			observed = request.localization
 			Utopia::Response.text("Fallback")
 		end) do
@@ -132,7 +132,7 @@ describe Utopia::Localization do
 	
 	it "invokes the application once" do
 		calls = 0
-		application = Utopia::Application.build(lambda do |_request|
+		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |_request|
 			calls += 1
 			Utopia::Response.text("Failure", 404)
 		end) do
@@ -148,7 +148,7 @@ describe Utopia::Localization do
 	
 	it "passes ignored requests through without localization" do
 		observed = nil
-		application = Utopia::Application.build(lambda do |request|
+		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |request|
 			observed = request.localization
 			Utopia::Response.text("Ignored")
 		end) do

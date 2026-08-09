@@ -14,7 +14,7 @@ describe Utopia::Application do
 		application_request = nil
 		
 		application = subject.build do
-			run lambda{|request|
+			run Protocol::HTTP::Middleware.for{|request|
 				application_request = request
 				
 				Utopia::Response.text("Hello")
@@ -40,7 +40,7 @@ describe Utopia::Application do
 		end
 		
 		application = subject.build do
-			run lambda{|request| response_object}
+			run Protocol::HTTP::Middleware.for{|request| response_object}
 		end
 		
 		response = application.call(http_request)
@@ -73,7 +73,7 @@ describe Utopia::Application do
 				require "utopia/application"
 				
 				Application = Utopia::Application.build do
-				run lambda{|request| Utopia::Response.text(request.path_info)}
+				run Protocol::HTTP::Middleware.for{|request| Utopia::Response.text(request.path_info)}
 				end
 			RUBY
 			

@@ -11,7 +11,7 @@ describe Utopia::Session do
 	include ProtocolApplication
 	
 	let(:app) do
-		Utopia::Application.build(lambda{|request|
+		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
 			case request.path_info
 			when "/login"
 				request.session["login"] = "true"
@@ -87,7 +87,7 @@ describe Utopia::Session do
 	include ProtocolApplication
 	
 	let(:app) do
-		Utopia::Application.build(lambda{|request|
+		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
 			case request.path_info
 			when "/session-set"
 				request.session[request.query_arguments["key"].to_sym] = request.query_arguments["value"]

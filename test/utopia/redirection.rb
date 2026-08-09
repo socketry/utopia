@@ -21,7 +21,7 @@ describe Utopia::Redirection do
 	end
 	
 	let(:app) do
-		Utopia::Application.build(lambda{|request|
+		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
 			case request.path_info
 			when "/error"
 				Utopia::Response.text("File not found :(", 200)
@@ -85,7 +85,7 @@ describe Utopia::Redirection do
 	
 	it "closes the response replaced by an error document" do
 		events = []
-		application = Utopia::Application.build(lambda do |request|
+		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |request|
 			if request.path_info == "/error"
 				Utopia::Response[200, {}, tracked_body(:error, events)]
 			else
@@ -108,7 +108,7 @@ describe Utopia::Redirection do
 	
 	it "closes both responses when the error document fails" do
 		events = []
-		application = Utopia::Application.build(lambda do |request|
+		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |request|
 			if request.path_info == "/error"
 				Utopia::Response[500, {}, tracked_body(:error, events)]
 			else
