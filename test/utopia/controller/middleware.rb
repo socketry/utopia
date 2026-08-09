@@ -30,6 +30,17 @@ describe Utopia::Controller do
 		expect(body).to be == "flat"
 	end
 	
+	it "returns a protocol response directly" do
+		root = File.expand_path(".middleware", __dir__)
+		middleware = Utopia::Controller::Middleware.new(Protocol::HTTP::Middleware::NotFound, root: root)
+		request = Utopia::Request["GET", "/controller/flat"]
+		
+		response = middleware.call(request)
+		
+		expect(response).to be_a(Protocol::HTTP::Response)
+		expect(response.read).to be == "flat"
+	end
+	
 	it "should invoke controller method from the top level" do
 		get "/controller/hello-world"
 		

@@ -6,6 +6,7 @@
 require_relative "../path"
 require_relative "../middleware"
 require_relative "../request"
+require_relative "../response"
 
 require_relative "variables"
 require_relative "base"
@@ -127,7 +128,7 @@ module Utopia
 				request.variables ||= Variables.new
 				
 				if result = invoke_controllers(request)
-					return result
+					return Utopia::Response.wrap(result)
 				end
 				
 				return @delegate.call(request)
