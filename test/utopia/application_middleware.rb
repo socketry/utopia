@@ -6,6 +6,8 @@
 require "protocol/http/request"
 require "tmpdir"
 
+require "falcon/server"
+
 require "utopia/application"
 require "utopia/redirection"
 require "utopia/session"
@@ -39,6 +41,28 @@ describe "Utopia application middleware" do
 		
 		expect(response.status).to be == 301
 		expect(response.headers["location"]).to be == "/new"
+	end
+	
+	it "runs behind Falcon protocol middleware" do
+		seen_request = nil
+		terminal = Protocol::HTTP::Middleware.for do |request|
+			seen_request = request
+			Utopia::Response.text("Hello")
+		end
+		
+		application = Utopia::Application.build do
+			run terminal
+		end
+		
+		middleware = Falcon::Server.protocol_middleware(application, cache: false)
+		response = middleware.call(request("/hello"))
+		
+		expect(seen_request).to be_a(Utopia::Request)
+		expect(response.status).to be == 200
+		expect(response.read).to be == "Hello"
+	ensure
+		response&.close
+		middleware&.close
 	end
 	
 	it "closes first-party middleware stacks" do

@@ -19,7 +19,7 @@ def generate(output_path: "static")
 	container = container_class.run(count: 2) do
 		Async do
 			server = Falcon::Server.new(
-				Falcon::Server.middleware(app),
+				Falcon::Server.protocol_middleware(app),
 				Async::HTTP::Endpoint.parse("http://localhost:#{server_port}")
 			)
 			
