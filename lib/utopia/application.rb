@@ -19,7 +19,7 @@ module Utopia
 		PATH = "config/application.rb".freeze
 		
 		# Build a Utopia application stack using the protocol HTTP middleware builder.
-		# @parameter default_app [Interface(:call)] The terminal application used when the block does not call `run`.
+		# @parameter default_app [Interface(:call)] The default application used when the block does not call `run`.
 		# @parameter block [Proc] The middleware builder block.
 		# @returns [Application] The protocol-facing Utopia application.
 		def self.build(default_app = Response::NotFound, &block)

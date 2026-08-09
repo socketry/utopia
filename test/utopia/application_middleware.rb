@@ -45,16 +45,14 @@ describe "Utopia application middleware" do
 	
 	it "runs behind Falcon protocol middleware" do
 		seen_request = nil
-		terminal = Protocol::HTTP::Middleware.for do |request|
+		application = Protocol::HTTP::Middleware.for do |request|
 			seen_request = request
 			Utopia::Response.text("Hello")
 		end
 		
-		application = Utopia::Application.build do
-			run terminal
-		end
+		utopia_application = Utopia::Application.build(application)
 		
-		middleware = Falcon::Server.protocol_middleware(application, cache: false)
+		middleware = Falcon::Server.protocol_middleware(utopia_application, cache: false)
 		response = middleware.call(request("/hello"))
 		
 		expect(seen_request).to be_a(Utopia::Request)
@@ -67,18 +65,18 @@ describe "Utopia application middleware" do
 	
 	it "closes first-party middleware stacks" do
 		closed = 0
-		terminal = lambda{|request| Utopia::Response.text("OK")}
-		terminal.define_singleton_method(:close) do
+		application = lambda{|request| Utopia::Response.text("OK")}
+		application.define_singleton_method(:close) do
 			closed += 1
 		end
 		
-		application = Utopia::Application.build do
+		utopia_application = Utopia::Application.build do
 			use Utopia::Redirection::Rewrite, {"/old" => "/new"}
 			use Utopia::Static
-			run terminal
+			run application
 		end
 		
-		application.close
+		utopia_application.close
 		
 		expect(closed).to be == 1
 	end
