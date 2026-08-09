@@ -47,7 +47,6 @@ module Utopia
 			# @parameter path [Utopia::Path | String] The path.
 			# @returns [LocalFile | Nil] The local file, or `nil` when it does not exist.
 			def fetch_file(path)
-				# We need file_path to be an absolute path for X-Sendfile to work correctly.
 				file_path = File.join(@root, path.components)
 				
 				if File.exist?(file_path)

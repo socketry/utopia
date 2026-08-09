@@ -24,6 +24,50 @@ describe Utopia::Static do
 		expect(last_response.body).to be_a(Protocol::HTTP::Body::File)
 	end
 	
+	it "returns not modified for matching entity tags" do
+		get "/test.txt"
+		etag = last_response.headers["etag"]
+		
+		expect(etag).to be(:start_with?, '"')
+		expect(etag).to be(:end_with?, '"')
+		
+		get "/test.txt", {"if-none-match" => etag}
+		expect(last_response.status).to be == 304
+		
+		get "/test.txt", {"if-none-match" => "W/#{etag}"}
+		expect(last_response.status).to be == 304
+		
+		get "/test.txt", {"if-none-match" => "*"}
+		expect(last_response.status).to be == 304
+	end
+	
+	it "gives entity tags precedence over modification dates" do
+		get "/test.txt", {
+			"if-none-match" => '"different"',
+			"if-modified-since" => (Time.now + 3600).httpdate,
+		}
+		
+		expect(last_response.status).to be == 200
+	end
+	
+	it "returns not modified when the modification time matches" do
+		get "/test.txt"
+		last_modified = last_response.headers["last-modified"]
+		
+		get "/test.txt", {"if-modified-since" => last_modified}
+		
+		expect(last_response.status).to be == 304
+	end
+	
+	it "returns modified when the modification time is newer" do
+		get "/test.txt"
+		last_modified = last_response.headers["last-modified"].to_time
+		
+		get "/test.txt", {"if-modified-since" => (last_modified - 1).httpdate}
+		
+		expect(last_response.status).to be == 200
+	end
+	
 	it "should return partial content" do
 		get "/test.txt", {"range" => "bytes=1-4"}
 		
