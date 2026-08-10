@@ -13,16 +13,11 @@ module Utopia
 			# Initialize an empty redirection configuration.
 			def initialize
 				@rules = []
-				@errors = {}
 			end
 			
 			# The configured request redirection rules.
 			# @returns [Array] The rules in declaration order.
 			attr :rules
-			
-			# The configured error document paths indexed by response status.
-			# @returns [Hash(Integer, String)] The configured error documents.
-			attr :errors
 			
 			# Configure and freeze this builder.
 			# @yields {|builder| ...} The redirection configuration.
@@ -47,7 +42,6 @@ module Utopia
 				return self if frozen?
 				
 				@rules.freeze
-				@errors.freeze
 				
 				return super
 			end
@@ -105,15 +99,6 @@ module Utopia
 					end
 				end
 				
-				return self
-			end
-			
-			# Replace an unhandled response status with an internal error document.
-			# @parameter status [Integer] The response status to handle.
-			# @parameter path [String] The internal error document path.
-			# @returns [self] This builder.
-			def error(status, path)
-				@errors[status] = path
 				return self
 			end
 			

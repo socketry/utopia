@@ -35,12 +35,11 @@ describe Utopia::Redirection do
 			use Utopia::Redirection do |redirects|
 				redirects.rewrite "/" => "/welcome/index"
 				redirects.directory_index
-				redirects.error 404, "/error"
-				redirects.error 418, "/teapot"
 				redirects.moved "/a", "/b"
 				redirects.moved "/hierarchy/", "/hierarchy", flatten: true
 				redirects.moved "/weird", "/status", status: 333
 			end
+			use Utopia::Redirection::Errors, 404 => "/error", 418 => "/teapot"
 		end
 	end
 	
@@ -84,6 +83,27 @@ describe Utopia::Redirection do
 		expect(last_response.read).to be == "File not found :("
 	end
 	
+	it "bypasses request redirections for internal error documents" do
+		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |request|
+			if request.path_info == "/error"
+				Utopia::Response.text("Internal error document")
+			else
+				Utopia::Response[404, {}, []]
+			end
+		end) do
+			use Utopia::Redirection do |redirects|
+				redirects.rewrite "/error" => "/redirected"
+			end
+			use Utopia::Redirection::Errors, 404 => "/error"
+		end
+		
+		response = application.call(Protocol::HTTP::Request["GET", "/missing"])
+		
+		expect(response.status).to be == 404
+		expect(response.headers["location"]).to be == nil
+		expect(response.read).to be == "Internal error document"
+	end
+	
 	it "closes the response replaced by an error document" do
 		events = []
 		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |request|
@@ -93,9 +113,7 @@ describe Utopia::Redirection do
 				Utopia::Response[404, {}, tracked_body(:original, events)]
 			end
 		end) do
-			use Utopia::Redirection do
-				error 404, "/error"
-			end
+			use Utopia::Redirection::Errors, 404 => "/error"
 		end
 		
 		response = application.call(Protocol::HTTP::Request["GET", "/missing"])
@@ -118,9 +136,7 @@ describe Utopia::Redirection do
 				Utopia::Response[404, {}, tracked_body(:original, events)]
 			end
 		end) do
-			use Utopia::Redirection do |redirects|
-				redirects.error 404, "/error"
-			end
+			use Utopia::Redirection::Errors, 404 => "/error"
 		end
 		
 		expect do

@@ -28,8 +28,8 @@ Application = Utopia::Application.build do
 	use Utopia::Redirection do |redirects|
 		redirects.rewrite "/" => "/welcome/index"
 		redirects.directory_index
-		redirects.error 404, "/errors/file-not-found"
 	end
+	use Utopia::Redirection::Errors, 404 => "/errors/file-not-found"
 	
 	use Utopia::Session,
 		expires_after: 3600 * 24,

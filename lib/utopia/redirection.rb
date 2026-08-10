@@ -4,6 +4,7 @@
 # Copyright, 2009-2026, by Samuel Williams.
 
 require_relative "redirection/request_failure"
+require_relative "redirection/errors"
 require_relative "redirection/rule"
 require_relative "redirection/builder"
 require_relative "redirection/middleware"
