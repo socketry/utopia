@@ -4,6 +4,7 @@
 # Copyright, 2009-2025, by Samuel Williams.
 
 require_relative "localization/preferences"
+require_relative "localization/locales"
 require_relative "localization/resolver"
 require_relative "localization/middleware"
 

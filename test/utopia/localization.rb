@@ -76,6 +76,24 @@ describe Utopia::Localization do
 		expect(last_response.headers["content-location"].to_s).to be == "/ja/localized.txt"
 	end
 	
+	it "matches less specific accepted languages" do
+		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |request|
+			Utopia::Response.text(request.localization.preferred_locales.compact.join(","))
+		end) do
+			use Utopia::Localization, locales: ["en-NZ", "en-US"], default_locale: "en-NZ"
+		end
+		
+		response = application.call(Protocol::HTTP::Request["GET", "/", {"accept-language" => "en"}])
+		
+		expect(response.read).to be == "en-NZ"
+	end
+	
+	it "ignores malformed accepted languages" do
+		client.get "/localized.txt", {"accept-language" => "not a language"}
+		
+		expect(last_response.read).to be == "localized.en.txt"
+	end
+	
 	it "resolves localized content templates" do
 		client.get "/page", {"accept-language" => "ja,en"}
 		

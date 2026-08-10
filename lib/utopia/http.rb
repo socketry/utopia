@@ -3,15 +3,11 @@
 # Released under the MIT License.
 # Copyright, 2010-2026, by Samuel Williams.
 
-require "http/accept"
 require "protocol/http/status"
 
 module Utopia
 	# HTTP protocol implementation.
 	module HTTP
-		# Pull in {::HTTP::Accept} for parsing.
-		Accept = ::HTTP::Accept
-		
 		# A list of commonly used HTTP status codes.
 		# For help choosing the right status code, see http://racksburg.com/choosing-an-http-status-code/
 		STATUS_CODES = {

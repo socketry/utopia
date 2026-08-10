@@ -17,7 +17,7 @@
 		<div>
 			<i class="fa fa-code"></i>
 			<h2>Well tested and maintained</h2>
-			<p>Utopia comprises a <a href="https://github.com/ioquatix/utopia">core gem</a> and several supporting libraries, the main ones being <a href="https://github.com/ioquatix/trenni">trenni</a> for templates and parsing, and <a href="https://github.com/ioquatix/http-accept">http-accept</a> for HTTP header processing. Together, these gems have over 90% test coverage.</p>
+			<p>Utopia comprises a <a href="https://github.com/ioquatix/utopia">core gem</a> and several supporting libraries, including <a href="https://github.com/socketry/xrb">XRB</a> for templates and markup parsing and <a href="https://github.com/socketry/protocol-http">Protocol HTTP</a> for HTTP protocol handling.</p>
 		</div>
 		
 		<div>
