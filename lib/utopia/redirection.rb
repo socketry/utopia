@@ -3,18 +3,13 @@
 # Released under the MIT License.
 # Copyright, 2009-2026, by Samuel Williams.
 
-module Utopia
-	# Redirect requests and replace unhandled error responses with error documents.
-	module Redirection
-	end
-end
-
 require_relative "redirection/request_failure"
 require_relative "redirection/rule"
 require_relative "redirection/builder"
 require_relative "redirection/middleware"
 
 module Utopia
+	# Redirect requests and replace unhandled error responses with error documents.
 	module Redirection
 		# Construct unified redirection middleware.
 		# @parameter delegate [Protocol::HTTP::Middleware] The downstream middleware.
