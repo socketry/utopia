@@ -6,8 +6,6 @@
 module Utopia
 	# Redirect requests and replace unhandled error responses with error documents.
 	module Redirection
-		# We cache redirects for 24 hours by default.
-		DEFAULT_MAX_AGE = 3600*24
 	end
 end
 

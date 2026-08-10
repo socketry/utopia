@@ -7,6 +7,9 @@ module Utopia
 	module Redirection
 		# Builds immutable redirection rules for {Middleware}.
 		class Builder
+			# The default redirect cache lifetime is 24 hours.
+			MAX_AGE = 3600*24
+			
 			def initialize
 				@rules = []
 				@errors = {}
@@ -53,7 +56,7 @@ module Utopia
 			# @parameter status [Integer] The redirect response status.
 			# @parameter max_age [Integer] The redirect cache lifetime in seconds.
 			# @returns [self] This builder.
-			def rewrite(patterns = nil, status: 301, max_age: DEFAULT_MAX_AGE, **keyword_patterns)
+			def rewrite(patterns = nil, status: 301, max_age: MAX_AGE, **keyword_patterns)
 				# Ruby interprets an unbraced path map as keyword arguments:
 				if patterns.nil?
 					patterns = keyword_patterns
@@ -73,7 +76,7 @@ module Utopia
 			# @parameter status [Integer] The redirect response status.
 			# @parameter max_age [Integer] The redirect cache lifetime in seconds.
 			# @returns [self] This builder.
-			def directory_index(index = "index", status: 307, max_age: DEFAULT_MAX_AGE)
+			def directory_index(index = "index", status: 307, max_age: MAX_AGE)
 				add(status, max_age) do |path|
 					if path.end_with?("/")
 						path + index
@@ -90,7 +93,7 @@ module Utopia
 			# @parameter flatten [Boolean] Whether to discard the matched path suffix.
 			# @parameter max_age [Integer] The redirect cache lifetime in seconds.
 			# @returns [self] This builder.
-			def moved(pattern, prefix, status: 301, flatten: false, max_age: DEFAULT_MAX_AGE)
+			def moved(pattern, prefix, status: 301, flatten: false, max_age: MAX_AGE)
 				add(status, max_age) do |path|
 					if path.start_with?(pattern)
 						if flatten
