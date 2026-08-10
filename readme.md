@@ -57,7 +57,6 @@ Please see the [project releases](https://socketry.github.io/utopia/releases/ind
   - [Utopia::Gallery](https://github.com/ioquatix/utopia-gallery) — A fast photo gallery based on [libvips](https://github.com/jcupitt/libvips).
   - [Utopia::Project](https://github.com/socketry/utopia-project) — A Ruby project documentation tool.
   - [Utopia::Analytics](https://github.com/ioquatix/utopia-analytics) — Simple integration with Google Analytics.
-  - [HTTP::Accept](https://github.com/ioquatix/http-accept) — RFC compliant header parser.
   - [Samovar](https://github.com/ioquatix/samovar) — Command line parser used by Utopia.
   - [Mapping](https://github.com/ioquatix/mapping) — Provide structured conversions for web interfaces.
 

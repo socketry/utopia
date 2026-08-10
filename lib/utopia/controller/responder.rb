@@ -5,25 +5,23 @@
 
 require_relative "middleware"
 
+require "protocol/http/header/accept"
+require "protocol/media/map"
+require "protocol/media/type"
+require "protocol/media/range"
+
 module Utopia
 	module Controller
 		# @namespace
 		module Handlers
 			# Serializes controller values as JSON responses.
 			module JSON
-				APPLICATION_JSON = HTTP::Accept::ContentType.new("application", "json").freeze
-				
-				# Delegate content-type splitting to the JSON media type.
-				# @parameter arguments [Array] The arguments.
-				# @returns [Array] The resulting values.
-				def self.split(*arguments)
-					APPLICATION_JSON.split(*arguments)
-				end
+				APPLICATION_JSON = Protocol::Media::Type.new("application", "json").freeze
 				
 				# Serialize an object as JSON.
 				# @parameter context [Object] The context.
 				# @parameter request [Utopia::Request] The request.
-				# @parameter media_range [HTTP::Accept::MediaTypes::MediaRange] The negotiated media range.
+				# @parameter media_range [Protocol::HTTP::Header::Accept::MediaRange] The negotiated media range.
 				# @parameter object [Object] The object.
 				# @parameter options [Hash] The options.
 				# @returns [String] The serialized JSON body.
@@ -36,7 +34,7 @@ module Utopia
 				end
 				
 				# The media type produced by this handler.
-				# @returns [HTTP::Accept::ContentType] The JSON media type.
+				# @returns [Protocol::Media::Type] The JSON media type.
 				def self.content_type
 					APPLICATION_JSON
 				end
@@ -44,19 +42,12 @@ module Utopia
 			
 			# Passes response values through without transformation.
 			module Passthrough
-				WILDCARD = HTTP::Accept::MediaTypes::MediaRange.new("*", "*").freeze
-				
-				# Delegate content-type splitting to the wildcard media range.
-				# @parameter arguments [Array] The arguments.
-				# @returns [Array] The resulting values.
-				def self.split(*arguments)
-					WILDCARD.split(*arguments)
-				end
+				WILDCARD = Protocol::Media::Range.new("*", "*").freeze
 				
 				# Pass an object through without transformation.
 				# @parameter context [Object] The context.
 				# @parameter request [Utopia::Request] The request.
-				# @parameter media_range [HTTP::Accept::MediaTypes::MediaRange] The negotiated media range.
+				# @parameter media_range [Protocol::HTTP::Header::Accept::MediaRange] The negotiated media range.
 				# @parameter object [Object] The object.
 				# @parameter options [Hash] The options.
 				# @returns [Object] The original body.
@@ -76,17 +67,10 @@ module Utopia
 		class Responder
 			# A content-type handler and its response block.
 			Handler = Struct.new(:content_type, :block) do
-				# Delegate content-type splitting to this handler's content type.
-				# @parameter arguments [Array] The arguments.
-				# @returns [Array] The resulting values.
-				def split(*arguments)
-					self.content_type.split(*arguments)
-				end
-				
 				# Invoke this handler's block in the controller context.
 				# @parameter context [Object] The context.
 				# @parameter request [Utopia::Request] The request.
-				# @parameter media_range [HTTP::Accept::MediaTypes::MediaRange] The negotiated media range.
+				# @parameter media_range [Protocol::HTTP::Header::Accept::MediaRange] The negotiated media range.
 				# @parameter arguments [Array] The arguments.
 				# @parameter options [Hash] The options.
 				# @returns [Object] The handler block's result.
@@ -95,19 +79,55 @@ module Utopia
 				end
 			end
 			
-			# Initialize an empty content-type handler map.
-			def initialize
-				@handlers = HTTP::Accept::MediaTypes::Map.new
+			# Initialize a responder with a handler map.
+			# @parameter handlers [Protocol::Media::Map] The response handlers.
+			# @parameter passthrough [Object | Nil] The fallback response handler.
+			def initialize(handlers = Protocol::Media::Map.new, passthrough = nil)
+				@handlers = handlers
+				@passthrough = passthrough
 			end
 			
 			attr :handlers
 			
-			# Freeze this object and its internal state.
-			# @returns [self] This object.
+			# Freeze this responder and compile its handler map.
+			# @returns [self] This responder.
 			def freeze
+				return self if frozen?
+				
 				@handlers.freeze
 				
-				super
+				return super
+			end
+			
+			# Add a serializer for the specified content type.
+			# @parameter content_type [String | Protocol::Media::Type] The produced media type.
+			# @yields The response handler body.
+			# @returns [self] This responder.
+			def handle(content_type, &block)
+				@handlers[content_type] = Handler.new(content_type, block).freeze
+				return self
+			end
+			
+			# Register the default JSON handler.
+			# @returns [self] This responder.
+			def with_json
+				@handlers[Handlers::JSON::APPLICATION_JSON] = Handlers::JSON
+				return self
+			end
+			
+			# Register the wildcard passthrough handler.
+			# @returns [self] This responder.
+			def with_passthrough
+				@passthrough = Handlers::Passthrough
+				return self
+			end
+			
+			# Add a serializer for the specified content type.
+			# @parameter content_type [String | Protocol::Media::Type] The produced media type.
+			# @yields The response handler body.
+			# @returns [self] This responder.
+			def with(content_type, &block)
+				return handle(content_type, &block)
 			end
 			
 			# Negotiate the request's accepted media types and invoke the best handler.
@@ -117,43 +137,27 @@ module Utopia
 			# @parameter options [Hash] The options.
 			# @returns [Array(Object, Object) | Nil] The selected content type and body, or `nil` if none matches.
 			def call(context, request, *arguments, **options)
-				# Parse the list of browser preferred content types and return ordered by priority:
-				media_types = HTTP::Accept::MediaTypes.browser_preferred_media_types(
-					HTTP::Accept::MediaTypes::HTTP_ACCEPT => Array(request.headers["accept"]).join(",")
-				)
+				accept = request.headers["accept"]
 				
-				handler, media_range = @handlers.for(media_types)
+				# An absent or empty Accept header accepts any media type:
+				if accept.nil? || accept.empty?
+					media_ranges = [Handlers::Passthrough::WILDCARD]
+				else
+					media_ranges = accept.preferred_media_ranges
+				end
+				
+				if match = @handlers.for(media_ranges)
+					handler, media_range = match
+				elsif @passthrough
+					handler = @passthrough
+					media_range = media_ranges.first
+				end
 				
 				if handler
 					return handler.content_type, handler.call(context, request, media_range, *arguments, **options)
 				end
 				
 				return nil
-			end
-			
-			# Add a serializer for the specified content type.
-			def handle(content_type, &block)
-				@handlers << Handler.new(content_type, block)
-			end
-			
-			# Register the default JSON handler.
-			# @returns [HTTP::Accept::MediaTypes::Map] The updated handler map.
-			def with_json
-				@handlers << Handlers::JSON
-			end
-			
-			# Register the wildcard passthrough handler.
-			# @returns [HTTP::Accept::MediaTypes::Map] The updated handler map.
-			def with_passthrough
-				@handlers << Handlers::Passthrough
-			end
-			
-			# Invoke the responder with the given object.
-			# @parameter content_type [String] The content type.
-			# @yields The response handler body.
-			# @returns [HTTP::Accept::MediaTypes::Map] The updated handler map.
-			def with(content_type, &block)
-				handle(content_type, &block)
 			end
 		end
 	end

@@ -46,6 +46,8 @@ describe Utopia::Controller do
 		end
 	end
 	
+	TestController.freeze
+	
 	let(:controller) {TestController.new}
 	
 	def mock_request(path, headers = {})
@@ -86,6 +88,24 @@ describe Utopia::Controller do
 		expect(response.read).to be == '{"user_id":10}'
 	end
 	
+	it "preserves the requested order for equally preferred responses" do
+		request, path = mock_request("/fetch", {"accept" => "text/plain, application/json"})
+		relative_path = path - controller.class.uri_path
+		
+		response = controller.process!(request, relative_path)
+		
+		expect(response.headers["content-type"]).to be == "text/plain"
+	end
+	
+	it "treats an empty accept header as accepting any response" do
+		request, path = mock_request("/fetch", {"accept" => ""})
+		relative_path = path - controller.class.uri_path
+		
+		response = controller.process!(request, relative_path)
+		
+		expect(response.headers["content-type"]).to be == "application/json"
+	end
+	
 	it "preserves readable response bodies" do
 		body = Protocol::HTTP::Body::Readable.new
 		controller.instance_variable_set(:@stream, body)
@@ -117,6 +137,14 @@ describe Utopia::Controller do
 		expect(response.read).to be == "Explicit"
 	end
 	
+	it "falls back to the passthrough handler" do
+		responder = Utopia::Controller::Responder.new
+		responder.with_passthrough
+		responder.freeze
+		request = Utopia::Request["GET", "/", {"accept" => "application/xml"}]
+		
+		expect(responder.call(controller, request, "Hello World")).to be == [nil, "Hello World"]
+	end
 end
 
 describe Utopia::Controller do

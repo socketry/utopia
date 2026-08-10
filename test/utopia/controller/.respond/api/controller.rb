@@ -4,7 +4,7 @@
 # Copyright, 2016-2023, by Samuel Williams.
 
 prepend Respond, Actions
-respond.with_json
+responds.with_json
 
 class VersionedResponse
 	def to_json(options = {})

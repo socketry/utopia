@@ -4,11 +4,13 @@
 # Copyright, 2025-2026, by Samuel Williams.
 
 require_relative "preferences"
+require_relative "locales"
 require_relative "../middleware"
 require_relative "../request"
 require_relative "../response"
 
 require "set"
+require "protocol/http/header/accept_language"
 
 module Utopia
 	module Localization
@@ -22,7 +24,7 @@ module Utopia
 			def initialize(app, locales:, default_locale: nil, default_locales: nil, hosts: {}, ignore: [])
 				super(app)
 				
-				@all_locales = HTTP::Accept::Languages::Locales.new(locales)
+				@all_locales = Locales.new(locales)
 				
 				# Locales here are represented as an array of strings, e.g. ['en', 'ja', 'cn', 'de'] and are used in order if no locale is specified by the user.
 				unless @default_locales = default_locales
@@ -125,17 +127,17 @@ module Utopia
 			# @parameter request [Utopia::Request] The application request.
 			# @returns [Array(String)] Supported locales accepted by the browser, in preference order.
 			def browser_preferred_locales(request)
-				accept_languages = request.headers["accept-language"]&.to_s
+				accept_languages = request.headers["accept-language"]
 				
 				# No user prefered languages:
 				return [] unless accept_languages
 				
 				# Extract the ordered list of languages:
-				languages = HTTP::Accept::Languages.parse(accept_languages)
+				languages = accept_languages.preferred_languages
 				
 				# Returns available languages based on the order languages:
-				return @all_locales & languages
-			rescue HTTP::Accept::ParseError
+				return @all_locales.match(languages)
+			rescue Protocol::HTTP::Header::AcceptLanguage::ParseError
 				# If we fail to parse the browser Accept-Language header, we ignore it (silently).
 				return []
 			end
