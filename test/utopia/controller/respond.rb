@@ -154,7 +154,9 @@ describe Utopia::Controller do
 		root = File.expand_path(".respond", __dir__)
 		
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request| Utopia::Response[404, {}, []]}) do
-			use Utopia::Redirection::Errors, 404 => "/fail"
+			use Utopia::Redirection do |redirects|
+				redirects.error 404, "/fail"
+			end
 			use Utopia::Controller, root: root
 			use Utopia::Content, root: root
 		end

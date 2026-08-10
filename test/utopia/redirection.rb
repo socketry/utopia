@@ -32,15 +32,15 @@ describe Utopia::Redirection do
 				Utopia::Response[404, {}, []]
 			end
 		}) do
-			use Utopia::Redirection::Rewrite, {"/" => "/welcome/index"}
-			use Utopia::Redirection::DirectoryIndex
-			use Utopia::Redirection::Errors, {
-				404 => "/error",
-				418 => "/teapot"
-			}
-			use Utopia::Redirection::Moved, "/a", "/b"
-			use Utopia::Redirection::Moved, "/hierarchy/", "/hierarchy", flatten: true
-			use Utopia::Redirection::Moved, "/weird", "/status", status: 333
+			use Utopia::Redirection do |redirects|
+				redirects.rewrite "/" => "/welcome/index"
+				redirects.directory_index
+				redirects.error 404, "/error"
+				redirects.error 418, "/teapot"
+				redirects.moved "/a", "/b"
+				redirects.moved "/hierarchy/", "/hierarchy", flatten: true
+				redirects.moved "/weird", "/status", status: 333
+			end
 		end
 	end
 	
@@ -93,7 +93,9 @@ describe Utopia::Redirection do
 				Utopia::Response[404, {}, tracked_body(:original, events)]
 			end
 		end) do
-			use Utopia::Redirection::Errors, 404 => "/error"
+			use Utopia::Redirection do
+				error 404, "/error"
+			end
 		end
 		
 		response = application.call(Protocol::HTTP::Request["GET", "/missing"])
@@ -116,7 +118,9 @@ describe Utopia::Redirection do
 				Utopia::Response[404, {}, tracked_body(:original, events)]
 			end
 		end) do
-			use Utopia::Redirection::Errors, 404 => "/error"
+			use Utopia::Redirection do |redirects|
+				redirects.error 404, "/error"
+			end
 		end
 		
 		expect do
@@ -141,5 +145,18 @@ describe Utopia::Redirection do
 		
 		expect(last_response.status).to be == 333
 		expect(last_response.headers["location"]).to be == "/status"
+	end
+	
+	it "applies request rules in declaration order" do
+		application = Utopia::Application.build do
+			use Utopia::Redirection do |redirects|
+				redirects.rewrite "/files/" => "/exact"
+				redirects.directory_index "index"
+			end
+		end
+		
+		response = application.call(Protocol::HTTP::Request["GET", "/files/"])
+		
+		expect(response.headers["location"]).to be == "/exact"
 	end
 end
