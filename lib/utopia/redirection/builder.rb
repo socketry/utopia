@@ -10,6 +10,7 @@ module Utopia
 			# The default redirect cache lifetime is 24 hours.
 			MAX_AGE = 3600*24
 			
+			# Initialize an empty redirection configuration.
 			def initialize
 				@rules = []
 				@errors = {}
