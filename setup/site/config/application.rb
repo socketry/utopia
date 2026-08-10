@@ -25,10 +25,11 @@ Application = Utopia::Application.build do
 	# Serve static files from "public" directory:
 	use Utopia::Static, root: "public"
 	
-	use Utopia::Redirection do |redirects|
-		redirects.rewrite "/" => "/welcome/index"
-		redirects.directory_index
-	end
+	use Utopia::Redirection::Rewrite, {
+		"/" => "/welcome/index"
+	}
+	
+	use Utopia::Redirection::DirectoryIndex
 	use Utopia::Redirection::Errors, 404 => "/errors/file-not-found"
 	
 	use Utopia::Session,

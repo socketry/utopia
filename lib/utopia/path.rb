@@ -3,6 +3,8 @@
 # Released under the MIT License.
 # Copyright, 2009-2025, by Samuel Williams.
 
+require "protocol/url/path"
+
 module Utopia
 	# Represents a path as an array of path components. Useful for efficient URL manipulation.
 	class Path
@@ -72,11 +74,11 @@ module Utopia
 			self.class.shortest_path(self, root)
 		end
 		
-		# Decode URL-encoded path content, converting `+` to whitespace and percent-encoded bytes to their corresponding characters.
+		# Decode URL-encoded path content, preserving literal `+` characters.
 		# @parameter string [String] The encoded content.
 		# @returns [String] The decoded content.
 		def self.unescape(string)
-			string.tr("+", " ").gsub(/((?:%[0-9a-fA-F]{2})+)/n) do
+			string.gsub(/((?:%[0-9a-fA-F]{2})+)/n) do
 				[$1.delete("%")].pack("H*")
 			end
 		end
@@ -89,12 +91,14 @@ module Utopia
 		end
 		
 		# Convert a path value into an array of components.
-		# @parameter path [Utopia::Path | String] The path.
+		# @parameter path [Utopia::Path | Protocol::URL::Path | String] The path.
 		# @returns [Array] The path components.
 		def self.split(path)
 			case path
 			when Path
 				return path.to_a
+			when Protocol::URL::Path
+				return path.components
 			when Array
 				return path
 			when String
@@ -105,10 +109,10 @@ module Utopia
 		end
 		
 		# Construct a path from URL-encoded text. This is an optimized direct entry point used by controller invocations.
-		# @parameter string [String] The encoded path.
+		# @parameter path [Protocol::URL::Path | String] The encoded path.
 		# @returns [Path] The decoded path.
-		def self.from_string(string)
-			self.new(unescape(string).split(SEPARATOR, -1))
+		def self.from_string(path)
+			self.new(Protocol::URL::Path[path].components)
 		end
 		
 		# Load a path from its serialized form.
@@ -126,16 +130,18 @@ module Utopia
 		end
 		
 		# Coerce a value into a path.
-		# @parameter path [Path | Array | String | Object | Nil] The value to coerce.
+		# @parameter path [Path | Protocol::URL::Path | Array | String | Object | Nil] The value to coerce.
 		# @returns [Path | Nil] The coerced path.
 		def self.create(path)
 			case path
 			when Path
 				return path
+			when Protocol::URL::Path
+				return self.new(path.components)
 			when Array
 				return self.new(path)
 			when String
-				return self.new(unescape(path).split(SEPARATOR, -1))
+				return self.from_string(path)
 			when nil
 				return nil
 			else

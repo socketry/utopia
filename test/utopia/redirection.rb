@@ -23,7 +23,7 @@ describe Utopia::Redirection do
 	
 	let(:middleware) do
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
-			case request.path_info
+			case request.url.path.encoded
 			when "/error"
 				Utopia::Response.text("File not found :(", 200)
 			when "/teapot"
@@ -32,13 +32,11 @@ describe Utopia::Redirection do
 				Utopia::Response[404, {}, []]
 			end
 		}) do
-			use Utopia::Redirection do |redirects|
-				redirects.rewrite "/" => "/welcome/index"
-				redirects.directory_index
-				redirects.moved "/a", "/b"
-				redirects.moved "/hierarchy/", "/hierarchy", flatten: true
-				redirects.moved "/weird", "/status", status: 333
-			end
+			use Utopia::Redirection::Rewrite, {"/" => "/welcome/index"}
+			use Utopia::Redirection::DirectoryIndex
+			use Utopia::Redirection::Moved, "/a", "/b"
+			use Utopia::Redirection::Moved, "/hierarchy/", "/hierarchy", flatten: true
+			use Utopia::Redirection::Moved, "/weird", "/status", status: 333
 			use Utopia::Redirection::Errors, 404 => "/error", 418 => "/teapot"
 		end
 	end
@@ -85,15 +83,13 @@ describe Utopia::Redirection do
 	
 	it "bypasses request redirections for internal error documents" do
 		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |request|
-			if request.path_info == "/error"
+			if request.url.path.encoded == "/error"
 				Utopia::Response.text("Internal error document")
 			else
 				Utopia::Response[404, {}, []]
 			end
 		end) do
-			use Utopia::Redirection do |redirects|
-				redirects.rewrite "/error" => "/redirected"
-			end
+			use Utopia::Redirection::Rewrite, {"/error" => "/redirected"}
 			use Utopia::Redirection::Errors, 404 => "/error"
 		end
 		
@@ -107,7 +103,7 @@ describe Utopia::Redirection do
 	it "closes the response replaced by an error document" do
 		events = []
 		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |request|
-			if request.path_info == "/error"
+			if request.url.path.encoded == "/error"
 				Utopia::Response[200, {}, tracked_body(:error, events)]
 			else
 				Utopia::Response[404, {}, tracked_body(:original, events)]
@@ -130,7 +126,7 @@ describe Utopia::Redirection do
 	it "closes both responses when the error document fails" do
 		events = []
 		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |request|
-			if request.path_info == "/error"
+			if request.url.path.encoded == "/error"
 				Utopia::Response[500, {}, tracked_body(:error, events)]
 			else
 				Utopia::Response[404, {}, tracked_body(:original, events)]
@@ -163,12 +159,9 @@ describe Utopia::Redirection do
 		expect(last_response.headers["location"]).to be == "/status"
 	end
 	
-	it "applies request rules in declaration order" do
+	it "uses exact-path lookup" do
 		application = Utopia::Application.build do
-			use Utopia::Redirection do |redirects|
-				redirects.rewrite "/files/" => "/exact"
-				redirects.directory_index "index"
-			end
+			use Utopia::Redirection::Rewrite, {"/files/" => "/exact"}
 		end
 		
 		response = application.call(Protocol::HTTP::Request["GET", "/files/"])

@@ -56,6 +56,15 @@ describe Utopia::Controller do
 		expect(last_response.read).to be == "Hello World"
 	end
 	
+	it "does not interpret encoded URL separators as controller path separators" do
+		client.get "/controller%2Fnested/hello-world"
+		expect(last_response.status).to be == 404
+		
+		# The invalid lookup must not poison the component-aware controller cache:
+		client.get "/controller/nested/hello-world"
+		expect(last_response.status).to be == 200
+	end
+	
 	it "shouldn't call the nested controller method" do
 		client.get "/controller/nested/flat"
 		

@@ -79,7 +79,7 @@ module Utopia
 				:referrer,
 				:path,
 				:request_path,
-				:path_info,
+				:url,
 				:query,
 				:user_agent,
 			]

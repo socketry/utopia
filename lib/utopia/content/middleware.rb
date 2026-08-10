@@ -123,17 +123,19 @@ module Utopia
 			# @parameter request [Utopia::Request] The request.
 			# @returns [Protocol::HTTP::Response] The content, redirect, or downstream response.
 			def call(request)
-				path = Path.create(request.path_info)
+				path = Path.create(request.url.path)
 				
 				# Check if the request is to a non-specific index. This only works for requests with a given name:
 				basename = path.basename
-				directory_path = File.join(@root, path.dirname.components, basename)
+				directory_path = local_path(path)
 				
 				# If the request for /foo/bar is actually a directory, rewrite it to /foo/bar/index:
-				if File.directory? directory_path
-					index_path = [basename, INDEX]
-					
-					return Utopia::Response[307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []]
+				if directory_path
+					if File.directory?(directory_path)
+						index_path = [basename, INDEX]
+						
+						return Utopia::Response[307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []]
+					end
 				end
 				
 				response = resolve_localized(request) do |localization|
@@ -152,6 +154,14 @@ module Utopia
 			end
 			
 			private
+			
+			# Resolve a decoded content path without losing its URL segment boundaries:
+			def local_path(path)
+				url_path = Protocol::URL::Path.for(path.components)
+				return url_path.local_path(@root)
+			rescue ArgumentError
+				return nil
+			end
 			
 			def lookup_content(name, parent_path)
 				if String === name && name.index("/")

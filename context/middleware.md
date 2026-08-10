@@ -18,19 +18,20 @@ use Utopia::Static,
 
 ## Redirection
 
-The {ruby Utopia::Redirection} middleware is used for redirecting requests based on paths.
+The redirection middleware is used for redirecting requests based on paths.
 
 ~~~ ruby
-use Utopia::Redirection do |redirects|
-	# String (fast hash lookup) rewriting:
-	redirects.rewrite '/' => '/welcome/index'
-	
-	# Redirect directories (e.g. /) to an index file (e.g. /index):
-	redirects.directory_index 'index.html'
-	
-	# Redirect matching path prefixes:
-	redirects.moved '/old/', '/new/'
-end
+# String (fast hash lookup) rewriting:
+use Utopia::Redirection::Rewrite,
+	{'/' => '/welcome/index'}
+
+# Redirect directories (e.g. /) to an index file (e.g. /index):
+use Utopia::Redirection::DirectoryIndex,
+	index: 'index.html'
+
+# Redirect matching path prefixes:
+use Utopia::Redirection::Moved,
+	'/old/', '/new/'
 ~~~
 
 The {ruby Utopia::Redirection::Errors} middleware maps unhandled error responses to internal error documents. It retains the original response status and does not issue a client-visible redirect:

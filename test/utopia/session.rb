@@ -13,7 +13,7 @@ describe Utopia::Session do
 	
 	let(:middleware) do
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
-			case request.path_info
+			case request.url.path.encoded
 			when "/login"
 				request.session["login"] = "true"
 				
@@ -161,7 +161,7 @@ describe Utopia::Session do
 	
 	let(:middleware) do
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
-			case request.path_info
+			case request.url.path.encoded
 			when "/session-set"
 				request.session[request.query_arguments["key"].to_sym] = request.query_arguments["value"]
 				

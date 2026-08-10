@@ -50,11 +50,11 @@ module Utopia
 				# The original response is replaced by the configured error document:
 				response.close
 				
-				error_request = request.with(method: "GET", path_info: location)
+				error_request = request.with(method: "GET", url: request.url.with(path: location))
 				error_response = Response.wrap(@delegate.call(error_request))
 				
 				if error_response.status >= 400
-					error = RequestFailure.new(request.path_info, resource_status, location, error_response.status)
+					error = RequestFailure.new(request.url.path.encoded, resource_status, location, error_response.status)
 					
 					# The failed error document will not be returned to the server:
 					error_response.close(error)

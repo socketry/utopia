@@ -36,7 +36,7 @@ Gem::Specification.new do |spec|
 	spec.add_dependency "protocol-content", "~> 0.1"
 	spec.add_dependency "protocol-http", "~> 0.70"
 	spec.add_dependency "protocol-media", "~> 0.3"
-	spec.add_dependency "protocol-url", "~> 0.10"
+	spec.add_dependency "protocol-url", "~> 0.11"
 	spec.add_dependency "samovar", "~> 2.1"
 	spec.add_dependency "traces", "~> 0.10"
 	spec.add_dependency "variant", "~> 0.1"

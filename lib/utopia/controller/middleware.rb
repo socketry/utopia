@@ -15,6 +15,7 @@ require_relative "respond"
 require_relative "actions"
 
 require "concurrent/map"
+require "protocol/url/path"
 
 module Utopia
 	# A middleware which loads controller classes and invokes functionality based on the requested path.
@@ -49,14 +50,22 @@ module Utopia
 			
 			# Fetch the controller for the given relative path. May be cached.
 			def lookup_controller(path)
-				@controller_cache.fetch_or_store(path.to_s) do
+				key = path.dup.freeze
+				
+				@controller_cache.fetch_or_store(key) do
 					load_controller_file(path)
 				end
 			end
 			
 			# Loads the controller file for the given relative url_path.
 			def load_controller_file(uri_path)
-				base_path = File.join(@root, uri_path.components)
+				begin
+					# Preserve URL segment boundaries when mapping the route to the filesystem:
+					url_path = Protocol::URL::Path.for(uri_path.components)
+					base_path = url_path.local_path(@root)
+				rescue ArgumentError
+					return nil
+				end
 				
 				controller_path = File.join(base_path, CONTROLLER_RB)
 				# puts "load_controller_file(#{path.inspect}) => #{controller_path}"
@@ -86,7 +95,7 @@ module Utopia
 			
 			# Invoke the controller layer for a given request. The request path may be rewritten.
 			def invoke_controllers(request)
-				request_path = Path.from_string(request.path_info)
+				request_path = Path[request.url.path]
 				
 				# The request path must be absolute. We could handle this internally but it is probably better for this to be an error:
 				raise ArgumentError.new("Invalid request path #{request_path}") unless request_path.absolute?
@@ -114,8 +123,8 @@ module Utopia
 					end
 				end
 				
-				# Controllers can directly modify relative_path, which is copied into controller_path. The controllers may have rewriten the path so we update the path info:
-				request.path_info = controller_path.to_s
+				# Controllers can directly modify the remaining path, so update the current request URL:
+				request.url = request.url.with(path: Protocol::URL::Path.for(controller_path.components))
 				
 				# No controller gave a useful result:
 				return nil

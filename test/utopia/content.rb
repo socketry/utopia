@@ -48,6 +48,14 @@ describe Utopia::Content do
 		expect(last_response.read).to be == "<h1>Hello World</h1>"
 	end
 	
+	it "does not interpret encoded URL separators as content path separators" do
+		client.get "/content%2F/test-partial"
+		expect(last_response.status).to be == 404
+		
+		client.get "/content/test-partial"
+		expect(last_response.read).to be == "10"
+	end
+	
 	it "should render partials correctly" do
 		client.get "/content/test-partial"
 		

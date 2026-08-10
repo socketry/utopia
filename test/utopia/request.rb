@@ -5,6 +5,7 @@
 
 require "protocol/http/request"
 require "utopia/request"
+require "utopia/path"
 
 describe Utopia::Request do
 	let(:request) {subject["POST", "/search?q=utopia&tag[]=ruby&tag[]=async", {"cookie" => "a=1; b=2"}]}
@@ -31,17 +32,87 @@ describe Utopia::Request do
 		expect{request.unknown_request_method}.to raise_exception(NoMethodError)
 	end
 	
-	it "provides path information" do
-		expect(request.path_info).to be == "/search"
+	it "provides a structured URL" do
+		expect(request.url).to be_a(Protocol::URL::Relative)
+		expect(request.url.path).to be == Protocol::URL::Path["/search"]
+		expect(request.url.query).to be == "q=utopia&tag[]=ruby&tag[]=async"
 		expect(request.query).to be == "q=utopia&tag[]=ruby&tag[]=async"
 	end
 	
-	it "updates path information while preserving query string" do
-		request.path_info = "/find"
+	it "normalizes the external path while preserving the query" do
+		request = subject["GET", "//users/./samuel/../amy?redirect=/a//b&value=%2e%2e"]
+		
+		expect(request.path).to be == "//users/./samuel/../amy?redirect=/a//b&value=%2e%2e"
+		expect(request.url.path).to be == Protocol::URL::Path["/users/amy"]
+		expect(request.url.query).to be == "redirect=/a//b&value=%2e%2e"
+		expect(request.query).to be == "redirect=/a//b&value=%2e%2e"
+		expect(request.request_path).to be == Protocol::URL::Path["//users/./samuel/../amy"]
+	end
+	
+	it "keeps encoded path delimiters separate from the query" do
+		request = subject["GET", "/search%3farchive?query=%"]
+		
+		expect(request.url.path).to be == Protocol::URL::Path["/search%3farchive"]
+		expect(request.query).to be == "query=%"
+	end
+	
+	it "does not decode external paths more than once" do
+		request = subject["GET", "/%252e%252e/value"]
+		
+		expect(request.url.path).to be == Protocol::URL::Path["/%252e%252e/value"]
+		expect(Utopia::Path.create(request.url.path).components).to be == ["", "%2e%2e", "value"]
+	end
+	
+	it "clamps parent components at the root" do
+		request = subject["GET", "/../../../foo"]
+		
+		expect(request.url.path).to be == Protocol::URL::Path["/foo"]
+	end
+	
+	it "rejects malformed or ambiguous external paths as bad requests" do
+		[
+			"relative/path",
+			"/invalid%2",
+			"/fragment#value",
+			"/control\0value",
+			"/control%00value",
+			"/ambiguous\\value",
+			"/ambiguous%5Cvalue",
+		].each do |path|
+			expect do
+				subject["GET", path]
+			end.to raise_exception(Utopia::InvalidPathError) do |error|
+				expect(error).to be_a(Protocol::HTTP::BadRequest)
+			end
+		end
+	end
+	
+	it "preserves encoded path separators as component data" do
+		request = subject["GET", "/files/a%2Fb"]
+		
+		expect(request.url.path.encoded).to be == "/files/a%2Fb"
+		expect(request.url.path.components).to be == ["", "files", "a/b"]
+		expect(Utopia::Path[request.url.path].components).to be == ["", "files", "a/b"]
+	end
+	
+	it "supports the server-wide OPTIONS target" do
+		request = subject["OPTIONS", "*"]
+		
+		expect(request.url.path).to be == Protocol::URL::Path["*"]
+	end
+	
+	it "updates the URL while preserving its query string" do
+		request.url = request.url.with(path: "/find")
 		
 		expect(request.path).to be == "/find?q=utopia&tag[]=ruby&tag[]=async"
-		expect(request.path_info).to be == "/find"
-		expect(request.request_path).to be == "/search"
+		expect(request.url.path).to be == Protocol::URL::Path["/find"]
+		expect(request.request_path).to be == Protocol::URL::Path["/search"]
+	end
+	
+	it "does not normalize trusted internal request target assignments" do
+		request.path = "/internal/../target"
+		
+		expect(request.url.path).to be == Protocol::URL::Path["/internal/../target"]
 	end
 	
 	it "identifies POST requests" do
@@ -105,7 +176,8 @@ describe Utopia::Request do
 		
 		expect(request.scheme).to be == "https"
 		expect(request.host).to be == "example.com"
-		expect(request.url).to be == "https://example.com/search?q=utopia&tag[]=ruby&tag[]=async"
+		expect(request.url).to be_a(Protocol::URL::Absolute)
+		expect(request.url.to_s).to be == "https://example.com/search?q=utopia&tag[]=ruby&tag[]=async"
 		expect(request.referrer).to be == "/from"
 	end
 	
@@ -119,12 +191,12 @@ describe Utopia::Request do
 		exception = StandardError.new("Boom")
 		request.exception = exception
 		
-		derived = request.with(method: "GET", path_info: "/find")
+		derived = request.with(method: "GET", url: request.url.with(path: "/find"))
 		
 		expect(derived).not.to be_equal(request)
 		expect(derived.method).to be == "GET"
 		expect(derived.path).to be == "/find?q=utopia&tag[]=ruby&tag[]=async"
-		expect(derived.request_path).to be == "/search"
+		expect(derived.request_path).to be == Protocol::URL::Path["/search"]
 		expect(derived.delegate).not.to be_equal(request.delegate)
 		expect(derived.session).to be_equal(session)
 		expect(derived.variables).to be_equal(variables)
@@ -132,11 +204,18 @@ describe Utopia::Request do
 		expect(derived.exception).to be_equal(exception)
 	end
 	
-	it "preserves the original request path across multiple derived requests" do
-		derived = request.with(path_info: "/find")
-		derived = derived.with(path_info: "/lookup")
+	it "does not normalize trusted derived request paths" do
+		url = Protocol::URL::Relative.new("/internal/../target", request.url.query)
+		derived = request.with(url: url)
 		
-		expect(derived.path_info).to be == "/lookup"
-		expect(derived.request_path).to be == "/search"
+		expect(derived.url.path).to be == Protocol::URL::Path["/internal/../target"]
+	end
+	
+	it "preserves the original request path across multiple derived requests" do
+		derived = request.with(url: request.url.with(path: "/find"))
+		derived = derived.with(url: derived.url.with(path: "/lookup"))
+		
+		expect(derived.url.path).to be == Protocol::URL::Path["/lookup"]
+		expect(derived.request_path).to be == Protocol::URL::Path["/search"]
 	end
 end
