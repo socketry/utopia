@@ -22,7 +22,9 @@ describe "Utopia application middleware" do
 		seen_request = nil
 		
 		application = Utopia::Application.build do
-			use Utopia::Redirection::Rewrite, {"/old" => "/new"}
+			use Utopia::Redirection do |redirects|
+				redirects.rewrite "/old" => "/new"
+			end
 			
 			run Protocol::HTTP::Middleware.for{|request|
 				seen_request = request
@@ -71,7 +73,9 @@ describe "Utopia application middleware" do
 		end
 		
 		utopia_application = Utopia::Application.build do
-			use Utopia::Redirection::Rewrite, {"/old" => "/new"}
+			use Utopia::Redirection do |redirects|
+				redirects.rewrite "/old" => "/new"
+			end
 			use Utopia::Static
 			run application
 		end

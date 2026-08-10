@@ -4,6 +4,7 @@
 
   - **Security** Fix handling of redirects that start with `//` to prevent open redirect vulnerabilities.
   - Use `protocol-media` and `protocol-http` for response and language negotiation, removing the `http-accept` dependency.
+  - Combine client-facing request redirections into one configurable middleware.
 
 ## v2.31.0
 
