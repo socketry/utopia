@@ -85,6 +85,16 @@ describe Utopia::Path do
 		end
 	end
 	
+	it "creates a decoded routing path from a structured URL path" do
+		path = Protocol::URL::Path["/files/a%2Fb"]
+		
+		expect(subject.create(path).components).to be == ["", "files", "a/b"]
+	end
+	
+	it "preserves plus characters when decoding paths" do
+		expect(subject.create("/a+b").to_s).to be == "/a+b"
+	end
+	
 	with "#first" do
 		let(:path) {subject.create(value)}
 		

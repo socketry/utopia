@@ -35,7 +35,7 @@ describe Utopia::Controller do
 	def mock_request(path)
 		request = Utopia::Request["GET", path]
 		
-		return request, Utopia::Path[request.path_info]
+		return request, Utopia::Path[request.url.path]
 	end
 	
 	it "should match path prefix and extract parameters" do

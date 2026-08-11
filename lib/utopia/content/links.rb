@@ -6,6 +6,7 @@
 require_relative "link"
 
 require "concurrent/map"
+require "protocol/url/path"
 
 module Utopia
 	module Content
@@ -128,7 +129,10 @@ module Utopia
 			# @parameter path [Utopia::Path | String] The path.
 			# @returns [Resolver] The link resolver.
 			def links(path)
-				@links_cache.fetch_or_store(path.to_s) do
+				path = Path.create(path)
+				key = path.dup.freeze
+				
+				@links_cache.fetch_or_store(key) do
 					load_links(path)
 				end
 			end
@@ -170,13 +174,18 @@ module Utopia
 					
 					@top = top
 					
-					# top.components.first == '', but this isn't a problem here.
-					@path = File.join(links.root, top.components)
-					
 					@ordered = []
 					@named = {}
 					
-					if File.directory?(@path)
+					begin
+						# Preserve URL segment boundaries when mapping the route to the filesystem:
+						url_path = Protocol::URL::Path.for(top.components)
+						@path = url_path.local_path(links.root)
+					rescue ArgumentError
+						@path = nil
+					end
+					
+					if @path && File.directory?(@path)
 						@metadata = links.metadata(@path)
 						
 						load_links(@metadata.dup) do |link|

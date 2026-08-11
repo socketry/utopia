@@ -38,36 +38,44 @@ module Utopia
 			
 			# Replace an unhandled error response with its configured error document.
 			# @parameter request [Utopia::Request] The request.
-			# @returns [Protocol::HTTP::Response] The original or error-document response.
+			# @parameter response [Protocol::HTTP::Response] The unhandled error response.
+			# @parameter location [String] The configured error document path.
+			# @returns [Protocol::HTTP::Response] The error-document response.
 			# @raises [RequestFailure] If the configured error document also fails.
+			def replace_error(request, response, location)
+				resource_status = response.status
+				
+				# The original response is replaced by the configured error document:
+				response.close
+				
+				error_request = request.with(method: "GET", url: request.url.with(path: location))
+				error_response = Response.wrap(@delegate.call(error_request))
+				
+				if error_response.status >= 400
+					error = RequestFailure.new(request.url.path.encoded, resource_status, location, error_response.status)
+					
+					# The failed error document will not be returned to the server:
+					error_response.close(error)
+					
+					raise error
+				end
+				
+				# Feed the error code back with the error document:
+				error_response.status = resource_status
+				return error_response
+			end
+			
+			# Replace configured unhandled responses through an internal request.
+			# @parameter request [Utopia::Request] The request.
+			# @returns [Protocol::HTTP::Response] The original or error-document response.
 			def call(request)
 				response = Response.wrap(@delegate.call(request))
 				
 				if unhandled_error?(response) && location = @codes[response.status]
-					resource_status = response.status
-					
-					# The original response is replaced by the configured error document:
-					response.close
-					
-					error_request = request.with(method: "GET", path_info: location)
-					
-					error_response = Response.wrap(@delegate.call(error_request))
-					
-					if error_response.status >= 400
-						error = RequestFailure.new(request.path_info, resource_status, location, error_response.status)
-						
-						# The failed error document will not be returned to the server:
-						error_response.close(error)
-						
-						raise error
-					else
-						# Feed the error code back with the error document:
-						error_response.status = resource_status
-						return error_response
-					end
-				else
-					return response
+					return replace_error(request, response, location)
 				end
+				
+				return response
 			end
 		end
 	end

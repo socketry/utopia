@@ -111,13 +111,14 @@ module Utopia
 			# @parameter request [Utopia::Request] The application request.
 			# @returns [Array(Utopia::Request, String | Nil)] The request and extracted locale.
 			def extract_path_locale(request)
-				path = Path[request.path_info]
+				path = Path[request.url.path]
 				
 				if request_locale = @all_locales.patterns[path.first]
 					# Remove the localization prefix:
 					path.delete_at(0)
 					
-					return request.with(path_info: path.to_s), request_locale
+					url_path = Protocol::URL::Path.for(path.components)
+					return request.with(url: request.url.with(path: url_path)), request_locale
 				else
 					return request, nil
 				end
@@ -147,8 +148,8 @@ module Utopia
 			# @returns [Boolean] Whether the path is eligible for localization.
 			def localized?(request)
 				# Ignore requests which match the ignored paths:
-				path_info = request.path_info
-				return false if @ignore.any?{|pattern| path_info[pattern] != nil}
+				path = request.url.path.encoded
+				return false if @ignore.any?{|pattern| path[pattern] != nil}
 				
 				return true
 			end

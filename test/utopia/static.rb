@@ -4,6 +4,8 @@
 # Copyright, 2014-2025, by Samuel Williams.
 
 require "sus/fixtures/protocol/http/middleware_context"
+require "fileutils"
+require "tmpdir"
 require "utopia/application"
 require "utopia/static"
 
@@ -23,6 +25,21 @@ describe Utopia::Static do
 		
 		expect(last_response.headers["content-type"]).to be == "text/plain"
 		expect(last_response.body).to be_a(Protocol::HTTP::Body::File)
+	end
+	
+	it "does not interpret encoded URL separators as filesystem separators" do
+		Dir.mktmpdir do |root|
+			FileUtils.mkdir_p(File.join(root, "private"))
+			File.write(File.join(root, "private", "secret.txt"), "Secret")
+			
+			application = Utopia::Application.build do
+				use Utopia::Static, root: root
+			end
+			
+			response = application.call(Protocol::HTTP::Request["GET", "/private%2Fsecret.txt"])
+			
+			expect(response.status).to be == 404
+		end
 	end
 	
 	it "returns not modified for matching entity tags" do

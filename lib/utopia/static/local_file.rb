@@ -8,6 +8,7 @@ require "digest/sha1"
 
 require "protocol/http/body/file"
 require "protocol/http/header/range"
+require "protocol/url/path"
 
 require_relative "../response"
 
@@ -18,10 +19,12 @@ module Utopia
 		class LocalFile
 			# Initialize metadata for a file beneath a static root.
 			# @parameter root [String] The root directory.
-			# @parameter path [Utopia::Path | String] The path.
-			def initialize(root, path)
+			# @parameter path [Utopia::Path] The decoded path.
+			# @parameter full_path [String] The resolved filesystem path.
+			def initialize(root, path, full_path = Protocol::URL::Path.for(path.components).local_path(root))
 				@root = root
 				@path = path
+				@full_path = full_path
 				fingerprint = Digest::SHA1.hexdigest("#{File.size(full_path)}#{mtime_date}")
 				@etag = %Q{W/"#{fingerprint}"}
 			end
@@ -32,9 +35,7 @@ module Utopia
 			
 			# Resolve this file beneath its configured root.
 			# @returns [String] The full filesystem path.
-			def full_path
-				File.join(@root, @path.components)
-			end
+			attr :full_path
 			
 			# Format the file's modification time for an HTTP header.
 			# @returns [String] The HTTP-date modification time.

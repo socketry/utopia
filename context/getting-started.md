@@ -36,7 +36,7 @@ Utopia includes a redirection middleware to redirect all root-level requests to 
 
 Application = Utopia::Application.build do
 	use Utopia::Redirection::Rewrite,
-		"/" => "/welcome/index"
+		{"/" => "/welcome/index"}
 end
 ```
 

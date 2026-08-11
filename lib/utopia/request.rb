@@ -6,25 +6,33 @@
 require "stringio"
 
 require "protocol/http/request"
+require "protocol/url"
 require "protocol/url/form_data/parser"
+
+require_relative "invalid_path_error"
 
 module Utopia
 	# Utopia's application-facing request wrapper.
 	#
 	# Protocol request methods are delegated to the underlying request; parsing
 	# and application conveniences live here rather than on protocol-http itself.
+	# External URL paths are normalized once during construction; subsequent
+	# request target assignments are trusted internal rewrites.
 	class Request
+		ASTERISK_PATH = Protocol::URL::Path["*"].freeze
+		private_constant :ASTERISK_PATH
+		
 		# Build a Utopia request from the given protocol request arguments.
 		def self.[](*arguments)
 			self.new(Protocol::HTTP::Request[*arguments])
 		end
 		
-		# Initialize the request proxy.
+		# Initialize the request proxy and normalize its external request path.
 		# @parameter delegate [Protocol::HTTP::Request] The underlying protocol request.
-		# @parameter request_path [String | Nil] The original path before internal rewrites.
-		def initialize(delegate, request_path: nil)
+		def initialize(delegate)
 			@delegate = delegate
-			@request_path = request_path
+			@url = nil
+			@request_path = nil
 			@session = nil
 			@variables = nil
 			@localization = nil
@@ -32,6 +40,8 @@ module Utopia
 			
 			@query_arguments = nil
 			@cookies = nil
+			
+			parse_url!
 		end
 		
 		# The underlying protocol request.
@@ -49,11 +59,8 @@ module Utopia
 		
 		# Assign the request path including query string.
 		def path= value
-			if value != @delegate.path
-				@request_path ||= self.path_info
-			end
-			
 			@delegate.path = value
+			@url = parse_url(value)
 			@query_arguments = nil
 		end
 		
@@ -62,34 +69,14 @@ module Utopia
 			self.method == "POST"
 		end
 		
-		# The request path without the query string.
-		def path_info
-			self.path&.split("?", 2)&.first
-		end
-		
-		# Set the request path while preserving the query string.
-		def path_info= value
-			@request_path ||= self.path_info
-			
-			if query = self.query
-				self.path = "#{value}?#{query}"
-			else
-				self.path = value
-			end
-		end
-		
 		# The original request path, before any internal request rewrites.
 		def request_path
-			@request_path || self.path_info
+			@request_path || @url&.path
 		end
 		
 		# The query string without the leading question mark.
 		def query
-			path = self.path
-			
-			if path&.include?("?")
-				return path.split("?", 2).last
-			end
+			@url&.query
 		end
 		
 		# Decoded query arguments.
@@ -134,40 +121,120 @@ module Utopia
 			self.peer&.ip_address
 		end
 		
-		# The full request URL, if scheme and host are available.
+		# The normalized request URL.
+		# @returns [Protocol::URL::Absolute | Protocol::URL::Relative | Nil] The request URL.
 		def url
+			return unless @url
+			return @url if @url.path == ASTERISK_PATH
+			
 			if scheme = self.scheme and host = self.host
-				"#{scheme}://#{host}#{self.path}"
+				return Protocol::URL::Absolute.new(scheme, host, @url.path, @url.query).freeze
+			end
+			
+			return @url
+		end
+		
+		# Assign the normalized request URL and update the protocol request target.
+		# @parameter url [Protocol::URL::Absolute | Protocol::URL::Relative | String | Nil] The request URL.
+		def url=(url)
+			url = Protocol::URL[url]
+			
+			if url&.fragment
+				raise ArgumentError, "HTTP request URLs cannot contain a fragment!"
+			end
+			
+			if url.is_a?(Protocol::URL::Absolute)
+				@delegate.scheme = url.scheme
+				@delegate.authority = url.authority
+			end
+			
+			if url
+				self.path = Protocol::URL::Relative.new(url.path, url.query).to_s
 			else
-				self.path
+				self.path = nil
 			end
 		end
 		
-		# Build a derived request with updated protocol fields.
-		def with(method: self.method, path: self.path, path_info: nil)
-			delegate = @delegate.dup
-			delegate.method = method
-			
-			request = self.class.new(delegate, request_path: self.request_path)
-			request.session = @session
-			request.variables = @variables
-			request.localization = @localization
-			request.exception = @exception
-			
-			if path_info
-				if query = self.query
-					request.path = "#{path_info}?#{query}"
-				else
-					request.path = path_info
-				end
-			else
-				request.path = path
-			end
+		# Build a derived request with an updated method or URL.
+		def with(method: self.method, url: self.url)
+			request = self.dup
+			request.method = method
+			request.url = url
 			
 			return request
 		end
 		
 		private
+		
+		# Parse and normalize the untrusted external URL exactly once during construction:
+		def parse_url!
+			target = @delegate.path
+			
+			unless target
+				return
+			end
+			
+			path, separator, query = target.partition("?")
+			path = Protocol::URL::Path[path]
+			@request_path = path.freeze
+			
+			# The asterisk-form is the standard server-wide OPTIONS target:
+			if @delegate.method == "OPTIONS" && path == ASTERISK_PATH && separator.empty?
+				@url = make_url(path)
+				return
+			end
+			
+			if target.include?("#")
+				raise InvalidPathError.new(path.encoded, "contains a fragment delimiter")
+			end
+			
+			path = normalize_path(path)
+			@url = make_url(path, separator.empty? ? nil : query)
+		end
+		
+		# Parse a trusted internal request target without normalizing its path:
+		def parse_url(target)
+			return unless target
+			
+			path, separator, query = target.partition("?")
+			return make_url(path, separator.empty? ? nil : query)
+		end
+		
+		# Construct an immutable relative URL for the current request target:
+		def make_url(path, query = nil)
+			path = Protocol::URL::Path[path].freeze
+			query = -query if query
+			
+			return Protocol::URL::Relative.new(path, query).freeze
+		end
+		
+		# Validate and simplify an untrusted external URL path:
+		def normalize_path(path)
+			unless path.absolute?
+				raise InvalidPathError.new(path.encoded, "expected an absolute path")
+			end
+			
+			begin
+				components = path.components
+			rescue ArgumentError => error
+				raise InvalidPathError.new(path.encoded, error.message)
+			end
+			
+			components.each do |component|
+				if component.include?("\\")
+					raise InvalidPathError.new(path.encoded, "contains an ambiguous separator")
+				end
+				
+				# Control characters cannot be represented safely in application paths:
+				component.b.each_byte do |byte|
+					if byte < 32 || byte == 127
+						raise InvalidPathError.new(path.encoded, "contains a control character")
+					end
+				end
+			end
+			
+			return path.simplify.freeze
+		end
 		
 		# These inherited methods conflict with the protocol request interface, so remove them to allow delegation.
 		undef_method :method, :to_s

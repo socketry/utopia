@@ -26,7 +26,7 @@ describe "Utopia application middleware" do
 			
 			run Protocol::HTTP::Middleware.for{|request|
 				seen_request = request
-				Utopia::Response.text(request.path_info)
+				Utopia::Response.text(request.url.path.encoded)
 			}
 		end
 		

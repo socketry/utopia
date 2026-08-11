@@ -73,7 +73,7 @@ describe Utopia::Application do
 				require "utopia/application"
 				
 				Application = Utopia::Application.build do
-				run Protocol::HTTP::Middleware.for{|request| Utopia::Response.text(request.path_info)}
+				run Protocol::HTTP::Middleware.for{|request| Utopia::Response.text(request.url.path.encoded)}
 				end
 			RUBY
 			

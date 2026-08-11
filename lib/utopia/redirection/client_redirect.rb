@@ -70,20 +70,15 @@ module Utopia
 				false
 			end
 			
-			# Redirect a normalized request path when it matches, otherwise invoke the application.
-			# @parameter request [Utopia::Request] The request.
+			# Redirect a matching request path, otherwise invoke the application.
+			# @parameter request [Utopia::Request] The normalized request.
 			# @returns [Protocol::HTTP::Response] The redirect or downstream response.
 			def call(request)
-				# Normalize the path to remove redundant slashes, `.` and `..` segments.
-				# This prevents protocol-relative redirect URLs (e.g. //evil.com/index)
-				# from being generated when PATH_INFO contains a double leading slash.
-				path = Path.create(request.path_info).simplify.to_s
-				
-				if redirection = self[path]
+				if redirection = self[request.url.path.encoded]
 					return redirection
 				end
 				
-				return @delegate.call(request)
+				return super
 			end
 		end
 	end

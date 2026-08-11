@@ -47,16 +47,19 @@ module Utopia
 			end
 			
 			# Open metadata for an existing file under the static root.
-			# @parameter path [Utopia::Path | String] The path.
+			# @parameter path [Utopia::Path] The decoded path.
 			# @returns [LocalFile | Nil] The local file, or `nil` when it does not exist.
 			def fetch_file(path)
-				file_path = File.join(@root, path.components)
+				url_path = Protocol::URL::Path.for(path.components)
+				file_path = url_path.local_path(@root)
 				
 				if File.exist?(file_path)
-					return LocalFile.new(@root, path)
+					return LocalFile.new(@root, path, file_path)
 				else
 					return nil
 				end
+			rescue ArgumentError
+				return nil
 			end
 			
 			attr :extensions
@@ -89,12 +92,12 @@ module Utopia
 			
 			# Respond.
 			# @parameter request [Utopia::Request] The request.
-			# @parameter path_info [String] The request path to serve.
+			# @parameter path [Protocol::URL::Path] The request path to serve.
 			# @parameter extension [String] The file extension.
 			# @parameter localization [Utopia::Localization::Preferences | Nil] The selected localization.
 			# @returns [Protocol::HTTP::Response] The response.
-			def respond(request, path_info, extension, localization: request.localization)
-				path = Path[path_info].simplify
+			def respond(request, path, extension, localization: request.localization)
+				path = Path[path]
 				
 				if locale = localization&.locale
 					path.last.insert(path.last.rindex(".") || -1, ".#{locale}")
@@ -115,12 +118,12 @@ module Utopia
 			# @parameter request [Utopia::Request] The request.
 			# @returns [Protocol::HTTP::Response] The static-file or downstream response.
 			def call(request)
-				path_info = request.path_info
-				extension = File.extname(path_info)
+				path = request.url.path
+				extension = File.extname(path.basename.to_s)
 				
 				if @extensions.key?(extension.downcase)
 					response = resolve_localized(request) do |localization|
-						self.respond(request, path_info, extension, localization: localization)
+						self.respond(request, path, extension, localization: localization)
 					end
 					
 					if response
@@ -134,9 +137,9 @@ module Utopia
 		end
 		
 		Traces::Provider(Static) do
-			def respond(request, path_info, extension, localization: request.localization)
+			def respond(request, path, extension, localization: request.localization)
 				attributes = {
-					path_info: path_info,
+					path: path,
 					locale: localization&.locale,
 				}
 				

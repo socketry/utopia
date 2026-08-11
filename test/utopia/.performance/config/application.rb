@@ -16,10 +16,7 @@ Application = Utopia::Application.build do
 	}
 	
 	use Utopia::Redirection::DirectoryIndex
-	
-	use Utopia::Redirection::Errors, {
-		404 => "/errors/file-not-found"
-	}
+	use Utopia::Redirection::Errors, 404 => "/errors/file-not-found"
 	
 	use Utopia::Controller, root: ROOT
 	use Utopia::Static, root: ROOT

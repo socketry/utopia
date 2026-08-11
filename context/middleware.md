@@ -18,18 +18,25 @@ use Utopia::Static,
 
 ## Redirection
 
-The {ruby Utopia::Redirection} middleware is used for redirecting requests based on patterns and status codes.
+The redirection middleware is used for redirecting requests based on paths.
 
 ~~~ ruby
 # String (fast hash lookup) rewriting:
 use Utopia::Redirection::Rewrite,
-	'/' => '/welcome/index'
+	{'/' => '/welcome/index'}
 
 # Redirect directories (e.g. /) to an index file (e.g. /index):
 use Utopia::Redirection::DirectoryIndex,
 	index: 'index.html'
 
-# Redirect (error) status codes to actual pages:
+# Redirect matching path prefixes:
+use Utopia::Redirection::Moved,
+	'/old/', '/new/'
+~~~
+
+The {ruby Utopia::Redirection::Errors} middleware maps unhandled error responses to internal error documents. It retains the original response status and does not issue a client-visible redirect:
+
+~~~ ruby
 use Utopia::Redirection::Errors,
 	404 => '/errors/file-not-found'
 ~~~
