@@ -10,7 +10,7 @@ The {ruby Utopia::Static} middleware services static files efficiently and suppo
 use Utopia::Static,
 	# The root path to serve files from:
 	root: "path/to/root",
-	# The mime-types to recognize/serve:
+	# The file extension groups to recognize/serve:
 	types: [:default, :xiph],
 	# Cache-Control header for files:
 	cache_control: 'public, max-age=7200'

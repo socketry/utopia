@@ -128,6 +128,8 @@ describe Utopia::Static do
 				".txt" => be == "text/plain",
 				".webm" => be == "video/webm",
 				".weba" => be == "audio/webm",
+				".ogg" => be == "audio/vorbis",
+				".spx" => be == "audio/speex",
 				".html" => be == "text/html",
 			)
 		end
