@@ -18,6 +18,16 @@ module Utopia
 				super(app)
 			end
 			
+			# Freeze this object and its internal state.
+			# @returns [self] This object.
+			def freeze
+				return self if frozen?
+				
+				@index.freeze
+				
+				return super
+			end
+			
 			# Redirect a directory path to its index path.
 			# @parameter path [String] The normalized request path.
 			# @returns [Protocol::HTTP::Response | Nil] The redirect response when the path ends with `/`.
