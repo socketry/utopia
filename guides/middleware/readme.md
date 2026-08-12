@@ -29,7 +29,11 @@ use Utopia::Redirection::Rewrite,
 use Utopia::Redirection::DirectoryIndex,
 	index: 'index.html'
 
-# Redirect (error) status codes to actual pages:
+~~~
+
+Place {ruby Utopia::Redirection::Errors} after all client-visible redirection middleware. It maps unhandled error responses to internal error documents while retaining the original response status. Because its internal requests invoke the downstream application directly, redirects configured before it are bypassed:
+
+~~~ ruby
 use Utopia::Redirection::Errors,
 	404 => '/errors/file-not-found'
 ~~~

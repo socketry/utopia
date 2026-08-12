@@ -34,13 +34,13 @@ describe Utopia::Redirection do
 		}) do
 			use Utopia::Redirection::Rewrite, {"/" => "/welcome/index"}
 			use Utopia::Redirection::DirectoryIndex
+			use Utopia::Redirection::Moved, "/a", "/b"
+			use Utopia::Redirection::Moved, "/hierarchy/", "/hierarchy", flatten: true
+			use Utopia::Redirection::Moved, "/weird", "/status", status: 333
 			use Utopia::Redirection::Errors, {
 				404 => "/error",
 				418 => "/teapot"
 			}
-			use Utopia::Redirection::Moved, "/a", "/b"
-			use Utopia::Redirection::Moved, "/hierarchy/", "/hierarchy", flatten: true
-			use Utopia::Redirection::Moved, "/weird", "/status", status: 333
 		end
 	end
 	
@@ -82,6 +82,25 @@ describe Utopia::Redirection do
 		
 		expect(last_response.status).to be == 404
 		expect(last_response.read).to be == "File not found :("
+	end
+	
+	it "bypasses client redirects for internal error documents" do
+		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |request|
+			if request.path_info == "/error"
+				Utopia::Response.text("Internal error document")
+			else
+				Utopia::Response[404, {}, []]
+			end
+		end) do
+			use Utopia::Redirection::Rewrite, {"/error" => "/redirected"}
+			use Utopia::Redirection::Errors, 404 => "/error"
+		end
+		
+		response = application.call(Protocol::HTTP::Request["GET", "/missing"])
+		
+		expect(response.status).to be == 404
+		expect(response.headers["location"]).to be == nil
+		expect(response.read).to be == "Internal error document"
 	end
 	
 	it "closes the response replaced by an error document" do

@@ -31,6 +31,7 @@ Application = Utopia::Application.build do
 	
 	use Utopia::Redirection::DirectoryIndex
 	
+	# Handle error documents after client redirects so internal requests bypass them:
 	use Utopia::Redirection::Errors, {
 		404 => "/errors/file-not-found"
 	}
