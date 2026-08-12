@@ -11,6 +11,10 @@ require_relative "request_failure"
 module Utopia
 	module Redirection
 		# A middleware which performs internal redirects based on error status codes.
+		#
+		# Place this middleware after client-visible redirection middleware in the
+		# application configuration. Internal error-document requests invoke the
+		# delegate directly, bypassing middleware configured before this one.
 		class Errors < Protocol::HTTP::Middleware
 			# @param codes [Hash<Integer,String>] The redirection path for a given error code.
 			def initialize(app, codes = {})
