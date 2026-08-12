@@ -23,6 +23,18 @@ module Utopia
 				super(app, status: status)
 			end
 			
+			# Freeze this object and its internal state.
+			# @returns [self] This object.
+			def freeze
+				return self if frozen?
+				
+				@pattern.freeze
+				@prefix.freeze
+				@flatten.freeze
+				
+				return super
+			end
+			
 			# Redirect a matching path to the configured prefix.
 			# @parameter path [String] The normalized request path.
 			# @returns [Protocol::HTTP::Response | Nil] The redirect response when the pattern matches.

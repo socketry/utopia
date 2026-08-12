@@ -21,6 +21,38 @@ describe Utopia::Redirection do
 		return body
 	end
 	
+	it "freezes directory index configuration" do
+		index = +"index"
+		middleware = Utopia::Redirection::DirectoryIndex.new(Protocol::HTTP::Middleware::NotFound, index: index)
+		
+		middleware.freeze
+		
+		expect(middleware).to be(:frozen?)
+		expect(index).to be(:frozen?)
+	end
+	
+	it "freezes rewrite configuration" do
+		patterns = {"/old" => "/new"}
+		middleware = Utopia::Redirection::Rewrite.new(Protocol::HTTP::Middleware::NotFound, patterns)
+		
+		middleware.freeze
+		
+		expect(middleware).to be(:frozen?)
+		expect(patterns).to be(:frozen?)
+	end
+	
+	it "freezes moved configuration" do
+		pattern = +"/old"
+		prefix = +"/new"
+		middleware = Utopia::Redirection::Moved.new(Protocol::HTTP::Middleware::NotFound, pattern, prefix)
+		
+		middleware.freeze
+		
+		expect(middleware).to be(:frozen?)
+		expect(pattern).to be(:frozen?)
+		expect(prefix).to be(:frozen?)
+	end
+	
 	let(:middleware) do
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
 			case request.path_info

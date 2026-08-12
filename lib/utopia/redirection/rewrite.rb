@@ -19,6 +19,16 @@ module Utopia
 				super(app, status: status)
 			end
 			
+			# Freeze this object and its internal state.
+			# @returns [self] This object.
+			def freeze
+				return self if frozen?
+				
+				@patterns.freeze
+				
+				return super
+			end
+			
 			# Redirect a path found in the rewrite map.
 			# @parameter path [String] The normalized request path.
 			# @returns [Protocol::HTTP::Response | Nil] The redirect response when the path is mapped.
