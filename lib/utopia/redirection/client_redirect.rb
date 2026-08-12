@@ -10,7 +10,7 @@ module Utopia
 	# A middleware which assists with redirecting from one path to another.
 	module Redirection
 		# We cache 301 redirects for 24 hours.
-		DEFAULT_MAX_AGE = 3600*24
+		MAX_AGE = 3600*24
 		
 		# A basic client-side redirect.
 		class ClientRedirect < Protocol::HTTP::Middleware
@@ -18,7 +18,7 @@ module Utopia
 			# @parameter app [Interface(:call)] The downstream application.
 			# @parameter status [Integer] The status.
 			# @parameter max_age [Integer] The maximum cache age in seconds.
-			def initialize(app, status: 307, max_age: DEFAULT_MAX_AGE)
+			def initialize(app, status: 307, max_age: MAX_AGE)
 				super(app)
 				
 				@status = status
