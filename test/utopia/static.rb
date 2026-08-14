@@ -35,6 +35,14 @@ describe Utopia::Static do
 		expect(last_response.read).to be == "Uppercase extension!\n"
 	end
 	
+	it "serves JavaScript modules" do
+		client.get "/module.mjs"
+		
+		expect(last_response.status).to be == 200
+		expect(last_response.headers["content-type"]).to be == "text/javascript"
+		expect(last_response.read).to be == "export default true;\n"
+	end
+	
 	it "serves HEAD requests without opening a response body" do
 		client.head "/test.txt"
 		
@@ -276,6 +284,7 @@ describe Utopia::Static do
 		it "should give the correct mime type" do
 			expect(extensions).to have_keys(
 				".txt" => be == "text/plain",
+				".mjs" => be == "text/javascript",
 				".webm" => be == "video/webm",
 				".weba" => be == "audio/webm",
 				".ogg" => be == "audio/vorbis",
