@@ -140,6 +140,12 @@ describe Utopia::Path do
 	end
 	
 	with "#to_url_path" do
+		it "preserves the absolute root" do
+			path = Utopia::Path.root
+			
+			expect(path.to_url_path).to be == Protocol::URL::Path["/"]
+		end
+		
 		it "encodes application path components" do
 			path = Utopia::Path.new(["", "some path"])
 			

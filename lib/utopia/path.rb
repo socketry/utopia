@@ -224,6 +224,11 @@ module Utopia
 		# Encode this application path as a URL path.
 		# @returns [Protocol::URL::Path] The encoded URL path.
 		def to_url_path
+			# Preserve Utopia's compact representation of the absolute root:
+			if @components == [""]
+				return Protocol::URL::Path[SEPARATOR]
+			end
+			
 			return Protocol::URL::Path.for(
 				@components,
 				encoding: Protocol::URL::Encoding::System,
