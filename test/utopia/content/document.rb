@@ -22,6 +22,15 @@ describe Utopia::Content::Document do
 		expect(document.request_path).to be == Utopia::Path["/index"]
 	end
 	
+	it "uses the normalized original request path" do
+		request = Utopia::Request["GET", "/nested/../%69ndex"]
+		document = subject.new(request, {})
+		
+		request.path = "/rewritten"
+		
+		expect(document.request_path).to be == Utopia::Path["/index"]
+	end
+	
 	it "should generate valid self-closing markup" do
 		node = proc do |document, state|
 			document.tag("img", src: "cats.jpg")

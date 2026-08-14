@@ -38,6 +38,13 @@ describe Utopia::Request do
 		expect(request.request_path).to be == "/search"
 	end
 	
+	it "normalizes and simplifies the original request path" do
+		request = Utopia::Request["GET", "/nested/../%69ndex?key=value"]
+		request.path = "/rewritten"
+		
+		expect(request.original_path).to be == Utopia::Path["/index"]
+	end
+	
 	it "identifies POST requests" do
 		expect(request.post?).to be == true
 		

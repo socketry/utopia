@@ -101,7 +101,7 @@ module Utopia
 		# The original request path as decoded application components.
 		# @returns [Utopia::Path] The normalized original request path.
 		def original_path
-			path = Protocol::URL::Path[self.request_path].normalize
+			path = Protocol::URL::Path[self.request_path].normalize.simplify
 			return Path.new(path.components(Protocol::URL::Encoding::System))
 		end
 		
