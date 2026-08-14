@@ -35,14 +35,14 @@ describe Utopia::Request do
 		expect(request.path).to be == Utopia::Path["/find"]
 		expect(request.url.path).to be == Protocol::URL::Path["/find"]
 		expect(request.url.query).to be == "q=utopia&tag[]=ruby&tag[]=async"
-		expect(request.request_path).to be == "/search"
+		expect(request.request_path).to be == Utopia::Path["/search"]
 	end
 	
-	it "normalizes and simplifies the original request path" do
+	it "normalizes and simplifies the request path" do
 		request = Utopia::Request["GET", "/nested/../%69ndex?key=value"]
 		request.path = "/rewritten"
 		
-		expect(request.original_path).to be == Utopia::Path["/index"]
+		expect(request.request_path).to be == Utopia::Path["/index"]
 	end
 	
 	it "identifies POST requests" do
@@ -135,7 +135,7 @@ describe Utopia::Request do
 		expect(derived.method).to be == "GET"
 		expect(derived.path).to be == Utopia::Path["/find"]
 		expect(derived.url.query).to be == "q=utopia&tag[]=ruby&tag[]=async"
-		expect(derived.request_path).to be == "/search"
+		expect(derived.request_path).to be == Utopia::Path["/search"]
 		expect(derived.delegate).not.to be_equal(request.delegate)
 		expect(derived.session).to be_equal(session)
 		expect(derived.variables).to be_equal(variables)
@@ -148,6 +148,6 @@ describe Utopia::Request do
 		derived = derived.with(path: "/lookup")
 		
 		expect(derived.path).to be == Utopia::Path["/lookup"]
-		expect(derived.request_path).to be == "/search"
+		expect(derived.request_path).to be == Utopia::Path["/search"]
 	end
 end

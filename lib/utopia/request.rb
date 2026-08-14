@@ -93,15 +93,12 @@ module Utopia
 			@delegate.method == "POST"
 		end
 		
-		# The original request path, before any internal request rewrites.
+		# The normalized original request path, before any internal request rewrites.
+		# @returns [Utopia::Path] The decoded application path.
 		def request_path
-			@delegate.path.split("?", 2).first
-		end
-		
-		# The original request path as decoded application components.
-		# @returns [Utopia::Path] The normalized original request path.
-		def original_path
-			path = Protocol::URL::Path[self.request_path].normalize.simplify
+			path = @delegate.path.split("?", 2).first
+			path = Protocol::URL::Path[path].normalize.simplify
+			
 			return Path.new(path.components(Protocol::URL::Encoding::System))
 		end
 		
