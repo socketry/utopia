@@ -49,9 +49,11 @@ describe Utopia::Content::Links do
 			
 			expect(matched[0].name).to be == "test"
 			expect(matched[0].locale).to be == "de"
+			expect(matched[0].href).to be == "/foo/test"
 			
 			expect(matched[1].name).to be == "test"
 			expect(matched[1].locale).to be == "en"
+			expect(matched[1].href).to be == "/foo/test"
 		end
 	end
 	
@@ -227,16 +229,16 @@ describe Utopia::Content::Links do
 		expect(link.relative_href(Utopia::Path["/index"])).to be == "some%20page"
 	end
 	
-	it "preserves inferred link paths containing dots" do
+	it "omits the variant from inferred link paths" do
 		link = Utopia::Content::Link.new(
 			:virtual,
-			"archive.tar",
-			nil,
-			Utopia::Path.new(["", "downloads", "archive.tar"]),
+			"document",
+			"en",
+			Utopia::Path.new(["", "articles", "document.en"]),
 			{},
 		)
 		
-		expect(link.href).to be == "/downloads/archive.tar"
+		expect(link.href).to be == "/articles/document"
 	end
 	
 	it "keeps explicit targets opaque until relativization" do

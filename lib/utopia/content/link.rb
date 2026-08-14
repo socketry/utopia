@@ -54,7 +54,8 @@ module Utopia
 			def href
 				@href ||= @info.fetch(:uri) do
 					@info.fetch(:href) do
-						@path.to_url_path.encoded if @path
+						# Omit the variant suffix from inferred content links:
+						(@path.dirname + @path.basename).to_url_path.encoded if @path
 					end
 				end
 			end
