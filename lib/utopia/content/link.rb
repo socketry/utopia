@@ -52,7 +52,13 @@ module Utopia
 			# Resolve this link's target URI.
 			# @returns [String | Nil] The explicit target URI or one derived from the content path.
 			def href
-				target_url&.to_s
+				if @info.key?(:uri)
+					return @info[:uri]
+				elsif @info.key?(:href)
+					return @info[:href]
+				elsif @path
+					return @path.to_url_path.encoded
+				end
 			end
 			
 			# Look up from the `links.yaml` metadata with a given symbolic key.
@@ -86,35 +92,23 @@ module Utopia
 			
 			# Resolve this link's target relative to a base path.
 			# @parameter base [Path | String | Nil] The source path.
-			# @returns [Path | String | Nil] The relative or unchanged target.
+			# @returns [String | Nil] The relative or unchanged target.
 			def relative_href(base = nil)
-				target = target_url
+				target = href
 				return unless target
+				return target unless base
 				
-				case target
-				when Protocol::URL::Absolute
-					return target.to_s
-				when Protocol::URL::Relative
-					if base && target.path.absolute?
-						# Convert root-relative targets to application paths before finding the shortest path:
-						path = Path.new(target.path.components(Protocol::URL::Encoding::System))
-						relative_path = Path.shortest_path(path, base).to_url_path
-						
-						return Protocol::URL::Relative.new(relative_path, target.query, target.fragment).to_s
-					end
+				url = Protocol::URL[target]
+				
+				if url.instance_of?(Protocol::URL::Relative) && url.path.absolute?
+					# Convert root-relative targets to application paths before finding the shortest path:
+					path = Path.new(url.path.components(Protocol::URL::Encoding::System))
+					relative_path = Path.shortest_path(path, base).to_url_path
+					
+					return Protocol::URL::Relative.new(relative_path, url.query, url.fragment).to_s
 				end
 				
-				return target.to_s
-			end
-			
-			private def target_url
-				if @info.key?(:uri)
-					Protocol::URL[@info[:uri]]
-				elsif @info.key?(:href)
-					Protocol::URL[@info[:href]]
-				elsif @path
-					Protocol::URL::Relative.new(@path.to_url_path)
-				end
+				return target
 			end
 			
 			# Return the display title from metadata or the inferred title.

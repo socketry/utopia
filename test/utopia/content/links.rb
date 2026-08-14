@@ -238,6 +238,14 @@ describe Utopia::Content::Links do
 		expect(link.href).to be == "/downloads/archive.tar"
 	end
 	
+	it "keeps explicit targets opaque until relativization" do
+		target = "some target"
+		link = Utopia::Content::Link.new(:virtual, "target", nil, nil, {href: target})
+		
+		expect(link.href).to be_equal(target)
+		expect(link.relative_href).to be_equal(target)
+	end
+	
 	it "preserves query and fragment components when relativizing targets" do
 		link = Utopia::Content::Link.new(
 			:virtual,
