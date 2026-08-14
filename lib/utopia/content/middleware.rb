@@ -25,6 +25,7 @@ module Utopia
 			include Localization::Resolver
 			
 			CONTENT_NAMESPACE = "content".freeze
+			RELATIVE_NAMESPACE = "relative".freeze
 			UTOPIA_NAMESPACE = "utopia".freeze
 			CONTENT_TAG_NAME = "utopia:content".freeze
 			
@@ -44,6 +45,9 @@ module Utopia
 				
 				# Default content namespace for dynamic path based lookup:
 				@namespaces[CONTENT_NAMESPACE] ||= self.method(:content_tag)
+				
+				# Resolve content relative to the logical invocation path:
+				@namespaces[RELATIVE_NAMESPACE] ||= self.method(:relative_tag)
 				
 				# The core namespace for utopia specific functionality:
 				@namespaces[UTOPIA_NAMESPACE] ||= Tags
@@ -190,8 +194,8 @@ module Utopia
 				return nil
 			end
 			
-			def content_tag(name, node)
-				full_path = node.parent_path + name
+			def content_tag(name, node, parent_path: node.parent_path)
+				full_path = parent_path + name
 				
 				name = full_path.pop
 				
@@ -205,6 +209,10 @@ module Utopia
 				@node_cache.fetch_or_store(cache_key) do
 					lookup_content(name, full_path)
 				end
+			end
+			
+			def relative_tag(name, node)
+				content_tag(name, node, parent_path: node.request_path.dirname)
 			end
 		end
 		

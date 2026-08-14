@@ -39,3 +39,9 @@ In order to render this, you will need two additional files, `_page.xnode` and `
 ```
 
 When the parser encounters `<content:heading>...` in the main page, it would evaluate the above template. `<utopia:content/>` is a special tag that evaluates to the content that the parent tag provided, so in this case: `"Welcome to my page"`.  Thus, the final output is `<h1>Welcome to my page</h1>`.
+
+## Relative Content
+
+By default, `<content:...>` tags resolve relative to the physical location of the template which contains them. This ensures that a shared template uses its own related content templates consistently.
+
+Use the `<relative:...>` namespace when a shared template should instead allow content to be overridden relative to the node being rendered. For example, a root `_page.xnode` can render `<relative:header/>`; when it wraps `blog/index.xnode`, Utopia first looks for `blog/_header.xnode` before falling back to `/_header.xnode`.
