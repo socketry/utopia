@@ -5,5 +5,5 @@
 
 # @namespace
 module Utopia
-	VERSION = "2.32.1"
+	VERSION = "3.0.0"
 end

@@ -17,7 +17,7 @@ Please see the [project documentation](https://socketry.github.io/utopia/) for m
 
   - [Getting Started](https://socketry.github.io/utopia/guides/getting-started/index) - This guide explains how to set up a `utopia` website for local development and deployment.
 
-  - [Middleware](https://socketry.github.io/utopia/guides/middleware/index) - This guide gives an overview of Utopia application middleware.
+  - [Middleware](https://socketry.github.io/utopia/guides/middleware/index) - This guide gives an overview of the different middleware used by Utopia.
 
   - [Server Setup](https://socketry.github.io/utopia/guides/server-setup/index) - This guide explains how to deploy a `utopia` web application.
 
@@ -31,9 +31,20 @@ Please see the [project documentation](https://socketry.github.io/utopia/) for m
 
 Please see the [project releases](https://socketry.github.io/utopia/releases/index) for all releases.
 
-### Unreleasd
+### v3.0.0
 
+The 3.0.x series is considered a development release while the protocol HTTP application and controller interfaces stabilize.
+
+  - **Breaking** Require Ruby 3.3 or later.
+  - **Breaking** Replace the Rack-centric application boundary with <code class="language-ruby">Utopia::Application</code> and <code class="language-ruby">Protocol::HTTP::Middleware</code>. Applications now use `config/application.rb` and `config/serve.rb` instead of `config.ru`.
+  - **Breaking** Separate complete protocol responses from semantic controller results. Use `respond!` with a <code class="language-ruby">Protocol::HTTP::Response</code>, or `succeed!` with a value serialized by <code class="language-ruby">Utopia::Controller::Respond</code>.
+  - Parse request bodies at the controller layer using `protocol-content`, independently of URL query parameters.
+  - Resolve localization through immutable request preferences, avoiding repeated internal controller requests.
+  - Split redirection handling into focused middleware for rewrites, moved resources, directory indexes, and error documents.
   - **Security** Fix handling of redirects that start with `//` to prevent open redirect vulnerabilities.
+  - Normalize request URLs using `Protocol::URL` and use structured paths throughout the middleware stack.
+  - Resolve static files through encoded URL paths, with improved `HEAD`, range, and validator handling.
+  - Use `protocol-media` and `protocol-http` for response and language negotiation, removing the `http-accept` dependency.
 
 ### v2.31.0
 

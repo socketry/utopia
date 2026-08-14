@@ -1,6 +1,6 @@
 # Releases
 
-## Unreleased
+## v3.0.0
 
 The 3.0.x series is considered a development release while the protocol HTTP application and controller interfaces stabilize.
 
