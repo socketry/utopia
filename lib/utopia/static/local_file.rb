@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2017-2025, by Samuel Williams.
+# Copyright, 2017-2026, by Samuel Williams.
 
 require "time"
 require "digest/sha1"
 
 require "protocol/http/body/file"
+require "protocol/http/body/head"
 require "protocol/http/header/range"
 
 require_relative "../response"
@@ -16,36 +17,30 @@ module Utopia
 	module Static
 		# Represents a local static resource and constructs responses for it.
 		class LocalFile
-			# Initialize metadata for a file beneath a static root.
-			# @parameter root [String] The root directory.
-			# @parameter path [Utopia::Path | String] The path.
-			def initialize(root, path)
-				@root = root
+			# Initialize metadata for a local file.
+			# @parameter path [String] The resolved filesystem path.
+			def initialize(path)
 				@path = path
-				fingerprint = Digest::SHA1.hexdigest("#{File.size(full_path)}#{mtime_date}")
+				@stat = File.stat(@path)
+				@mtime_date = @stat.mtime.httpdate
+				
+				fingerprint = Digest::SHA1.hexdigest("#{@stat.size}:#{@stat.mtime.to_i}:#{@stat.mtime.nsec}")
 				@etag = %Q{W/"#{fingerprint}"}
 			end
 			
-			attr :root
 			attr :path
 			attr :etag
-			
-			# Resolve this file beneath its configured root.
-			# @returns [String] The full filesystem path.
-			def full_path
-				File.join(@root, @path.components)
-			end
 			
 			# Format the file's modification time for an HTTP header.
 			# @returns [String] The HTTP-date modification time.
 			def mtime_date
-				File.mtime(full_path).httpdate
+				@mtime_date
 			end
 			
 			# Measure the file's content length.
 			# @returns [Integer] The file size in bytes.
 			def bytesize
-				File.size(full_path)
+				@stat.size
 			end
 			
 			# Check whether the file has changed since the request validators.
@@ -57,7 +52,7 @@ module Utopia
 				end
 				
 				if modified_since = request.headers["if-modified-since"]
-					return File.mtime(full_path).to_i > modified_since.to_time.to_i
+					return @stat.mtime.to_i > modified_since.to_time.to_i
 				end
 				
 				return true
@@ -71,7 +66,7 @@ module Utopia
 			# @parameter response_headers [Hash] The response headers.
 			# @returns [Protocol::HTTP::Response] The response.
 			def serve(request, response_headers)
-				ranges = byte_ranges(request.headers["range"])
+				ranges = byte_ranges(request)
 				size = bytesize
 				
 				# puts "Requesting ranges: #{ranges.inspect} (#{size})"
@@ -92,18 +87,44 @@ module Utopia
 					response_headers[CONTENT_RANGE] = "bytes #{range.min}-#{range.max}/#{size}"
 				end
 				
-				body = Protocol::HTTP::Body::File.open(full_path, range, size: size)
+				if request.head?
+					body = Protocol::HTTP::Body::Head.new(size)
+				else
+					body = Protocol::HTTP::Body::File.open(@path, range, size: size)
+				end
 				
 				return Response[status, response_headers, body]
 			end
 			
 			# Resolve satisfiable byte ranges from the parsed range header.
-			# @parameter range [Protocol::HTTP::Header::Range | Nil] The parsed range header.
+			# @parameter request [Utopia::Request] The request.
 			# @returns [Array | Nil] The resulting values, or `nil` if the range is not applicable.
-			def byte_ranges(range)
+			def byte_ranges(request)
+				return nil unless request.method == Protocol::HTTP::Methods::GET
+				
+				range = request.headers["range"]
 				return nil unless range&.bytes?
 				
+				if validator = request.headers["if-range"]
+					return nil unless if_range?(validator)
+				end
+				
 				return range.resolve(bytesize)
+			end
+			
+			# Check whether an If-Range validator strongly matches this file.
+			# @parameter validator [String] The If-Range entity tag or HTTP date.
+			# @returns [Boolean] Whether the range can be served safely.
+			private def if_range?(validator)
+				validator = validator.to_s
+				
+				# Date validators cannot be used because this file's modification date is not known to be strong:
+				return false unless validator.start_with?('"')
+				
+				# Weak entity tags cannot authorize a partial response:
+				return false if @etag.start_with?("W/")
+				
+				return @etag == validator
 			end
 		end
 	end

@@ -257,7 +257,7 @@ module Utopia
 		# Create a new import map with paths relative to the given page path.
 		# This is useful for creating page-specific import maps from a global one.
 		#
-		# @parameter path [String] The absolute page path to make imports relative to.
+		# @parameter path [String | Protocol::URL::Path] The absolute page path to make imports relative to.
 		# @returns [ImportMap] A new import map with a relative base.
 		#
 		# @example Creating page-specific import maps.
@@ -270,8 +270,8 @@ module Utopia
 		def relative_to(path)
 			if @base
 				# Calculate the relative path from the page to the base
-				relative_base = Protocol::URL::Path.relative(@base.path, path)
-				resolved_base = Protocol::URL[relative_base]
+				relative_path = @base.path.relative(path)
+				resolved_base = Protocol::URL::Relative.new(relative_path)
 			else
 				resolved_base = nil
 			end

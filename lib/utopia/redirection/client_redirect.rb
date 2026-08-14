@@ -74,10 +74,7 @@ module Utopia
 			# @parameter request [Utopia::Request] The request.
 			# @returns [Protocol::HTTP::Response] The redirect or downstream response.
 			def call(request)
-				# Normalize the path to remove redundant slashes, `.` and `..` segments.
-				# This prevents protocol-relative redirect URLs (e.g. //evil.com/index)
-				# from being generated when PATH_INFO contains a double leading slash.
-				path = Path.create(request.path_info).simplify.to_s
+				path = request.url.path.encoded
 				
 				if redirection = self[path]
 					return redirection

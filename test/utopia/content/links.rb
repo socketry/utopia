@@ -49,9 +49,11 @@ describe Utopia::Content::Links do
 			
 			expect(matched[0].name).to be == "test"
 			expect(matched[0].locale).to be == "de"
+			expect(matched[0].href).to be == "/foo/test"
 			
 			expect(matched[1].name).to be == "test"
 			expect(matched[1].locale).to be == "en"
+			expect(matched[1].href).to be == "/foo/test"
 		end
 	end
 	
@@ -211,5 +213,94 @@ describe Utopia::Content::Links do
 			link = links.for(Utopia::Path["/bar/index"])
 			expect(link.title).to be == "Bar"
 		end
+	end
+	
+	it "encodes inferred link paths" do
+		link = Utopia::Content::Link.new(
+			:file,
+			"some page",
+			nil,
+			Utopia::Path.new(["", "some page"]),
+			{},
+		)
+		
+		expect(link.href).to be == "/some%20page"
+		expect(link.href).to be_equal(link.href)
+		expect(link.relative_href(Utopia::Path["/index"])).to be == "some%20page"
+	end
+	
+	it "omits the variant from inferred link paths" do
+		link = Utopia::Content::Link.new(
+			:virtual,
+			"document",
+			"en",
+			Utopia::Path.new(["", "articles", "document.en"]),
+			{},
+		)
+		
+		expect(link.href).to be == "/articles/document"
+	end
+	
+	it "keeps explicit targets opaque until relativization" do
+		target = "some target"
+		link = Utopia::Content::Link.new(:virtual, "target", nil, nil, {href: target})
+		
+		expect(link.href).to be_equal(target)
+		expect(link.relative_href).to be_equal(target)
+	end
+	
+	it "preserves query and fragment components when relativizing targets" do
+		link = Utopia::Content::Link.new(
+			:virtual,
+			"search",
+			nil,
+			nil,
+			{href: "/search?q=x#results"},
+		)
+		
+		expect(link.href).to be == "/search?q=x#results"
+		expect(link.relative_href(Utopia::Path["/index"])).to be == "search?q=x#results"
+	end
+	
+	it "identifies the root directory explicitly" do
+		link = Utopia::Content::Link.new(:virtual, "root", nil, nil, {href: "/"})
+		
+		expect(link.relative_href(Utopia::Path["/index"])).to be == "./"
+	end
+	
+	it "preserves encoded separators when relativizing targets" do
+		link = Utopia::Content::Link.new(
+			:virtual,
+			"file",
+			nil,
+			nil,
+			{href: "/files/a%2Fb"},
+		)
+		
+		expect(link.relative_href(Utopia::Path["/index"])).to be == "files/a%2Fb"
+	end
+	
+	it "does not relativize absolute URLs" do
+		link = Utopia::Content::Link.new(
+			:virtual,
+			"search",
+			nil,
+			nil,
+			{href: "https://example.com/search?q=x#results"},
+		)
+		
+		expect(link.relative_href(Utopia::Path["/index"])).to be == "https://example.com/search?q=x#results"
+	end
+	
+	it "does not rewrite already-relative references" do
+		link = Utopia::Content::Link.new(
+			:virtual,
+			"search",
+			nil,
+			nil,
+			{href: "../search?q=x#results"},
+		)
+		
+		expect(link.relative_href(Utopia::Path["/guides/index"])).to be == "../search?q=x#results"
 	end
 end

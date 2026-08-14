@@ -25,6 +25,10 @@ on 'redirect' do
 	redirect! 'bar'
 end
 
+on 'goto' do
+	goto! 'some path'
+end
+
 on 'index' do
 	respond! Utopia::Response[200, {}, ['Hello World']]
 end

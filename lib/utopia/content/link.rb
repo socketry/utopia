@@ -6,6 +6,7 @@
 # Copyright, 2020, by Michael Adams.
 
 require "yaml"
+require "protocol/url"
 require "xrb/builder"
 
 require "xrb/strings"
@@ -53,7 +54,8 @@ module Utopia
 			def href
 				@href ||= @info.fetch(:uri) do
 					@info.fetch(:href) do
-						(@path.dirname + @path.basename).to_s if @path
+						# Omit the variant suffix from inferred content links:
+						(@path.dirname + @path.basename).to_url_path.encoded if @path
 					end
 				end
 			end
@@ -89,13 +91,21 @@ module Utopia
 			
 			# Resolve this link's target relative to a base path.
 			# @parameter base [Path | String | Nil] The source path.
-			# @returns [Path | String | Nil] The relative or unchanged target.
+			# @returns [String | Nil] The relative or unchanged target.
 			def relative_href(base = nil)
-				if base and href.start_with? "/"
-					Path.shortest_path(href, base)
-				else
-					href
+				target = href
+				return unless target
+				return target unless base
+				
+				url = Protocol::URL[target]
+				relative_url = url.relative_to(Path[base].to_url_path)
+				
+				# Preserve unchanged targets exactly and avoid allocating a serialized replacement:
+				if relative_url.equal?(url)
+					return target
 				end
+				
+				return relative_url.to_s
 			end
 			
 			# Return the display title from metadata or the inferred title.

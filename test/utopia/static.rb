@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2014-2025, by Samuel Williams.
+# Copyright, 2014-2026, by Samuel Williams.
+
+require "tmpdir"
 
 require "sus/fixtures/protocol/http/middleware_context"
 require "utopia/application"
@@ -23,6 +25,45 @@ describe Utopia::Static do
 		
 		expect(last_response.headers["content-type"]).to be == "text/plain"
 		expect(last_response.body).to be_a(Protocol::HTTP::Body::File)
+	end
+	
+	it "normalizes the extension for media type lookup" do
+		client.get "/uppercase.TXT"
+		
+		expect(last_response.status).to be == 200
+		expect(last_response.headers["content-type"]).to be == "text/plain"
+		expect(last_response.read).to be == "Uppercase extension!\n"
+	end
+	
+	it "serves HEAD requests without opening a response body" do
+		client.head "/test.txt"
+		
+		expect(last_response.status).to be == 200
+		expect(last_response.headers["content-length"]).to be == "12"
+		expect(last_response.body).to be_a(Protocol::HTTP::Body::Head)
+		expect(last_response.body.length).to be == 12
+		expect(last_response.read).to be_nil
+	end
+	
+	it "passes non-retrieval methods through" do
+		client.post "/test.txt"
+		expect(last_response.status).to be == 404
+		
+		client.delete "/test.txt"
+		expect(last_response.status).to be == 404
+	end
+	
+	it "resolves encoded file names beneath the static root" do
+		client.get "/test%2Etxt"
+		
+		expect(last_response.status).to be == 200
+		expect(last_response.read).to be == "Hello World!"
+	end
+	
+	it "rejects encoded path separators" do
+		expect do
+			client.get "/directory%2F..%2Ftest.txt"
+		end.to raise_exception(ArgumentError, message: be =~ /invalid characters/)
 	end
 	
 	it "returns not modified for matching entity tags" do
@@ -93,6 +134,45 @@ describe Utopia::Static do
 		expect(last_response.read).to be == "Hello World!"
 	end
 	
+	it "ignores ranges with stale entity tags" do
+		client.get "/test.txt", {
+			"range" => "bytes=1-4",
+			"if-range" => '"stale"',
+		}
+		
+		expect(last_response.status).to be == 200
+		expect(last_response.headers["content-range"]).to be_nil
+		expect(last_response.read).to be == "Hello World!"
+	end
+	
+	it "does not use weak entity tags for If-Range" do
+		client.get "/test.txt"
+		etag = last_response.headers["etag"]
+		
+		client.get "/test.txt", {
+			"range" => "bytes=1-4",
+			"if-range" => etag,
+		}
+		
+		expect(last_response.status).to be == 200
+		expect(last_response.headers["content-range"]).to be_nil
+		expect(last_response.read).to be == "Hello World!"
+	end
+	
+	it "does not use weak modification dates for If-Range" do
+		client.get "/test.txt"
+		last_modified = last_response.headers["last-modified"]
+		
+		client.get "/test.txt", {
+			"range" => "bytes=1-4",
+			"if-range" => last_modified,
+		}
+		
+		expect(last_response.status).to be == 200
+		expect(last_response.headers["content-range"]).to be_nil
+		expect(last_response.read).to be == "Hello World!"
+	end
+	
 	it "should ignore unsatisfiable ranges" do
 		client.get "/test.txt", {"range" => "bytes=999-1000"}
 		
@@ -118,6 +198,76 @@ describe Utopia::Static do
 		expect do
 			client.get "/test.txt", {"range" => "bytes=4-1"}
 		end.to raise_exception(Protocol::HTTP::Header::Range::ParseError)
+	end
+	
+	it "expands relative roots during initialization" do
+		Dir.mktmpdir do |directory|
+			root = File.join(directory, "public")
+			Dir.mkdir(root)
+			File.write(File.join(root, "test.txt"), "Expanded root!")
+			
+			application = Dir.chdir(directory) do
+				Utopia::Application.build do
+					use Utopia::Static, root: "public"
+				end
+			end
+			
+			begin
+				Dir.mktmpdir do |working_directory|
+					response = Dir.chdir(working_directory) do
+						application.call(Protocol::HTTP::Request["GET", "/test.txt"])
+					end
+					
+					begin
+						expect(response.status).to be == 200
+						expect(response.read).to be == "Expanded root!"
+					ensure
+						response.close
+					end
+				end
+			ensure
+				application.close
+			end
+		end
+	end
+	
+	describe Utopia::Static::LocalFile do
+		it "uses a consistent metadata snapshot" do
+			Dir.mktmpdir do |directory|
+				path = File.join(directory, "test.txt")
+				File.write(path, "Original")
+				
+				file = subject.new(path)
+				mtime_date = file.mtime_date
+				etag = file.etag
+				
+				File.write(path, "Updated content")
+				
+				expect(file.bytesize).to be == 8
+				expect(file.mtime_date).to be == mtime_date
+				expect(file.etag).to be == etag
+			end
+		end
+		
+		it "includes subsecond modification time in entity tags" do
+			Dir.mktmpdir do |directory|
+				path = File.join(directory, "test.txt")
+				File.write(path, "Content")
+				
+				seconds = Time.now.to_i - 1
+				first_mtime = Time.at(seconds, 100_000_000, :nanosecond)
+				second_mtime = Time.at(seconds, 200_000_000, :nanosecond)
+				
+				File.utime(first_mtime, first_mtime, path)
+				first = subject.new(path)
+				
+				File.utime(second_mtime, second_mtime, path)
+				second = subject.new(path)
+				
+				expect(first.mtime_date).to be == second.mtime_date
+				expect(first.etag).not.to be == second.etag
+			end
+		end
 	end
 	
 	describe Utopia::Static::MIME_TYPES do

@@ -42,6 +42,13 @@ describe Utopia::Content do
 		expect(last_response.headers["location"]).to be == "/content/index"
 	end
 	
+	it "encodes index redirect paths" do
+		client.get "/some%20directory"
+		
+		expect(last_response.status).to be == 307
+		expect(last_response.headers["location"]).to be == "/some%20directory/index"
+	end
+	
 	it "should successfully render the index page" do
 		client.get "/index"
 		

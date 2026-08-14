@@ -55,7 +55,7 @@ module Utopia
 			
 			# @returns [Path] The original request path, if known.
 			def request_path
-				Path[request.request_path]
+				request.request_path
 			end
 			
 			protected def current_base_uri_path

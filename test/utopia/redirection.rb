@@ -55,7 +55,7 @@ describe Utopia::Redirection do
 	
 	let(:middleware) do
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
-			case request.path_info
+			case request.url.path.encoded
 			when "/error"
 				Utopia::Response.text("File not found :(", 200)
 			when "/teapot"
@@ -93,6 +93,32 @@ describe Utopia::Redirection do
 		end
 	end
 	
+	it "matches normalized encoded paths" do
+		middleware = Utopia::Redirection::Rewrite.new(
+			Protocol::HTTP::Middleware::NotFound,
+			{"/welcome" => "/target"}
+		)
+		request = Utopia::Request["GET", "/%77elcome"]
+		
+		response = middleware.call(request)
+		
+		expect(response.status).to be == 301
+		expect(response.headers["location"]).to be == "/target"
+	end
+	
+	it "preserves encoded separators when matching paths" do
+		middleware = Utopia::Redirection::Rewrite.new(
+			Protocol::HTTP::Middleware::NotFound,
+			{"/files/a%2Fb" => "/target"}
+		)
+		request = Utopia::Request["GET", "/files/a%2fb"]
+		
+		response = middleware.call(request)
+		
+		expect(response.status).to be == 301
+		expect(response.headers["location"]).to be == "/target"
+	end
+	
 	it "should be permanently moved" do
 		client.get "/a"
 		
@@ -118,7 +144,7 @@ describe Utopia::Redirection do
 	
 	it "bypasses client redirects for internal error documents" do
 		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |request|
-			if request.path_info == "/error"
+			if request.url.path == "/error"
 				Utopia::Response.text("Internal error document")
 			else
 				Utopia::Response[404, {}, []]
@@ -138,7 +164,7 @@ describe Utopia::Redirection do
 	it "closes the response replaced by an error document" do
 		events = []
 		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |request|
-			if request.path_info == "/error"
+			if request.url.path == "/error"
 				Utopia::Response[200, {}, tracked_body(:error, events)]
 			else
 				Utopia::Response[404, {}, tracked_body(:original, events)]
@@ -161,7 +187,7 @@ describe Utopia::Redirection do
 	it "closes both responses when the error document fails" do
 		events = []
 		application = Utopia::Application.build(Protocol::HTTP::Middleware.for do |request|
-			if request.path_info == "/error"
+			if request.url.path == "/error"
 				Utopia::Response[500, {}, tracked_body(:error, events)]
 			else
 				Utopia::Response[404, {}, tracked_body(:original, events)]

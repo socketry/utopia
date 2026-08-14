@@ -139,6 +139,15 @@ describe Utopia::ImportMap do
 			expect(page_map.base.to_s).to be == "../../_components/"
 		end
 		
+		it "accepts a structured page path" do
+			import_map = subject.new(base: "/_components/")
+			path = Protocol::URL::Path["/foo/bar/"]
+			page_map = import_map.relative_to(path)
+			
+			expect(page_map.base.path).to be_a(Protocol::URL::Path)
+			expect(page_map.base.to_s).to be == "../../_components/"
+		end
+		
 		it "preserves imports, scopes, and integrity" do
 			import_map = subject.build(base: "/_components/") do |map|
 				map.import("react", "https://esm.sh/react", integrity: "sha384-abc123")

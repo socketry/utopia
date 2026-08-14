@@ -17,31 +17,32 @@ describe Utopia::Request do
 		expect(request).to be(:respond_to?, :scheme=)
 	end
 	
-	it "duplicates the underlying protocol request" do
-		copy = request.dup
-		copy.path = "/copy"
-		
-		expect(copy.delegate).not.to be_equal(request.delegate)
-		expect(copy.path).to be == "/copy"
-		expect(request.path).to be == "/search?q=utopia&tag[]=ruby&tag[]=async"
-	end
-	
 	it "does not proxy unknown methods" do
 		expect(request).not.to be(:respond_to?, :unknown_request_method)
 		expect{request.unknown_request_method}.to raise_exception(NoMethodError)
 	end
 	
 	it "provides path information" do
-		expect(request.path_info).to be == "/search"
-		expect(request.query).to be == "q=utopia&tag[]=ruby&tag[]=async"
+		expect(request.url).to be_a(Protocol::URL::Relative)
+		expect(request.url.path).to be == Protocol::URL::Path["/search"]
+		expect(request.path).to be == Utopia::Path["/search"]
+		expect(request.url.query).to be == "q=utopia&tag[]=ruby&tag[]=async"
 	end
 	
-	it "updates path information while preserving query string" do
-		request.path_info = "/find"
+	it "updates the application path while preserving the query string" do
+		request.path = "/find"
 		
-		expect(request.path).to be == "/find?q=utopia&tag[]=ruby&tag[]=async"
-		expect(request.path_info).to be == "/find"
-		expect(request.request_path).to be == "/search"
+		expect(request.path).to be == Utopia::Path["/find"]
+		expect(request.url.path).to be == Protocol::URL::Path["/find"]
+		expect(request.url.query).to be == "q=utopia&tag[]=ruby&tag[]=async"
+		expect(request.request_path).to be == Utopia::Path["/search"]
+	end
+	
+	it "normalizes and simplifies the request path" do
+		request = Utopia::Request["GET", "/nested/../%69ndex?key=value"]
+		request.path = "/rewritten"
+		
+		expect(request.request_path).to be == Utopia::Path["/index"]
 	end
 	
 	it "identifies POST requests" do
@@ -52,25 +53,33 @@ describe Utopia::Request do
 	end
 	
 	it "provides decoded query arguments" do
-		expect(request.query_arguments).to be == {
+		expect(request.query_parameters).to be == {
 			"q" => "utopia",
 			"tag" => ["ruby", "async"]
 		}
 	end
 	
 	it "provides nested query arguments" do
-		request.path = "/search?user[name]=Samuel&query=hello+world"
+		request.url = "/search?user[name]=Samuel&query=hello+world"
 		
-		expect(request.query_arguments).to be == {
+		expect(request.query_parameters).to be == {
 			"user" => {"name" => "Samuel"},
 			"query" => "hello world"
 		}
 	end
 	
-	it "distinguishes absent and empty query values" do
-		request.path = "/search?absent&empty="
+	it "invalidates decoded query parameters when replacing the URL" do
+		expect(request.query_parameters).to have_keys("q", "tag")
 		
-		expect(request.query_arguments).to be == {"absent" => nil, "empty" => ""}
+		request.url = "/search?query=hello+world"
+		
+		expect(request.query_parameters).to be == {"query" => "hello world"}
+	end
+	
+	it "distinguishes absent and empty query values" do
+		request.url = "/search?absent&empty="
+		
+		expect(request.query_parameters).to be == {"absent" => nil, "empty" => ""}
 	end
 	
 	it "does not expose ambiguous Rack request accessors" do
@@ -104,8 +113,9 @@ describe Utopia::Request do
 		request.headers["referer"] = "/from"
 		
 		expect(request.scheme).to be == "https"
-		expect(request.host).to be == "example.com"
-		expect(request.url).to be == "https://example.com/search?q=utopia&tag[]=ruby&tag[]=async"
+		expect(request.authority).to be == "example.com"
+		expect(request.url).to be_a(Protocol::URL::Absolute)
+		expect(request.url.to_s).to be == "https://example.com/search?q=utopia&tag[]=ruby&tag[]=async"
 		expect(request.referrer).to be == "/from"
 	end
 	
@@ -119,12 +129,13 @@ describe Utopia::Request do
 		exception = StandardError.new("Boom")
 		request.exception = exception
 		
-		derived = request.with(method: "GET", path_info: "/find")
+		derived = request.with(method: "GET", path: "/find")
 		
 		expect(derived).not.to be_equal(request)
 		expect(derived.method).to be == "GET"
-		expect(derived.path).to be == "/find?q=utopia&tag[]=ruby&tag[]=async"
-		expect(derived.request_path).to be == "/search"
+		expect(derived.path).to be == Utopia::Path["/find"]
+		expect(derived.url.query).to be == "q=utopia&tag[]=ruby&tag[]=async"
+		expect(derived.request_path).to be == Utopia::Path["/search"]
 		expect(derived.delegate).not.to be_equal(request.delegate)
 		expect(derived.session).to be_equal(session)
 		expect(derived.variables).to be_equal(variables)
@@ -133,10 +144,10 @@ describe Utopia::Request do
 	end
 	
 	it "preserves the original request path across multiple derived requests" do
-		derived = request.with(path_info: "/find")
-		derived = derived.with(path_info: "/lookup")
+		derived = request.with(path: "/find")
+		derived = derived.with(path: "/lookup")
 		
-		expect(derived.path_info).to be == "/lookup"
-		expect(derived.request_path).to be == "/search"
+		expect(derived.path).to be == Utopia::Path["/lookup"]
+		expect(derived.request_path).to be == Utopia::Path["/search"]
 	end
 end
