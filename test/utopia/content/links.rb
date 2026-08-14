@@ -223,6 +223,7 @@ describe Utopia::Content::Links do
 		)
 		
 		expect(link.href).to be == "/some%20page"
+		expect(link.href).to be_equal(link.href)
 		expect(link.relative_href(Utopia::Path["/index"])).to be == "some%20page"
 	end
 	

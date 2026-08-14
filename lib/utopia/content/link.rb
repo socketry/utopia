@@ -52,12 +52,10 @@ module Utopia
 			# Resolve this link's target URI.
 			# @returns [String | Nil] The explicit target URI or one derived from the content path.
 			def href
-				if @info.key?(:uri)
-					return @info[:uri]
-				elsif @info.key?(:href)
-					return @info[:href]
-				elsif @path
-					return @path.to_url_path.encoded
+				@href ||= @info.fetch(:uri) do
+					@info.fetch(:href) do
+						@path.to_url_path.encoded if @path
+					end
 				end
 			end
 			
