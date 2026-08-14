@@ -5,6 +5,9 @@ on: [push, pull_request]
 permissions:
   contents: read
 
+env:
+  BUNDLE_WITHOUT: maintenance
+
 jobs:
   check:
     runs-on: ubuntu-latest
