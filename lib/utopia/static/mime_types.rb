@@ -29,7 +29,7 @@ module Utopia
 				"png", "gif", "jpeg", "tiff", "svg", "webp"
 			],
 			:default => [
-				:media, :text, :archive, :images, :fonts
+				:media, :text, :archive, :images, :fonts, "wasm"
 			]
 		}
 		

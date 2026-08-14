@@ -43,6 +43,14 @@ describe Utopia::Static do
 		expect(last_response.read).to be == "export default true;\n"
 	end
 	
+	it "serves WebAssembly modules" do
+		client.get "/module.wasm"
+		
+		expect(last_response.status).to be == 200
+		expect(last_response.headers["content-type"]).to be == "application/wasm"
+		expect(last_response.read).to be == "WebAssembly\n"
+	end
+	
 	it "serves HEAD requests without opening a response body" do
 		client.head "/test.txt"
 		
@@ -285,6 +293,7 @@ describe Utopia::Static do
 			expect(extensions).to have_keys(
 				".txt" => be == "text/plain",
 				".mjs" => be == "text/javascript",
+				".wasm" => be == "application/wasm",
 				".webm" => be == "video/webm",
 				".weba" => be == "audio/webm",
 				".ogg" => be == "audio/vorbis",
