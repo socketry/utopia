@@ -20,7 +20,7 @@ module Utopia
 				"js", "mjs", "wasm"
 			],
 			:text => [
-				"html", "css", "js", "map", "txt", "rtf", "xml", "pdf"
+				"html", "css", "map", "txt", "rtf", "xml", "pdf"
 			],
 			:fonts => [
 				"otf", "eot", "ttf", "woff", "woff2"
