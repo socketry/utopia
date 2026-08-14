@@ -16,8 +16,11 @@ module Utopia
 			:media => [
 				:xiph, "mp3", "mp4", "wav", "aiff", "aac", "webm", "weba", "mov", "avi", "wmv", "mpg", "m3u8", "ts"
 			],
+			:scripts => [
+				"js", "mjs", "wasm"
+			],
 			:text => [
-				"html", "css", "js", "map", "txt", "rtf", "xml", "pdf"
+				"html", "css", "map", "txt", "rtf", "xml", "pdf"
 			],
 			:fonts => [
 				"otf", "eot", "ttf", "woff", "woff2"
@@ -29,7 +32,7 @@ module Utopia
 				"png", "gif", "jpeg", "tiff", "svg", "webp"
 			],
 			:default => [
-				:media, :text, :archive, :images, :fonts
+				:media, :scripts, :text, :archive, :images, :fonts
 			]
 		}
 		

@@ -35,6 +35,22 @@ describe Utopia::Static do
 		expect(last_response.read).to be == "Uppercase extension!\n"
 	end
 	
+	it "serves JavaScript modules" do
+		client.get "/module.mjs"
+		
+		expect(last_response.status).to be == 200
+		expect(last_response.headers["content-type"]).to be == "text/javascript"
+		expect(last_response.read).to be == "export default true;\n"
+	end
+	
+	it "serves WebAssembly modules" do
+		client.get "/module.wasm"
+		
+		expect(last_response.status).to be == 200
+		expect(last_response.headers["content-type"]).to be == "application/wasm"
+		expect(last_response.read).to be == "WebAssembly\n"
+	end
+	
 	it "serves HEAD requests without opening a response body" do
 		client.head "/test.txt"
 		
@@ -272,10 +288,21 @@ describe Utopia::Static do
 	
 	describe Utopia::Static::MIME_TYPES do
 		let(:extensions) {Utopia::Static::MimeTypeLoader.extensions_for(subject[:default])}
+		let(:script_extensions) {Utopia::Static::MimeTypeLoader.extensions_for(subject[:scripts])}
+		
+		it "groups script extensions" do
+			expect(script_extensions).to have_keys(
+				".js" => be == "text/javascript",
+				".mjs" => be == "text/javascript",
+				".wasm" => be == "application/wasm",
+			)
+		end
 		
 		it "should give the correct mime type" do
 			expect(extensions).to have_keys(
 				".txt" => be == "text/plain",
+				".mjs" => be == "text/javascript",
+				".wasm" => be == "application/wasm",
 				".webm" => be == "video/webm",
 				".weba" => be == "audio/webm",
 				".ogg" => be == "audio/vorbis",
