@@ -23,10 +23,20 @@ describe Utopia::Path do
 		let(:path) {subject.root}
 		
 		it "is a root path" do
-			expect(path).to be == [""]
+			expect(path).to be == ["", ""]
+			expect(path).to be == subject.create("/")
+			expect(path).to be == subject.create([""])
+			expect(path).not.to be == subject.create("")
 			expect(path).not.to be(:relative?)
 			expect(path).to be(:absolute?)
-			expect(path).to have_attributes(local_path: be == "")
+			expect(path).to be(:directory?)
+			expect(path).not.to be(:file?)
+			expect(path).to have_attributes(local_path: be == "/")
+		end
+		
+		it "traverses the root exactly once" do
+			expect(path.descend.to_a).to be == [path]
+			expect(path.ascend.to_a).to be == [path]
 		end
 	end
 	
@@ -120,7 +130,7 @@ describe Utopia::Path do
 			let(:path) {subject.root}
 			
 			it "can extract the last path component from a a root path" do
-				expect(path.last).to be == nil
+				expect(path.last).to be == ""
 			end
 		end
 		
@@ -128,6 +138,22 @@ describe Utopia::Path do
 			it "can extract the last path component from an absolute path" do
 				expect(path.last).to be == "bar"
 			end
+		end
+	end
+	
+	with "#pop" do
+		it "does not remove the absolute root" do
+			path = Utopia::Path.root
+			
+			expect(path.pop).to be_nil
+			expect(path).to be == Utopia::Path.root
+		end
+		
+		it "preserves the absolute root after removing the final component" do
+			path = Utopia::Path["/foo"]
+			
+			expect(path.pop).to be == "foo"
+			expect(path).to be == Utopia::Path.root
 		end
 	end
 	
@@ -161,6 +187,12 @@ describe Utopia::Path do
 		end
 	end
 	
+	with "#to_absolute" do
+		it "converts an empty relative path to the absolute root" do
+			expect(Utopia::Path[""].to_absolute).to be == Utopia::Path.root
+		end
+	end
+	
 	it "should concatenate absolute paths" do
 		root = Utopia::Path["/"]
 		
@@ -173,7 +205,7 @@ describe Utopia::Path do
 		
 		descendants = root.descend.to_a
 		
-		expect(descendants[0].components).to be == [""]
+		expect(descendants[0].components).to be == ["", ""]
 		expect(descendants[1].components).to be == ["", "foo"]
 		expect(descendants[2].components).to be == ["", "foo", "bar"]
 		
@@ -224,10 +256,28 @@ describe Utopia::Path do
 		expect(path.start_with?(path.dirname)).to be == true
 	end
 	
+	it "should start with the absolute root" do
+		path = Utopia::Path["/a/b/c/d/e"]
+		
+		expect(path.start_with?(Utopia::Path.root)).to be == true
+	end
+	
+	it "should preserve the absolute root when taking the directory name" do
+		path = Utopia::Path["/foo"]
+		
+		expect(path.dirname).to be == Utopia::Path.root
+	end
+	
 	it "should split at the specified point" do
 		path = Utopia::Path["/a/b/c/d/e"]
 		
 		expect(path.split("c")).to be == [Utopia::Path["/a/b"], Utopia::Path["d/e"]]
+	end
+	
+	it "should preserve the absolute root when splitting the first component" do
+		path = Utopia::Path["/foo"]
+		
+		expect(path.split("foo")).to be == [Utopia::Path.root, Utopia::Path[""]]
 	end
 	
 	it "shouldn't be able to modify frozen paths" do
@@ -287,7 +337,20 @@ describe Utopia::Path do
 		expect((output + short).simplify).to be == input
 	end
 	
+	it "should omit a redundant root separator when ascending to a parent directory" do
+		input = Utopia::Path.root
+		output = Utopia::Path["/nested/index"]
+		
+		expect(input.shortest_path(output)).to be == Utopia::Path[".."]
+	end
+	
 	with "#simplify" do
+		it "preserves the absolute root" do
+			path = Utopia::Path["/foo/.."]
+			
+			expect(path.simplify).to be == Utopia::Path.root
+		end
+		
 		it "doesn't remove leading .. from relative paths" do
 			path = Utopia::Path["../foo/bar"]
 			simplified = path.simplify

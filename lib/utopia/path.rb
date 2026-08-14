@@ -39,7 +39,7 @@ module Utopia
 		# Construct the root path.
 		# @returns [Path] The root path.
 		def self.root
-			self.new([""])
+			self.new(["", ""])
 		end
 		
 		# Compute the number of leading components shared by two sequences.
@@ -63,8 +63,14 @@ module Utopia
 			
 			# The difference between the root path and the required path, taking into account the common prefix:
 			up = root.components.size - i
+			down = path.components[i..-1]
 			
-			return self.create([".."] * up + path.components[i..-1])
+			# A parent component already denotes the destination directory, so a trailing directory separator is redundant:
+			if up > 0 && down == [""]
+				down = []
+			end
+			
+			return self.create([".."] * up + down)
 		end
 		
 		# Compute the shortest relative path from the containing directory of `root` to this path.
@@ -135,6 +141,7 @@ module Utopia
 			when Path
 				return path
 			when Array
+				return self.root if path == [""]
 				return self.new(path)
 			when String
 				return self.new(unescape(path).split(SEPARATOR, -1))
@@ -199,7 +206,7 @@ module Utopia
 			if absolute?
 				return self
 			else
-				return self.class.new([""] + @components)
+				return self.class.create([""] + @components)
 			end
 		end
 		
@@ -212,11 +219,7 @@ module Utopia
 		# Convert this object to a string.
 		# @returns [String] The resulting string.
 		def to_str
-			if @components == [""]
-				SEPARATOR
-			else
-				@components.join(SEPARATOR)
-			end
+			@components.join(SEPARATOR)
 		end
 		
 		alias to_s to_str
@@ -224,11 +227,6 @@ module Utopia
 		# Encode this application path as a URL path.
 		# @returns [Protocol::URL::Path] The encoded URL path.
 		def to_url_path
-			# Preserve Utopia's compact representation of the absolute root:
-			if @components == [""]
-				return Protocol::URL::Path[SEPARATOR]
-			end
-			
 			return Protocol::URL::Path.for(
 				@components,
 				encoding: Protocol::URL::Encoding::System,
@@ -246,7 +244,7 @@ module Utopia
 		def join(other)
 			# Check whether other is an absolute path:
 			if other.first == ""
-				self.class.new(other)
+				self.class.create(other)
 			else
 				self.class.new(@components + other).simplify
 			end
@@ -332,7 +330,7 @@ module Utopia
 				index += 1
 			end
 			
-			return self.class.new(components)
+			return self.class.create(components)
 		end
 		
 		# Return the first path component, excluding the root marker.
@@ -348,9 +346,7 @@ module Utopia
 		# Return the last path component, excluding the root marker.
 		# @returns [String | Nil] The last component.
 		def last
-			if @components != [""]
-				@components.last
-			end
+			@components.last
 		end
 		
 		alias last? file?
@@ -358,10 +354,19 @@ module Utopia
 		# Remove the last path component without converting the root path to a relative path.
 		# @returns [String | Nil] The removed component.
 		def pop
-			# We don't want to convert an absolute path to a relative path.
-			if @components != [""]
-				@components.pop
+			# The absolute root has no path component to remove:
+			if @components == ["", ""]
+				return nil
 			end
+			
+			component = @components.pop
+			
+			# Preserve the canonical root after removing the final component:
+			if @components == [""]
+				@components << ""
+			end
+			
+			return component
 		end
 		
 		# @returns [String] The last path component without its file extension.
@@ -382,7 +387,7 @@ module Utopia
 		# @parameter count [Integer] The number of components.
 		# @returns [Path] The containing path.
 		def dirname(count = 1)
-			path = self.class.new(@components[0...-count])
+			path = self.class.create(@components[0...-count])
 			
 			return absolute? ? path.to_absolute : path
 		end
@@ -400,12 +405,17 @@ module Utopia
 		def descend(&block)
 			return to_enum(:descend) unless block_given?
 			
+			if @components == ["", ""]
+				yield self.class.root
+				return @components
+			end
+			
 			components = []
 			
 			@components.each do |component|
 				components << component
 				
-				yield self.class.new(components.dup)
+				yield self.class.create(components.dup)
 			end
 		end
 		
@@ -418,7 +428,10 @@ module Utopia
 			components = self.components.dup
 			
 			while components.any?
-				yield self.class.new(components.dup)
+				path = self.class.create(components.dup)
+				yield path
+				
+				break if path.components == ["", ""]
 				
 				components.pop
 			end
@@ -433,7 +446,7 @@ module Utopia
 			end
 			
 			if at
-				return [self.class.new(@components[0...at]), self.class.new(@components[at+1..-1])]
+				return [self.class.create(@components[0...at]), self.class.create(@components[at+1..-1])]
 			else
 				return nil
 			end
@@ -482,6 +495,11 @@ module Utopia
 		# @parameter other [Path] The possible prefix.
 		# @returns [Boolean] Whether this path starts with all components of `other`.
 		def start_with? other
+			# The root directory contains every absolute path:
+			if other.components == ["", ""]
+				return absolute?
+			end
+			
 			other.components.each_with_index do |part, index|
 				return false if @components[index] != part
 			end
