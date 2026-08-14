@@ -262,6 +262,12 @@ describe Utopia::Content::Links do
 		expect(link.relative_href(Utopia::Path["/index"])).to be == "search?q=x#results"
 	end
 	
+	it "identifies the root directory explicitly" do
+		link = Utopia::Content::Link.new(:virtual, "root", nil, nil, {href: "/"})
+		
+		expect(link.relative_href(Utopia::Path["/index"])).to be == "./"
+	end
+	
 	it "preserves encoded separators when relativizing targets" do
 		link = Utopia::Content::Link.new(
 			:virtual,
