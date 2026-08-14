@@ -288,6 +288,15 @@ describe Utopia::Static do
 	
 	describe Utopia::Static::MIME_TYPES do
 		let(:extensions) {Utopia::Static::MimeTypeLoader.extensions_for(subject[:default])}
+		let(:script_extensions) {Utopia::Static::MimeTypeLoader.extensions_for(subject[:scripts])}
+		
+		it "groups script extensions" do
+			expect(script_extensions).to have_keys(
+				".js" => be == "text/javascript",
+				".mjs" => be == "text/javascript",
+				".wasm" => be == "application/wasm",
+			)
+		end
 		
 		it "should give the correct mime type" do
 			expect(extensions).to have_keys(
