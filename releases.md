@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+The 3.0.x series is considered a development release while the protocol HTTP application and controller interfaces stabilize.
+
+  - **Breaking** Require Ruby 3.3 or later.
+  - **Breaking** Replace the Rack-centric application boundary with {ruby Utopia::Application} and {ruby Protocol::HTTP::Middleware}. Applications now use `config/application.rb` and `config/serve.rb` instead of `config.ru`.
+  - **Breaking** Separate complete protocol responses from semantic controller results. Use `respond!` with a {ruby Protocol::HTTP::Response}, or `succeed!` with a value serialized by {ruby Utopia::Controller::Respond}.
+  - Parse request bodies at the controller layer using `protocol-content`, independently of URL query parameters.
+  - Resolve localization through immutable request preferences, avoiding repeated internal controller requests.
+  - Split redirection handling into focused middleware for rewrites, moved resources, directory indexes, and error documents.
   - **Security** Fix handling of redirects that start with `//` to prevent open redirect vulnerabilities.
   - Normalize request URLs using `Protocol::URL` and use structured paths throughout the middleware stack.
   - Resolve static files through encoded URL paths, with improved `HEAD`, range, and validator handling.
