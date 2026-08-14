@@ -99,16 +99,14 @@ module Utopia
 				return target unless base
 				
 				url = Protocol::URL[target]
+				relative_url = url.relative_to(Path[base].to_url_path)
 				
-				if url.instance_of?(Protocol::URL::Relative) && url.path.absolute?
-					# Convert root-relative targets to application paths before finding the shortest path:
-					path = Path.new(url.path.components(Protocol::URL::Encoding::System))
-					relative_path = Path.shortest_path(path, base).to_url_path
-					
-					return Protocol::URL::Relative.new(relative_path, url.query, url.fragment).to_s
+				# Preserve unchanged targets exactly and avoid allocating a serialized replacement:
+				if relative_url.equal?(url)
+					return target
 				end
 				
-				return target
+				return relative_url.to_s
 			end
 			
 			# Return the display title from metadata or the inferred title.

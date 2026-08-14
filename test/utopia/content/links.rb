@@ -259,6 +259,18 @@ describe Utopia::Content::Links do
 		expect(link.relative_href(Utopia::Path["/index"])).to be == "search?q=x#results"
 	end
 	
+	it "preserves encoded separators when relativizing targets" do
+		link = Utopia::Content::Link.new(
+			:virtual,
+			"file",
+			nil,
+			nil,
+			{href: "/files/a%2Fb"},
+		)
+		
+		expect(link.relative_href(Utopia::Path["/index"])).to be == "files/a%2Fb"
+	end
+	
 	it "does not relativize absolute URLs" do
 		link = Utopia::Content::Link.new(
 			:virtual,
