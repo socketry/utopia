@@ -61,6 +61,14 @@ describe Utopia::Request do
 		}
 	end
 	
+	it "invalidates decoded query parameters when replacing the URL" do
+		expect(request.query_parameters).to have_keys("q", "tag")
+		
+		request.url = "/search?query=hello+world"
+		
+		expect(request.query_parameters).to be == {"query" => "hello world"}
+	end
+	
 	it "distinguishes absent and empty query values" do
 		request.url = "/search?absent&empty="
 		

@@ -163,6 +163,7 @@ module Utopia
 		# @parameter url [Protocol::URL::Absolute | Protocol::URL::Relative | String | Nil] The request URL.
 		def url= url
 			@url = Protocol::URL[url]
+			@query_parameters = nil
 		end
 		
 		# Build a derived request with updated protocol fields.
