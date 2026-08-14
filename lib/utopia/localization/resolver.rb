@@ -37,7 +37,7 @@ module Utopia
 				
 				if locale = localization.locale
 					response.headers[CONTENT_LANGUAGE] = locale
-					response.headers[CONTENT_LOCATION] = localization.localized_path(request.path_info)
+					response.headers[CONTENT_LOCATION] = localization.localized_path(request.url.path.encoded)
 				end
 				
 				return response

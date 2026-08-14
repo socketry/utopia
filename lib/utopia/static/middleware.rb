@@ -27,7 +27,7 @@ module Utopia
 			def initialize(app, root: Utopia::default_root, types: MIME_TYPES[:default], cache_control: DEFAULT_CACHE_CONTROL)
 				super(app)
 				
-				@root = root
+				@root = File.expand_path(root)
 				
 				@extensions = MimeTypeLoader.extensions_for(types)
 				
@@ -47,13 +47,11 @@ module Utopia
 			end
 			
 			# Open metadata for an existing file under the static root.
-			# @parameter path [Utopia::Path | String] The path.
+			# @parameter local_path [String] The resolved filesystem path.
 			# @returns [LocalFile | Nil] The local file, or `nil` when it does not exist.
-			def fetch_file(path)
-				file_path = File.join(@root, path.components)
-				
-				if File.exist?(file_path)
-					return LocalFile.new(@root, path)
+			private def fetch_file(local_path)
+				if File.file?(local_path)
+					return LocalFile.new(local_path)
 				else
 					return nil
 				end
@@ -89,19 +87,20 @@ module Utopia
 			
 			# Respond.
 			# @parameter request [Utopia::Request] The request.
-			# @parameter path_info [String] The request path to serve.
+			# @parameter path [Protocol::URL::Path] The request path to serve.
 			# @parameter extension [String] The file extension.
+			# @parameter content_type [String] The file media type.
 			# @parameter localization [Utopia::Localization::Preferences | Nil] The selected localization.
 			# @returns [Protocol::HTTP::Response] The response.
-			def respond(request, path_info, extension, localization: request.localization)
-				path = Path[path_info].simplify
+			def respond(request, path, extension, content_type, localization: request.localization)
+				local_path = path.local_path(@root)
 				
 				if locale = localization&.locale
-					path.last.insert(path.last.rindex(".") || -1, ".#{locale}")
+					local_path = local_path.delete_suffix(extension) + ".#{locale}#{extension}"
 				end
 				
-				if file = fetch_file(path)
-					response_headers = self.response_headers_for(file, @extensions[extension])
+				if file = fetch_file(local_path)
+					response_headers = self.response_headers_for(file, content_type)
 					
 					if file.modified?(request)
 						return file.serve(request, response_headers)
@@ -115,12 +114,18 @@ module Utopia
 			# @parameter request [Utopia::Request] The request.
 			# @returns [Protocol::HTTP::Response] The static-file or downstream response.
 			def call(request)
-				path_info = request.path_info
-				extension = File.extname(path_info)
+				case request.method
+				when Protocol::HTTP::Methods::GET, Protocol::HTTP::Methods::HEAD
+				else
+					return @delegate.call(request)
+				end
 				
-				if @extensions.key?(extension.downcase)
+				path = request.url.path
+				extension = File.extname(path.basename)
+				
+				if content_type = @extensions[extension.downcase]
 					response = resolve_localized(request) do |localization|
-						self.respond(request, path_info, extension, localization: localization)
+						self.respond(request, path, extension, content_type, localization: localization)
 					end
 					
 					if response
@@ -134,9 +139,9 @@ module Utopia
 		end
 		
 		Traces::Provider(Static) do
-			def respond(request, path_info, extension, localization: request.localization)
+			def respond(request, path, extension, content_type, localization: request.localization)
 				attributes = {
-					path_info: path_info,
+					path: path,
 					locale: localization&.locale,
 				}
 				

@@ -44,6 +44,32 @@ describe Utopia::Localization do
 		expect(last_response.read).to be == "localized.ja.txt"
 	end
 	
+	it "extracts the path locale without decoding the remaining path" do
+		middleware = Utopia::Localization::Middleware.new(
+			Protocol::HTTP::Middleware::NotFound,
+			locales: ["en"],
+		)
+		request = Utopia::Request["GET", "/en/files/a%2fb?token=1"]
+		
+		localized_request, locale = middleware.extract_path_locale(request)
+		
+		expect(locale).to be == "en"
+		expect(localized_request.url.path).to be_a(Protocol::URL::Path)
+		expect(localized_request.url.path).to be == "/files/a%2Fb"
+		expect(localized_request.url.query).to be == "token=1"
+		
+		root_request, locale = middleware.extract_path_locale(Utopia::Request["GET", "/en"])
+		
+		expect(locale).to be == "en"
+		expect(root_request.url.path).to be == "/"
+		
+		relative_request = Utopia::Request["GET", "en/files"]
+		localized_request, locale = middleware.extract_path_locale(relative_request)
+		
+		expect(locale).to be_nil
+		expect(localized_request).to be_equal(relative_request)
+	end
+	
 	it "prefers an explicit path locale" do
 		client.get "/ja/localized.txt", {"accept-language" => "en"}, authority: "foobar.de"
 		

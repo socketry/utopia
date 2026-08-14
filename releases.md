@@ -1,8 +1,10 @@
 # Releases
 
-## Unreleasd
+## Unreleased
 
   - **Security** Fix handling of redirects that start with `//` to prevent open redirect vulnerabilities.
+  - Normalize request URLs using `Protocol::URL` and use structured paths throughout the middleware stack.
+  - Resolve static files through encoded URL paths, with improved `HEAD`, range, and validator handling.
   - Use `protocol-media` and `protocol-http` for response and language negotiation, removing the `http-accept` dependency.
 
 ## v2.31.0

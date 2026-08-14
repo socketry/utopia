@@ -4,6 +4,7 @@
 # Copyright, 2014-2025, by Samuel Williams.
 
 require_relative "../http"
+require_relative "../path"
 require_relative "../response"
 require_relative "result"
 
@@ -149,7 +150,12 @@ module Utopia
 			# Request relative redirect. Respond with a redirect to the given target.
 			def redirect!(target, status = 302)
 				status = HTTP::Status.new(status, 300...400)
-				location = target.to_s
+				
+				if target.is_a?(Utopia::Path)
+					location = target.to_url_path.encoded
+				else
+					location = target.to_s
+				end
 				
 				respond! Utopia::Response[status.to_i, {HTTP::LOCATION => location}, [status.to_s]]
 			end

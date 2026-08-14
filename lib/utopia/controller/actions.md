@@ -32,7 +32,7 @@ on "new" do |request|
 end
 
 on "edit" do |request|
-	@user = User.find(request.query_arguments["id"])
+	@user = User.find(request.query_parameters["id"])
 	
 	if request.post?
 		@user.update_attributes(parse_body(request)["user"])
@@ -42,7 +42,7 @@ on "edit" do |request|
 end
 
 on "delete" do |request|
-	User.find(request.query_arguments["id"]).destroy
+	User.find(request.query_parameters["id"]).destroy
 	
 	redirect! "index"
 end

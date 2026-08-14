@@ -53,7 +53,7 @@ describe Utopia::Controller do
 	def mock_request(path, headers = {})
 		request = Utopia::Request["GET", path, headers]
 		
-		return request, Utopia::Path[request.path_info]
+		return request, request.path
 	end
 	
 	it "should serialize response as JSON" do

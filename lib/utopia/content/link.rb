@@ -6,6 +6,7 @@
 # Copyright, 2020, by Michael Adams.
 
 require "yaml"
+require "protocol/url"
 require "xrb/builder"
 
 require "xrb/strings"
@@ -51,11 +52,7 @@ module Utopia
 			# Resolve this link's target URI.
 			# @returns [String | Nil] The explicit target URI or one derived from the content path.
 			def href
-				@href ||= @info.fetch(:uri) do
-					@info.fetch(:href) do
-						(@path.dirname + @path.basename).to_s if @path
-					end
-				end
+				target_url&.to_s
 			end
 			
 			# Look up from the `links.yaml` metadata with a given symbolic key.
@@ -91,10 +88,32 @@ module Utopia
 			# @parameter base [Path | String | Nil] The source path.
 			# @returns [Path | String | Nil] The relative or unchanged target.
 			def relative_href(base = nil)
-				if base and href.start_with? "/"
-					Path.shortest_path(href, base)
-				else
-					href
+				target = target_url
+				return unless target
+				
+				case target
+				when Protocol::URL::Absolute
+					return target.to_s
+				when Protocol::URL::Relative
+					if base && target.path.absolute?
+						# Convert root-relative targets to application paths before finding the shortest path:
+						path = Path.new(target.path.components(Protocol::URL::Encoding::System))
+						relative_path = Path.shortest_path(path, base).to_url_path
+						
+						return Protocol::URL::Relative.new(relative_path, target.query, target.fragment).to_s
+					end
+				end
+				
+				return target.to_s
+			end
+			
+			private def target_url
+				if @info.key?(:uri)
+					Protocol::URL[@info[:uri]]
+				elsif @info.key?(:href)
+					Protocol::URL[@info[:href]]
+				elsif @path
+					Protocol::URL::Relative.new(@path.to_url_path)
 				end
 			end
 			

@@ -25,7 +25,8 @@ describe Utopia::Application do
 		
 		expect(application_request).to be_a(Utopia::Request)
 		expect(application_request.delegate).to be_equal(http_request)
-		expect(application_request.path).to be == http_request.path
+		expect(application_request.path).to be == Utopia::Path["/hello"]
+		expect(application_request.url.query).to be == "name=sam"
 		
 		expect(response).to be_a(Protocol::HTTP::Response)
 		expect(response.status).to be == 200
@@ -73,7 +74,7 @@ describe Utopia::Application do
 				require "utopia/application"
 				
 				Application = Utopia::Application.build do
-				run Protocol::HTTP::Middleware.for{|request| Utopia::Response.text(request.path_info)}
+					run Protocol::HTTP::Middleware.for{|request| Utopia::Response.text(request.path.to_s)}
 				end
 			RUBY
 			

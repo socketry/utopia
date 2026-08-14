@@ -86,7 +86,7 @@ module Utopia
 			
 			# Invoke the controller layer for a given request. The request path may be rewritten.
 			def invoke_controllers(request)
-				request_path = Path.from_string(request.path_info)
+				request_path = request.path
 				
 				# The request path must be absolute. We could handle this internally but it is probably better for this to be an error:
 				raise ArgumentError.new("Invalid request path #{request_path}") unless request_path.absolute?
@@ -114,8 +114,8 @@ module Utopia
 					end
 				end
 				
-				# Controllers can directly modify relative_path, which is copied into controller_path. The controllers may have rewriten the path so we update the path info:
-				request.path_info = controller_path.to_s
+				# Controllers can directly modify the remaining path. Preserve those rewrites at the request boundary:
+				request.path = controller_path
 				
 				# No controller gave a useful result:
 				return nil

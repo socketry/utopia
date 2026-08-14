@@ -42,6 +42,38 @@ describe Utopia::Controller do
 		expect(response.read).to be == "flat"
 	end
 	
+	it "uses normalized URL path components" do
+		root = File.expand_path(".middleware", __dir__)
+		middleware = Utopia::Controller::Middleware.new(Protocol::HTTP::Middleware::NotFound, root: root)
+		request = Utopia::Request["GET", "/%63ontroller/flat"]
+		
+		response = middleware.call(request)
+		
+		expect(response.status).to be == 200
+		expect(response.read).to be == "flat"
+	end
+	
+	it "rejects encoded path separators" do
+		root = File.expand_path(".middleware", __dir__)
+		middleware = Utopia::Controller::Middleware.new(Protocol::HTTP::Middleware::NotFound, root: root)
+		request = Utopia::Request["GET", "/controller%2Fflat"]
+		
+		expect do
+			middleware.call(request)
+		end.to raise_exception(ArgumentError)
+	end
+	
+	it "encodes rewritten paths and preserves the query" do
+		root = File.expand_path(".middleware", __dir__)
+		middleware = Utopia::Controller::Middleware.new(Protocol::HTTP::Middleware::NotFound, root: root)
+		request = Utopia::Request["GET", "/rewrite/source?key=value"]
+		
+		middleware.call(request)
+		
+		expect(request.url.path.encoded).to be == "/rewrite/rewritten%20path"
+		expect(request.url.query).to be == "key=value"
+	end
+	
 	it "should invoke controller method from the top level" do
 		client.get "/controller/hello-world"
 		
@@ -71,6 +103,12 @@ describe Utopia::Controller do
 		client.get "/controller/redirect"
 		expect(last_response.status).to be == 302
 		expect(last_response.headers["location"]).to be == "bar"
+	end
+	
+	it "encodes controller-relative redirects" do
+		client.get "/controller/goto"
+		expect(last_response.status).to be == 302
+		expect(last_response.headers["location"]).to be == "/controller/some%20path"
 	end
 	
 	# This was a bug, where by the controller URI_PATH was being mutated by Controller#invoke_controllers.

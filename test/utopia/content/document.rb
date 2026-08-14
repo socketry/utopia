@@ -17,7 +17,7 @@ describe Utopia::Content::Document do
 	end
 	
 	it "uses the original request path" do
-		request.path_info = "/rewritten"
+		request.path = "/rewritten"
 		
 		expect(document.request_path).to be == Utopia::Path["/index"]
 	end

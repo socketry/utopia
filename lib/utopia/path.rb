@@ -3,6 +3,8 @@
 # Released under the MIT License.
 # Copyright, 2009-2025, by Samuel Williams.
 
+require "protocol/url/path"
+
 module Utopia
 	# Represents a path as an array of path components. Useful for efficient URL manipulation.
 	class Path
@@ -218,6 +220,15 @@ module Utopia
 		end
 		
 		alias to_s to_str
+		
+		# Encode this application path as a URL path.
+		# @returns [Protocol::URL::Path] The encoded URL path.
+		def to_url_path
+			return Protocol::URL::Path.for(
+				@components,
+				encoding: Protocol::URL::Encoding::System,
+			)
+		end
 		
 		# Convert this path to an array of components.
 		# @returns [Array] The resulting values.

@@ -212,4 +212,66 @@ describe Utopia::Content::Links do
 			expect(link.title).to be == "Bar"
 		end
 	end
+	
+	it "encodes inferred link paths" do
+		link = Utopia::Content::Link.new(
+			:file,
+			"some page",
+			nil,
+			Utopia::Path.new(["", "some page"]),
+			{},
+		)
+		
+		expect(link.href).to be == "/some%20page"
+		expect(link.relative_href(Utopia::Path["/index"])).to be == "some%20page"
+	end
+	
+	it "preserves inferred link paths containing dots" do
+		link = Utopia::Content::Link.new(
+			:virtual,
+			"archive.tar",
+			nil,
+			Utopia::Path.new(["", "downloads", "archive.tar"]),
+			{},
+		)
+		
+		expect(link.href).to be == "/downloads/archive.tar"
+	end
+	
+	it "preserves query and fragment components when relativizing targets" do
+		link = Utopia::Content::Link.new(
+			:virtual,
+			"search",
+			nil,
+			nil,
+			{href: "/search?q=x#results"},
+		)
+		
+		expect(link.href).to be == "/search?q=x#results"
+		expect(link.relative_href(Utopia::Path["/index"])).to be == "search?q=x#results"
+	end
+	
+	it "does not relativize absolute URLs" do
+		link = Utopia::Content::Link.new(
+			:virtual,
+			"search",
+			nil,
+			nil,
+			{href: "https://example.com/search?q=x#results"},
+		)
+		
+		expect(link.relative_href(Utopia::Path["/index"])).to be == "https://example.com/search?q=x#results"
+	end
+	
+	it "does not rewrite already-relative references" do
+		link = Utopia::Content::Link.new(
+			:virtual,
+			"search",
+			nil,
+			nil,
+			{href: "../search?q=x#results"},
+		)
+		
+		expect(link.relative_href(Utopia::Path["/guides/index"])).to be == "../search?q=x#results"
+	end
 end

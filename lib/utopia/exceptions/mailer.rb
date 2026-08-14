@@ -79,8 +79,6 @@ module Utopia
 				:referrer,
 				:path,
 				:request_path,
-				:path_info,
-				:query,
 				:user_agent,
 			]
 			
@@ -113,8 +111,8 @@ module Utopia
 					io.puts "request.#{key}: #{value.inspect}"
 				end
 				
-				request.query_arguments.each do |key, value|
-					io.puts "request.query_arguments.#{key}: #{value.inspect}"
+				request.query_parameters.each do |key, value|
+					io.puts "request.query_parameters.#{key}: #{value.inspect}"
 				end
 				
 				io.puts

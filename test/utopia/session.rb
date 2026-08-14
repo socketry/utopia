@@ -13,17 +13,17 @@ describe Utopia::Session do
 	
 	let(:middleware) do
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
-			case request.path_info
+			case request.path.to_s
 			when "/login"
 				request.session["login"] = "true"
 				
 				Utopia::Response[200, {}, []]
 			when "/session-set"
-				request.session[request.query_arguments["key"].to_sym] = request.query_arguments["value"]
+				request.session[request.query_parameters["key"].to_sym] = request.query_parameters["value"]
 				
 				Utopia::Response[200, {}, []]
 			when "/session-get"
-				Utopia::Response[200, {}, [request.session[request.query_arguments["key"].to_sym]]]
+				Utopia::Response[200, {}, [request.session[request.query_parameters["key"].to_sym]]]
 			else
 				Utopia::Response[404, {}, []]
 			end
@@ -161,13 +161,13 @@ describe Utopia::Session do
 	
 	let(:middleware) do
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
-			case request.path_info
+			case request.path.to_s
 			when "/session-set"
-				request.session[request.query_arguments["key"].to_sym] = request.query_arguments["value"]
+				request.session[request.query_parameters["key"].to_sym] = request.query_parameters["value"]
 				
 				Utopia::Response[200, {}, []]
 			when "/session-get"
-				Utopia::Response[200, {}, [request.session[request.query_arguments["key"].to_sym]]]
+				Utopia::Response[200, {}, [request.session[request.query_parameters["key"].to_sym]]]
 			else
 				Utopia::Response[404, {}, []]
 			end

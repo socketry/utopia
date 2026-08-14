@@ -123,7 +123,7 @@ module Utopia
 			# @parameter request [Utopia::Request] The request.
 			# @returns [Protocol::HTTP::Response] The content, redirect, or downstream response.
 			def call(request)
-				path = Path.create(request.path_info)
+				path = request.path
 				
 				# Check if the request is to a non-specific index. This only works for requests with a given name:
 				basename = path.basename
@@ -132,8 +132,9 @@ module Utopia
 				# If the request for /foo/bar is actually a directory, rewrite it to /foo/bar/index:
 				if File.directory? directory_path
 					index_path = [basename, INDEX]
+					location = path.dirname.join(index_path).to_url_path.encoded
 					
-					return Utopia::Response[307, {HTTP::LOCATION => path.dirname.join(index_path).to_s}, []]
+					return Utopia::Response[307, {HTTP::LOCATION => location}, []]
 				end
 				
 				response = resolve_localized(request) do |localization|

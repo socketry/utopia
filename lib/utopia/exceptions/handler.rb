@@ -44,7 +44,7 @@ module Utopia
 						# We do an internal redirection to the error location:
 						error_request = request.with(
 							method: "GET",
-							path_info: @location
+							path: @location
 						)
 						error_request.exception = exception
 						

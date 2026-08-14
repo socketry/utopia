@@ -92,16 +92,16 @@ module Utopia
 				return locales.to_a
 			end
 			
-			# Infer preferred locales from the request host.
+			# Infer preferred locales from the request authority.
 			# @parameter request [Utopia::Request] The application request.
-			# @yields {|locale| ...} Each locale whose host pattern matches the request host.
+			# @yields {|locale| ...} Each locale whose host pattern matches the request authority.
 			# @returns [Hash] The configured host mappings.
 			def host_preferred_locales(request)
-				http_host = request.host.to_s
+				authority = request.authority.to_s
 				
-				# Yield all hosts which match the incoming http_host:
+				# Yield all hosts which match the incoming authority:
 				@hosts.each do |pattern, locale|
-					if http_host[pattern]
+					if authority[pattern]
 						yield locale
 					end
 				end
@@ -111,16 +111,34 @@ module Utopia
 			# @parameter request [Utopia::Request] The application request.
 			# @returns [Array(Utopia::Request, String | Nil)] The request and extracted locale.
 			def extract_path_locale(request)
-				path = Path[request.path_info]
+				path = request.url.path
 				
-				if request_locale = @all_locales.patterns[path.first]
-					# Remove the localization prefix:
-					path.delete_at(0)
-					
-					return request.with(path_info: path.to_s), request_locale
-				else
+				# Localization prefixes only apply to absolute application paths:
+				unless path.absolute?
 					return request, nil
 				end
+				
+				if segment = path.segments[1]
+					# Decode only the component which may contain the locale:
+					component = Protocol::URL::Encoding::System.unescape(segment)
+					
+					if request_locale = @all_locales.patterns[component]
+						# Remove the locale while preserving all other encoded segments:
+						segments = path.segments.dup
+						segments.delete_at(1)
+						
+						# Preserve the absolute root when the locale was the only component:
+						if segments == [""]
+							segments << ""
+						end
+						
+						path = Protocol::URL::Path.new(nil, segments)
+						
+						return request.with(path: path), request_locale
+					end
+				end
+				
+				return request, nil
 			end
 			
 			# Parse the locales preferred by the browser.
@@ -147,8 +165,8 @@ module Utopia
 			# @returns [Boolean] Whether the path is eligible for localization.
 			def localized?(request)
 				# Ignore requests which match the ignored paths:
-				path_info = request.path_info
-				return false if @ignore.any?{|pattern| path_info[pattern] != nil}
+				path = request.url.path.encoded
+				return false if @ignore.any?{|pattern| path[pattern] != nil}
 				
 				return true
 			end

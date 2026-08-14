@@ -139,6 +139,22 @@ describe Utopia::Path do
 		end
 	end
 	
+	with "#to_url_path" do
+		it "encodes application path components" do
+			path = Utopia::Path.new(["", "some path"])
+			
+			expect(path.to_url_path).to be == Protocol::URL::Path["/some%20path"]
+		end
+		
+		it "rejects components containing path separators" do
+			path = Utopia::Path.new(["invalid/path"])
+			
+			expect do
+				path.to_url_path
+			end.to raise_exception(ArgumentError)
+		end
+	end
+	
 	it "should concatenate absolute paths" do
 		root = Utopia::Path["/"]
 		
