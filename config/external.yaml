@@ -1,4 +1,4 @@
 utopia-project:
   url: https://github.com/socketry/utopia-project.git
-  branch: v3-protocol-application
+  branch: latest-utopia
   command: bundle exec bake test
