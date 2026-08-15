@@ -268,13 +268,7 @@ module Utopia
 		# 	page_map = import_map.relative_to("/foo/bar/")
 		# 	# Base becomes: "../../_components/"
 		def relative_to(path)
-			if @base
-				# Calculate the relative path from the page to the base
-				relative_path = @base.path.relative(path)
-				resolved_base = Protocol::URL::Relative.new(relative_path)
-			else
-				resolved_base = nil
-			end
+			resolved_base = @base&.relative_to(path)
 			
 			instance = self.class.new(@imports.dup, @integrity.dup, @scopes.dup, base: resolved_base)
 			
@@ -285,10 +279,12 @@ module Utopia
 		#
 		# @parameter value [String] The import URL or path value.
 		# @parameter base [Protocol::URL | Nil] The base URL context for resolving relative paths.
-		# @returns [Protocol::URL | String] The resolved URL object or original string.
+		# @returns [Protocol::URL] The resolved URL.
 		private def resolve_value(value, base)
+			value = Protocol::URL[value]
+			
 			if base
-				base + Protocol::URL[value]
+				base + value
 			else
 				value
 			end
@@ -303,7 +299,7 @@ module Utopia
 			result = {}
 			
 			imports.each do |specifier, value|
-				result[specifier] = resolve_value(value, base).to_s
+				result[specifier] = resolve_value(value, base).to_s(explicit: true)
 			end
 			
 			result

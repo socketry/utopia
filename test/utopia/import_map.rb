@@ -139,6 +139,23 @@ describe Utopia::ImportMap do
 			expect(page_map.base.to_s).to be == "../../_components/"
 		end
 		
+		it "generates explicit same-directory URLs" do
+			import_map = subject.build(base: "/_components/") do |map|
+				map.import("app", "./app.js")
+			end
+			page_map = import_map.relative_to("/index")
+			
+			expect(page_map.base.to_s).to be == "_components/"
+			expect(page_map.as_json.dig("imports", "app")).to be == "./_components/app.js"
+		end
+		
+		it "preserves absolute bases" do
+			import_map = subject.new(base: "https://cdn.example.com/components/")
+			page_map = import_map.relative_to("/index")
+			
+			expect(page_map.base.to_s).to be == "https://cdn.example.com/components/"
+		end
+		
 		it "accepts a structured page path" do
 			import_map = subject.new(base: "/_components/")
 			path = Protocol::URL::Path["/foo/bar/"]
@@ -200,6 +217,14 @@ describe Utopia::ImportMap do
 				json = import_map.as_json
 				expect(json["imports"]["components/button"]).to be == "/components/button.js"
 			end
+			
+			it "identifies ambiguous relative addresses explicitly" do
+				import_map = subject.build do |map|
+					map.import("app", "js/app.js")
+				end
+				
+				expect(import_map.as_json.dig("imports", "app")).to be == "./js/app.js"
+			end
 		end
 		
 		with "with base" do
@@ -242,15 +267,15 @@ describe Utopia::ImportMap do
 			it "resolves multiple relative path styles" do
 				json = import_map.as_json
 				
-				# "pages/blog/" + "./app.js" => "pages/blog/app.js"
-				expect(json["imports"]["app"]).to be == "pages/blog/app.js"
+				# Import map addresses must be explicit relative URLs.
+				expect(json["imports"]["app"]).to be == "./pages/blog/app.js"
 			end
 			
 			it "resolves parent directory references" do
 				json = import_map.as_json
 				
-				# "pages/blog/" + "../vendor/lib.js" => "pages/vendor/lib.js"
-				expect(json["imports"]["vendor"]).to be == "pages/vendor/lib.js"
+				# The resolved address is in the current directory tree.
+				expect(json["imports"]["vendor"]).to be == "./pages/vendor/lib.js"
 			end
 			
 			it "keeps CDN URLs unchanged" do
@@ -403,7 +428,7 @@ describe Utopia::ImportMap do
 			expect(json["imports"]["preact"]).to be(:start_with?, "//")
 			
 			# Paths resolved with base
-			expect(json["imports"]["app"]).to be(:start_with?, "pages")
+			expect(json["imports"]["app"]).to be(:start_with?, "./pages")
 		end
 		
 		it "supports full import map specification" do
