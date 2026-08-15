@@ -17,7 +17,7 @@ $ npm install jquery
 Copy the distribution files to `public/_components`:
 
 ```bash
-$ bundle exec bake utopia:node:update
+$ bundle exec bake utopia:components:update
 ```
 
 This will copy the library's distribution files (typically from `node_modules/*/dist/`) to your `public/_components/` directory, making them available for local serving.
