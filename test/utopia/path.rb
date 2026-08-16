@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2012-2025, by Samuel Williams.
+# Copyright, 2012-2026, by Samuel Williams.
 
 require "utopia/path"
 
@@ -22,11 +22,26 @@ describe Utopia::Path do
 	with ".root" do
 		let(:path) {subject.root}
 		
-		it "is a root path" do
+		it "represents the structural root" do
 			expect(path).to be == [""]
 			expect(path).not.to be(:relative?)
 			expect(path).to be(:absolute?)
+			expect(path).to be(:directory?)
+			expect(path).not.to be(:file?)
 			expect(path).to have_attributes(local_path: be == "")
+		end
+		
+		it "is structurally distinct from an explicit root separator" do
+			explicit_path = subject["/"]
+			
+			expect(path).not.to be == explicit_path
+			expect(path.to_s).to be == explicit_path.to_s
+			expect(path.to_url_path).to be == explicit_path.to_url_path
+		end
+		
+		it "traverses the structural root exactly once" do
+			expect(path.descend.to_a).to be == [path]
+			expect(path.ascend.to_a).to be == [path]
 		end
 	end
 	
@@ -128,6 +143,42 @@ describe Utopia::Path do
 			it "can extract the last path component from an absolute path" do
 				expect(path.last).to be == "bar"
 			end
+		end
+	end
+	
+	with "root-preserving operations" do
+		it "does not pop the structural root" do
+			path = subject.root
+			
+			expect(path.pop).to be_nil
+			expect(path).to be == subject.root
+		end
+		
+		it "returns to the structural root after popping the final component" do
+			path = subject["/foo"]
+			
+			expect(path.pop).to be == "foo"
+			expect(path).to be == subject.root
+		end
+		
+		it "returns the structural root as the parent of a top-level component" do
+			expect(subject["/foo"].dirname).to be == subject.root
+		end
+		
+		it "simplifies traversal back to the structural root" do
+			expect(subject["/foo/.."].simplify).to be == subject.root
+		end
+		
+		it "uses the structural root when splitting a top-level component" do
+			expect(subject["/foo"].split("foo")).to be == [subject.root, subject[""]]
+		end
+		
+		it "uses the structural root as a prefix of absolute paths" do
+			expect(subject["/foo/bar"].start_with?(subject.root)).to be == true
+		end
+		
+		it "computes a parent traversal to the structural root" do
+			expect(subject.root.shortest_path(subject["/nested/index"])).to be == subject[".."]
 		end
 	end
 	
