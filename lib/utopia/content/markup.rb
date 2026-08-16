@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2025, by Samuel Williams.
+# Copyright, 2009-2026, by Samuel Williams.
 
 require "xrb/parsers"
 require "xrb/entities"
@@ -108,9 +108,9 @@ module Utopia
 				# @returns [String] The resulting string.
 				def to_s
 					if @closing_tag
-						"#{start_location}: #{@opening_tag} was not closed!"
-					else
 						"#{start_location}: #{@opening_tag} was closed by #{@closing_tag}!"
+					else
+						"#{start_location}: #{@opening_tag} was not closed!"
 					end
 				end
 			end

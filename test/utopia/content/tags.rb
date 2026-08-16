@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2017-2025, by Samuel Williams.
+# Copyright, 2017-2026, by Samuel Williams.
 
 require "utopia/content/tags"
 require "utopia/content/document"
@@ -52,6 +52,16 @@ describe Utopia::Content::Tags do
 			result = document.render_node(node)
 			
 			expect(result).to be == "Goodbye World"
+		end
+		
+		it "uses the configured environment by default" do
+			mock(Variant) do |mock|
+				mock.replace(:for){|name| :testing}
+				
+				result = document.render_node(node)
+				
+				expect(result).to be == "Hello World"
+			end
 		end
 	end
 	

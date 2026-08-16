@@ -159,12 +159,7 @@ module Utopia
 			private
 			
 			def lookup_content(name, parent_path)
-				if String === name && name.index("/")
-					name = Path.create(name)
-				end
-				
 				if Path === name
-					name = parent_path + name
 					name_path = name.components.dup
 					name_path[-1] += XNODE_EXTENSION
 				else
@@ -195,6 +190,21 @@ module Utopia
 			end
 			
 			def content_tag(name, node, parent_path: node.parent_path)
+				# Preserve nested names while searching the physical content hierarchy:
+				if String === name
+					if name.index("/")
+						name = Path.create(name)
+					end
+				end
+				
+				if Path === name
+					cache_key = parent_path + name
+					
+					return @node_cache.fetch_or_store(cache_key) do
+						lookup_content(name, parent_path)
+					end
+				end
+				
 				full_path = parent_path + name
 				
 				name = full_path.pop

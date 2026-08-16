@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2015-2025, by Samuel Williams.
+# Copyright, 2015-2026, by Samuel Williams.
 
 require "utopia/content"
 
@@ -27,6 +27,18 @@ describe Utopia::Content::Node do
 		expect(links.size).to be == 2
 		expect(links[0].name).to be == "first"
 		expect(links[1].name).to be == "second"
+	end
+	
+	it "should enumerate links" do
+		node = content.lookup_node(Utopia::Path["/ordered/index"])
+		names = []
+		
+		result = node.links do |link|
+			names << link.name
+		end
+		
+		expect(names).to be == ["first", "second"]
+		expect(result).to be == node.links
 	end
 	
 	it "should list related links" do
@@ -66,6 +78,12 @@ describe Utopia::Content::Node do
 			
 			expect(node.local_path("preview.jpg")).to be == (base + "ordered/preview.jpg")
 		end
+		
+		it "can compute absolute paths" do
+			node = content.lookup_node(Utopia::Path["/ordered/index"])
+			
+			expect(node.local_path("/shared/preview.jpg")).to be == (base + "shared/preview.jpg")
+		end
 	end
 	
 	with "#relative_path" do
@@ -80,5 +98,63 @@ describe Utopia::Content::Node do
 			
 			expect(node.relative_path("preview.jpg")).to be == (Utopia::Path["/ordered/preview.jpg"])
 		end
+	end
+	
+	it "exposes its name" do
+		node = content.lookup_node(Utopia::Path["/ordered/first"])
+		
+		expect(node.name).to be == "first"
+	end
+	
+	it "uses the containing directory for index siblings" do
+		node = content.lookup_node(Utopia::Path["/ordered/index"])
+		
+		expect(node.siblings_path).to be == Utopia::Path.root
+	end
+	
+	it "exposes rendering context" do
+		deferred = []
+		linked = []
+		
+		node = Object.new
+		node.define_singleton_method(:links) do |*arguments, **options, &block|
+			block&.call(:link)
+			linked << [arguments, options]
+			return :links
+		end
+		
+		state = Struct.new(:node, :attributes) do
+			define_method(:defer) do |&block|
+				deferred << block
+				return :deferred
+			end
+		end.new(node, {local: "Local"})
+		
+		document = Struct.new(:controller, :localization, :request, :attributes, :content, :parent, :first).new(
+			:controller,
+			:localization,
+			:request,
+			{global: "Global"},
+			:content,
+			:parent,
+			:first,
+		)
+		context = subject::Context.new(document, state)
+		
+		expect(context.partial{:content}).to be == :deferred
+		expect(deferred.first.call).to be == :content
+		expect(context.controller).to be == :controller
+		expect(context.localization).to be == :localization
+		expect(context.request).to be == :request
+		expect(context.response).to be_equal(document)
+		expect(context.attributes).to be_equal(state.attributes)
+		expect(context[:local]).to be == "Local"
+		expect(context[:global]).to be == "Global"
+		expect(context.current).to be_equal(state)
+		expect(context.content).to be == :content
+		expect(context.parent).to be == :parent
+		expect(context.first).to be == :first
+		expect(context.links(".", locale: "en"){|link| link}).to be == :links
+		expect(linked).to be == [[["."], {locale: "en"}]]
 	end
 end
