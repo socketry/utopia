@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2015-2023, by Samuel Williams.
+# Copyright, 2015-2026, by Samuel Williams.
 
 prepend Actions
 
@@ -10,6 +10,14 @@ end
 
 on "blow" do
 	raise TharSheBlows.new("Arrrh!")
+end
+
+on "syntax-error" do
+	raise SyntaxError.new("Invalid application syntax!")
+end
+
+on "interrupt" do
+	raise Interrupt.new("Application interrupted!")
 end
 
 # The ExceptionHandler middleware will redirect here when an exception occurs. If this also fails, things get ugly.

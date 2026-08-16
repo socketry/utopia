@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2014-2025, by Samuel Williams.
+# Copyright, 2014-2026, by Samuel Williams.
 # Copyright, 2025, by Olle Jonsson.
 
 require "console"
@@ -9,6 +9,7 @@ require "console"
 require_relative "../middleware"
 require_relative "../request"
 require_relative "../response"
+require_relative "application_errors"
 
 module Utopia
 	module Exceptions
@@ -37,7 +38,7 @@ module Utopia
 			def call(request)
 				begin
 					return @delegate.call(request)
-				rescue Exception => exception
+				rescue *APPLICATION_ERRORS => exception
 					Console.warn(self, "An error occurred while processing the request.", error: exception)
 					
 					begin
@@ -52,7 +53,7 @@ module Utopia
 						error_response.status = 500
 						
 						return error_response
-					rescue Exception => exception
+					rescue *APPLICATION_ERRORS => exception
 						# If redirection fails, we also finish with a fatal error:
 						Console.error(self, "An error occurred while invoking the error handler.", error: exception)
 						return Response[500, {"content-type" => "text/plain"}, ["An error occurred while processing the request."]]
