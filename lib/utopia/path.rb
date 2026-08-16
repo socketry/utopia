@@ -1,12 +1,20 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2009-2025, by Samuel Williams.
+# Copyright, 2009-2026, by Samuel Williams.
 
 require "protocol/url/path"
 
 module Utopia
-	# Represents a path as an array of path components. Useful for efficient URL manipulation.
+	# Represents an application path as a traversal through a tree.
+	#
+	# Each component names a node and `/` represents the edge between adjacent nodes. A leading empty component anchors the traversal at the root, while a trailing empty component preserves an explicit final edge and denotes a directory:
+	#
+	# - `["foo", "bar"]` represents `foo/bar`.
+	# - `["", "foo", "bar"]` represents `/foo/bar`.
+	# - `["", "foo", "bar", ""]` represents `/foo/bar/`.
+	#
+	# The structural root is represented by `[""]` and contains no traversed edge. It is intentionally distinct from parsing `/`, which preserves the explicit edge as `["", ""]`. Both serialize as `/`, but they retain different structural representations. In particular, the structural root maps to an empty local path so it can be resolved relative to an application root.
 	class Path
 		include Comparable
 		
@@ -36,7 +44,7 @@ module Utopia
 			@components.empty?
 		end
 		
-		# Construct the root path.
+		# Construct the structural root path without an explicit trailing separator.
 		# @returns [Path] The root path.
 		def self.root
 			self.new([""])
