@@ -12,6 +12,23 @@ require "utopia/static"
 describe Utopia::Static do
 	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
+	it "freezes its configuration" do
+		cache_control = proc{"private"}
+		middleware = Utopia::Static::Middleware.new(
+			Protocol::HTTP::Middleware::NotFound,
+			root: File.expand_path(".static", __dir__),
+			cache_control: cache_control,
+		)
+		
+		expect(middleware.freeze).to be_equal(middleware)
+		expect(middleware).to be(:frozen?)
+		expect(middleware.freeze).to be_equal(middleware)
+		
+		expect(middleware.instance_variable_get(:@root)).to be(:frozen?)
+		expect(middleware.extensions).to be(:frozen?)
+		expect(cache_control).to be(:frozen?)
+	end
+	
 	let(:middleware) do
 		root = File.expand_path(".static", __dir__)
 		

@@ -20,6 +20,16 @@ describe Utopia::Exceptions::Handler do
 		end
 	end
 	
+	it "freezes its configuration" do
+		location = +"/exception"
+		middleware = subject.new(Protocol::HTTP::Middleware::NotFound, location)
+		
+		expect(middleware.freeze).to be_equal(middleware)
+		expect(middleware).to be(:frozen?)
+		expect(middleware.freeze).to be_equal(middleware)
+		expect(location).to be(:frozen?)
+	end
+	
 	it "should successfully call the controller method" do
 		# This request will raise an exception, and then redirect to the /exception url which will fail again, and cause a fatal error.
 		client.get "/blow?fatal=true"

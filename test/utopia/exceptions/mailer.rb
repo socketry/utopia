@@ -29,6 +29,29 @@ describe Utopia::Exceptions::Mailer do
 		super
 	end
 	
+	it "freezes its configuration" do
+		to = +"postmaster@example.com"
+		from = +"utopia@example.com"
+		template = +"%{exception}"
+		delivery_method = [:test, {}]
+		middleware = subject.new(
+			Protocol::HTTP::Middleware::NotFound,
+			to: to,
+			from: from,
+			subject: template,
+			delivery_method: delivery_method,
+		)
+		
+		expect(middleware.freeze).to be_equal(middleware)
+		expect(middleware).to be(:frozen?)
+		expect(middleware.freeze).to be_equal(middleware)
+		
+		expect(to).to be(:frozen?)
+		expect(from).to be(:frozen?)
+		expect(template).to be(:frozen?)
+		expect(delivery_method).to be(:frozen?)
+	end
+	
 	it "should send an email to report the failure" do
 		client.headers["accept"] = "text/plain"
 		

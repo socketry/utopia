@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2014-2025, by Samuel Williams.
+# Copyright, 2014-2026, by Samuel Williams.
 
 require "sus/fixtures/protocol/http/middleware_context"
 require "utopia/application"
@@ -12,6 +12,31 @@ require "utopia/localization"
 
 describe Utopia::Localization do
 	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
+	
+	it "freezes its configuration" do
+		default_locale = +"en"
+		default_locales = [default_locale, nil]
+		hosts = {/example\.com$/ => default_locale}
+		ignore = ["/health"]
+		middleware = Utopia::Localization::Middleware.new(
+			Protocol::HTTP::Middleware::NotFound,
+			locales: ["en"],
+			default_locale: default_locale,
+			default_locales: default_locales,
+			hosts: hosts,
+			ignore: ignore,
+		)
+		
+		expect(middleware.freeze).to be_equal(middleware)
+		expect(middleware).to be(:frozen?)
+		expect(middleware.freeze).to be_equal(middleware)
+		
+		expect(middleware.all_locales).to be(:frozen?)
+		expect(default_locales).to be(:frozen?)
+		expect(default_locale).to be(:frozen?)
+		expect(hosts).to be(:frozen?)
+		expect(ignore).to be(:frozen?)
+	end
 	
 	let(:middleware) do
 		root = File.expand_path(".localization", __dir__)
