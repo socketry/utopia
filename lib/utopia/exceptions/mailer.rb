@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2025, by Samuel Williams.
+# Copyright, 2016-2026, by Samuel Williams.
 
 require "net/smtp"
 require "mail"
 
 require_relative "../middleware"
 require_relative "../request"
-require_relative "handler"
+require_relative "application_errors"
 
 module Utopia
 	module Exceptions
@@ -59,7 +59,7 @@ module Utopia
 			def call(request)
 				begin
 					return @delegate.call(request)
-				rescue => exception
+				rescue *APPLICATION_ERRORS => exception
 					request.exception = exception
 					send_notification exception, request
 					

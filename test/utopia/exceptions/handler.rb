@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2015-2025, by Samuel Williams.
+# Copyright, 2015-2026, by Samuel Williams.
 
 require "sus/fixtures/protocol/http/middleware_context"
 require "utopia/application"
@@ -34,5 +34,16 @@ describe Utopia::Exceptions::Handler do
 		
 		expect(last_response.status).to be == 500
 		expect(last_response.read).to be(:include?, "Error: Arrrh!")
+	end
+	
+	it "handles application syntax errors" do
+		client.get "/syntax-error"
+		
+		expect(last_response.status).to be == 500
+		expect(last_response.read).to be(:include?, "Invalid application syntax!")
+	end
+	
+	it "does not handle process exceptions" do
+		expect{client.get "/interrupt"}.to raise_exception(Interrupt, message: be =~ /Application interrupted/)
 	end
 end

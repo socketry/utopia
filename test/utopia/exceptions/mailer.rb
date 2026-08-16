@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2016-2025, by Samuel Williams.
+# Copyright, 2016-2026, by Samuel Williams.
 
 require "sus/fixtures/protocol/http/middleware_context"
 require "utopia/application"
@@ -41,6 +41,19 @@ describe Utopia::Exceptions::Mailer do
 		expect(last_mail.to_s).to be(:include?, "request.ip")
 		expect(last_mail.to_s).to be(:include?, "header[")
 		expect(last_mail.to_s).to be(:include?, "TharSheBlows")
+	end
+	
+	it "reports application syntax errors" do
+		expect{client.get "/syntax-error"}.to raise_exception(SyntaxError, message: be =~ /Invalid application syntax/)
+		
+		last_mail = Mail::TestMailer.deliveries.last
+		expect(last_mail.to_s).to be(:include?, "SyntaxError")
+	end
+	
+	it "does not report process exceptions" do
+		expect{client.get "/interrupt"}.to raise_exception(Interrupt, message: be =~ /Application interrupted/)
+		
+		expect(Mail::TestMailer.deliveries).to be(:empty?)
 	end
 	
 	it "extracts rewindable request bodies" do
