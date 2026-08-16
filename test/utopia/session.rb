@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2014-2025, by Samuel Williams.
+# Copyright, 2014-2026, by Samuel Williams.
 # Copyright, 2019, by Huba Nagy.
 
 require "sus/fixtures/protocol/http/middleware_context"
@@ -85,6 +85,26 @@ describe Utopia::Session do
 end
 
 describe Utopia::Session::Middleware do
+	it "freezes its configuration" do
+		middleware = subject.new(
+			Protocol::HTTP::Middleware::NotFound,
+			session_name: "test.session",
+			secret: "secret",
+			expires_after: 3600,
+			update_timeout: 60,
+		)
+		
+		expect(middleware.freeze).to be_equal(middleware)
+		expect(middleware).to be(:frozen?)
+		expect(middleware.freeze).to be_equal(middleware)
+		
+		expect(middleware.cookie_name).to be(:frozen?)
+		expect(middleware.key).to be(:frozen?)
+		expect(middleware.expires_after).to be(:frozen?)
+		expect(middleware.update_timeout).to be(:frozen?)
+		expect(middleware.cookie_defaults).to be(:frozen?)
+	end
+	
 	let(:delegate) do
 		Protocol::HTTP::Middleware.for do |request|
 			request.session[:updated] = true

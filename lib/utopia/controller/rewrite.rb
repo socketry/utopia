@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2015-2025, by Samuel Williams.
+# Copyright, 2015-2026, by Samuel Williams.
 
 require_relative "../http"
 require_relative "../path/matcher"
@@ -48,6 +48,8 @@ module Utopia
 				# Freeze this object and its internal state.
 				# @returns [self] This object.
 				def freeze
+					return self if frozen?
+					
 					@matcher.freeze
 					@block.freeze
 					

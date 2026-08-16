@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2015-2025, by Samuel Williams.
+# Copyright, 2015-2026, by Samuel Williams.
 
 require "utopia/controller"
 require "utopia/request"
@@ -36,6 +36,18 @@ describe Utopia::Controller do
 		request = Utopia::Request["GET", path]
 		
 		return request, request.path
+	end
+	
+	it "freezes extraction rules" do
+		callback = proc{}
+		rule = Utopia::Controller::Rewrite::ExtractPrefixRule.new({id: Integer}, callback)
+		
+		expect(rule.freeze).to be_equal(rule)
+		expect(rule).to be(:frozen?)
+		expect(rule.freeze).to be_equal(rule)
+		
+		expect(rule.instance_variable_get(:@matcher)).to be(:frozen?)
+		expect(callback).to be(:frozen?)
 	end
 	
 	it "should match path prefix and extract parameters" do

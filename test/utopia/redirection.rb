@@ -53,6 +53,16 @@ describe Utopia::Redirection do
 		expect(prefix).to be(:frozen?)
 	end
 	
+	it "freezes error document configuration" do
+		codes = {404 => "/error"}
+		middleware = Utopia::Redirection::Errors.new(Protocol::HTTP::Middleware::NotFound, codes)
+		
+		expect(middleware.freeze).to be_equal(middleware)
+		expect(middleware).to be(:frozen?)
+		expect(middleware.freeze).to be_equal(middleware)
+		expect(codes).to be(:frozen?)
+	end
+	
 	let(:middleware) do
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
 			case request.url.path.encoded

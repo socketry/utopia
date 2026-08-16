@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2013-2025, by Samuel Williams.
+# Copyright, 2013-2026, by Samuel Williams.
 
 require "sus/fixtures/protocol/http/middleware_context"
 require "utopia/application"
@@ -9,6 +9,23 @@ require "utopia/controller"
 
 describe Utopia::Controller do
 	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
+	
+	it "freezes its configuration" do
+		root = +File.expand_path(".middleware", __dir__)
+		base = Class.new(Utopia::Controller::Base)
+		middleware = Utopia::Controller::Middleware.new(
+			Protocol::HTTP::Middleware::NotFound,
+			root: root,
+			base: base,
+		)
+		
+		expect(middleware.freeze).to be_equal(middleware)
+		expect(middleware).to be(:frozen?)
+		expect(middleware.freeze).to be_equal(middleware)
+		
+		expect(root).to be(:frozen?)
+		expect(base).to be(:frozen?)
+	end
 	
 	let(:middleware) do
 		root = File.expand_path(".middleware", __dir__)
