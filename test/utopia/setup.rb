@@ -5,12 +5,13 @@
 # Copyright, 2017, by Huba Nagy.
 
 require "fileutils"
-require "tmpdir"
+require "sus/fixtures/temporary_directory_context"
 require "utopia/setup"
 
 describe Utopia::Setup do
-	let(:config_root) {File.expand_path("setup_spec/config", __dir__)}
-	let(:setup) {subject.new(config_root)}
+	include Sus::Fixtures::TemporaryDirectoryContext
+	
+	let(:setup) {subject.new(root)}
 	
 	let(:environment) {Variant::Environment.instance}
 	let(:sequence) {Array.new}
@@ -52,7 +53,7 @@ describe Utopia::Setup do
 	end
 	
 	it "resolves the configuration root" do
-		expect(setup.config_root).to be == File.join(config_root, "config")
+		expect(setup.config_root).to be == File.join(root, "config")
 	end
 	
 	[:production, :staging, :development, :testing].each do |variant|
@@ -64,37 +65,35 @@ describe Utopia::Setup do
 	end
 	
 	it "loads environment variables without replacing existing values" do
-		Dir.mktmpdir do |root|
-			configuration_root = File.join(root, "config")
-			FileUtils.mkdir_p(configuration_root)
-			
-			existing_key = "UTOPIA_SETUP_EXISTING"
-			new_key = "UTOPIA_SETUP_NEW"
-			previous_values = {
-				existing_key => ENV[existing_key],
-				new_key => ENV[new_key],
-			}
-			
-			ENV[existing_key] = "existing"
-			ENV.delete(new_key)
-			
-			File.write(File.join(configuration_root, "environment.yaml"), YAML.dump(
-				existing_key => "replacement",
-				new_key => "new",
-			))
-			
-			loaded = subject.new(root).send(:load_environment, :environment)
-			
-			expect(loaded).to be == true
-			expect(ENV[existing_key]).to be == "existing"
-			expect(ENV[new_key]).to be == "new"
-		ensure
-			previous_values.each do |key, value|
-				if value
-					ENV[key] = value
-				else
-					ENV.delete(key)
-				end
+		configuration_root = File.join(root, "config")
+		FileUtils.mkdir_p(configuration_root)
+		
+		existing_key = "UTOPIA_SETUP_EXISTING"
+		new_key = "UTOPIA_SETUP_NEW"
+		previous_values = {
+			existing_key => ENV[existing_key],
+			new_key => ENV[new_key],
+		}
+		
+		ENV[existing_key] = "existing"
+		ENV.delete(new_key)
+		
+		File.write(File.join(configuration_root, "environment.yaml"), YAML.dump(
+			existing_key => "replacement",
+			new_key => "new",
+		))
+		
+		loaded = subject.new(root).send(:load_environment, :environment)
+		
+		expect(loaded).to be == true
+		expect(ENV[existing_key]).to be == "existing"
+		expect(ENV[new_key]).to be == "new"
+	ensure
+		previous_values.each do |key, value|
+			if value
+				ENV[key] = value
+			else
+				ENV.delete(key)
 			end
 		end
 	end
@@ -104,7 +103,7 @@ describe Utopia::Setup do
 		Utopia.instance_variable_set(:@setup, Object.new)
 		
 		expect do
-			Utopia.setup(config_root)
+			Utopia.setup(root)
 		end.to raise_exception(RuntimeError, message: be =~ /already setup/)
 	ensure
 		Utopia.instance_variable_set(:@setup, previous_setup)
