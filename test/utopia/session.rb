@@ -85,6 +85,14 @@ describe Utopia::Session do
 end
 
 describe Utopia::Session::Middleware do
+	it "requires a non-empty session secret" do
+		[nil, ""].each do |secret|
+			expect do
+				subject.new(Protocol::HTTP::Middleware::NotFound, secret: secret)
+			end.to raise_exception(ArgumentError, message: be =~ /invalid session secret/)
+		end
+	end
+	
 	it "freezes its configuration" do
 		middleware = subject.new(
 			Protocol::HTTP::Middleware::NotFound,
@@ -174,6 +182,17 @@ describe Utopia::Session::Middleware do
 			middleware(unknown: true)
 		end.to raise_exception(ArgumentError)
 	end
+	
+	it "enforces the encoded payload size limit" do
+		data = middleware(maximum_size: nil).send(:encrypt, {value: "test"})
+		allowed = middleware(maximum_size: data.bytesize)
+		rejected = middleware(maximum_size: data.bytesize - 1)
+		
+		expect(allowed.send(:decrypt, data)).to be == {value: "test"}
+		expect do
+			rejected.send(:decrypt, data)
+		end.to raise_exception(subject::PayloadError, message: be =~ /exceeds maximum allowed size/)
+	end
 end
 
 describe Utopia::Session do
@@ -249,10 +268,12 @@ describe Utopia::Session::LazyHash do
 		end
 		
 		expect(loaded).to be == false
+		expect(hash).not.to be(:loaded?)
 		
 		expect(hash[:a]).to be == 10
 		
 		expect(loaded).to be == true
+		expect(hash).to be(:loaded?)
 	end
 	
 	it "should need to be reloaded if changed" do
@@ -261,6 +282,7 @@ describe Utopia::Session::LazyHash do
 		end
 		
 		expect(hash.needs_update?).to be == false
+		expect(hash).not.to be(:changed?)
 		
 		hash[:a] = 10
 		
@@ -269,6 +291,7 @@ describe Utopia::Session::LazyHash do
 		hash[:a] = 20
 		
 		expect(hash.needs_update?).to be == true
+		expect(hash).to be(:changed?)
 	end
 	
 	it "should need to be reloaded if old" do
