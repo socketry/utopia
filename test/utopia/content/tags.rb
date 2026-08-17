@@ -57,11 +57,11 @@ describe Utopia::Content::Tags do
 		it "uses the configured environment by default" do
 			mock(Variant) do |mock|
 				mock.replace(:for){|name| :testing}
-				
-				result = document.render_node(node)
-				
-				expect(result).to be == "Hello World"
 			end
+			
+			result = document.render_node(node)
+			
+			expect(result).to be == "Hello World"
 		end
 	end
 	

@@ -12,10 +12,10 @@ describe Utopia::Content::Links do
 	it "provides uncached convenience methods" do
 		mock(subject) do |mock|
 			mock.replace(:warn){}
-			
-			expect(subject.for(root, Utopia::Path["/index"]).title).to be == "Home"
-			expect(subject.index(root, Utopia::Path["/"], name: "welcome").size).to be == 1
 		end
+		
+		expect(subject.for(root, Utopia::Path["/index"]).title).to be == "Home"
+		expect(subject.index(root, Utopia::Path["/"], name: "welcome").size).to be == 1
 	end
 	
 	with "#index_filter" do
