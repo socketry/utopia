@@ -4,12 +4,14 @@
 # Copyright, 2016-2026, by Samuel Williams.
 
 require "sus/fixtures/protocol/http/middleware_context"
+require "sus/fixtures/console/captured_logger"
 require "utopia/application"
 require "utopia/exceptions"
 require "utopia/controller"
 
 describe Utopia::Exceptions::Mailer do
 	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
+	include Sus::Fixtures::Console::CapturedLogger
 	
 	let(:middleware) do
 		root = File.expand_path(".handler", __dir__)
@@ -110,17 +112,13 @@ describe Utopia::Exceptions::Mailer do
 		
 		request = Utopia::Request["GET", "/"]
 		mailer = subject.new(Protocol::HTTP::Middleware::NotFound, delivery_method: delivery_method)
-		stderr = StringIO.new
-		original_stderr = $stderr
+		mailer.send(:send_notification, RuntimeError.new("Failure"), request)
 		
-		begin
-			$stderr = stderr
-			mailer.send(:send_notification, RuntimeError.new("Failure"), request)
-		ensure
-			$stderr = original_stderr
-		end
-		
-		expect(stderr.string).to be(:include?, "Delivery failed")
+		expect_console.to have_logged(
+			severity: be == :warn,
+			message: be == "Failed to deliver exception notification.",
+			error: have_attributes(message: be == "Delivery failed"),
+		)
 	end
 	
 	it "reports application syntax errors" do

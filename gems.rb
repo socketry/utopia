@@ -34,6 +34,7 @@ group :test do
 	gem "falcon", "~> 0.57"
 	gem "async-websocket"
 	gem "sus-fixtures-async-http"
+	gem "sus-fixtures-console"
 	gem "sus-fixtures-protocol-http", "~> 0.1"
 	
 	gem "bake-test"

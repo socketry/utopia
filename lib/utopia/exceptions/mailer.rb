@@ -5,6 +5,7 @@
 
 require "net/smtp"
 require "mail"
+require "console"
 
 require_relative "../middleware"
 require_relative "../request"
@@ -168,8 +169,7 @@ module Utopia
 				
 				mail.deliver
 			rescue => mail_exception
-				$stderr.puts mail_exception.to_s
-				$stderr.puts mail_exception.backtrace
+				Console.warn(self, "Failed to deliver exception notification.", error: mail_exception)
 			end
 			
 			def current_state(request)
