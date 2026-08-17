@@ -3,6 +3,7 @@
 ## Unreleased
 
   - **Breaking** Remove support for JavaScript packages installed in `lib/components`; use `node_modules` instead.
+  - **Security** Authenticate encrypted session cookies using AES-256-GCM. Existing session cookies are invalidated.
 
 ## v3.0.0
 

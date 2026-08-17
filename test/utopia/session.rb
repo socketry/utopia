@@ -125,6 +125,14 @@ describe Utopia::Session::Middleware do
 		return subject.new(delegate, secret: "test-secret", **options)
 	end
 	
+	def corrupt_payload(data, offset)
+		version, encoded_payload = data.split(".", 2)
+		payload = encoded_payload.unpack1("m0")
+		payload.setbyte(offset, payload.getbyte(offset) ^ 1)
+		
+		return "#{version}.#{[payload].pack("m0")}"
+	end
+	
 	it "emits the default cookie directives" do
 		response = middleware.call(Utopia::Request["GET", "/"])
 		cookie = response.headers["set-cookie"].first
@@ -192,6 +200,60 @@ describe Utopia::Session::Middleware do
 		expect do
 			rejected.send(:decrypt, data)
 		end.to raise_exception(subject::PayloadError, message: be =~ /exceeds maximum allowed size/)
+	end
+	
+	it "encrypts authenticated session payloads" do
+		instance = middleware(maximum_size: nil)
+		values = {value: "test"}
+		data = instance.send(:encrypt, values)
+		
+		expect(data).to be(:start_with?, "#{subject::PAYLOAD_VERSION}.")
+		expect(instance.send(:decrypt, data)).to be == values
+		expect(instance.send(:encrypt, values)).not.to be == data
+	end
+	
+	it "rejects modified session payloads" do
+		instance = middleware(maximum_size: nil)
+		data = instance.send(:encrypt, {value: "test"})
+		encoded_payload = data.split(".", 2).last
+		payload_size = encoded_payload.unpack1("m0").bytesize
+		
+		[0, payload_size / 2, payload_size - 1].each do |offset|
+			expect do
+				instance.send(:decrypt, corrupt_payload(data, offset))
+			end.to raise_exception(subject::PayloadError, message: be =~ /Invalid session payload/)
+		end
+	end
+	
+	it "rejects payloads from a different context" do
+		data = middleware(maximum_size: nil).send(:encrypt, {value: "test"})
+		
+		[
+			middleware(maximum_size: nil, session_name: "other.session"),
+			subject.new(delegate, secret: "other-secret", maximum_size: nil),
+		].each do |instance|
+			expect do
+				instance.send(:decrypt, data)
+			end.to raise_exception(subject::PayloadError, message: be =~ /Invalid session payload/)
+		end
+	end
+	
+	it "rejects unsupported and malformed payloads" do
+		instance = middleware(maximum_size: nil)
+		data = instance.send(:encrypt, {value: "test"})
+		encoded_payload = data.split(".", 2).last
+		
+		[encoded_payload, "v0.#{encoded_payload}"].each do |invalid_data|
+			expect do
+				instance.send(:decrypt, invalid_data)
+			end.to raise_exception(subject::PayloadError, message: be =~ /Unsupported session payload format/)
+		end
+		
+		["#{subject::PAYLOAD_VERSION}.!", "#{subject::PAYLOAD_VERSION}.#{["short"].pack("m0")}"].each do |invalid_data|
+			expect do
+				instance.send(:decrypt, invalid_data)
+			end.to raise_exception(subject::PayloadError, message: be =~ /Invalid session payload/)
+		end
 	end
 end
 
