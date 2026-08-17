@@ -43,4 +43,16 @@ describe Utopia::Path::Matcher do
 		expect(match_data[:id]).to be == 20
 		expect(match_data[:action]).to be == "edit"
 	end
+	
+	it "coerces floating-point and custom components" do
+		component = Struct.new(:value)
+		path = Utopia::Path["1.5/example/raw"]
+		matcher = subject[ratio: Float, component: component, raw: nil]
+		
+		match_data = matcher.match(path)
+		
+		expect(match_data[:ratio]).to be == 1.5
+		expect(match_data[:component]).to have_attributes(value: be == "example")
+		expect(match_data[:raw]).to be == "raw"
+	end
 end

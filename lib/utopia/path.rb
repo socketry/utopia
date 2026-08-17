@@ -211,12 +211,6 @@ module Utopia
 			end
 		end
 		
-		# Remove the first component when this path is relative.
-		# @returns [String | Nil] The removed component, or `nil` when the path is absolute.
-		def to_relative!
-			@components.shift if relative?
-		end
-		
 		# Convert this object to a string.
 		# @returns [String] The resulting string.
 		def to_str
@@ -539,12 +533,5 @@ module Utopia
 			
 			return index
 		end
-	end
-	
-	# Coerce a value into a {Path}.
-	# @parameter path [Utopia::Path | String] The path.
-	# @returns [Path | Nil] The coerced path.
-	def self.Path(path)
-		Path.create(path)
 	end
 end

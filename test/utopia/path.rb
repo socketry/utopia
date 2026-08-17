@@ -6,6 +6,23 @@
 require "utopia/path"
 
 describe Utopia::Path do
+	with ".unescape" do
+		it "decodes spaces and percent-encoded bytes" do
+			expect(subject.unescape("hello+world%21")).to be == "hello world!"
+		end
+	end
+	
+	with ".split" do
+		it "coerces path-like values into components" do
+			path = subject["foo/bar"]
+			components = ["foo", "bar"]
+			
+			expect(subject.split(path)).to be == components
+			expect(subject.split(components)).to be_equal(components)
+			expect(subject.split(:foo)).to be == [:foo]
+		end
+	end
+	
 	with "#load / #dump" do
 		let(:string) {"foo/bar/baz"}
 		let(:path) {subject.load(string)}
@@ -75,6 +92,7 @@ describe Utopia::Path do
 		with value: "" do
 			it "is empty path" do
 				expect(path).to be == []
+				expect(path).to be(:empty?)
 				expect(path).to be(:relative?)
 				expect(path).not.to be(:absolute?)
 				expect(path).to have_attributes(local_path: be == "")
@@ -97,6 +115,26 @@ describe Utopia::Path do
 				expect(path).to be(:absolute?)
 				expect(path).to have_attributes(local_path: be == "/foo/bar")
 			end
+		end
+	end
+	
+	with "#replace" do
+		it "copies the replacement components" do
+			path = subject["old/path"]
+			replacement = subject["new/path"]
+			
+			path.replace(replacement)
+			replacement.components << "suffix"
+			
+			expect(path).to be == subject["new/path"]
+		end
+	end
+	
+	with "absolute and relative conversion" do
+		it "converts a relative path to an absolute path" do
+			path = subject["foo/bar"]
+			
+			expect(path.to_absolute).to be == subject["/foo/bar"]
 		end
 	end
 	
@@ -187,6 +225,19 @@ describe Utopia::Path do
 			root = Utopia::Path["/invoices/_template"]
 			
 			expect(root + "/foo/_bar").to be == Utopia::Path["/foo/_bar"]
+		end
+		
+		it "appends arrays and other component values" do
+			path = subject["/foo"]
+			
+			expect(path + ["bar"]).to be == subject["/foo/bar"]
+			expect(path + :bar).to be == subject["/foo/bar"]
+		end
+	end
+	
+	with "#with_prefix" do
+		it "prepends a path" do
+			expect(subject["bar"].with_prefix("/foo")).to be == subject["/foo/bar"]
 		end
 	end
 	
@@ -279,6 +330,34 @@ describe Utopia::Path do
 		path = Utopia::Path["/a/b/c/d/e"]
 		
 		expect(path.split("c")).to be == [Utopia::Path["/a/b"], Utopia::Path["d/e"]]
+	end
+	
+	it "returns nil when the split point is missing" do
+		path = Utopia::Path["/a/b/c"]
+		
+		expect(path.split("missing")).to be_nil
+	end
+	
+	it "orders paths by their components" do
+		left = Utopia::Path["/a"]
+		right = Utopia::Path["/b"]
+		
+		expect(left <=> right).to be == -1
+	end
+	
+	with "indexed components" do
+		it "indexes ranges without exposing path markers" do
+			path = subject["/foo/bar/"]
+			
+			expect(path[0..-1]).to be == ["foo", "bar"]
+		end
+		
+		it "deletes components without exposing path markers" do
+			path = subject["/foo/bar/"]
+			
+			expect(path.delete_at(-1)).to be == "bar"
+			expect(path).to be == subject["/foo/"]
+		end
 	end
 	
 	it "shouldn't be able to modify frozen paths" do
