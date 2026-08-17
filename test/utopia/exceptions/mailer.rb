@@ -165,6 +165,16 @@ describe Utopia::Exceptions::Mailer do
 		expect(body).not.to be(:include?, "state.session")
 	end
 	
+	it "redacts sensitive fields nested in arrays" do
+		mailer = subject.new(Protocol::HTTP::Middleware::NotFound, delivery_method: nil)
+		value = [{"token" => "secret"}, "public"]
+		
+		expect(mailer.send(:redact, nil, value)).to be == [
+			{"token" => "[REDACTED]"},
+			"public",
+		]
+	end
+	
 	with "a body attachment size limit" do
 		def generate_mail(body, attachment_size_limit:)
 			request = Utopia::Request["POST", "/submit", {}, [body]]
