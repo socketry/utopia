@@ -50,13 +50,81 @@ describe Utopia::Components do
 	
 	it "copies unconfigured scoped packages using the existing behavior" do
 		Dir.mktmpdir do |root|
-			write(File.join(root, "package.json"), "{}")
 			write(File.join(root, "node_modules/@socketry/syntax/Syntax.js"), "syntax")
 			
 			subject.new(root).update(["@socketry/syntax"])
 			
 			installed = File.join(root, "public/_components/@socketry/syntax/Syntax.js")
 			expect(File.read(installed)).to be == "syntax"
+		end
+	end
+	
+	it "uses the legacy components directory" do
+		Dir.mktmpdir do |root|
+			write(File.join(root, "lib/components/example/example.js"), "example")
+			
+			components = subject.new(root)
+			components.update(["example"])
+			
+			expect(components.package_root).to be == Pathname.new(root) + "lib/components"
+			expect(File.read(File.join(root, "public/_components/example/example.js"))).to be == "example"
+		end
+	end
+	
+	it "requires component configuration to be an object" do
+		Dir.mktmpdir do |root|
+			write(File.join(root, "package.json"), JSON.generate(
+				"utopia" => {"components" => []},
+			))
+			
+			expect do
+				subject.new(root)
+			end.to raise_exception(ArgumentError, message: be =~ /components must be an object/)
+		end
+	end
+	
+	it "requires package configuration to be an object" do
+		Dir.mktmpdir do |root|
+			write(File.join(root, "node_modules/example/example.js"), "example")
+			write(File.join(root, "package.json"), JSON.generate(
+				"utopia" => {"components" => {"example" => []}},
+			))
+			
+			expect do
+				subject.new(root).update(["example"])
+			end.to raise_exception(ArgumentError, message: be =~ /include must be a non-empty array/)
+		end
+	end
+	
+	it "requires package include patterns" do
+		Dir.mktmpdir do |root|
+			write(File.join(root, "node_modules/example/example.js"), "example")
+			write(File.join(root, "package.json"), JSON.generate(
+				"utopia" => {"components" => {"example" => {}}},
+			))
+			
+			expect do
+				subject.new(root).update(["example"])
+			end.to raise_exception(ArgumentError, message: be =~ /include must be a non-empty array/)
+		end
+	end
+	
+	{
+		"type" => nil,
+		"absolute" => "/example.js",
+		"parent" => "../example.js",
+	}.each do |name, pattern|
+		it "rejects invalid include patterns", unique: name do
+			Dir.mktmpdir do |root|
+				write(File.join(root, "node_modules/example/example.js"), "example")
+				write(File.join(root, "package.json"), JSON.generate(
+					"utopia" => {"components" => {"example" => {"include" => [pattern]}}},
+				))
+				
+				expect do
+					subject.new(root).update(["example"])
+				end.to raise_exception(ArgumentError, message: be =~ /Invalid include pattern/)
+			end
 		end
 	end
 	

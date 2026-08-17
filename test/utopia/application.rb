@@ -6,6 +6,7 @@
 require "protocol/http/request"
 require "tmpdir"
 require "utopia/application"
+require "variant"
 
 describe Utopia::Application do
 	let(:http_request) {Protocol::HTTP::Request["GET", "/hello?name=sam"]}
@@ -149,14 +150,17 @@ describe Utopia::Application do
 		end
 	end
 	
-	it "loads the generated serve configuration" do
+	it "loads the generated production serve configuration" do
 		path = File.expand_path("../../setup/site/config/serve.rb", __dir__)
-		application = Protocol::HTTP::Middleware.load(path)
-		response = application.call(Protocol::HTTP::Request["GET", "/"])
 		
-		expect(application).to be_a(Utopia::Application)
-		expect(response.status).to be == 301
-		expect(response.headers["location"]).to be == "/welcome/index"
+		Variant::Environment.instance.with({"VARIANT" => "production"}) do
+			application = Protocol::HTTP::Middleware.load(path)
+			response = application.call(Protocol::HTTP::Request["GET", "/"])
+			
+			expect(application).to be_a(Utopia::Application)
+			expect(response.status).to be == 301
+			expect(response.headers["location"]).to be == "/welcome/index"
+		end
 	ensure
 		response&.close
 		application&.close
