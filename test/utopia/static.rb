@@ -223,11 +223,29 @@ describe Utopia::Static do
 		expect(last_response.read).to be == "Hello World!"
 	end
 	
-	it "should ignore unsatisfiable ranges" do
+	it "returns range not satisfiable when no ranges can be fulfilled" do
 		client.get "/test.txt", {"range" => "bytes=999-1000"}
 		
-		expect(last_response.status).to be == 200
-		expect(last_response.read).to be == "Hello World!"
+		expect(last_response.status).to be == 416
+		expect(last_response.headers["content-length"]).to be == "0"
+		expect(last_response.headers["content-range"]).to be == "bytes */12"
+		expect(last_response.read).to be_nil
+	end
+	
+	it "returns range not satisfiable when several ranges cannot be fulfilled" do
+		client.get "/test.txt", {"range" => "bytes=999-1000,2000-3000"}
+		
+		expect(last_response.status).to be == 416
+		expect(last_response.headers["content-range"]).to be == "bytes */12"
+		expect(last_response.read).to be_nil
+	end
+	
+	it "returns a single satisfiable range from a mixed range set" do
+		client.get "/test.txt", {"range" => "bytes=0-1,999-1000"}
+		
+		expect(last_response.status).to be == 206
+		expect(last_response.headers["content-range"]).to be == "bytes 0-1/12"
+		expect(last_response.read).to be == "He"
 	end
 	
 	it "should ignore multiple ranges" do
