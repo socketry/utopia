@@ -103,6 +103,12 @@ describe Utopia::Request do
 		expect(request.cookies).to be == {"a" => "1", "b" => "2"}
 	end
 	
+	it "provides empty cookie values without a cookie header" do
+		request = subject["GET", "/"]
+		
+		expect(request.cookies).to be == {}
+	end
+	
 	it "preserves cookie values without applying form decoding" do
 		request.headers["cookie"] = "plus=a+b; encoded=%2F"
 		

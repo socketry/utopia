@@ -63,6 +63,18 @@ describe Utopia::ImportMap do
 			expect(import_map.imports["lit"]).to be == "https://cdn.jsdelivr.net/npm/lit@2.7.5/index.js"
 		end
 		
+		it "resolves nested bases relative to the parent base" do
+			import_map = subject.build do |map|
+				map.with(base: "https://cdn.example.com/") do |cdn|
+					cdn.with(base: "packages/") do |packages|
+						packages.import("example", "example.js")
+					end
+				end
+			end
+			
+			expect(import_map.imports["example"]).to be == "https://cdn.example.com/packages/example.js"
+		end
+		
 		it "supports with(base:) with instance_eval style" do
 			import_map = subject.build do |map|
 				map.with(base: "https://esm.sh/") do
