@@ -24,7 +24,7 @@ module Utopia
 			class PayloadError < StandardError
 			end
 			
-			MAXIMUM_SIZE = 1024*32
+			SIZE_LIMIT = 1024*32
 			
 			SECRET_KEY = "UTOPIA_SESSION_SECRET".freeze
 			
@@ -50,8 +50,8 @@ module Utopia
 			# @param http_only [Boolean] Whether client-side scripts may access the cookie.
 			# @param same_site [Symbol | String | Boolean | Nil] Controls whether the cookie is sent with cross-site requests.
 			# @param partitioned [Boolean] Whether the cookie uses partitioned storage.
-			# @param maximum_size [Integer | Nil] The maximum encoded session payload size.
-			def initialize(app, session_name: SESSION_KEY, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, domain: nil, path: "/", max_age: nil, secure: false, http_only: true, same_site: :lax, partitioned: false, maximum_size: MAXIMUM_SIZE)
+			# @param size_limit [Integer | Nil] The encoded session payload size limit.
+			def initialize(app, session_name: SESSION_KEY, secret: nil, expires_after: DEFAULT_EXPIRES_AFTER, update_timeout: DEFAULT_UPDATE_TIMEOUT, domain: nil, path: "/", max_age: nil, secure: false, http_only: true, same_site: :lax, partitioned: false, size_limit: SIZE_LIMIT)
 				super(app)
 				
 				@session_name = session_name
@@ -85,7 +85,7 @@ module Utopia
 				}
 				
 				@serialization = Serialization.new
-				@maximum_size = maximum_size
+				@size_limit = size_limit
 			end
 			
 			attr :cookie_name
@@ -268,13 +268,15 @@ module Utopia
 				encrypted_data << cipher.final
 				
 				payload = initialization_vector + encrypted_data + cipher.auth_tag(AUTHENTICATION_TAG_SIZE)
-				return "#{PAYLOAD_VERSION}.#{[payload].pack("m0")}"
+				data = "#{PAYLOAD_VERSION}.#{[payload].pack("m0")}"
+				
+				validate_size!(data)
+				
+				return data
 			end
 			
 			def decrypt(data)
-				if @maximum_size and data.bytesize > @maximum_size
-					raise PayloadError, "Session payload size #{data.bytesize}bytes exceeds maximum allowed size #{@maximum_size}bytes!"
-				end
+				validate_size!(data)
 				
 				version, encoded_payload = data.split(".", 2)
 				
@@ -307,6 +309,12 @@ module Utopia
 					return @serialization.load(decrypted_data)
 				rescue ArgumentError, OpenSSL::Cipher::CipherError
 					raise PayloadError, "Invalid session payload!"
+				end
+			end
+			
+			def validate_size!(data)
+				if @size_limit and data.bytesize > @size_limit
+					raise PayloadError, "Session payload size #{data.bytesize}bytes exceeds size limit #{@size_limit}bytes!"
 				end
 			end
 		end
