@@ -5,9 +5,10 @@
 
 require "utopia/static/mime_types"
 
-describe Utopia::Static::MIME_TYPES do
-	let(:extensions) {Utopia::Static::MimeTypeLoader.extensions_for(subject[:default])}
-	let(:script_extensions) {Utopia::Static::MimeTypeLoader.extensions_for(subject[:scripts])}
+describe "Utopia::Static::MIME_TYPES" do
+	let(:mime_types) {Utopia::Static::MIME_TYPES}
+	let(:extensions) {Utopia::Static::MimeTypeLoader.extensions_for(mime_types[:default])}
+	let(:script_extensions) {Utopia::Static::MimeTypeLoader.extensions_for(mime_types[:scripts])}
 	
 	it "groups script extensions" do
 		expect(script_extensions).to have_keys(
