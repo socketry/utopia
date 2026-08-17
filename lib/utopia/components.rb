@@ -8,7 +8,7 @@ require "json"
 require "pathname"
 
 module Utopia
-	# Installs JavaScript packages into the public components directory. Package contents are copied from `dist` when it exists, otherwise from the package root.
+	# Installs JavaScript packages from `node_modules` into the public components directory. Package contents are copied from `dist` when it exists, otherwise from the package root.
 	#
 	# By default, the complete source directory is installed. Projects can limit an individual package to a set of files using `utopia.components` in their `package.json` file.
 	class Components
@@ -18,11 +18,6 @@ module Utopia
 		def initialize(root)
 			@root = Pathname.new(root)
 			@package_root = @root + "node_modules"
-			
-			# This is a legacy path:
-			unless @package_root.directory?
-				@package_root = @root + "lib/components"
-			end
 			
 			@install_root = @root + "public/_components"
 			@configuration = load_configuration

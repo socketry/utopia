@@ -57,14 +57,10 @@ describe Utopia::Components do
 		expect(File.read(installed)).to be == "syntax"
 	end
 	
-	it "uses the legacy components directory" do
-		write(File.join(root, "lib/components/example/example.js"), "example")
-		
+	it "uses node_modules as the package directory" do
 		components = subject.new(root)
-		components.update(["example"])
 		
-		expect(components.package_root).to be == Pathname.new(root) + "lib/components"
-		expect(File.read(File.join(root, "public/_components/example/example.js"))).to be == "example"
+		expect(components.package_root).to be == Pathname.new(root) + "node_modules"
 	end
 	
 	it "requires component configuration to be an object" do
