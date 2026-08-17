@@ -5,6 +5,7 @@
   - **Breaking** Remove support for JavaScript packages installed in `lib/components`; use `node_modules` instead.
   - **Breaking** Expose {ruby Utopia::Content::Middleware#links} as the content link resolver rather than an indexed lookup method.
   - **Security** Authenticate encrypted session cookies using AES-256-GCM. Existing session cookies are invalidated.
+  - Constrain content node local paths to the configured content root.
   - **Security** Redact sensitive exception report fields and make bounded request body attachments opt-in.
   - Return `416 Range Not Satisfiable` for unsatisfiable static file byte ranges.
 
