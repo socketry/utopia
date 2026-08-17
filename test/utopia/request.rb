@@ -54,10 +54,10 @@ describe Utopia::Request do
 	
 	it "identifies QUERY requests" do
 		request.method = "QUERY"
-		expect(request.query?).to be == true
+		expect(request).to be(:query?)
 		
 		request.method = "GET"
-		expect(request.query?).to be == false
+		expect(request).not.to be(:query?)
 	end
 	
 	it "provides decoded query arguments" do
