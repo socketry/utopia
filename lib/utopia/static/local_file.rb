@@ -69,9 +69,13 @@ module Utopia
 				ranges = byte_ranges(request)
 				size = bytesize
 				
-				# puts "Requesting ranges: #{ranges.inspect} (#{size})"
-				
-				if ranges == nil or ranges.size != 1
+				# A valid byte-range request with no satisfiable ranges cannot be fulfilled:
+				if ranges && ranges.empty?
+					response_headers[CONTENT_LENGTH] = "0"
+					response_headers[CONTENT_RANGE] = "bytes */#{size}"
+					
+					return Response[416, response_headers, []]
+				elsif ranges == nil or ranges.size != 1
 					# No ranges, or multiple ranges (which we don't support).
 					# TODO: Support multiple byte-ranges, for now just send entire file:
 					status = 200
