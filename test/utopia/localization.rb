@@ -38,6 +38,35 @@ describe Utopia::Localization do
 		expect(ignore).to be(:frozen?)
 	end
 	
+	it "represents active and inactive localization preferences" do
+		active = Utopia::Localization::Preferences.new(
+			all_locales: ["en"],
+			preferred_locales: ["en", nil],
+			default_locale: "en",
+		)
+		inactive = Utopia::Localization::Preferences.new(
+			all_locales: [],
+			preferred_locales: [nil],
+			default_locale: nil,
+		)
+		
+		expect(active).to be(:localized?)
+		expect(inactive).not.to be(:localized?)
+		expect(inactive.localized_path("/example")).to be == "/example"
+	end
+	
+	it "includes the default locale in the configured fallbacks" do
+		middleware = Utopia::Localization::Middleware.new(
+			Protocol::HTTP::Middleware::NotFound,
+			locales: ["en", "ja"],
+			default_locale: "en",
+			default_locales: ["ja", nil],
+		)
+		request = Utopia::Request["GET", "/"]
+		
+		expect(middleware.preferred_locales(request)).to be == ["en", "ja", nil]
+	end
+	
 	let(:middleware) do
 		root = File.expand_path(".localization", __dir__)
 		
@@ -164,6 +193,30 @@ describe Utopia::Localization do
 		
 		expect(last_response.read).to be == "unlocalized.content\n"
 		expect(last_response.headers["content-language"]).to be_nil
+	end
+	
+	it "passes through when no localized content representation exists" do
+		delegate = Protocol::HTTP::Middleware.for do |_request|
+			Utopia::Response.text("Fallback")
+		end
+		middleware = Utopia::Content::Middleware.new(
+			delegate,
+			root: File.expand_path(".localization", __dir__),
+		)
+		request = Utopia::Request["GET", "/missing"]
+		request.localization = Utopia::Localization::Preferences.new(
+			all_locales: ["en"],
+			preferred_locales: ["en"],
+			default_locale: "en",
+		)
+		
+		response = middleware.call(request)
+		
+		expect(response.status).to be == 200
+		expect(response.read).to be == "Fallback"
+	ensure
+		response&.close
+		middleware&.close
 	end
 	
 	it "keeps request preferences immutable while resolving content" do
