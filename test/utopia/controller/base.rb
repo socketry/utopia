@@ -12,6 +12,36 @@ require "stringio"
 
 describe Utopia::Controller::Base do
 	let(:controller) {subject.new}
+	let(:delegate) {Protocol::HTTP::Middleware.for{|request| Utopia::Response.text(request.path.to_s)}}
+	let(:controller_middleware) {Protocol::HTTP::Middleware.new(delegate)}
+	let(:controller_class) do
+		Class.new(subject).tap do |controller_class|
+			controller_class.const_set(:BASE_PATH, "/tmp/controller")
+			controller_class.const_set(:URI_PATH, Utopia::Path["/controller"])
+			controller_class.const_set(:CONTROLLER, controller_middleware)
+		end
+	end
+	
+	it "exposes configured controller metadata" do
+		expect(controller_class.base_path).to be == "/tmp/controller"
+		expect(controller_class.uri_path).to be == Utopia::Path["/controller"]
+		expect(controller_class.controller).to be_equal(controller_middleware)
+		
+		expect(controller_class.direct?(Utopia::Path["/controller/index"])).to be == true
+		expect(controller_class.direct?(Utopia::Path["/other/index"])).to be == false
+	end
+	
+	it "delegates requests through its controller middleware" do
+		request = Utopia::Request["GET", "/controller/index"]
+		response = controller_class.new.call(request)
+		
+		expect(response.status).to be == 200
+		expect(response.read).to be == "/controller/index"
+	end
+	
+	it "describes controller instances" do
+		expect(controller.to_s).to be == "#<Utopia::Controller::Base>"
+	end
 	
 	it "produces semantic results for negotiated responses" do
 		result = controller.catch_response do

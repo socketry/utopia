@@ -37,6 +37,12 @@ describe Utopia::Controller::Variables do
 		expect(variables.fetch(:y){:default}).to be == :default
 	end
 	
+	it "raises when a key is not found" do
+		expect do
+			variables.fetch(:missing)
+		end.to raise_exception(KeyError)
+	end
+	
 	it "should convert to hash" do
 		variables << a << b
 		
