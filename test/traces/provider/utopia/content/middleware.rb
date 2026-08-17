@@ -41,7 +41,7 @@ describe Utopia::Content::Middleware do
 		
 		expect(response.status).to be == 307
 		expect(traces).to be == [[
-			"utopia.content.middleware.respond",
+			"utopia.content.respond",
 			{
 				"link.key" => "example.en",
 				"link.href" => "/target",
