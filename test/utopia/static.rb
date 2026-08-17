@@ -262,10 +262,12 @@ describe Utopia::Static do
 		expect(last_response.read).to be == "Hello World!"
 	end
 	
-	it "should reject malformed ranges" do
-		expect do
-			client.get "/test.txt", {"range" => "bytes=4-1"}
-		end.to raise_exception(Protocol::HTTP::Header::Range::ParseError)
+	it "ignores malformed ranges" do
+		client.get "/test.txt", {"range" => "bytes=4-1"}
+		
+		expect(last_response.status).to be == 200
+		expect(last_response.headers["content-range"]).to be_nil
+		expect(last_response.read).to be == "Hello World!"
 	end
 	
 	it "expands relative roots during initialization" do

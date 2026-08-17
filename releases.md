@@ -7,6 +7,7 @@
   - **Security** Authenticate encrypted session cookies using AES-256-GCM. Existing session cookies are invalidated.
   - Constrain content node local paths to the configured content root.
   - **Security** Redact sensitive exception report fields and make bounded request body attachments opt-in.
+  - Ignore malformed `Range` headers when serving static files.
   - Return `416 Range Not Satisfiable` for unsatisfiable static file byte ranges.
 
 ## v3.0.0

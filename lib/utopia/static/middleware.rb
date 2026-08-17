@@ -98,10 +98,11 @@ module Utopia
 				end
 				
 				if file = fetch_file(local_path)
+					ranges = file.byte_ranges(request)
 					response_headers = self.response_headers_for(file, content_type)
 					
 					if file.modified?(request)
-						return file.serve(request, response_headers)
+						return file.serve(request, response_headers, ranges: ranges)
 					else
 						return Response[304, response_headers, []]
 					end

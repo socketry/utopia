@@ -64,9 +64,9 @@ module Utopia
 			# Serve.
 			# @parameter request [Utopia::Request] The request.
 			# @parameter response_headers [Hash] The response headers.
+			# @parameter ranges [Array | Nil] The resolved byte ranges.
 			# @returns [Protocol::HTTP::Response] The response.
-			def serve(request, response_headers)
-				ranges = byte_ranges(request)
+			def serve(request, response_headers, ranges: byte_ranges(request))
 				size = bytesize
 				
 				# A valid byte-range request with no satisfiable ranges cannot be fulfilled:
@@ -76,8 +76,7 @@ module Utopia
 					
 					return Response[416, response_headers, []]
 				elsif ranges == nil or ranges.size != 1
-					# No ranges, or multiple ranges (which we don't support).
-					# TODO: Support multiple byte-ranges, for now just send entire file:
+					# With no range, or multiple unsupported ranges, send the entire file:
 					status = 200
 					response_headers[CONTENT_LENGTH] = size.to_s
 					range = nil
@@ -114,6 +113,11 @@ module Utopia
 				end
 				
 				return range.resolve(bytesize)
+			rescue Protocol::HTTP::Header::Range::ParseError
+				# Ignore malformed range headers and serve the complete representation:
+				request.headers.extract(["range"])
+				
+				return nil
 			end
 			
 			# Check whether an If-Range validator strongly matches this file.
