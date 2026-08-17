@@ -22,4 +22,27 @@ describe Utopia::Content::Middleware do
 		
 		expect(markup).to be == "<root><physical>Hello World</physical></root>"
 	end
+	
+	it "resolves nested content paths through the physical hierarchy" do
+		parent = content.lookup_node(Utopia::Path["/fallback/index"])
+		node = content.lookup_tag("content:shared/frame", parent)
+		
+		expect(node.uri_path).to be == Utopia::Path["/shared/frame"]
+		expect(node.request_path).to be == Utopia::Path["/fallback/shared/frame"]
+		expect(node.process!(nil).read).to be == "Nested Frame\n"
+	end
+	
+	it "returns nil when nested content does not exist" do
+		parent = content.lookup_node(Utopia::Path["/fallback/index"])
+		
+		expect(content.lookup_tag("content:missing/absent", parent)).to be_nil
+	end
+	
+	it "avoids resolving the current name recursively" do
+		parent = content.lookup_node(Utopia::Path["/fallback/index"])
+		node = content.lookup_tag("content:fallback", parent)
+		
+		expect(node.uri_path).to be == Utopia::Path["/fallback"]
+		expect(node.process!(nil).read).to be == "Fallback\n"
+	end
 end

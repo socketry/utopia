@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2015-2025, by Samuel Williams.
+# Copyright, 2015-2026, by Samuel Williams.
 
 require_relative "link"
 
@@ -204,8 +204,10 @@ module Utopia
 				def each(locale)
 					return to_enum(:each, locale) unless block_given?
 					
-					ordered.each do |links|
-						yield links.find{|link| link.locale == locale}
+					@named.each_key do |name|
+						if link = lookup(name, locale)
+							yield link
+						end
 					end
 				end
 				

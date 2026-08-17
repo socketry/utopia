@@ -82,11 +82,7 @@ module Utopia
 			def text(content)
 				return unless content
 				
-				if content.respond_to?(:build_markup)
-					content.build_markup(self)
-				else
-					XRB::Markup.append(@output, content)
-				end
+				content.build_markup(self)
 			end
 			
 			# Write a complete tag to the output.

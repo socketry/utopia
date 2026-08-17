@@ -1,13 +1,22 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2015-2025, by Samuel Williams.
+# Copyright, 2015-2026, by Samuel Williams.
 
 require "utopia/content/links"
 
 describe Utopia::Content::Links do
 	let(:root) {File.expand_path("links", __dir__)}
 	let(:links) {subject.new(root)}
+	
+	it "provides uncached convenience methods" do
+		mock(subject) do |mock|
+			mock.replace(:warn){}
+		end
+		
+		expect(subject.for(root, Utopia::Path["/index"]).title).to be == "Home"
+		expect(subject.index(root, Utopia::Path["/"], name: "welcome").size).to be == 1
+	end
 	
 	with "#index_filter" do
 		it "should match index" do
@@ -80,6 +89,13 @@ describe Utopia::Content::Links do
 			matched = links.index("/", locale: "zh")
 			
 			expect(matched.collect(&:title)).to be == ["One", "Two", "Three", "四"]
+		end
+		
+		it "merges default metadata into localized indexes" do
+			matched = links.index("/", locale: "en")
+			four = matched.find{|link| link.name == "four"}
+			
+			expect(four.info[:category]).to be == "examples"
 		end
 	end
 	
@@ -213,6 +229,31 @@ describe Utopia::Content::Links do
 			link = links.for(Utopia::Path["/bar/index"])
 			expect(link.title).to be == "Bar"
 		end
+		
+		it "falls back to an unlocalized link" do
+			link = links.for(Utopia::Path["/welcome"], "en")
+			
+			expect(link.title).to be == "Welcome"
+			expect(links.for(Utopia::Path["/welcome"], "en", fallback: false)).to be_nil
+		end
+	end
+	
+	it "handles missing content directories" do
+		resolver = links.links(Utopia::Path["/missing"])
+		
+		expect(resolver.ordered).to be(:empty?)
+		expect(resolver.lookup("missing")).to be_nil
+	end
+	
+	it "enumerates one localized link per name" do
+		resolver = links.links(Utopia::Path.root)
+		selected = resolver.each("en").to_a
+		
+		expect(selected).not.to be(:empty?)
+		expect(selected).to be(:all?) do |link|
+			link.locale == "en" || link.locale.nil?
+		end
+		expect(selected.map(&:name)).to be(:include?, "welcome")
 	end
 	
 	it "encodes inferred link paths" do
@@ -239,6 +280,23 @@ describe Utopia::Content::Links do
 		)
 		
 		expect(link.href).to be == "/articles/document"
+	end
+	
+	it "describes link metadata" do
+		link = Utopia::Content::Link.new(
+			:virtual,
+			"document",
+			nil,
+			Utopia::Path.new(["", "articles", "document"]),
+			{title: "Document"},
+		)
+		copy = Utopia::Content::Link.new(:virtual, "document", nil, link.path, link.info)
+		
+		expect(link).to be(:virtual?)
+		expect(link).to be(:default_locale?)
+		expect(link.to_s).to be =~ /Document/
+		expect(link).to be(:eql?, copy)
+		expect(link).not.to be(:eql?, Object.new)
 	end
 	
 	it "keeps explicit targets opaque until relativization" do

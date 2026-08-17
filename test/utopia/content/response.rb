@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2012-2025, by Samuel Williams.
+# Copyright, 2012-2026, by Samuel Williams.
 
 require "utopia/content/response"
 
@@ -33,5 +33,13 @@ describe Utopia::Content::Response do
 		response.content_type! "text/html"
 		
 		expect(response.headers["content-type"]).to be == "text/html"
+	end
+	
+	it "joins rendered content" do
+		response.body << "Hello"
+		response.body << " World"
+		
+		expect(response.content).to be == "Hello World"
+		expect(response.lookup(nil)).to be_nil
 	end
 end

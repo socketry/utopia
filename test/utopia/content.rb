@@ -115,6 +115,12 @@ describe Utopia::Content do
 		expect(last_response.status).to be == 307
 		expect(last_response.headers["location"]).to be == "foo"
 	end
+	
+	it "passes missing content to the downstream middleware" do
+		client.get "/missing"
+		
+		expect(last_response.status).to be == 404
+	end
 end
 
 describe Utopia::Content do
