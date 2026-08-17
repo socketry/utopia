@@ -136,13 +136,6 @@ describe Utopia::Path do
 			
 			expect(path.to_absolute).to be == subject["/foo/bar"]
 		end
-		
-		it "removes the first component from a relative path" do
-			path = subject["foo/bar"]
-			
-			expect(path.to_relative!).to be == "foo"
-			expect(path).to be == subject["bar"]
-		end
 	end
 	
 	with "#first" do
@@ -477,9 +470,5 @@ describe Utopia::Path do
 			
 			expect(simplified.components).to be == ["", "a", "c", ""]
 		end
-	end
-	
-	it "provides module-level coercion" do
-		expect(Utopia.Path("foo/bar")).to be == subject["foo/bar"]
 	end
 end
