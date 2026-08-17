@@ -29,6 +29,23 @@ describe Utopia::Static do
 		expect(cache_control).to be(:frozen?)
 	end
 	
+	it "computes cache control from the served file" do
+		served_file = nil
+		application = Utopia::Application.build do
+			use Utopia::Static,
+				root: File.expand_path(".static", __dir__),
+				cache_control: proc{|file| served_file = file; "private, max-age=#{file.bytesize}"}
+		end
+		
+		response = application.call(Protocol::HTTP::Request["GET", "/test.txt"])
+		
+		expect(response.headers["cache-control"]).to be == ["private", "max-age=12"]
+		expect(served_file).to be_a(Utopia::Static::LocalFile)
+	ensure
+		response&.close
+		application.close
+	end
+	
 	let(:middleware) do
 		root = File.expand_path(".static", __dir__)
 		
@@ -301,6 +318,19 @@ describe Utopia::Static do
 				expect(first.etag).not.to be == second.etag
 			end
 		end
+		
+		it "matches strong entity tags for range requests" do
+			Dir.mktmpdir do |directory|
+				path = File.join(directory, "test.txt")
+				File.write(path, "Content")
+				
+				file = subject.new(path)
+				file.instance_variable_set(:@etag, '"strong"')
+				
+				expect(file.send(:if_range?, '"strong"')).to be == true
+				expect(file.send(:if_range?, '"different"')).to be == false
+			end
+		end
 	end
 	
 	describe Utopia::Static::MIME_TYPES do
@@ -326,6 +356,34 @@ describe Utopia::Static do
 				".spx" => be == "audio/speex",
 				".html" => be == "text/html",
 			)
+		end
+	end
+	
+	describe Utopia::Static::MimeTypeLoader do
+		it "expands explicit extension mappings" do
+			extensions = subject.extensions_for([["example", "application/example"]])
+			
+			expect(extensions).to have_keys(
+				".example" => be == "application/example",
+			)
+		end
+		
+		it "rejects unknown file extensions" do
+			expect do
+				subject.extensions_for(["not-a-real-extension"])
+			end.to raise_exception(subject::ExpansionError, message: be =~ /Unknown file extension/)
+		end
+		
+		it "rejects unsupported definitions" do
+			expect do
+				subject.extensions_for([Object.new])
+			end.to raise_exception(subject::ExpansionError, message: be =~ /Unsupported MIME type definition/)
+		end
+		
+		it "wraps errors while expanding named groups" do
+			expect do
+				subject.extensions_for([:missing], {})
+			end.to raise_exception(subject::ExpansionError, message: be =~ /Error while processing :missing/)
 		end
 	end
 end
