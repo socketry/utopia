@@ -122,11 +122,7 @@ module Utopia
 			
 			return cookies unless cookie_header
 			
-			if cookie_header.respond_to?(:to_str)
-				cookie_header = cookie_header.to_str
-			else
-				cookie_header = cookie_header.to_s
-			end
+			cookie_header = cookie_header.to_s
 			
 			cookie_header.split(/;\s*/).each do |pair|
 				key, value = pair.split("=", 2)

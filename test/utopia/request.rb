@@ -52,6 +52,14 @@ describe Utopia::Request do
 		expect(request.post?).to be == false
 	end
 	
+	it "identifies QUERY requests" do
+		request.method = "QUERY"
+		expect(request.query?).to be == true
+		
+		request.method = "GET"
+		expect(request.query?).to be == false
+	end
+	
 	it "provides decoded query arguments" do
 		expect(request.query_parameters).to be == {
 			"q" => "utopia",
