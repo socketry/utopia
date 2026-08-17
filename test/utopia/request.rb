@@ -52,6 +52,14 @@ describe Utopia::Request do
 		expect(request.post?).to be == false
 	end
 	
+	it "identifies QUERY requests" do
+		request.method = "QUERY"
+		expect(request).to be(:query?)
+		
+		request.method = "GET"
+		expect(request).not.to be(:query?)
+	end
+	
 	it "provides decoded query arguments" do
 		expect(request.query_parameters).to be == {
 			"q" => "utopia",
@@ -90,7 +98,8 @@ describe Utopia::Request do
 		expect(request).not.to be(:respond_to?, :parsed_body)
 	end
 	
-	it "provides decoded cookies" do
+	it "provides cookie values" do
+		expect(request.headers["cookie"]).to be_a(Protocol::HTTP::Header::Cookie)
 		expect(request.cookies).to be == {"a" => "1", "b" => "2"}
 	end
 	

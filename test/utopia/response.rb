@@ -20,6 +20,14 @@ describe Utopia::Response do
 		expect(response.headers["location"]).to be == "/target"
 	end
 	
+	it "builds HTML responses" do
+		response = subject.html("<h1>Hello</h1>", 201)
+		
+		expect(response.status).to be == 201
+		expect(response.headers["content-type"]).to be == "text/html; charset=utf-8"
+		expect(response.read).to be == "<h1>Hello</h1>"
+	end
+	
 	it "passes through protocol responses" do
 		response = Protocol::HTTP::Response[204]
 		

@@ -117,28 +117,13 @@ module Utopia
 			@query_parameters ||= parse_query_parameters(self.url.query)
 		end
 		
-		private def parse_cookies(cookie_header)
-			cookies = {}
-			
-			return cookies unless cookie_header
-			
-			if cookie_header.respond_to?(:to_str)
-				cookie_header = cookie_header.to_str
-			else
-				cookie_header = cookie_header.to_s
-			end
-			
-			cookie_header.split(/;\s*/).each do |pair|
-				key, value = pair.split("=", 2)
-				cookies[key] = value || ""
-			end
-			
-			return cookies
-		end
-		
 		# Decoded request cookies.
 		def cookies
-			@cookies ||= parse_cookies(self.headers["cookie"])
+			@cookies ||= if cookie_header = self.headers["cookie"]
+				cookie_header.to_h.transform_values(&:value)
+			else
+				{}
+			end
 		end
 		
 		# The request user agent.

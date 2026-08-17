@@ -33,6 +33,17 @@ describe Utopia::Application do
 		expect(response.headers["content-type"]).to be == "text/plain; charset=utf-8"
 	end
 	
+	it "yields the builder to blocks accepting arguments" do
+		application = subject.build do |builder|
+			builder.run Protocol::HTTP::Middleware.for{|request| Utopia::Response.text("Hello")}
+		end
+		
+		response = application.call(http_request)
+		
+		expect(response.status).to be == 200
+		expect(response.read).to be == "Hello"
+	end
+	
 	it "normalizes protocol response objects" do
 		response_object = Object.new
 		
