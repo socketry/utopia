@@ -110,7 +110,7 @@ describe Utopia::Components do
 	end
 	
 	{
-		"type" => nil,
+		"type" => 1,
 		"absolute" => "/example.js",
 		"parent" => "../example.js",
 	}.each do |name, pattern|

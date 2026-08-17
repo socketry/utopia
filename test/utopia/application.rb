@@ -152,6 +152,8 @@ describe Utopia::Application do
 	
 	it "loads the generated production serve configuration" do
 		path = File.expand_path("../../setup/site/config/serve.rb", __dir__)
+		application = nil
+		response = nil
 		
 		Variant::Environment.instance.with({"VARIANT" => "production"}) do
 			application = Protocol::HTTP::Middleware.load(path)
