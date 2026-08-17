@@ -399,4 +399,42 @@ describe Utopia::Session::LazyHash do
 		
 		expect(hash).to be(:needs_update?)
 	end
+	
+	it "should persist changed values" do
+		hash = Utopia::Session::LazyHash.new do
+			{a: 10}
+		end
+		
+		hash[:a] = 20
+		persisted_at = Time.now.utc
+		
+		result = hash.persist do |values, updated_at|
+			expect(values[:a]).to be == 20
+			expect(updated_at).to be >= persisted_at
+			expect(values[:updated_at]).to be_equal(updated_at)
+			
+			:complete
+		end
+		
+		expect(result).to be == :complete
+		expect(hash).not.to be(:changed?)
+		expect(hash).not.to be(:respond_to?, :values)
+		expect(hash).not.to be(:respond_to?, :load!)
+	end
+	
+	it "should retain changes if persistence fails" do
+		hash = Utopia::Session::LazyHash.new do
+			{a: 10}
+		end
+		
+		hash[:a] = 20
+		
+		expect do
+			hash.persist do
+				raise "Persistence failed!"
+			end
+		end.to raise_exception(RuntimeError, message: be == "Persistence failed!")
+		
+		expect(hash).to be(:changed?)
+	end
 end

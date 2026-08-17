@@ -16,10 +16,6 @@ module Utopia
 				@loader = block
 			end
 			
-			# The loaded session values, if already loaded.
-			# @returns [Hash | Nil] The loaded values.
-			attr :values
-			
 			# Fetch a value by key, loading the hash if necessary.
 			# @parameter key [Object] The key.
 			# @returns [Object | Nil] The value.
@@ -66,10 +62,20 @@ module Utopia
 				@changed
 			end
 			
-			# Load and return the underlying values.
-			# @returns [Hash] The loaded values.
-			def load!
-				@values ||= @loader.call
+			# Persist the session values if they have changed or require updating.
+			# @parameter timeout [Numeric | Nil] The maximum age before an update is required.
+			# @yields {|values, updated_at| ...} The loaded values and their update time.
+			# @returns [Object | Nil] The result of the block if persistence was required.
+			def persist(timeout = nil)
+				return unless needs_update?(timeout)
+				
+				values = load!
+				updated_at = values[:updated_at] = Time.now.utc
+				
+				result = yield(values, updated_at)
+				@changed = false
+				
+				return result
 			end
 			
 			# Check whether the underlying values have been loaded.
@@ -92,6 +98,13 @@ module Utopia
 				end
 				
 				return false
+			end
+			
+			private
+			
+			# Load and return the underlying values.
+			def load!
+				@values ||= @loader.call
 			end
 		end
 	end

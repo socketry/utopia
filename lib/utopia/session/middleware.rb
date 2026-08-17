@@ -149,14 +149,8 @@ module Utopia
 			end
 			
 			def update_session(session_hash, headers)
-				if session_hash.needs_update?(@update_timeout)
-					values = session_hash.values
-					
-					values[:updated_at] = Time.now.utc
-					
-					data = encrypt(session_hash.values)
-					
-					commit(data, values[:updated_at], headers)
+				session_hash.persist(@update_timeout) do |values, updated_at|
+					commit(encrypt(values), updated_at, headers)
 				end
 			end
 			
