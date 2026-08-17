@@ -16,7 +16,6 @@ require_relative "tags"
 
 require "xrb/template"
 require "concurrent/map"
-require "traces/provider"
 
 module Utopia
 	module Content
@@ -226,16 +225,5 @@ module Utopia
 			end
 		end
 		
-		Traces::Provider(Middleware) do
-			def respond(link, request, localization: request.localization)
-				attributes = {
-					"link.key" => link.key,
-					"link.href" => link.href,
-					"link.locale" => localization&.locale,
-				}
-				
-				Traces.trace("utopia.content.middleware.respond", attributes: attributes){super}
-			end
-		end
 	end
 end

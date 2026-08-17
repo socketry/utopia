@@ -11,8 +11,6 @@ require_relative "local_file"
 require_relative "mime_types"
 require_relative "../localization/resolver"
 
-require "traces/provider"
-
 module Utopia
 	module Static
 		DEFAULT_CACHE_CONTROL = "public, max-age=3600".freeze
@@ -138,15 +136,5 @@ module Utopia
 			end
 		end
 		
-		Traces::Provider(Static) do
-			def respond(request, path, extension, content_type, localization: request.localization)
-				attributes = {
-					path: path,
-					locale: localization&.locale,
-				}
-				
-				Traces.trace("utopia.static.respond", attributes: attributes){super}
-			end
-		end
 	end
 end

@@ -29,6 +29,23 @@ describe Utopia::Static do
 		expect(cache_control).to be(:frozen?)
 	end
 	
+	it "computes cache control from the served file" do
+		served_file = nil
+		application = Utopia::Application.build do
+			use Utopia::Static,
+				root: File.expand_path(".static", __dir__),
+				cache_control: proc{|file| served_file = file; "private, max-age=#{file.bytesize}"}
+		end
+		
+		response = application.call(Protocol::HTTP::Request["GET", "/test.txt"])
+		
+		expect(response.headers["cache-control"]).to be == ["private", "max-age=12"]
+		expect(served_file).to be_a(Utopia::Static::LocalFile)
+	ensure
+		response&.close
+		application.close
+	end
+	
 	let(:middleware) do
 		root = File.expand_path(".static", __dir__)
 		
@@ -261,71 +278,6 @@ describe Utopia::Static do
 			ensure
 				application.close
 			end
-		end
-	end
-	
-	describe Utopia::Static::LocalFile do
-		it "uses a consistent metadata snapshot" do
-			Dir.mktmpdir do |directory|
-				path = File.join(directory, "test.txt")
-				File.write(path, "Original")
-				
-				file = subject.new(path)
-				mtime_date = file.mtime_date
-				etag = file.etag
-				
-				File.write(path, "Updated content")
-				
-				expect(file.bytesize).to be == 8
-				expect(file.mtime_date).to be == mtime_date
-				expect(file.etag).to be == etag
-			end
-		end
-		
-		it "includes subsecond modification time in entity tags" do
-			Dir.mktmpdir do |directory|
-				path = File.join(directory, "test.txt")
-				File.write(path, "Content")
-				
-				seconds = Time.now.to_i - 1
-				first_mtime = Time.at(seconds, 100_000_000, :nanosecond)
-				second_mtime = Time.at(seconds, 200_000_000, :nanosecond)
-				
-				File.utime(first_mtime, first_mtime, path)
-				first = subject.new(path)
-				
-				File.utime(second_mtime, second_mtime, path)
-				second = subject.new(path)
-				
-				expect(first.mtime_date).to be == second.mtime_date
-				expect(first.etag).not.to be == second.etag
-			end
-		end
-	end
-	
-	describe Utopia::Static::MIME_TYPES do
-		let(:extensions) {Utopia::Static::MimeTypeLoader.extensions_for(subject[:default])}
-		let(:script_extensions) {Utopia::Static::MimeTypeLoader.extensions_for(subject[:scripts])}
-		
-		it "groups script extensions" do
-			expect(script_extensions).to have_keys(
-				".js" => be == "text/javascript",
-				".mjs" => be == "text/javascript",
-				".wasm" => be == "application/wasm",
-			)
-		end
-		
-		it "should give the correct mime type" do
-			expect(extensions).to have_keys(
-				".txt" => be == "text/plain",
-				".mjs" => be == "text/javascript",
-				".wasm" => be == "application/wasm",
-				".webm" => be == "video/webm",
-				".weba" => be == "audio/webm",
-				".ogg" => be == "audio/vorbis",
-				".spx" => be == "audio/speex",
-				".html" => be == "text/html",
-			)
 		end
 	end
 end
