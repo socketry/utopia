@@ -191,19 +191,31 @@ describe Utopia::Session::Middleware do
 		end.to raise_exception(ArgumentError)
 	end
 	
-	it "enforces the encoded payload size limit" do
-		data = middleware(maximum_size: nil).send(:encrypt, {value: "test"})
-		allowed = middleware(maximum_size: data.bytesize)
-		rejected = middleware(maximum_size: data.bytesize - 1)
+	it "enforces the encoded payload size limit when decrypting" do
+		data = middleware(size_limit: nil).send(:encrypt, {value: "test"})
+		allowed = middleware(size_limit: data.bytesize)
+		rejected = middleware(size_limit: data.bytesize - 1)
 		
 		expect(allowed.send(:decrypt, data)).to be == {value: "test"}
 		expect do
 			rejected.send(:decrypt, data)
-		end.to raise_exception(subject::PayloadError, message: be =~ /exceeds maximum allowed size/)
+		end.to raise_exception(subject::PayloadError, message: be =~ /exceeds size limit/)
+	end
+	
+	it "enforces the encoded payload size limit when encrypting" do
+		values = {value: "test"}
+		data = middleware(size_limit: nil).send(:encrypt, values)
+		allowed = middleware(size_limit: data.bytesize)
+		rejected = middleware(size_limit: data.bytesize - 1)
+		
+		expect(allowed.send(:encrypt, values).bytesize).to be == data.bytesize
+		expect do
+			rejected.send(:encrypt, values)
+		end.to raise_exception(subject::PayloadError, message: be =~ /exceeds size limit/)
 	end
 	
 	it "encrypts authenticated session payloads" do
-		instance = middleware(maximum_size: nil)
+		instance = middleware(size_limit: nil)
 		values = {value: "test"}
 		data = instance.send(:encrypt, values)
 		
@@ -213,7 +225,7 @@ describe Utopia::Session::Middleware do
 	end
 	
 	it "rejects modified session payloads" do
-		instance = middleware(maximum_size: nil)
+		instance = middleware(size_limit: nil)
 		data = instance.send(:encrypt, {value: "test"})
 		encoded_payload = data.split(".", 2).last
 		payload_size = encoded_payload.unpack1("m0").bytesize
@@ -226,11 +238,11 @@ describe Utopia::Session::Middleware do
 	end
 	
 	it "rejects payloads from a different context" do
-		data = middleware(maximum_size: nil).send(:encrypt, {value: "test"})
+		data = middleware(size_limit: nil).send(:encrypt, {value: "test"})
 		
 		[
-			middleware(maximum_size: nil, session_name: "other.session"),
-			subject.new(delegate, secret: "other-secret", maximum_size: nil),
+			middleware(size_limit: nil, session_name: "other.session"),
+			subject.new(delegate, secret: "other-secret", size_limit: nil),
 		].each do |instance|
 			expect do
 				instance.send(:decrypt, data)
@@ -239,7 +251,7 @@ describe Utopia::Session::Middleware do
 	end
 	
 	it "rejects unsupported and malformed payloads" do
-		instance = middleware(maximum_size: nil)
+		instance = middleware(size_limit: nil)
 		data = instance.send(:encrypt, {value: "test"})
 		encoded_payload = data.split(".", 2).last
 		
