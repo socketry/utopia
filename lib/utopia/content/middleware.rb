@@ -65,11 +65,7 @@ module Utopia
 			end
 			
 			attr :root
-			
-			# TODO we should remove this method and expose `@links` directly.
-			def links(path, **options)
-				@links.index(path, **options)
-			end
+			attr :links
 			
 			# Load and cache a content template.
 			# @parameter path [Utopia::Path | String] The path.
