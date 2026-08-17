@@ -84,6 +84,20 @@ describe Utopia::Content::Node do
 			
 			expect(node.local_path("/shared/preview.jpg")).to be == (base + "shared/preview.jpg")
 		end
+		
+		it "rejects absolute paths which escape the content root" do
+			node = content.lookup_node(Utopia::Path["/ordered/index"])
+			
+			expect do
+				node.local_path("/../../outside")
+			end.to raise_exception(ArgumentError, message: be =~ /escapes the specified root/)
+		end
+		
+		it "contains relative paths within the content root" do
+			node = content.lookup_node(Utopia::Path["/ordered/index"])
+			
+			expect(node.local_path("../../../outside")).to be == (base + "outside")
+		end
 	end
 	
 	with "#relative_path" do

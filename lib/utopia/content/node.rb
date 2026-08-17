@@ -51,14 +51,12 @@ module Utopia
 			def local_path(path = ".", base = nil)
 				path = Path[path]
 				
-				root = Pathname.new(@controller.root)
-				
-				if path.absolute?
-					return root.join(*path.components)
-				else
+				if path.relative?
 					base ||= uri_path.dirname
-					return root.join(*(base + path).components)
+					path = base + path
 				end
+				
+				return Pathname.new(path.to_url_path.local_path(@controller.root))
 			end
 			
 			# Resolve a path relative to this node's containing URI path.
