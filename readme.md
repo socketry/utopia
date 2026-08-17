@@ -31,6 +31,15 @@ Please see the [project documentation](https://socketry.github.io/utopia/) for m
 
 Please see the [project releases](https://socketry.github.io/utopia/releases/index) for all releases.
 
+### v3.0.5
+
+  - **Breaking** Remove support for JavaScript packages installed in `lib/components`; use `node_modules` instead.
+  - **Breaking** Expose <code class="language-ruby">Utopia::Content::Middleware\#links</code> as the content link resolver rather than an indexed lookup method.
+  - **Security** Authenticate encrypted session cookies using AES-256-GCM. Existing session cookies are invalidated.
+  - Constrain content node local paths to the configured content root.
+  - **Security** Redact sensitive exception report fields and make bounded request body attachments opt-in.
+  - Return `416 Range Not Satisfiable` for unsatisfiable static file byte ranges.
+
 ### v3.0.0
 
 The 3.0.x series is considered a development release while the protocol HTTP application and controller interfaces stabilize.
