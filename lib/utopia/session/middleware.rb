@@ -180,8 +180,8 @@ module Utopia
 							
 							return values
 						end
-					rescue => error
-						Console.error(self, error)
+					rescue PayloadError => error
+						Console.debug(self, "Discarding invalid session cookie!", exception: error)
 					end
 				end
 				
