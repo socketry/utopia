@@ -167,7 +167,7 @@ This template would typically be designed with supporting `_page.xnode` and `_he
 
 ## Session
 
-The {ruby Utopia::Session} middleware provides session storage using encrypted client-side cookies. The session management uses symmetric private key encryption to store data on the client and avoid tampering.
+The {ruby Utopia::Session} middleware provides session storage using authenticated, encrypted client-side cookies. The session management uses symmetric private key encryption to store data on the client and prevent tampering.
 
 ```ruby
 use Utopia::Session,
@@ -177,7 +177,7 @@ use Utopia::Session,
 	secure: true
 ```
 
-All session data is stored on the client, but it's encrypted with a salt and the secret key. It is impossible for the client to decrypt the data without the secret stored on the server.
+All session data is stored on the client, but it is encrypted and authenticated with a key derived from the secret. The client cannot read or modify the data without the secret stored on the server.
 
 When the middleware is installed, the session is available on the request:
 

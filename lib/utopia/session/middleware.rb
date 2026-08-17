@@ -29,7 +29,9 @@ module Utopia
 			SECRET_KEY = "UTOPIA_SESSION_SECRET".freeze
 			
 			SESSION_KEY = "utopia.session".freeze
-			CIPHER_ALGORITHM = "aes-256-cbc"
+			CIPHER_ALGORITHM = "aes-256-gcm"
+			PAYLOAD_VERSION = "v1".freeze
+			AUTHENTICATION_TAG_SIZE = 16
 			
 			# The session will expire if no requests were made within 24 hours:
 			DEFAULT_EXPIRES_AFTER = 3600*24
@@ -61,6 +63,7 @@ module Utopia
 				
 				# This generates a 32-byte key suitable for aes.
 				@key = Digest::SHA2.digest(secret)
+				@authentication_context = "#{@cookie_name}\0#{PAYLOAD_VERSION}".b.freeze
 				
 				@expires_after = expires_after
 				@update_timeout = update_timeout
@@ -100,6 +103,7 @@ module Utopia
 				
 				@cookie_name.freeze
 				@key.freeze
+				@authentication_context.freeze
 				@expires_after.freeze
 				@update_timeout.freeze
 				@cookie_defaults.freeze
@@ -253,17 +257,18 @@ module Utopia
 			end
 			
 			def encrypt(hash)
-				c = OpenSSL::Cipher.new(CIPHER_ALGORITHM)
-				c.encrypt
+				cipher = OpenSSL::Cipher.new(CIPHER_ALGORITHM)
+				cipher.encrypt
 				
-				# your pass is what is used to encrypt/decrypt
-				c.key = @key
-				c.iv = iv = c.random_iv
+				cipher.key = @key
+				cipher.iv = initialization_vector = cipher.random_iv
+				cipher.auth_data = @authentication_context
 				
-				e = c.update(@serialization.dump(hash))
-				e << c.final
+				encrypted_data = cipher.update(@serialization.dump(hash))
+				encrypted_data << cipher.final
 				
-				return [iv + e].pack("m0")
+				payload = initialization_vector + encrypted_data + cipher.auth_tag(AUTHENTICATION_TAG_SIZE)
+				return "#{PAYLOAD_VERSION}.#{[payload].pack("m0")}"
 			end
 			
 			def decrypt(data)
@@ -271,20 +276,38 @@ module Utopia
 					raise PayloadError, "Session payload size #{data.bytesize}bytes exceeds maximum allowed size #{@maximum_size}bytes!"
 				end
 				
-				payload = data.unpack1("m0")
-				iv = payload.byteslice(0, 16)
-				e = payload.byteslice(16..)
+				version, encoded_payload = data.split(".", 2)
 				
-				c = OpenSSL::Cipher.new(CIPHER_ALGORITHM)
-				c.decrypt
+				if version != PAYLOAD_VERSION or encoded_payload.nil?
+					raise PayloadError, "Unsupported session payload format!"
+				end
 				
-				c.key = @key
-				c.iv = iv
-				
-				d = c.update(e)
-				d << c.final
-				
-				return @serialization.load(d)
+				begin
+					cipher = OpenSSL::Cipher.new(CIPHER_ALGORITHM)
+					payload = encoded_payload.unpack1("m0")
+					minimum_size = cipher.iv_len + AUTHENTICATION_TAG_SIZE
+					
+					if payload.bytesize < minimum_size
+						raise PayloadError, "Invalid session payload!"
+					end
+					
+					initialization_vector = payload.byteslice(0, cipher.iv_len)
+					encrypted_data = payload.byteslice(cipher.iv_len, payload.bytesize - minimum_size)
+					authentication_tag = payload.byteslice(-AUTHENTICATION_TAG_SIZE, AUTHENTICATION_TAG_SIZE)
+					
+					cipher.decrypt
+					cipher.key = @key
+					cipher.iv = initialization_vector
+					cipher.auth_tag = authentication_tag
+					cipher.auth_data = @authentication_context
+					
+					decrypted_data = cipher.update(encrypted_data)
+					decrypted_data << cipher.final
+					
+					return @serialization.load(decrypted_data)
+				rescue ArgumentError, OpenSSL::Cipher::CipherError
+					raise PayloadError, "Invalid session payload!"
+				end
 			end
 		end
 	end
