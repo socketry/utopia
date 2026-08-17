@@ -15,6 +15,6 @@ Traces::Provider(Utopia::Content::Middleware) do
 			"link.locale" => localization&.locale,
 		}
 		
-		Traces.trace("utopia.content.middleware.respond", attributes: attributes){super}
+		Traces.trace("utopia.content.respond", attributes: attributes){super}
 	end
 end
