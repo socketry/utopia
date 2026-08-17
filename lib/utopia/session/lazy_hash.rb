@@ -62,6 +62,12 @@ module Utopia
 				@changed
 			end
 			
+			# The current time for session expiry and persistence.
+			# @returns [Time] The current time in UTC.
+			def now
+				Time.now.utc
+			end
+			
 			# Persist the session values if they have changed or require updating.
 			# @parameter timeout [Numeric | Nil] The maximum age before an update is required.
 			# @yields {|values, updated_at| ...} The loaded values and their update time.
@@ -70,7 +76,7 @@ module Utopia
 				return unless needs_update?(timeout)
 				
 				values = load!
-				updated_at = values[:updated_at] = Time.now.utc
+				updated_at = values[:updated_at] = now
 				
 				result = yield(values, updated_at)
 				@changed = false
@@ -94,7 +100,7 @@ module Utopia
 				# We want to be careful here and not call load! which isn't cheap operation.
 				if timeout and @values and updated_at = @values[:updated_at]
 					# If the last update was too long ago, we need update:
-					return true if updated_at < (Time.now - timeout)
+					return true if updated_at < (now - timeout)
 				end
 				
 				return false
@@ -104,7 +110,7 @@ module Utopia
 			
 			# Load and return the underlying values.
 			def load!
-				@values ||= @loader.call
+				@values ||= @loader.call(now)
 			end
 		end
 	end

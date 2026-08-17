@@ -11,8 +11,14 @@ require "utopia/session"
 describe Utopia::Session do
 	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
+	let(:clock) {Struct.new(:now).new(Time.now.utc)}
+	
 	let(:middleware) do
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
+			mock(request.session) do |session|
+				session.replace(:now){clock.now}
+			end
+			
 			case request.path.to_s
 			when "/login"
 				request.session["login"] = "true"
@@ -75,8 +81,7 @@ describe Utopia::Session do
 		client.get "/session-set?key=foo&value=bar"
 		expect(last_response.headers).to have_keys("set-cookie")
 		
-		# Sleep more than update_timeout
-		sleep 2
+		clock.now += 2
 		
 		client.get "/session-set?key=foo&value=bar"
 		expect(last_response.headers).to have_keys("set-cookie")
@@ -272,8 +277,14 @@ end
 describe Utopia::Session do
 	include Sus::Fixtures::Protocol::HTTP::MiddlewareContext
 	
+	let(:clock) {Struct.new(:now).new(Time.now.utc)}
+	
 	let(:middleware) do
 		Utopia::Application.build(Protocol::HTTP::Middleware.for{|request|
+			mock(request.session) do |session|
+				session.replace(:now){clock.now}
+			end
+			
 			case request.path.to_s
 			when "/session-set"
 				request.session[request.query_parameters["key"].to_sym] = request.query_parameters["value"]
@@ -316,7 +327,7 @@ describe Utopia::Session do
 	
 	it "should fail if expired cookie is sent with the request" do
 		session_cookie = last_response.headers["set-cookie"].first.split(";")[0]
-		sleep 6 # sleep longer than the session timeout
+		clock.now += 6
 		client.set_cookie session_cookie
 		
 		client.get "/session-get?key=foo"
@@ -369,9 +380,11 @@ describe Utopia::Session::LazyHash do
 	end
 	
 	it "should need to be reloaded if old" do
+		current_time = Time.now.utc
 		hash = Utopia::Session::LazyHash.new do
-			{updated_at: Time.now - 3700}
+			{updated_at: current_time - 3700}
 		end
+		expect(hash).to receive(:now).and_return(current_time)
 		
 		expect(hash.needs_update?(3600)).to be == false
 		
@@ -401,16 +414,17 @@ describe Utopia::Session::LazyHash do
 	end
 	
 	it "should persist changed values" do
+		current_time = Time.now.utc
 		hash = Utopia::Session::LazyHash.new do
 			{a: 10}
 		end
+		expect(hash).to receive(:now).and_return(current_time)
 		
 		hash[:a] = 20
-		persisted_at = Time.now.utc
 		
 		result = hash.persist do |values, updated_at|
 			expect(values[:a]).to be == 20
-			expect(updated_at).to be >= persisted_at
+			expect(updated_at).to be_equal(current_time)
 			expect(values[:updated_at]).to be_equal(updated_at)
 			
 			:complete

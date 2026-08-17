@@ -143,8 +143,8 @@ module Utopia
 			end
 			
 			def prepare_session(request)
-				LazyHash.new do
-					self.load_session_values(request)
+				LazyHash.new do |now|
+					self.load_session_values(request, now)
 				end
 			end
 			
@@ -155,22 +155,22 @@ module Utopia
 			end
 			
 			# Constructs a valid session for the given request. These fields must match as per the checks performed in `valid_session?`:
-			def build_initial_session(request)
+			def build_initial_session(request, now)
 				{
 					user_agent: request.user_agent,
-					created_at: Time.now.utc,
-					updated_at: Time.now.utc,
+					created_at: now,
+					updated_at: now,
 				}
 			end
 			
 			# Load session from user supplied cookie. If the data is invalid or otherwise fails validation, `build_iniital_session` is invoked.
 			# @return hash of values.
-			def load_session_values(request)
+			def load_session_values(request, now)
 				# Decrypt the data from the user if possible:
 				if data = request.cookies[@cookie_name]
 					begin
 						if values = decrypt(data)
-							validate_session!(request, values)
+							validate_session!(request, values, now)
 							
 							return values
 						end
@@ -180,16 +180,16 @@ module Utopia
 				end
 				
 				# If we couldn't create a session
-				return build_initial_session(request)
+				return build_initial_session(request, now)
 			end
 			
-			def validate_session!(request, values)
+			def validate_session!(request, values, now)
 				if values[:user_agent] != request.user_agent
 					raise PayloadError, "Invalid session because supplied user agent #{request.user_agent.inspect} does not match session user agent #{values[:user_agent].inspect}!"
 				end
 				
 				if expires_at = expires(values[:updated_at])
-					if expires_at < Time.now.utc
+					if expires_at < now
 						raise PayloadError, "Expired session cookie, user agent submitted a cookie that should have expired at #{expires_at}."
 					end
 				end
@@ -197,7 +197,7 @@ module Utopia
 				return true
 			end
 			
-			def expires(updated_at=Time.now.utc)
+			def expires(updated_at)
 				if @expires_after
 					return updated_at + @expires_after
 				end
