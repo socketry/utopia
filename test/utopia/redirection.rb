@@ -53,6 +53,19 @@ describe Utopia::Redirection do
 		expect(prefix).to be(:frozen?)
 	end
 	
+	it "passes unmatched client redirects to the delegate" do
+		middleware = Utopia::Redirection::ClientRedirect.new(
+			Protocol::HTTP::Middleware.for do
+				Utopia::Response.text("Not redirected")
+			end
+		)
+		
+		response = middleware.call(Utopia::Request["GET", "/original"])
+		
+		expect(response.status).to be == 200
+		expect(response.read).to be == "Not redirected"
+	end
+	
 	it "freezes error document configuration" do
 		codes = {404 => "/error"}
 		middleware = Utopia::Redirection::Errors.new(Protocol::HTTP::Middleware::NotFound, codes)
