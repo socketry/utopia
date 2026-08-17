@@ -6,6 +6,8 @@
 require "net/smtp"
 require "mail"
 require "console"
+require "stringio"
+require "yaml"
 
 require_relative "../middleware"
 require_relative "../request"
@@ -24,20 +26,33 @@ module Utopia
 			
 			DEFAULT_FROM = (ENV["USER"] || "utopia").freeze
 			DEFAULT_SUBJECT = "%{exception} [PID %{pid} : %{cwd}]".freeze
+			ATTACHMENT_SIZE_LIMIT = 64*1024
+			SENSITIVE_FIELD = /authorization|cookie|credential|password|private[_-]?key|referer|referrer|secret|session|token|variables|api[_-]?key/i
+			REDACTED = "[REDACTED]".freeze
 			
 			# @param to [String] The address to email error reports to.
 			# @param from [String] The from address for error reports.
 			# @param subject [String] The subject template which can access attributes defined by `#attributes_for`.
 			# @param delivery_method [Object] The delivery method as required by the mail gem.
-			# @param dump_environment [Boolean] Attach request attributes as `attributes.yaml` to the error report.
-			def initialize(app, to: "postmaster", from: DEFAULT_FROM, subject: DEFAULT_SUBJECT, delivery_method: LOCAL_SMTP, dump_environment: false)
+			# @param dump_body [Boolean] Attach a bounded rewindable request body to the error report.
+			# @param dump_environment [Boolean] Include application state and attach it as `state.yaml`.
+			# @param attachment_size_limit [Integer] The maximum size of each attachment.
+			# @param redact [Regexp | Nil] A pattern matching structured field names whose values should be redacted.
+			def initialize(app, to: "postmaster", from: DEFAULT_FROM, subject: DEFAULT_SUBJECT, delivery_method: LOCAL_SMTP, dump_body: false, dump_environment: false, attachment_size_limit: ATTACHMENT_SIZE_LIMIT, redact: SENSITIVE_FIELD)
 				super(app)
 				
 				@to = to
 				@from = from
 				@subject = subject
 				@delivery_method = delivery_method
+				@dump_body = dump_body
 				@dump_environment = dump_environment
+				@attachment_size_limit = Integer(attachment_size_limit)
+				@redact = redact
+				
+				if @attachment_size_limit < 0
+					raise ArgumentError, "attachment_size_limit must not be negative!"
+				end
 			end
 			
 			# Freeze this object and its internal state.
@@ -49,7 +64,10 @@ module Utopia
 				@from.freeze
 				@subject.freeze
 				@delivery_method.freeze
+				@dump_body.freeze
 				@dump_environment.freeze
+				@attachment_size_limit.freeze
+				@redact.freeze
 				
 				super
 			end
@@ -100,30 +118,32 @@ module Utopia
 			def generate_body(exception, request)
 				io = StringIO.new
 				
-				io.puts "#{request.method} #{request.url}"
-				
-				# TODO embed the request body if it's textual?
-				# TODO dump and embed `utopia.variables`?
+				# Do not include the raw query string, as it may contain sensitive values:
+				io.puts "#{request.method} #{request.url.path.encoded}"
 				
 				io.puts
 				
 				REQUEST_ATTRIBUTES.each do |key|
-					value = request.send(key)
+					value = redact(key, request.send(key))
 					io.puts "request.#{key}: #{value.inspect}"
 				end
 				
 				request.query_parameters.each do |key, value|
+					value = redact(key, value)
 					io.puts "request.query_parameters.#{key}: #{value.inspect}"
 				end
 				
 				io.puts
 				
 				request.headers.each do |key, value|
+					value = redact(key, value)
 					io.puts "header[#{key.inspect}]: #{value.inspect}"
 				end
 				
-				self.current_state(request).each do |key, value|
-					io.puts "state.#{key}: #{value.inspect}"
+				if @dump_environment
+					filtered_state(request).each do |key, value|
+						io.puts "state.#{key}: #{value.inspect}"
+					end
 				end
 				
 				io.puts
@@ -151,12 +171,14 @@ module Utopia
 				mail.text_part = Mail::Part.new
 				mail.text_part.body = generate_body(exception, request)
 				
-				if body = extract_body(request) and body.size > 0
-					mail.attachments["body.bin"] = body
+				if @dump_body
+					if body = extract_body(request, @attachment_size_limit)
+						mail.attachments["body.bin"] = body
+					end
 				end
 				
 				if @dump_environment
-					mail.attachments["state.yaml"] = YAML.dump(self.current_state(request))
+					attach(mail, "state.yaml", YAML.dump(filtered_state(request)))
 				end
 				
 				return mail
@@ -181,11 +203,51 @@ module Utopia
 				}
 			end
 			
-			def extract_body(request)
+			def filtered_state(request)
+				redact(nil, current_state(request))
+			end
+			
+			def redact(name, value)
+				if @redact && name
+					if @redact.match?(name.to_s)
+						return REDACTED
+					end
+				end
+				
+				case value
+				when Hash
+					return value.to_h do |key, item|
+						[key, redact(key, item)]
+					end
+				when Array
+					return value.map{|item| redact(nil, item)}
+				else
+					return value
+				end
+			end
+			
+			def attach(mail, name, content)
+				if content.bytesize <= @attachment_size_limit
+					mail.attachments[name] = content
+				end
+			end
+			
+			def extract_body(request, size_limit)
 				body = request.body
 				
 				if body&.rewindable? && body.rewind
-					return body.join
+					buffer = String.new.b
+					
+					body.each do |chunk|
+						# Do not retain a partial body when the complete attachment would exceed the limit:
+						if chunk.bytesize > size_limit - buffer.bytesize
+							return nil
+						end
+						
+						buffer << chunk
+					end
+					
+					return buffer unless buffer.empty?
 				end
 			end
 		end

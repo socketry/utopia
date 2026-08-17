@@ -4,6 +4,7 @@
 
   - **Breaking** Remove support for JavaScript packages installed in `lib/components`; use `node_modules` instead.
   - **Security** Authenticate encrypted session cookies using AES-256-GCM. Existing session cookies are invalidated.
+  - **Security** Redact sensitive exception report fields and make bounded request body attachments opt-in.
 
 ## v3.0.0
 

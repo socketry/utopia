@@ -36,12 +36,14 @@ describe Utopia::Exceptions::Mailer do
 		from = +"utopia@example.com"
 		template = +"%{exception}"
 		delivery_method = [:test, {}]
+		redact = /secret/
 		middleware = subject.new(
 			Protocol::HTTP::Middleware::NotFound,
 			to: to,
 			from: from,
 			subject: template,
 			delivery_method: delivery_method,
+			redact: redact,
 		)
 		
 		expect(middleware.freeze).to be_equal(middleware)
@@ -52,6 +54,7 @@ describe Utopia::Exceptions::Mailer do
 		expect(from).to be(:frozen?)
 		expect(template).to be(:frozen?)
 		expect(delivery_method).to be(:frozen?)
+		expect(redact).to be(:frozen?)
 	end
 	
 	it "should send an email to report the failure" do
@@ -86,18 +89,116 @@ describe Utopia::Exceptions::Mailer do
 		expect(output.string).to be(:include?, "Caused by Object: Inner failure")
 	end
 	
-	it "attaches buffered request bodies and environment state" do
+	it "attaches bounded request bodies and filtered environment state" do
 		request = Utopia::Request["POST", "/submit", {}, ["Hello World!"]]
+		request.session = {token: "session-secret"}
+		request.variables = {password: "variable-secret"}
 		mailer = subject.new(
 			Protocol::HTTP::Middleware::NotFound,
 			delivery_method: nil,
+			dump_body: true,
 			dump_environment: true,
 		)
 		
 		mail = mailer.send(:generate_mail, RuntimeError.new("Failure"), request)
 		
 		expect(mail.attachments["body.bin"].decoded).to be == "Hello World!"
-		expect(mail.attachments["state.yaml"]).not.to be_nil
+		expect(mail.attachments["state.yaml"].decoded).to be(:include?, "[REDACTED]")
+		expect(mail.attachments["state.yaml"].decoded).not.to be(:include?, "session-secret")
+		expect(mail.attachments["state.yaml"].decoded).not.to be(:include?, "variable-secret")
+	end
+	
+	it "does not attach request bodies by default" do
+		request = Utopia::Request["POST", "/submit", {}, ["Hello World!"]]
+		mailer = subject.new(Protocol::HTTP::Middleware::NotFound, delivery_method: nil)
+		
+		mail = mailer.send(:generate_mail, RuntimeError.new("Failure"), request)
+		
+		expect(mail.attachments["body.bin"]).to be_nil
+	end
+	
+	it "does not attach environment state above the limit" do
+		request = Utopia::Request["GET", "/"]
+		mailer = subject.new(
+			Protocol::HTTP::Middleware::NotFound,
+			delivery_method: nil,
+			dump_environment: true,
+			attachment_size_limit: 0,
+		)
+		
+		mail = mailer.send(:generate_mail, RuntimeError.new("Failure"), request)
+		
+		expect(mail.attachments["state.yaml"]).to be_nil
+	end
+	
+	it "rejects a negative attachment size limit" do
+		expect do
+			subject.new(
+				Protocol::HTTP::Middleware::NotFound,
+				attachment_size_limit: -1,
+			)
+		end.to raise_exception(ArgumentError, message: be =~ /must not be negative/)
+	end
+	
+	it "redacts sensitive request fields" do
+		request = Utopia::Request[
+			"GET",
+			"/submit?token=query-secret&name=Samuel",
+			{
+				"authorization" => "Bearer header-secret",
+				"referer" => "https://example.com/?token=referrer-secret",
+				"x-request-id" => "public-request-id",
+			},
+		]
+		mailer = subject.new(Protocol::HTTP::Middleware::NotFound, delivery_method: nil)
+		
+		mail = mailer.send(:generate_mail, RuntimeError.new("Failure"), request)
+		body = mail.text_part.decoded
+		
+		expect(body).to be(:include?, "GET /submit")
+		expect(body).to be(:include?, "public-request-id")
+		expect(body).to be(:include?, "Samuel")
+		expect(body).to be(:include?, "[REDACTED]")
+		expect(body).not.to be(:include?, "query-secret")
+		expect(body).not.to be(:include?, "header-secret")
+		expect(body).not.to be(:include?, "referrer-secret")
+		expect(body).not.to be(:include?, "state.session")
+	end
+	
+	it "redacts sensitive fields nested in arrays" do
+		mailer = subject.new(Protocol::HTTP::Middleware::NotFound, delivery_method: nil)
+		value = [{"token" => "secret"}, "public"]
+		
+		expect(mailer.send(:redact, nil, value)).to be == [
+			{"token" => "[REDACTED]"},
+			"public",
+		]
+	end
+	
+	with "a body attachment size limit" do
+		def generate_mail(body, attachment_size_limit:)
+			request = Utopia::Request["POST", "/submit", {}, [body]]
+			mailer = subject.new(
+				Protocol::HTTP::Middleware::NotFound,
+				delivery_method: nil,
+				dump_body: true,
+				attachment_size_limit: attachment_size_limit,
+			)
+			
+			return mailer.send(:generate_mail, RuntimeError.new("Failure"), request)
+		end
+		
+		it "attaches a body at the limit" do
+			mail = generate_mail("1234", attachment_size_limit: 4)
+			
+			expect(mail.attachments["body.bin"].decoded).to be == "1234"
+		end
+		
+		it "does not attach a body above the limit" do
+			mail = generate_mail("12345", attachment_size_limit: 4)
+			
+			expect(mail.attachments["body.bin"]).to be_nil
+		end
 	end
 	
 	it "does not propagate delivery failures" do
@@ -139,7 +240,7 @@ describe Utopia::Exceptions::Mailer do
 		request.body.read
 		mailer = subject.new(Protocol::HTTP::Middleware::NotFound, delivery_method: nil)
 		
-		expect(mailer.send(:extract_body, request)).to be == "Hello World!"
+		expect(mailer.send(:extract_body, request, 12)).to be == "Hello World!"
 	end
 	
 	it "does not extract streaming request bodies" do
@@ -148,6 +249,6 @@ describe Utopia::Exceptions::Mailer do
 		request = Struct.new(:body).new(body)
 		mailer = subject.new(Protocol::HTTP::Middleware::NotFound, delivery_method: nil)
 		
-		expect(mailer.send(:extract_body, request)).to be_nil
+		expect(mailer.send(:extract_body, request, 1024)).to be_nil
 	end
 end

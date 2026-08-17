@@ -41,6 +41,7 @@ describe Utopia::Controller::Base do
 	
 	it "describes controller instances" do
 		expect(controller.to_s).to be == "#<Utopia::Controller::Base>"
+		expect(controller.inspect).to be == "#<Utopia::Controller::Base>"
 	end
 	
 	it "produces semantic results for negotiated responses" do
