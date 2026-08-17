@@ -127,6 +127,10 @@ describe Utopia::Content do
 	let(:root) {File.expand_path(".content", __dir__)}
 	let(:content) {Utopia::Content.new(Protocol::HTTP::Middleware::NotFound, root: root)}
 	
+	it "exposes its link resolver" do
+		expect(content.links).to be_a Utopia::Content::Links
+	end
+	
 	it "should parse file and expand variables" do
 		path = Utopia::Path.create("/index")
 		node = content.lookup_node(path)

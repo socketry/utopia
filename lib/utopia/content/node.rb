@@ -84,7 +84,7 @@ module Utopia
 			def links(path = ".", **options, &block)
 				path = uri_path.dirname + Path[path]
 				
-				links = @controller.links(path, **options)
+				links = @controller.links.index(path, **options)
 				
 				if block_given?
 					links.each(&block)
@@ -96,7 +96,7 @@ module Utopia
 			# Return localized and indexed variants related to this node.
 			# @returns [Array(Link)] The related links.
 			def related_links
-				@controller.links(@uri_path.dirname, name: @uri_path.basename, indices: true)
+				@controller.links.index(@uri_path.dirname, name: @uri_path.basename, indices: true)
 			end
 			
 			# Return the directory whose links are siblings of this node.
@@ -113,7 +113,7 @@ module Utopia
 			# @parameter options [Hash] The options.
 			# @returns [Array(Link)] The sibling links.
 			def sibling_links(**options)
-				return @controller.links(siblings_path, **options)
+				return @controller.links.index(siblings_path, **options)
 			end
 			
 			# Lookup the given tag which is being rendered within the given node. Invoked by {Document}.
