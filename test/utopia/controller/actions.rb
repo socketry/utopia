@@ -29,7 +29,7 @@ describe Utopia::Controller::Actions::Action do
 		
 		expect(action.inspect).to be == "<action {}>"
 		expect(configured.inspect).to be(:include?, callback.source_location.to_s)
-		expect(configured.inspect).to be(:include?, '{name: "test"}')
+		expect(configured.inspect).to be(:include?, configured.options.inspect)
 	end
 	
 	it "should resolve callbacks" do
