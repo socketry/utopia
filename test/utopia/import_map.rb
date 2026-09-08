@@ -11,7 +11,7 @@ describe Utopia::ImportMap do
 	with ".load_manifest" do
 		it "loads generated imports while preserving relative rendering" do
 			Dir.mktmpdir do |root|
-				Bake::Node::Manifest.build(
+				Web::Packages::Manifest.build(
 					base: "/_components/",
 					imports: {
 						"example" => "/_components/example/example.js",

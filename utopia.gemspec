@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
 	spec.required_ruby_version = ">= 3.3"
 	
 	spec.add_dependency "bake", "~> 0.20"
-	spec.add_dependency "bake-node"
+	spec.add_dependency "web-packages", "~> 0.2"
 	spec.add_dependency "concurrent-ruby", "~> 1.2"
 	spec.add_dependency "console", "~> 1.24"
 	spec.add_dependency "irb"
