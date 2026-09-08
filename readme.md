@@ -31,6 +31,10 @@ Please see the [project documentation](https://socketry.github.io/utopia/) for m
 
 Please see the [project releases](https://socketry.github.io/utopia/releases/index) for all releases.
 
+### v3.0.7
+
+  - [Web Packages](https://socketry.github.io/utopia/releases/index#web-packages)
+
 ### v3.0.6
 
   - [JavaScript Packages](https://socketry.github.io/utopia/releases/index#javascript-packages)

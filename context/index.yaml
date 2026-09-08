@@ -3,6 +3,8 @@
 ---
 description: Utopia is a framework for building dynamic content-driven websites.
 metadata:
+  bug_tracker_uri: https://github.com/socketry/utopia/issues
+  changelog_uri: https://github.com/socketry/utopia/blob/main/releases.md
   documentation_uri: https://socketry.github.io/utopia/
   funding_uri: https://github.com/sponsors/ioquatix/
   source_code_uri: https://github.com/socketry/utopia.git
