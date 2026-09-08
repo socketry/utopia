@@ -1,5 +1,11 @@
 # Releases
 
+## Unreleased
+
+### Web Packages
+
+Utopia now uses `web-packages` v0.2 after the project was renamed from `bake-node`. Applications should use the `web-packages` key in `package.json` and invoke package management through the `web:packages` Bake namespace. The generated `.manifest.json` format remains compatible.
+
 ## v3.0.6
 
 ### JavaScript Packages

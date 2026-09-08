@@ -8,7 +8,7 @@ Import maps provide a modern way to manage JavaScript module dependencies. Utopi
 
 ### Installing JavaScript Libraries
 
-Declare browser libraries as production dependencies in `package.json`. The `bake-node.packages` section selects the files that should be served and assigns their browser import names:
+Declare browser libraries as production dependencies in `package.json`. The `web-packages.packages` section selects the files that should be served and assigns their browser import names:
 
 ```json
 {
@@ -16,7 +16,7 @@ Declare browser libraries as production dependencies in `package.json`. The `bak
   "dependencies": {
     "@socketry/syntax": "^0.6.1"
   },
-  "bake-node": {
+  "web-packages": {
     "packages": {
       "@socketry/syntax": {
         "include": [
@@ -34,8 +34,8 @@ Declare browser libraries as production dependencies in `package.json`. The `bak
 Install the dependencies using the configured package manager, then generate the browser-facing package projection:
 
 ```bash
-$ bundle exec bake node:install
-$ bundle exec bake node:packages:static
+$ bundle exec bake web:packages:install
+$ bundle exec bake web:packages:update
 ```
 
 This installs dependencies into `node_modules/` and copies only the selected browser files into `public/_components/`. Treat both directories as generated projections rather than authored source.
@@ -43,8 +43,8 @@ This installs dependencies into `node_modules/` and copies only the selected bro
 Use an immutable installation and verify the checked-in projection in CI:
 
 ```bash
-$ bundle exec bake node:install frozen=true
-$ bundle exec bake node:packages:check
+$ bundle exec bake web:packages:install frozen=true
+$ bundle exec bake web:packages:check
 ```
 
 ### Creating the Import Map
@@ -96,9 +96,9 @@ Once the import map is set up, you can import and use the library in your script
 </script>
 ```
 
-Inspect the generated import map with `bundle exec bake node:importmap:show` when debugging package resolution.
+Inspect the generated import map with `bundle exec bake web:packages:import_map:show` when debugging package resolution.
 
-See the [Bake Node documentation](https://socketry.github.io/bake-node/) for workspace packages, package selection, and alternative package managers.
+See the [Web Packages documentation](https://socketry.github.io/web-packages/) for workspace packages, package selection, and alternative package managers.
 
 ### Advanced Import Map Features
 
