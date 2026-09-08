@@ -1,5 +1,11 @@
 # Releases
 
+## Unreleased
+
+### JavaScript Packages
+
+Utopia now depends on `bake-node` for JavaScript dependency installation and static package projection. `Utopia::Components` and `utopia:components:update` have been removed. Replace the old task with `bundle exec bake node:packages:static`, and migrate package selection from `utopia.components` to `bake-node.packages` in `package.json`.
+
 ## v3.0.5
 
   - **Breaking** Remove support for JavaScript packages installed in `lib/components`; use `node_modules` instead.

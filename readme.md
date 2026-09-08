@@ -31,6 +31,10 @@ Please see the [project documentation](https://socketry.github.io/utopia/) for m
 
 Please see the [project releases](https://socketry.github.io/utopia/releases/index) for all releases.
 
+### Unreleased
+
+  - [JavaScript Packages](https://socketry.github.io/utopia/releases/index#javascript-packages)
+
 ### v3.0.5
 
   - **Breaking** Remove support for JavaScript packages installed in `lib/components`; use `node_modules` instead.
