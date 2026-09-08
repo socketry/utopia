@@ -8,19 +8,44 @@ Import maps provide a modern way to manage JavaScript module dependencies. Utopi
 
 ### Installing JavaScript Libraries
 
-First, install the library using npm:
+Declare browser libraries as production dependencies in `package.json`. The `bake-node.packages` section selects the files that should be served and assigns their browser import names:
 
-```bash
-$ npm install jquery
+```json
+{
+  "private": true,
+  "dependencies": {
+    "@socketry/syntax": "^0.6.1"
+  },
+  "bake-node": {
+    "packages": {
+      "@socketry/syntax": {
+        "include": [
+          "Syntax.js"
+        ],
+        "imports": {
+          "@socketry/syntax": "Syntax.js"
+        }
+      }
+    }
+  }
+}
 ```
 
-Copy the distribution files to `public/_components`:
+Install the dependencies using the configured package manager, then generate the browser-facing package projection:
 
 ```bash
-$ bundle exec bake utopia:components:update
+$ bundle exec bake node:install
+$ bundle exec bake node:packages:static
 ```
 
-This will copy the library's distribution files (typically from `node_modules/*/dist/`) to your `public/_components/` directory, making them available for local serving.
+This installs dependencies into `node_modules/` and copies only the selected browser files into `public/_components/`. Treat both directories as generated projections rather than authored source.
+
+Use an immutable installation and verify the checked-in projection in CI:
+
+```bash
+$ bundle exec bake node:install frozen=true
+$ bundle exec bake node:packages:check
+```
 
 ### Creating the Import Map
 
@@ -30,11 +55,11 @@ Create a global import map in `lib/my_website/import_map.rb`:
 require "utopia/import_map"
 
 module MyWebsite
-	IMPORT_MAP = Utopia::ImportMap.build(base: "/_components/") do |map|
-		map.import("jquery", "./jquery/jquery.js")
-	end
+	IMPORT_MAP = Utopia::ImportMap.load_manifest("public/_components")
 end
 ```
+
+This loads the generated package mappings directly, so the browser import map remains synchronized with `package.json`.
 
 Then load this in `lib/my_website.rb`:
 
@@ -64,15 +89,16 @@ Once the import map is set up, you can import and use the library in your script
 ```xrb
 <script type="module">
 	// <![CDATA[
-	import $ from 'jquery';
+	import Syntax from '@socketry/syntax';
 	
-	$(document).ready(function() {
-		console.log("jQuery is ready!");
-	});
+	await Syntax.highlight();
 	// ]]>
 </script>
 ```
 
+Inspect the generated import map with `bundle exec bake node:importmap:show` when debugging package resolution.
+
+See the [Bake Node documentation](https://socketry.github.io/bake-node/) for workspace packages, package selection, and alternative package managers.
 
 ### Advanced Import Map Features
 

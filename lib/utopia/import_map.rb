@@ -6,6 +6,7 @@
 require "json"
 require "xrb"
 require "protocol/url"
+require "bake/node/manifest"
 
 module Utopia
 	# Represents an import map for JavaScript modules with support for URI and relative path resolution.
@@ -55,6 +56,19 @@ module Utopia
 	# 	
 	# 	puts page_map.to_html
 	class ImportMap
+		# Load the import mappings from a Bake Node static package manifest.
+		# @parameter root [String | Pathname] The static package output directory.
+		# @returns [ImportMap] A frozen import map using the manifest's public base URL.
+		def self.load_manifest(root)
+			manifest = Bake::Node::Manifest.load(root)
+			base = Protocol::URL[manifest.data.fetch("base")]
+			imports = manifest.import_map.fetch("imports").transform_values do |value|
+				Protocol::URL[value].relative_to(base).to_s
+			end
+			
+			return self.new(imports, base: base).freeze
+		end
+		
 		# Builder class for constructing import maps with scoped base URIs.
 		#
 		# The builder supports nested `with(base:)` blocks where each base is resolved
