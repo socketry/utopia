@@ -1,6 +1,6 @@
 # Releases
 
-## Unreleased
+## v3.0.6
 
 ### JavaScript Packages
 
