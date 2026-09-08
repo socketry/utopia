@@ -16,6 +16,8 @@ Gem::Specification.new do |spec|
 	spec.homepage = "https://github.com/socketry/utopia"
 	
 	spec.metadata = {
+		"bug_tracker_uri" => "https://github.com/socketry/utopia/issues",
+		"changelog_uri" => "https://github.com/socketry/utopia/blob/main/releases.md",
 		"documentation_uri" => "https://socketry.github.io/utopia/",
 		"funding_uri" => "https://github.com/sponsors/ioquatix/",
 		"source_code_uri" => "https://github.com/socketry/utopia.git",
@@ -26,7 +28,6 @@ Gem::Specification.new do |spec|
 	spec.required_ruby_version = ">= 3.3"
 	
 	spec.add_dependency "bake", "~> 0.20"
-	spec.add_dependency "web-packages", "~> 0.2"
 	spec.add_dependency "concurrent-ruby", "~> 1.2"
 	spec.add_dependency "console", "~> 1.24"
 	spec.add_dependency "irb"
@@ -41,5 +42,6 @@ Gem::Specification.new do |spec|
 	spec.add_dependency "samovar", "~> 2.1"
 	spec.add_dependency "traces", "~> 0.10"
 	spec.add_dependency "variant", "~> 0.1"
+	spec.add_dependency "web-packages", "~> 0.2"
 	spec.add_dependency "xrb", "~> 0.4"
 end
