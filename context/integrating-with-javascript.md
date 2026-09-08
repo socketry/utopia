@@ -55,11 +55,11 @@ Create a global import map in `lib/my_website/import_map.rb`:
 require "utopia/import_map"
 
 module MyWebsite
-	IMPORT_MAP = Utopia::ImportMap.build(base: "/_components/") do |map|
-		map.import("@socketry/syntax", "./@socketry/syntax/Syntax.js")
-	end
+	IMPORT_MAP = Utopia::ImportMap.load_manifest("public/_components")
 end
 ```
+
+This loads the generated package mappings directly, so the browser import map remains synchronized with `package.json`.
 
 Then load this in `lib/my_website.rb`:
 
@@ -96,7 +96,7 @@ Once the import map is set up, you can import and use the library in your script
 </script>
 ```
 
-The static package manifest contains the complete generated import map. Inspect it with `bundle exec bake node:importmap:show` when defining or debugging the application's {ruby Utopia::ImportMap}.
+Inspect the generated import map with `bundle exec bake node:importmap:show` when debugging package resolution.
 
 See the [Bake Node documentation](https://socketry.github.io/bake-node/) for workspace packages, package selection, and alternative package managers.
 

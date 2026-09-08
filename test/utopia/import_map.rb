@@ -3,9 +3,33 @@
 # Released under the MIT License.
 # Copyright, 2025, by Samuel Williams.
 
+require "tmpdir"
+
 require "utopia/import_map"
 
 describe Utopia::ImportMap do
+	with ".load_manifest" do
+		it "loads generated imports while preserving relative rendering" do
+			Dir.mktmpdir do |root|
+				Bake::Node::Manifest.build(
+					base: "/_components/",
+					imports: {
+						"example" => "/_components/example/example.js",
+						"external" => "https://cdn.example.com/external.js",
+					},
+					packages: {},
+				).write(root)
+				
+				import_map = subject.load_manifest(root)
+				
+				expect(import_map).to be(:frozen?)
+				expect(import_map.as_json.dig("imports", "example")).to be == "/_components/example/example.js"
+				expect(import_map.as_json.dig("imports", "external")).to be == "https://cdn.example.com/external.js"
+				expect(import_map.relative_to("/guides/setup/").as_json.dig("imports", "example")).to be == "../../_components/example/example.js"
+			end
+		end
+	end
+	
 	with ".build" do
 		it "creates an import map with a block yielding map" do
 			import_map = subject.build do |map|
